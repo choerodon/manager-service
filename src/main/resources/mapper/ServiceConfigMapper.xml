@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.choerodon.manager.infra.mapper.ServiceConfigMapper">
+    <!--<select id="selectOneByServiceAndLabel" resultType="io.choerodon.manager.infra.dataobject.ServiceConfigDO">-->
+    <!--SELECT-->
+    <!--service_config.*-->
+    <!--FROM-->
+    <!--mgmt_service_config-->
+    <!--LEFT JOIN mgmt_service on mgmt_service_config.service_id=mgmt_service.id-->
+    <!--LEFT JOIN mgmt_config_label on mgmt_config_label.config_id=mgmt_service_config.id-->
+    <!--WHERE-->
+    <!--mgmt_service.name=#{serviceName}-->
+    <!--AND-->
+    <!--label=#{label}-->
+    <!--LIMIT 1-->
+    <!--</select>-->
+
+    <select id="selectOneByServiceDefault" resultType="io.choerodon.manager.infra.dataobject.ServiceConfigDO">
+        SELECT
+        mgmt_service_config.*
+        FROM
+        mgmt_service_config
+        INNER JOIN mgmt_service on mgmt_service_config.service_id=mgmt_service.id
+        WHERE
+        mgmt_service.name=#{serviceName}
+        AND
+        mgmt_service_config.is_default=TRUE
+        LIMIT 1
+    </select>
+
+    <select id="selectOneByServiceAndConfigVersion" resultType="io.choerodon.manager.infra.dataobject.ServiceConfigDO">
+        SELECT
+        mgmt_service_config.*
+        FROM
+        mgmt_service_config
+        INNER JOIN mgmt_service on mgmt_service_config.service_id=mgmt_service.id
+        WHERE
+        mgmt_service.name=#{serviceName} AND  mgmt_service_config.config_version=#{configVersion}
+        LIMIT 1
+    </select>
+
+    <update id="closeDefaultByServiceId">
+        UPDATE mgmt_service_config
+        SET is_default = FALSE
+        WHERE
+        service_id=#{serviceId}
+    </update>
+</mapper>

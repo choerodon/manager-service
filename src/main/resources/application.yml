@@ -1,0 +1,60 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: choerodon
+    password: 123456
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+    consumer:
+      group-id: manager-server
+      auto-offset-reset: latest
+    listener:
+      ack-mode: manual_immediate
+      poll-timeout: 3000
+  cloud:
+    stream:
+      default-binder: kafka
+      kafka:
+        binder:
+          brokers: 127.0.0.1:9092
+          zkNodes: 127.0.0.1:2181
+    bus:
+      enabled: true
+  sleuth:
+    stream:
+      enabled: true
+hystrix:
+  stream:
+    queue:
+      enabled: true
+mybatis:
+  mapperLocations: classpath*:/mapper/*.xml
+  configuration:
+    mapUnderscoreToCamelCase: true
+eureka:
+  instance:
+    preferIpAddress: true
+    leaseRenewalIntervalInSeconds: 1
+    leaseExpirationDurationInSeconds: 3
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8000/eureka/}
+security:
+  basic:
+    enabled: false
+  ignored: /swagger-ui.html,/swagger-resources/**, /webjars/** , /docs/**
+choerodon:
+  swagger:
+    client: client
+    oauth-url: http://localhost:8080/oauth/oauth/authorize
+    skip:
+      service: register-server, api-gateway, gateway-helper, oauth-server, config-server, event-store-service
+  gateway:
+    domain: 127.0.0.1:8080
+    names: api-gateway, gateway-helper
+  register:
+    executetTime: 100
+  profiles:
+    active: sit

@@ -1,0 +1,58 @@
+# Default values for manager-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: registry.cn-hangzhou.aliyuncs.com/choerodon/manager-service
+  pullPolicy: Always
+
+preJob:
+  preInitDB:
+    mysql:
+      host: localhost
+      port: 3306
+      database: manager_service
+      username: username
+      password: password
+
+deployment:
+  managementPort: 8964
+
+env:
+  open:
+    SPRING_DATABASE_URL: jdbc:mysql://localhost/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    SPRING_DATABASE_USERNAME: username
+    SPRING_DATABASE_PASSWORD: password
+    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://localhost:8000/eureka/
+    SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka-0.kafka-headless.kafka.svc.cluster.local:9092,kafka-1.kafka-headless.kafka.svc.cluster.local:9092,kafka-2.kafka-headless.kafka.svc.cluster.local:9092
+    SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES: zookeeper-0.zookeeper-headless.zookeeper.svc.cluster.local:2181,zookeeper-1.zookeeper-headless.zookeeper.svc.cluster.local:2181,zookeeper-2.zookeeper-headless.zookeeper.svc.cluster.local:2181
+    SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-0.kafka-headless.kafka.svc.cluster.local:9092,kafka-1.kafka-headless.kafka.svc.cluster.local:9092,kafka-2.kafka-headless.kafka.svc.cluster.local:9092
+    CHOERODON_SWAGGER_OAUTH_URL: http://localhost:8080/oauth/oauth/authorize
+    CHOERODON_GATEWAY_DOMAIN: http://127.0.0.1:8080
+
+metrics:
+  path: /prometheus
+  label: java-spring
+
+logs:
+  parser: java-spring
+
+service:
+  enable: false
+  type: ClusterIP
+  port: 8963
+  name: manager-service
+
+resources: 
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources,such as Minikube. If you do want to specify resources,uncomment the following
+  # lines,adjust them as necessary,and remove the curly braces after 'resources:'.
+  limits:
+    # cpu: 100m
+    memory: 3Gi
+  requests:
+    # cpu: 100m
+    memory: 2Gi

@@ -1,0 +1,18 @@
+server:
+  port: 8963
+spring:
+  application:
+    name: manager-service
+  cloud:
+    config:
+      uri: http://127.0.0.1:8010/
+      enabled: false
+      fail-fast: true
+      retry:
+        max-attempts: 6
+        max-interval: 2000
+        multiplier: 1.5
+management:
+  port: 8964
+  security:
+    enabled: false
