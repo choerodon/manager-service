@@ -1,10 +1,10 @@
-# manager-service
+# Manager Service
 
-This service is the management center of the choerodon micro services framework. Its main functions include configuration management, route management, and swagger management.
+This service is the management center of the Choerodon Microservices Framework. It`s main functions include configuration management, route management, and swagger management.
 
 ## Installation and Getting Started
 
-Create a `manager_service` database in mysql：
+Create a `manager_service` database in MySQL：
 
 ```sql
 CREATE USER 'choerodon'@'%' IDENTIFIED BY "123456";
@@ -12,7 +12,7 @@ CREATE DATABASE manager_service DEFAULT CHARACTER SET utf8;
 GRANT ALL PRIVILEGES ON manager_service.* TO choerodon@'%';
 FLUSH PRIVILEGES;
 ```
-New file of "init-local-database.sh" in the root directory of the `manager-service` project：
+New file of `init-local-database.sh` in the root directory of the `manager-service` project：
 
 ```sh
 mkdir -p target
@@ -48,23 +48,4 @@ mvn spring-boot:run
 1. Route Management：
     * The initial route can be obtained by initializing the configuration of the `api-gateway` service.
     * You can create, edit, and edit routes.
-    * After modifying the route, the manager will notify the `config-server` service and let the `api-gateway` service re-pull the route
-1. swagger Management：
-    * The list of services displayed by swagger is judged based on the route of the database and the instance obtained by the registration service.
-    * Cache swagger information based on the version of the service to the database, get the database's swagger json, or request swagger json based on the type of service.
-
-
-## Dependencies
-
-* mysql
-* kafka
-
-## Reporting Issues
-
-If you find any shortcomings or bugs, please describe them in the [issue](https://github.com/choerodon/choerodon/issues/new?template=issue_template.md).
-    
-## How to Contribute
-Pull requests are welcome! [Follow](https://github.com/choerodon/choerodon/blob/master/CONTRIBUTING.md) to know for more information on how to contribute.
-
-## Note
-`Manager-service` is the configuration management center of the choerodon micro services framework, so its configuration profile can only use "default" by default.
+    * After modifying the route, the manager will notify the `config-server` service and 
