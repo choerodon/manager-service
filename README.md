@@ -4,7 +4,7 @@ This service is the management center of the choerodon micro services framework.
 
 ## Installation and Getting Started
 
-Create a `manager-service` database in mysql：
+Create a `manager_service` database in mysql：
 
 ```sql
 CREATE USER 'choerodon'@'%' IDENTIFIED BY "123456";
@@ -12,7 +12,7 @@ CREATE DATABASE manager_service DEFAULT CHARACTER SET utf8;
 GRANT ALL PRIVILEGES ON manager_service.* TO choerodon@'%';
 FLUSH PRIVILEGES;
 ```
-New file of "init-local-database.sh" in the root directory of the manager-service project：
+New file of "init-local-database.sh" in the root directory of the `manager-service` project：
 
 ```sh
 mkdir -p target
@@ -20,7 +20,7 @@ if [ ! -f target/choerodon-tool-liquibase.jar ]
 then
     curl http://nexus.choerodon.com.cn/repository/choerodon-release/io/choerodon/choerodon-tool-liquibase/0.5.0.RELEASE/choerodon-tool-liquibase-0.5.0.RELEASE.jar -o target/choerodon-tool-liquibase.jar
 fi
-java -Dspring.datasource.url="jdbc:mysql://localhost/manager-service?useUnicode=true&characterEncoding=utf-8&useSSL=false" \
+java -Dspring.datasource.url="jdbc:mysql://localhost/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false" \
  -Dspring.datasource.username=choerodon \
  -Dspring.datasource.password=123456 \
  -Ddata.drop=false -Ddata.init=true \
@@ -28,7 +28,7 @@ java -Dspring.datasource.url="jdbc:mysql://localhost/manager-service?useUnicode=
  -jar target/choerodon-tool-liquibase.jar
 ```
 
-And executed in the root directory of the manager-service project：
+And executed in the root directory of the `manager-service` project：
 
 ```sh
 sh init-local-database.sh
@@ -52,6 +52,8 @@ mvn spring-boot:run
 1. swagger Management：
     * The list of services displayed by swagger is judged based on the route of the database and the instance obtained by the registration service.
     * Cache swagger information based on the version of the service to the database, get the database's swagger json, or request swagger json based on the type of service.
+
+
 ## Dependencies
 
 * mysql
