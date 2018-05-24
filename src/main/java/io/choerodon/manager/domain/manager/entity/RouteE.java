@@ -50,6 +50,8 @@ public class RouteE {
 
     private Long objectVersionNumber;
 
+    private Boolean builtIn;
+
     @Autowired
     private RouteRepository routeRepository;
 
@@ -214,6 +216,14 @@ public class RouteE {
 
     public void setCustomSensitiveHeaders(Boolean customSensitiveHeaders) {
         this.customSensitiveHeaders = customSensitiveHeaders;
+    }
+
+    public Boolean getBuiltIn() {
+        return builtIn;
+    }
+
+    public void setBuiltIn(Boolean builtIn) {
+        this.builtIn = builtIn;
     }
 
     public String getHelperService() {

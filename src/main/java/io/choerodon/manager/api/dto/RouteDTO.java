@@ -29,6 +29,8 @@ public class RouteDTO {
 
     private Long objectVersionNumber;
 
+    private Boolean builtIn;
+
     public Long getId() {
         return id;
     }
@@ -115,5 +117,13 @@ public class RouteDTO {
 
     public void setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+    }
+
+    public Boolean getBuiltIn() {
+        return builtIn;
+    }
+
+    public void setBuiltIn(Boolean builtIn) {
+        this.builtIn = builtIn;
     }
 }
