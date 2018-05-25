@@ -2,6 +2,7 @@ package io.choerodon.manager.domain.manager.entity;
 
 import java.util.List;
 
+import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import io.choerodon.manager.infra.common.utils.VersionUtil;
 @Component
 @Scope("prototype")
 public class RouteE {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RouteE.class);
 
     private Long id;

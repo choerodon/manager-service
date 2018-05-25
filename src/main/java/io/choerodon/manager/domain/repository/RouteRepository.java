@@ -12,6 +12,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
  * @author wuguokai
  */
 public interface RouteRepository {
+
     RouteE queryRoute(RouteE routeE);
 
     RouteE addRoute(RouteE routeE);
