@@ -14,7 +14,7 @@ import springfox.documentation.spring.web.plugins.Docket;
 import io.choerodon.manager.infra.common.utils.GatewayProperties;
 import io.choerodon.resource.annoation.EnableChoerodonResourceServer;
 
-@EnableChoerodonResourceServer
+//@EnableChoerodonResourceServer
 @EnableEurekaClient
 @EnableFeignClients
 @EnableScheduling

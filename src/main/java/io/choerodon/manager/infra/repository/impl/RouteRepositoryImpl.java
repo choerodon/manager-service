@@ -46,13 +46,19 @@ public class RouteRepositoryImpl implements RouteRepository {
     @Override
     public RouteE updateRoute(RouteE routeE) {
         RouteDO oldRouteD = routeMapper.selectByPrimaryKey(routeE.getId());
+        if (oldRouteD.getBuiltIn()) {
+            throw new CommonException("error.routeDO.updateBuiltIn");
+        }
         RouteDO routeDO = ConvertHelper.convert(routeE, RouteDO.class);
-        routeDO.setObjectVersionNumber(oldRouteD.getObjectVersionNumber());
-        int isUpdate = routeMapper.updateOptional(routeDO);
+        if (routeDO.getObjectVersionNumber() == null) {
+            throw new CommonException("error.objectVersionNumber.empty");
+        }
+        routeDO.setBuiltIn(false);
+        int isUpdate = routeMapper.updateByPrimaryKeySelective(routeDO);
         if (isUpdate != 1) {
             throw new CommonException("error.update.route");
         }
-        return ConvertHelper.convert(routeMapper.selectOne(routeDO), RouteE.class);
+        return ConvertHelper.convert(routeMapper.selectByPrimaryKey(routeE.getId()), RouteE.class);
     }
 
     @Override

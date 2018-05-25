@@ -86,7 +86,7 @@ public class IDocumentServiceImpl implements IDocumentService, IDocumentService.
         definition.setType("oauth2");
         definition.setFlow("implicit");
         definition.setScopes(Collections.singletonMap(DEFAULT, "default scope"));
-        LOGGER.info(definition.getScopes().toString());
+        LOGGER.info("{}", definition.getScopes());
         node.putPOJO("securityDefinitions", Collections.singletonMap(client, definition));
         Iterator<Map.Entry<String, JsonNode>> pathIterator = node.get("paths").fields();
         while (pathIterator.hasNext()) {

@@ -7,6 +7,10 @@ import io.choerodon.manager.infra.common.utils.ConfigFileFormat;
  * @author wuguokai
  */
 public class ConfigFileTypeValidator {
+
+    private ConfigFileTypeValidator() {
+    }
+
     public static void validate(String type) {
         boolean rightType = false;
         for (ConfigFileFormat mt : ConfigFileFormat.values()) {

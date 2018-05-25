@@ -11,6 +11,10 @@ import io.choerodon.manager.domain.manager.entity.SwaggerE;
  */
 @Component
 public class SwaggerEFactory {
+
+    private SwaggerEFactory() {
+    }
+
     public static SwaggerE createSwaggerE() {
         return ApplicationContextHelper.getSpringFactory().getBean(SwaggerE.class);
     }

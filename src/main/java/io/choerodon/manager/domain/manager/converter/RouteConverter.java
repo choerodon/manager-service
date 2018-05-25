@@ -36,6 +36,7 @@ public class RouteConverter implements ConvertorI<RouteE, RouteDO, RouteDTO> {
         routeDO.setServiceId(entity.getServiceId());
         routeDO.setStripPrefix(entity.getStripPrefix());
         routeDO.setUrl(entity.getUrl());
+        routeDO.setBuiltIn(entity.getBuiltIn());
         routeDO.setObjectVersionNumber(entity.getObjectVersionNumber());
         return routeDO;
     }
@@ -53,6 +54,7 @@ public class RouteConverter implements ConvertorI<RouteE, RouteDO, RouteDTO> {
         routeE.setStripPrefix(routeDTO.getStripPrefix());
         routeE.setUrl(routeDTO.getUrl());
         routeE.setObjectVersionNumber(routeDTO.getObjectVersionNumber());
+        routeE.setBuiltIn(routeDTO.getBuiltIn());
         return routeE;
     }
 
@@ -69,6 +71,7 @@ public class RouteConverter implements ConvertorI<RouteE, RouteDO, RouteDTO> {
         routeDTO.setStripPrefix(routeE.getStripPrefix());
         routeDTO.setUrl(routeE.getUrl());
         routeDTO.setObjectVersionNumber(routeE.getObjectVersionNumber());
+        routeDTO.setBuiltIn(routeE.getBuiltIn());
         return routeDTO;
     }
 }

@@ -1,11 +1,7 @@
 package io.choerodon.manager.domain.manager.entity;
 
-import java.util.*;
-
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections.map.MultiKeyMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -15,6 +11,8 @@ import springfox.documentation.swagger.web.SecurityConfiguration;
 import springfox.documentation.swagger.web.SwaggerResource;
 import springfox.documentation.swagger.web.UiConfiguration;
 
+import java.util.*;
+
 /**
  * @author superleader8@gmail.com
  * @data 2018/3/11
@@ -22,7 +20,6 @@ import springfox.documentation.swagger.web.UiConfiguration;
 @Component
 @Scope("prototype")
 public class SwaggerE {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SwaggerE.class);
 
     private Long id;
 

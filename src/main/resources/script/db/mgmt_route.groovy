@@ -31,4 +31,13 @@ databaseChangeLog(logicalFilePath: 'script/db/mgmt_routeroute.groovy') {
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
     }
+
+    changeSet(author: 'jcalaz@163.com', id: '2018-05-24-add_column_is_built_in') {
+        addColumn(tableName: 'mgmt_route') {
+            column(name: 'is_built_in', type: 'TINYINT UNSIGNED', defaultValue: "0", remarks: '是否为内置服务。1表示是，0表示不是') {
+                constraints(nullable: false)
+            }
+        }
+    }
+
 }

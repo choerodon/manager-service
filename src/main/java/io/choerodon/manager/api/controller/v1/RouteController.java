@@ -17,6 +17,8 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 
+import javax.validation.Valid;
+
 /**
  * 路由操作控制器
  *
@@ -52,7 +54,7 @@ public class RouteController {
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("增加一个新路由")
     @PostMapping
-    public ResponseEntity<RouteDTO> create(@RequestBody RouteDTO routeDTO) {
+    public ResponseEntity<RouteDTO> create(@RequestBody @Valid RouteDTO routeDTO) {
         return new ResponseEntity<>(routeService.create(routeDTO), HttpStatus.OK);
     }
 
@@ -65,7 +67,7 @@ public class RouteController {
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("更新一个路由")
     @PostMapping("/{id}")
-    public ResponseEntity<RouteDTO> update(@PathVariable("id") Long id, @RequestBody RouteDTO routeDTO) {
+    public ResponseEntity<RouteDTO> update(@PathVariable("id") Long id, @RequestBody @Valid RouteDTO routeDTO) {
         return new ResponseEntity<>(routeService.update(id, routeDTO), HttpStatus.OK);
     }
 

@@ -11,6 +11,9 @@ import io.choerodon.manager.domain.manager.entity.GroupLabelE;
  */
 public class GroupLabelEFactory {
 
+    private GroupLabelEFactory() {
+    }
+
     public static GroupLabelE createGroupLabelE() {
         return ApplicationContextHelper.getSpringFactory().getBean(GroupLabelE.class);
     }

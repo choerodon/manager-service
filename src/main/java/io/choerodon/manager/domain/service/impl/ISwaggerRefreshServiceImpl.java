@@ -2,21 +2,18 @@ package io.choerodon.manager.domain.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
-import org.springframework.stereotype.Service;
-
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.RegisterInstancePayload;
 import io.choerodon.manager.domain.service.SwaggerRefreshService;
 import io.choerodon.manager.domain.service.VersionStrategy;
 import io.choerodon.manager.infra.dataobject.SwaggerDO;
 import io.choerodon.manager.infra.mapper.SwaggerMapper;
-import org.springframework.util.concurrent.FailureCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.SuccessCallback;
 
 /**
  * 实现类
@@ -90,11 +87,11 @@ public class ISwaggerRefreshServiceImpl implements SwaggerRefreshService {
     public void parsePermission(RegisterInstancePayload registerInstancePayload, String json) throws JsonProcessingException {
         registerInstancePayload.setApiData(json);
         String data = mapper.writeValueAsString(registerInstancePayload);
-        ListenableFuture<SendResult> resultListenableFuture =  kafkaTemplate.send(SWAGGER_TOPIC_NAME, data.getBytes());
+        ListenableFuture<SendResult> resultListenableFuture = kafkaTemplate.send(SWAGGER_TOPIC_NAME, data.getBytes());
         resultListenableFuture.addCallback((SendResult result) -> {
-          LOGGER.info("parsePermission send message to kafka success, {}", registerInstancePayload);
+            LOGGER.info("parsePermission send message to kafka success, {}", registerInstancePayload);
         }, (Throwable ex) -> {
-            LOGGER.info("parsePermission send message to kafka failed, {} {}",registerInstancePayload, ex.getCause());
+            LOGGER.info("parsePermission send message to kafka failed, {} {}", registerInstancePayload, ex.getCause());
             throw new RuntimeException("error send message to kafka");
         });
     }
