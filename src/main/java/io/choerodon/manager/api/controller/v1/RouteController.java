@@ -67,7 +67,7 @@ public class RouteController {
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("更新一个路由")
     @PostMapping("/{id}")
-    public ResponseEntity<RouteDTO> update(@PathVariable("id") Long id, @RequestBody @Valid RouteDTO routeDTO) {
+    public ResponseEntity<RouteDTO> update(@PathVariable("id") Long id, @RequestBody RouteDTO routeDTO) {
         return new ResponseEntity<>(routeService.update(id, routeDTO), HttpStatus.OK);
     }
 

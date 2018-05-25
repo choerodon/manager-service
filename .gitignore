@@ -26,4 +26,4 @@ Thumbs.db
 
 gitlabci/.generated
 rebel.xml
-src/main/resources/application-default.yml
+application-default.yml
