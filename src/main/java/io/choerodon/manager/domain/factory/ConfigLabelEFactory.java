@@ -9,6 +9,10 @@ import io.choerodon.manager.domain.manager.entity.ConfigLabelE;
  * @author wuguokai
  */
 public class ConfigLabelEFactory {
+
+    private ConfigLabelEFactory() {
+    }
+
     public static ConfigLabelE create() {
         return ApplicationContextHelper.getSpringFactory().getBean(ConfigLabelE.class);
     }

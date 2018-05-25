@@ -1,11 +1,9 @@
 package io.choerodon.manager.domain.manager.entity;
 
-import java.util.List;
-
-import io.choerodon.core.exception.CommonException;
+import io.choerodon.manager.domain.repository.RouteRepository;
+import io.choerodon.manager.infra.common.annotation.RouteNotifyRefresh;
+import io.choerodon.manager.infra.common.utils.VersionUtil;
 import org.apache.commons.collections.map.MultiKeyMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -13,10 +11,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import io.choerodon.manager.api.eventhandler.EurekaInstanceRegisteredListener;
-import io.choerodon.manager.domain.repository.RouteRepository;
-import io.choerodon.manager.infra.common.annotation.RouteNotifyRefresh;
-import io.choerodon.manager.infra.common.utils.VersionUtil;
+import java.util.List;
 
 /**
  * 路由领域对象
@@ -27,8 +22,6 @@ import io.choerodon.manager.infra.common.utils.VersionUtil;
 @Component
 @Scope("prototype")
 public class RouteE {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RouteE.class);
 
     private Long id;
 

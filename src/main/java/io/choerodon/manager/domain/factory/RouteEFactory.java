@@ -10,6 +10,10 @@ import io.choerodon.manager.domain.manager.entity.RouteE;
  * @author wuguokai
  */
 public class RouteEFactory {
+
+    private RouteEFactory() {
+    }
+
     public static RouteE createRouteE() {
         return ApplicationContextHelper.getSpringFactory().getBean(RouteE.class);
     }
