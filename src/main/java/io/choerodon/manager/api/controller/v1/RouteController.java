@@ -2,6 +2,7 @@ package io.choerodon.manager.api.controller.v1;
 
 import java.util.Optional;
 
+import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 
@@ -40,8 +42,9 @@ public class RouteController {
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("分页查询路由信息")
+    @CustomPageRequest
     @GetMapping
-    public ResponseEntity<Page<RouteDTO>> list(@SortDefault(value = "id", direction = Sort.Direction.ASC) PageRequest pageRequest) {
+    public ResponseEntity<Page<RouteDTO>> list(@ApiIgnore @SortDefault(value = "id", direction = Sort.Direction.ASC) PageRequest pageRequest) {
         return new ResponseEntity<>(routeService.list(pageRequest), HttpStatus.OK);
     }
 
