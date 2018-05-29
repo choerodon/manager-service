@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
  */
 @Component
 public class RouteRepositoryImpl implements RouteRepository {
+
     private RouteMapper routeMapper;
 
     public RouteRepositoryImpl(RouteMapper routeMapper) {
@@ -85,8 +86,8 @@ public class RouteRepositoryImpl implements RouteRepository {
     }
 
     @Override
-    public Page<RouteE> pageAllRoutes(PageRequest pageRequest) {
-        Page<RouteDO> routeDOPage = PageHelper.doPageAndSort(pageRequest, () -> routeMapper.selectAll());
+    public Page<RouteE> pageAllRoutes(PageRequest pageRequest, RouteDO routeDO, String params) {
+        Page<RouteDO> routeDOPage = PageHelper.doPageAndSort(pageRequest, () -> routeMapper.selectRoutes(routeDO, params));
         return ConvertPageHelper.convertPage(routeDOPage, RouteE.class);
     }
 }

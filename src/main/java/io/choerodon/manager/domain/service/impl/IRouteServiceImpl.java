@@ -55,8 +55,8 @@ public class IRouteServiceImpl implements IRouteService {
     }
 
     @Override
-    public Page<RouteE> pageAll(PageRequest pageRequest) {
-        return routeRepository.pageAllRoutes(pageRequest);
+    public Page<RouteE> pageAll(PageRequest pageRequest, RouteDO routeDO, String params) {
+        return routeRepository.pageAllRoutes(pageRequest, routeDO, params);
     }
 
     @Override

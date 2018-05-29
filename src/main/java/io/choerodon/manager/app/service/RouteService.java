@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.manager.api.dto.RouteDTO;
+import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
@@ -17,7 +18,7 @@ public interface RouteService {
      *
      * @return page
      */
-    Page<RouteDTO> list(PageRequest pageRequest);
+    Page<RouteDTO> list(PageRequest pageRequest, RouteDO routeDO, String params);
 
     /**
      * 添加一个路由
