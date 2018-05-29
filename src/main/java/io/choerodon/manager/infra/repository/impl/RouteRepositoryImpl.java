@@ -1,10 +1,5 @@
 package io.choerodon.manager.infra.repository.impl;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-
 import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.core.convertor.ConvertPageHelper;
 import io.choerodon.core.domain.Page;
@@ -15,6 +10,10 @@ import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.manager.infra.mapper.RouteMapper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author wuguokai
@@ -40,12 +39,15 @@ public class RouteRepositoryImpl implements RouteRepository {
         if (isInsert != 1) {
             throw new CommonException("error.insert.route");
         }
-        return ConvertHelper.convert(routeDO, RouteE.class);
+        return ConvertHelper.convert(routeMapper.selectByPrimaryKey(routeDO.getId()), RouteE.class);
     }
 
     @Override
     public RouteE updateRoute(RouteE routeE) {
         RouteDO oldRouteD = routeMapper.selectByPrimaryKey(routeE.getId());
+        if (oldRouteD == null) {
+            throw new CommonException("error.routeDO.not.exist");
+        }
         if (oldRouteD.getBuiltIn()) {
             throw new CommonException("error.routeDO.updateBuiltIn");
         }

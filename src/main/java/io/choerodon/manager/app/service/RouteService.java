@@ -25,7 +25,7 @@ public interface RouteService {
      * @param routeDTO 路由对象
      * @return routeDTO
      */
-    RouteDTO create(RouteDTO routeDTO);
+    RouteDTO     create(RouteDTO routeDTO);
 
     /**
      * 更新一个路由对象
