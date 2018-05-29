@@ -2,6 +2,7 @@ package io.choerodon.manager.api.controller.v1;
 
 import java.util.Optional;
 
+import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
@@ -44,8 +45,18 @@ public class RouteController {
     @ApiOperation("分页查询路由信息")
     @CustomPageRequest
     @GetMapping
-    public ResponseEntity<Page<RouteDTO>> list(@ApiIgnore @SortDefault(value = "id", direction = Sort.Direction.ASC) PageRequest pageRequest) {
-        return new ResponseEntity<>(routeService.list(pageRequest), HttpStatus.OK);
+    public ResponseEntity<Page<RouteDTO>> list(@ApiIgnore @SortDefault(value = "id", direction = Sort.Direction.ASC) PageRequest pageRequest,
+                                               @RequestParam(required = false, name = "name") String name,
+                                               @RequestParam(required = false, name = "path") String path,
+                                               @RequestParam(required = false, name = "serviceId") String serviceId,
+                                               @RequestParam(required = false, name = "builtIn") Boolean builtIn,
+                                               @RequestParam(required = false, name = "params") String params) {
+        RouteDO routeDO = new RouteDO();
+        routeDO.setName(name);
+        routeDO.setPath(path);
+        routeDO.setServiceId(serviceId);
+        routeDO.setBuiltIn(builtIn);
+        return new ResponseEntity<>(routeService.list(pageRequest, routeDO, params), HttpStatus.OK);
     }
 
     /**

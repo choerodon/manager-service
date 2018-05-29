@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.manager.domain.manager.entity.RouteE;
+import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
@@ -25,5 +26,5 @@ public interface RouteRepository {
 
     List<RouteE> addRoutesBatch(List<RouteE> routeEList);
 
-    Page<RouteE> pageAllRoutes(PageRequest pageRequest);
+    Page<RouteE> pageAllRoutes(PageRequest pageRequest, RouteDO routeDO, String params);
 }

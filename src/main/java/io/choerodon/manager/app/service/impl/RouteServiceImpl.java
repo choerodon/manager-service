@@ -2,6 +2,7 @@ package io.choerodon.manager.app.service.impl;
 
 import java.util.List;
 
+import io.choerodon.manager.infra.dataobject.RouteDO;
 import org.springframework.stereotype.Component;
 
 import io.choerodon.core.convertor.ConvertHelper;
@@ -35,8 +36,8 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
-    public Page<RouteDTO> list(PageRequest pageRequest) {
-        Page<RouteE> routeEPage = irouteService.pageAll(pageRequest);
+    public Page<RouteDTO> list(PageRequest pageRequest, RouteDO routeDO, String params) {
+        Page<RouteE> routeEPage = irouteService.pageAll(pageRequest, routeDO, params);
         return ConvertPageHelper.convertPage(routeEPage, RouteDTO.class);
     }
 

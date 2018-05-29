@@ -2,6 +2,7 @@ package io.choerodon.manager.domain.service;
 
 import java.util.List;
 
+import io.choerodon.manager.infra.dataobject.RouteDO;
 import org.apache.commons.collections.map.MultiKeyMap;
 
 import io.choerodon.core.domain.Page;
@@ -21,7 +22,7 @@ public interface IRouteService {
      *
      * @return page
      */
-    Page<RouteE> pageAll(PageRequest pageRequest);
+    Page<RouteE> pageAll(PageRequest pageRequest, RouteDO routeDO, String params);
 
     /**
      * 批量添加路由信息

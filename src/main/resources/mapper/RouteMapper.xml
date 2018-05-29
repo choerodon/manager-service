@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="io.choerodon.manager.infra.mapper.RouteMapper">
+
+    <resultMap id="routeDo" type="io.choerodon.manager.infra.dataobject.RouteDO">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="path" column="path"/>
+        <result property="serviceId" column="service_id"/>
+        <result property="url" column="url"/>
+        <result property="stripPrefix" column="strip_prefix"/>
+        <result property="retryable" column="retryable"/>
+        <result property="sensitiveHeaders" column="sensitive_headers"/>
+        <result property="customSensitiveHeaders" column="custom_sensitive_headers"/>
+        <result property="helperService" column="helper_service"/>
+        <result property="builtIn" column="is_built_in"/>
+        <result property="objectVersionNumber" column="object_version_number"/>
+    </resultMap>
+
+    <select id="selectRoutes" resultMap="routeDo">
+        select * FROM mgmt_route WHERE 1 = 1
+        <if test="routeDO.name!= null">
+            AND name LIKE concat('%',#{routeDO.name},'%')
+        </if>
+        <if test="routeDO.path!= null">
+            AND path LIKE concat('%',#{routeDO.path},'%')
+        </if>
+        <if test="routeDO.serviceId!= null">
+            AND service_id LIKE concat('%',#{routeDO.serviceId},'%')
+        </if>
+        <if test="routeDO.builtIn != null">
+            AND is_built_in = #{routeDO.builtIn}
+        </if>
+        <if test="params != null">
+            AND
+            name LIKE concat('%',#{params},'%') OR
+            path LIKE concat('%',#{params},'%') OR
+            service_id LIKE concat('%',#{params},'%')
+        </if>
+    </select>
+
+</mapper>
