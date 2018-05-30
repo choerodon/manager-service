@@ -10,6 +10,7 @@ import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.manager.infra.mapper.RouteMapper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -35,10 +36,21 @@ public class RouteRepositoryImpl implements RouteRepository {
 
     @Override
     public RouteE addRoute(RouteE routeE) {
+        if (routeE.getBuiltIn() == null) {
+            routeE.setBuiltIn(false);
+        }
         RouteDO routeDO = ConvertHelper.convert(routeE, RouteDO.class);
-        int isInsert = routeMapper.insert(routeDO);
-        if (isInsert != 1) {
-            throw new CommonException("error.insert.route");
+        try {
+            int isInsert = routeMapper.insert(routeDO);
+            if (isInsert != 1) {
+                throw new CommonException("error.insert.route");
+            }
+        } catch (DuplicateKeyException e) {
+            if (routeMapper.selectCount(new RouteDO(routeE.getName())) > 0) {
+                throw new CommonException("error.insert.route.nameDuplicate");
+            } else {
+                throw new CommonException("error.insert.route.pathDuplicate");
+            }
         }
         return ConvertHelper.convert(routeMapper.selectByPrimaryKey(routeDO.getId()), RouteE.class);
     }
@@ -57,9 +69,17 @@ public class RouteRepositoryImpl implements RouteRepository {
             throw new CommonException("error.objectVersionNumber.empty");
         }
         routeDO.setBuiltIn(false);
-        int isUpdate = routeMapper.updateByPrimaryKeySelective(routeDO);
-        if (isUpdate != 1) {
-            throw new CommonException("error.update.route");
+        try {
+            int isUpdate = routeMapper.updateByPrimaryKeySelective(routeDO);
+            if (isUpdate != 1) {
+                throw new CommonException("error.update.route");
+            }
+        } catch (DuplicateKeyException e) {
+            if (routeE.getName() != null && routeMapper.selectCount(new RouteDO(routeE.getName())) > 0) {
+                throw new CommonException("error.insert.route.nameDuplicate");
+            } else {
+                throw new CommonException("error.insert.route.pathDuplicate");
+            }
         }
         return ConvertHelper.convert(routeMapper.selectByPrimaryKey(routeE.getId()), RouteE.class);
     }
