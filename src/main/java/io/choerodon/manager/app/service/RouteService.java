@@ -60,4 +60,7 @@ public interface RouteService {
     List<RouteDTO> getAllRoute();
 
     RouteDTO queryByName(String name);
+
+
+    void checkRoute(RouteDTO routeDTO);
 }
