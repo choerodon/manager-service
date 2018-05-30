@@ -27,4 +27,6 @@ public interface RouteRepository {
     List<RouteE> addRoutesBatch(List<RouteE> routeEList);
 
     Page<RouteE> pageAllRoutes(PageRequest pageRequest, RouteDO routeDO, String params);
+
+    int countRoute(RouteDO routeDO);
 }

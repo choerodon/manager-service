@@ -110,4 +110,9 @@ public class RouteRepositoryImpl implements RouteRepository {
         Page<RouteDO> routeDOPage = PageHelper.doPageAndSort(pageRequest, () -> routeMapper.selectRoutes(routeDO, params));
         return ConvertPageHelper.convertPage(routeDOPage, RouteE.class);
     }
+
+    @Override
+    public int countRoute(RouteDO routeDO) {
+        return routeMapper.selectCount(routeDO);
+    }
 }

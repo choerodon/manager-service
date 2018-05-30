@@ -30,6 +30,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping(value = "/v1/routes")
 public class RouteController {
+
     private RouteService routeService;
 
     public RouteController(RouteService routeService) {
@@ -99,5 +100,14 @@ public class RouteController {
                 .map(i -> new ResponseEntity<>(i, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.route.delete"));
     }
+
+    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @ApiOperation(value = "route 校验接口")
+    @PostMapping(value = "/check")
+    public ResponseEntity check(@RequestBody RouteDTO routeDTO) {
+        routeService.checkRoute(routeDTO);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
 
 }
