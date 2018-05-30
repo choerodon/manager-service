@@ -125,4 +125,11 @@ public class RouteDO extends AuditDomain {
     public void setBuiltIn(Boolean builtIn) {
         this.builtIn = builtIn;
     }
+
+    public RouteDO(String name) {
+        this.name = name;
+    }
+
+    public RouteDO() {
+    }
 }

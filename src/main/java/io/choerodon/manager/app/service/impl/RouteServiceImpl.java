@@ -43,9 +43,6 @@ public class RouteServiceImpl implements RouteService {
 
     @Override
     public RouteDTO create(RouteDTO routeDTO) {
-        if (routeDTO.getBuiltIn() == null) {
-            routeDTO.setBuiltIn(false);
-        }
         return ConvertHelper.convert(ConvertHelper.convert(routeDTO, RouteE.class).addRoute(), RouteDTO.class);
     }
 
