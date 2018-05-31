@@ -64,7 +64,6 @@ public class EurekaInstanceRegisteredListener {
      * 监听eureka-instance消息队列的新消息处理
      *
      * @param record 消息信息
-     * @throws Exception 异常
      */
     @KafkaListener(topics = "register-server")
     public void handle(ConsumerRecord<byte[], byte[]> record) {
