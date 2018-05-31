@@ -11,7 +11,7 @@ spring:
       group-id: manager-server
       auto-offset-reset: latest
     listener:
-      ack-mode: manual_immediate
+      ack-mode: record
       poll-timeout: 3000
   cloud:
     stream:
