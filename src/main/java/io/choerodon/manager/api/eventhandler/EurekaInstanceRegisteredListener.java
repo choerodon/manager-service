@@ -97,8 +97,8 @@ public class EurekaInstanceRegisteredListener {
         if (num.get() < 0) {
             num.set(0);
         }
+        num.compareAndSet(0, map.size());
         map.entrySet().parallelStream().forEach(entry -> {
-            this.num.incrementAndGet();
             try {
                 handlerRegisterInstancePayload(entry.getValue(), entry.getKey());
             } catch (Exception e) {
@@ -138,6 +138,7 @@ public class EurekaInstanceRegisteredListener {
         try {
             swaggerRefreshService.updateOrInsertSwagger(payload, json);
             payload.setSwaggerStatusSuccess();
+            return true;
         } catch (Exception e) {
             if (payload.getExecuteTime() % 10 == 0) {
                 LOGGER.info("message has bean consumed failed when updateOrInsertSwagger, e {}", e.getMessage());
@@ -153,6 +154,7 @@ public class EurekaInstanceRegisteredListener {
         try {
             swaggerRefreshService.parsePermission(payload, json);
             payload.setPermissionStatusSuccess();
+            return true;
         } catch (Exception e) {
             if (payload.getExecuteTime() % 10 == 0) {
                 LOGGER.info("message has bean consumed failed when parsePermission, e {}", e.getMessage());
@@ -170,6 +172,7 @@ public class EurekaInstanceRegisteredListener {
                 iRouteService.autoRefreshRoute(json);
             }
             payload.setRouteStatusSuccess();
+            return true;
         } catch (Exception e) {
             if (payload.getExecuteTime() % 10 == 0) {
                 LOGGER.info("message has bean consumed failed when autoRefreshRoute, e {}", e.getMessage());
