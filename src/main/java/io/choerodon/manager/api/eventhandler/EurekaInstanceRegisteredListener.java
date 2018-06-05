@@ -96,42 +96,42 @@ public class EurekaInstanceRegisteredListener {
             Observable.just(payload)
                     .delay(2, TimeUnit.SECONDS)
                     .subscribeOn(Schedulers.io())
-                    .subscribe((RegisterInstancePayload instancePayload) -> {
-                        String json = iDocumentService.fetchSwaggerJsonByIp(instancePayload);
-                        if (StringUtils.isEmpty(json)) {
-                            LOGGER.info("fetched swagger json data is empty, {}", instancePayload);
-                            Integer time = failTimeMap.get(instancePayload.getInstanceAddress());
-                            if (time == null) {
-                                time = 0;
-                            }
-                            if (fetchSwaggerJsonCallBack) {
-                                instancePayload.setApiData(null);
-                                try {
-                                    if (time < fetchSwaggerJsonTime) {
-                                        kafkaTemplate.send(REGISTER_TOPIC, mapper.writeValueAsBytes(instancePayload));
-                                        failTimeMap.put(instancePayload.getInstanceAddress(), ++time);
-                                    } else {
-                                        failTimeMap.remove(instancePayload.getInstanceAddress());
-                                        LOGGER.warn("fetched swagger json data failed too many times {}", instancePayload);
-                                    }
-
-                                } catch (JsonProcessingException e) {
-                                    LOGGER.warn("error happened when instancePayload serialize {}", e.getMessage());
-                                }
-                            }
-                        } else {
-                            swaggerConsumer(instancePayload, json);
-                            permissionConsumer(instancePayload, json);
-                            routeConsumer(instancePayload, json);
-                            failTimeMap.remove(instancePayload.getInstanceAddress());
-                        }
-                    });
+                    .subscribe(this::msgConsumer);
         } catch (IOException e) {
             LOGGER.warn("error happened when handle message， {} cause {}", message, e.toString());
         }
-
     }
 
+    private void msgConsumer(final RegisterInstancePayload instancePayload) {
+        String json = iDocumentService.fetchSwaggerJsonByIp(instancePayload);
+        if (StringUtils.isEmpty(json)) {
+            LOGGER.info("fetched swagger json data is empty, {}", instancePayload);
+            Integer time = failTimeMap.get(instancePayload.getInstanceAddress());
+            if (time == null) {
+                time = 0;
+            }
+            if (fetchSwaggerJsonCallBack) {
+                instancePayload.setApiData(null);
+                try {
+                    if (time < fetchSwaggerJsonTime) {
+                        kafkaTemplate.send(REGISTER_TOPIC, mapper.writeValueAsBytes(instancePayload));
+                        failTimeMap.put(instancePayload.getInstanceAddress(), ++time);
+                    } else {
+                        failTimeMap.remove(instancePayload.getInstanceAddress());
+                        LOGGER.warn("fetched swagger json data failed too many times {}", instancePayload);
+                    }
+
+                } catch (JsonProcessingException e) {
+                    LOGGER.warn("error happened when instancePayload serialize {}", e.getMessage());
+                }
+            }
+        } else {
+            swaggerConsumer(instancePayload, json);
+            permissionConsumer(instancePayload, json);
+            routeConsumer(instancePayload, json);
+            failTimeMap.remove(instancePayload.getInstanceAddress());
+        }
+    }
     private boolean swaggerConsumer(final RegisterInstancePayload payload, final String json) {
         try {
             swaggerRefreshService.updateOrInsertSwagger(payload, json);
