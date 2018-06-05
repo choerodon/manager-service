@@ -1,12 +1,17 @@
 package io.choerodon.manager.domain.service.impl;
 
-import java.io.IOException;
-import java.util.*;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.choerodon.manager.api.dto.RegisterInstancePayload;
+import io.choerodon.manager.domain.manager.entity.RouteE;
+import io.choerodon.manager.domain.service.IDocumentService;
+import io.choerodon.manager.domain.service.IRouteService;
+import io.choerodon.manager.domain.service.SwaggerRefreshService;
+import io.choerodon.manager.infra.common.utils.VersionUtil;
+import io.choerodon.manager.infra.dataobject.SwaggerDO;
+import io.choerodon.manager.infra.mapper.SwaggerMapper;
 import io.swagger.models.auth.OAuth2Definition;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.lang.StringUtils;
@@ -21,14 +26,8 @@ import org.springframework.remoting.RemoteAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import io.choerodon.manager.api.dto.RegisterInstancePayload;
-import io.choerodon.manager.domain.manager.entity.RouteE;
-import io.choerodon.manager.domain.service.IDocumentService;
-import io.choerodon.manager.domain.service.IRouteService;
-import io.choerodon.manager.domain.service.SwaggerRefreshService;
-import io.choerodon.manager.infra.common.utils.VersionUtil;
-import io.choerodon.manager.infra.dataobject.SwaggerDO;
-import io.choerodon.manager.infra.mapper.SwaggerMapper;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * {@inheritDoc}
@@ -113,11 +112,6 @@ public class IDocumentServiceImpl implements IDocumentService, IDocumentService.
         }
     }
 
-    @Override
-    public String fetchSwaggerJson(String service, String version) {
-        return getJsonByNameAndVersion(service, version);
-    }
-
     private String getJsonByNameAndVersion(String service, String version) {
         List<ServiceInstance> instances = discoveryClient.getInstances(service);
         for (ServiceInstance instance : instances) {
@@ -185,5 +179,21 @@ public class IDocumentServiceImpl implements IDocumentService, IDocumentService.
     @Override
     public void refresh(String service, String json) {
         // Do nothing only for override
+    }
+
+
+    @Override
+    public String fetchSwaggerJsonByIp(final RegisterInstancePayload payload) {
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + "/v2/choerodon/api-docs",
+                    String.class);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return response.getBody();
+            }
+        } catch (Exception e) {
+            LOGGER.info("error.IDocumentService.fetchSwaggerJsonByIp {}", e.getMessage());
+        }
+        return null;
     }
 }

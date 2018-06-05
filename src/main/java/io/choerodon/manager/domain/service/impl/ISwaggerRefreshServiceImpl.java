@@ -31,7 +31,7 @@ public class ISwaggerRefreshServiceImpl implements SwaggerRefreshService {
 
     private VersionStrategy versionStrategy;
 
-    private KafkaTemplate kafkaTemplate;
+    private KafkaTemplate<byte[], byte[]> kafkaTemplate;
 
     /**
      * 构造器
@@ -87,12 +87,12 @@ public class ISwaggerRefreshServiceImpl implements SwaggerRefreshService {
     public void parsePermission(RegisterInstancePayload registerInstancePayload, String json) throws JsonProcessingException {
         registerInstancePayload.setApiData(json);
         String data = mapper.writeValueAsString(registerInstancePayload);
-        ListenableFuture<SendResult> resultListenableFuture = kafkaTemplate.send(SWAGGER_TOPIC_NAME, data.getBytes());
-        resultListenableFuture.addCallback((SendResult result) -> {
-            LOGGER.info("parsePermission send message to kafka success, {}", registerInstancePayload);
-        }, (Throwable ex) -> {
+        ListenableFuture<SendResult<byte[], byte[]>> resultListenableFuture = kafkaTemplate.send(SWAGGER_TOPIC_NAME, data.getBytes());
+        resultListenableFuture.addCallback((SendResult result) ->
+            LOGGER.info("parsePermission send message to kafka success, {}", registerInstancePayload)
+        , (Throwable ex) -> {
             LOGGER.info("parsePermission send message to kafka failed, {} {}", registerInstancePayload, ex.getCause());
-            throw new RuntimeException("error send message to kafka");
+            throw new CommonException("error send message to kafka");
         });
     }
 }
