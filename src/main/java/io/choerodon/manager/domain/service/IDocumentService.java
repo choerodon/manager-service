@@ -3,6 +3,7 @@ package io.choerodon.manager.domain.service;
 import java.io.IOException;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.choerodon.manager.api.dto.RegisterInstancePayload;
 
 /**
  * swagger json的业务service
@@ -37,7 +38,7 @@ public interface IDocumentService {
 
     void manualRefresh(String serviceName, String version);
 
-    String fetchSwaggerJson(String service, String version);
+    String fetchSwaggerJsonByIp(RegisterInstancePayload payload);
 
     interface RefreshSwaggerListener {
 
