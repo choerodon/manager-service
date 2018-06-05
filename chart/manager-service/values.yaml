@@ -9,6 +9,7 @@ image:
   pullPolicy: Always
 
 preJob:
+  appname: devops-service
   preInitDB:
     mysql:
       host: localhost
@@ -34,10 +35,10 @@ env:
 
 metrics:
   path: /prometheus
-  label: java-spring
+  label: spring-boot
 
 logs:
-  parser: java-spring
+  parser: spring-boot
 
 service:
   enable: false
