@@ -9,6 +9,9 @@ import io.choerodon.manager.domain.manager.entity.ServiceE;
  */
 public class ServiceEFactory {
 
+    private ServiceEFactory() {
+    }
+
     public static ServiceE createServiceE() {
         return ApplicationContextHelper.getSpringFactory().getBean(ServiceE.class);
     }

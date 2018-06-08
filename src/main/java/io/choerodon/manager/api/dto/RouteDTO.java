@@ -1,5 +1,7 @@
 package io.choerodon.manager.api.dto;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
 /**
  * 前端交互路由对象
  *
@@ -9,10 +11,13 @@ public class RouteDTO {
 
     private Long id;
 
+    @NotEmpty(message = "name不可为空")
     private String name;
 
+    @NotEmpty(message = "path不可为空")
     private String path;
 
+    @NotEmpty(message = "serviceId不可为空")
     private String serviceId;
 
     private String url;
@@ -28,6 +33,8 @@ public class RouteDTO {
     private String helperService;
 
     private Long objectVersionNumber;
+
+    private Boolean builtIn;
 
     public Long getId() {
         return id;
@@ -115,5 +122,13 @@ public class RouteDTO {
 
     public void setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+    }
+
+    public Boolean getBuiltIn() {
+        return builtIn;
+    }
+
+    public void setBuiltIn(Boolean builtIn) {
+        this.builtIn = builtIn;
     }
 }

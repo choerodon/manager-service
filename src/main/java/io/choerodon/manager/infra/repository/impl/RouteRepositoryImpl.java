@@ -1,10 +1,5 @@
 package io.choerodon.manager.infra.repository.impl;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-
 import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.core.convertor.ConvertPageHelper;
 import io.choerodon.core.domain.Page;
@@ -15,12 +10,18 @@ import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.manager.infra.mapper.RouteMapper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author wuguokai
  */
 @Component
 public class RouteRepositoryImpl implements RouteRepository {
+
     private RouteMapper routeMapper;
 
     public RouteRepositoryImpl(RouteMapper routeMapper) {
@@ -35,24 +36,52 @@ public class RouteRepositoryImpl implements RouteRepository {
 
     @Override
     public RouteE addRoute(RouteE routeE) {
-        RouteDO routeDO = ConvertHelper.convert(routeE, RouteDO.class);
-        int isInsert = routeMapper.insert(routeDO);
-        if (isInsert != 1) {
-            throw new CommonException("error.insert.route");
+        if (routeE.getBuiltIn() == null) {
+            routeE.setBuiltIn(false);
         }
-        return ConvertHelper.convert(routeDO, RouteE.class);
+        RouteDO routeDO = ConvertHelper.convert(routeE, RouteDO.class);
+        try {
+            int isInsert = routeMapper.insert(routeDO);
+            if (isInsert != 1) {
+                throw new CommonException("error.insert.route");
+            }
+        } catch (DuplicateKeyException e) {
+            if (routeMapper.selectCount(new RouteDO(routeE.getName())) > 0) {
+                throw new CommonException("error.insert.route.nameDuplicate");
+            } else {
+                throw new CommonException("error.insert.route.pathDuplicate");
+            }
+        }
+        return ConvertHelper.convert(routeMapper.selectByPrimaryKey(routeDO.getId()), RouteE.class);
     }
 
     @Override
     public RouteE updateRoute(RouteE routeE) {
         RouteDO oldRouteD = routeMapper.selectByPrimaryKey(routeE.getId());
-        RouteDO routeDO = ConvertHelper.convert(routeE, RouteDO.class);
-        routeDO.setObjectVersionNumber(oldRouteD.getObjectVersionNumber());
-        int isUpdate = routeMapper.updateOptional(routeDO);
-        if (isUpdate != 1) {
-            throw new CommonException("error.update.route");
+        if (oldRouteD == null) {
+            throw new CommonException("error.routeDO.not.exist");
         }
-        return ConvertHelper.convert(routeMapper.selectOne(routeDO), RouteE.class);
+        if (oldRouteD.getBuiltIn()) {
+            throw new CommonException("error.routeDO.updateBuiltIn");
+        }
+        RouteDO routeDO = ConvertHelper.convert(routeE, RouteDO.class);
+        if (routeDO.getObjectVersionNumber() == null) {
+            throw new CommonException("error.objectVersionNumber.empty");
+        }
+        routeDO.setBuiltIn(false);
+        try {
+            int isUpdate = routeMapper.updateByPrimaryKeySelective(routeDO);
+            if (isUpdate != 1) {
+                throw new CommonException("error.update.route");
+            }
+        } catch (DuplicateKeyException e) {
+            if (routeE.getName() != null && routeMapper.selectCount(new RouteDO(routeE.getName())) > 0) {
+                throw new CommonException("error.insert.route.nameDuplicate");
+            } else {
+                throw new CommonException("error.insert.route.pathDuplicate");
+            }
+        }
+        return ConvertHelper.convert(routeMapper.selectByPrimaryKey(routeE.getId()), RouteE.class);
     }
 
     @Override
@@ -77,8 +106,13 @@ public class RouteRepositoryImpl implements RouteRepository {
     }
 
     @Override
-    public Page<RouteE> pageAllRoutes(PageRequest pageRequest) {
-        Page<RouteDO> routeDOPage = PageHelper.doPageAndSort(pageRequest, () -> routeMapper.selectAll());
+    public Page<RouteE> pageAllRoutes(PageRequest pageRequest, RouteDO routeDO, String params) {
+        Page<RouteDO> routeDOPage = PageHelper.doPageAndSort(pageRequest, () -> routeMapper.selectRoutes(routeDO, params));
         return ConvertPageHelper.convertPage(routeDOPage, RouteE.class);
+    }
+
+    @Override
+    public int countRoute(RouteDO routeDO) {
+        return routeMapper.selectCount(routeDO);
     }
 }

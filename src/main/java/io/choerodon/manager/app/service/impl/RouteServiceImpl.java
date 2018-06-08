@@ -1,19 +1,21 @@
 package io.choerodon.manager.app.service.impl;
 
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
 import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.core.convertor.ConvertPageHelper;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.RouteDTO;
 import io.choerodon.manager.app.service.RouteService;
 import io.choerodon.manager.domain.factory.RouteEFactory;
 import io.choerodon.manager.domain.manager.entity.RouteE;
 import io.choerodon.manager.domain.repository.RouteRepository;
 import io.choerodon.manager.domain.service.IRouteService;
+import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 /**
  * 应用层实现
@@ -22,7 +24,9 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
  */
 @Component
 public class RouteServiceImpl implements RouteService {
+
     private IRouteService irouteService;
+
     private RouteRepository routeRepository;
 
 
@@ -35,8 +39,8 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
-    public Page<RouteDTO> list(PageRequest pageRequest) {
-        Page<RouteE> routeEPage = irouteService.pageAll(pageRequest);
+    public Page<RouteDTO> list(PageRequest pageRequest, RouteDO routeDO, String params) {
+        Page<RouteE> routeEPage = irouteService.pageAll(pageRequest, routeDO, params);
         return ConvertPageHelper.convertPage(routeEPage, RouteDTO.class);
     }
 
@@ -77,5 +81,23 @@ public class RouteServiceImpl implements RouteService {
                 routeRepository.queryRoute(
                         ConvertHelper.convert(routeDTO, RouteE.class)),
                 RouteDTO.class);
+    }
+
+    @Override
+    public void checkRoute(RouteDTO routeDTO) {
+        if (!StringUtils.isEmpty(routeDTO.getName())) {
+            RouteDO routeDO = new RouteDO();
+            routeDO.setName(routeDTO.getName());
+            if (routeRepository.countRoute(routeDO) > 0) {
+                throw new CommonException("error.insert.route.nameDuplicate");
+            }
+        }
+        if (!StringUtils.isEmpty(routeDTO.getPath())) {
+            RouteDO routeDO = new RouteDO();
+            routeDO.setPath(routeDTO.getPath());
+            if (routeRepository.countRoute(routeDO) > 0) {
+                throw new CommonException("error.insert.route.pathDuplicate");
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 package io.choerodon.manager.infra.dataobject;
 
+import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -33,6 +34,9 @@ public class RouteDO extends AuditDomain {
     private Boolean customSensitiveHeaders;
 
     private String helperService;
+
+    @Column(name = "is_built_in")
+    private Boolean builtIn;
 
     public String getHelperService() {
         return helperService;
@@ -112,5 +116,20 @@ public class RouteDO extends AuditDomain {
 
     public void setCustomSensitiveHeaders(Boolean customSensitiveHeaders) {
         this.customSensitiveHeaders = customSensitiveHeaders;
+    }
+
+    public Boolean getBuiltIn() {
+        return builtIn;
+    }
+
+    public void setBuiltIn(Boolean builtIn) {
+        this.builtIn = builtIn;
+    }
+
+    public RouteDO(String name) {
+        this.name = name;
+    }
+
+    public RouteDO() {
     }
 }

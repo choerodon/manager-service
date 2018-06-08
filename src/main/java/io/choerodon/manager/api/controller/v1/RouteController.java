@@ -2,6 +2,8 @@ package io.choerodon.manager.api.controller.v1;
 
 import java.util.Optional;
 
+import io.choerodon.manager.infra.dataobject.RouteDO;
+import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,9 @@ import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
+import springfox.documentation.annotations.ApiIgnore;
+
+import javax.validation.Valid;
 
 /**
  * 路由操作控制器
@@ -25,6 +30,7 @@ import io.choerodon.swagger.annotation.Permission;
 @RestController
 @RequestMapping(value = "/v1/routes")
 public class RouteController {
+
     private RouteService routeService;
 
     public RouteController(RouteService routeService) {
@@ -38,9 +44,20 @@ public class RouteController {
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("分页查询路由信息")
+    @CustomPageRequest
     @GetMapping
-    public ResponseEntity<Page<RouteDTO>> list(@SortDefault(value = "id", direction = Sort.Direction.ASC) PageRequest pageRequest) {
-        return new ResponseEntity<>(routeService.list(pageRequest), HttpStatus.OK);
+    public ResponseEntity<Page<RouteDTO>> list(@ApiIgnore @SortDefault(value = "id", direction = Sort.Direction.ASC) PageRequest pageRequest,
+                                               @RequestParam(required = false, name = "name") String name,
+                                               @RequestParam(required = false, name = "path") String path,
+                                               @RequestParam(required = false, name = "serviceId") String serviceId,
+                                               @RequestParam(required = false, name = "builtIn") Boolean builtIn,
+                                               @RequestParam(required = false, name = "params") String params) {
+        RouteDO routeDO = new RouteDO();
+        routeDO.setName(name);
+        routeDO.setPath(path);
+        routeDO.setServiceId(serviceId);
+        routeDO.setBuiltIn(builtIn);
+        return new ResponseEntity<>(routeService.list(pageRequest, routeDO, params), HttpStatus.OK);
     }
 
     /**
@@ -52,7 +69,7 @@ public class RouteController {
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("增加一个新路由")
     @PostMapping
-    public ResponseEntity<RouteDTO> create(@RequestBody RouteDTO routeDTO) {
+    public ResponseEntity<RouteDTO> create(@RequestBody @Valid RouteDTO routeDTO) {
         return new ResponseEntity<>(routeService.create(routeDTO), HttpStatus.OK);
     }
 
@@ -83,5 +100,14 @@ public class RouteController {
                 .map(i -> new ResponseEntity<>(i, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.route.delete"));
     }
+
+    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @ApiOperation(value = "route 校验接口")
+    @PostMapping(value = "/check")
+    public ResponseEntity check(@RequestBody RouteDTO routeDTO) {
+        routeService.checkRoute(routeDTO);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
 
 }
