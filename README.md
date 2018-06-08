@@ -18,7 +18,7 @@ New file of `init-local-database.sh` in the root directory of the `manager-servi
 mkdir -p target
 if [ ! -f target/choerodon-tool-liquibase.jar ]
 then
-    curl http://nexus.choerodon.com.cn/repository/choerodon-release/io/choerodon/choerodon-tool-liquibase/0.5.0.RELEASE/choerodon-tool-liquibase-0.5.0.RELEASE.jar -o target/choerodon-tool-liquibase.jar
+    curl http://nexus.choerodon.com.cn/repository/choerodon-release/io/choerodon/choerodon-tool-liquibase/0.6.0.RELEASE/choerodon-tool-liquibase-0.6.0.RELEASE.jar -o target/choerodon-tool-liquibase.jar
 fi
 java -Dspring.datasource.url="jdbc:mysql://localhost/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false" \
  -Dspring.datasource.username=choerodon \
@@ -49,3 +49,14 @@ mvn spring-boot:run
     * The initial route can be obtained by initializing the configuration of the `api-gateway` service.
     * You can create, edit, and edit routes.
     * After modifying the route, the manager will notify the `config-server` service and 
+    
+## Links
+
+* [Change Log](./CHANGELOG.zh-CN.md)
+
+## Reporting Issues
+
+If you find any shortcomings or bugs, please describe them in the [Issue](https://github.com/choerodon/choerodon/issues/new?template=issue_template.md).
+    
+## How to Contribute
+Pull requests are welcome! Follow [this link](https://github.com/choerodon/choerodon/blob/master/CONTRIBUTING.md) for more information on how to contribute.
