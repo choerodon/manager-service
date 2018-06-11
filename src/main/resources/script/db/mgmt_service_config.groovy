@@ -34,4 +34,11 @@ databaseChangeLog(logicalFilePath: 'script/db/mgmt_service_configonfig.groovy') 
         }
         addUniqueConstraint(tableName: 'mgmt_service_config', columnNames: 'service_id,config_version')
     }
+
+    changeSet(author: 'jcalaz@163.com', id: '2018-06-11-alter-nullable') {
+        dropNotNullConstraint(tableName: 'mgmt_service_config', columnName: 'config_version', columnDataType: 'VARCHAR(128)')
+        renameColumn(tableName: 'mgmt_service_config', oldColumnName: 'config_version', newColumnName: 'config_version', columnDataType: 'VARCHAR(128)', remarks: '配置版本')
+        renameColumn(tableName: 'mgmt_service_config', oldColumnName: 'source', newColumnName: 'source', columnDataType: 'VARCHAR(64) NOT NULL', remarks: '配置来源，工具生成或者页面生成')
+    }
+
 }
