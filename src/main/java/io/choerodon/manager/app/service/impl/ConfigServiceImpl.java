@@ -11,9 +11,11 @@ import io.choerodon.manager.domain.manager.entity.ServiceE;
 import io.choerodon.manager.domain.repository.ConfigRepository;
 import io.choerodon.manager.domain.repository.RouteRepository;
 import io.choerodon.manager.domain.repository.ServiceRepository;
+import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
 import io.choerodon.manager.infra.dataobject.ConfigDO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +29,11 @@ import java.util.Map;
  */
 @Component
 public class ConfigServiceImpl implements ConfigService {
+
+    public static final String CONFIG_TYPE_PROPERTIES = "properties";
+    public static final String CONFIG_TYPE_JSON = "json";
+    public static final String CONFIG_TYPE_YAML = "yaml";
+
 
     @Value("${choerodon.gateway.names}")
     private String[] getRouteServices;
@@ -73,7 +80,7 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public ConfigDTO query(Long configId) {
+    public ConfigDTO query(Long configId, String type) {
         ConfigDTO configDTO = ConvertHelper.convert(configRepository.query(configId), ConfigDTO.class);
         if (configDTO == null) {
             return null;
@@ -85,6 +92,9 @@ public class ConfigServiceImpl implements ConfigService {
         if (ArrayUtils.contains(getRouteServices, serviceE.getName())) {
             final List<RouteE> routeEList = routeRepository.getAllRoute();
             setRoutes(routeEList, configDTO.getValue());
+        }
+        if (!StringUtils.isEmpty(type)) {
+            configDTO.setContent(ConfigUtil.convertMapToText(configDTO.getValue(), type));
         }
         return configDTO;
     }

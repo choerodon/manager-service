@@ -23,7 +23,7 @@ public interface ConfigService {
 
     ConfigDTO setServiceConfigDefault(Long configId);
 
-    ConfigDTO query(Long configId);
+    ConfigDTO query(Long configId, String type);
 
     Boolean delete(Long configId);
 

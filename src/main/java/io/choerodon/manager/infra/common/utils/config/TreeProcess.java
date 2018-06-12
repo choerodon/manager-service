@@ -1,4 +1,4 @@
-package io.choerodon.manager.infra.common.utils.format.parser.support;
+package io.choerodon.manager.infra.common.utils.config;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.Set;
  *
  * @author wuguokai
  */
-public class TreeProcess {
+class TreeProcess {
 
     private TreeProcess() {
     }
@@ -22,7 +22,7 @@ public class TreeProcess {
      * @return map
      */
     @SuppressWarnings("unchecked")
-    public static Object mapParseRecursive(Map<String, Object> map) {
+    static Object mapParseRecursive(Map<String, Object> map) {
         Map<String, Object> res = new LinkedHashMap<>();
         Set<String> keySet = map.keySet();
         for (String key : keySet) {

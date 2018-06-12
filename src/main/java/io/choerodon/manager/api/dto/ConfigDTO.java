@@ -29,6 +29,8 @@ public class ConfigDTO {
 
     private Long objectVersionNumber;
 
+    private String content;
+
     public ConfigDTO() {
     }
 
@@ -117,18 +119,27 @@ public class ConfigDTO {
         this.objectVersionNumber = objectVersionNumber;
     }
 
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
     @Override
     public String toString() {
-        return "ConfigDTO{"
-                + "id=" + id
-                + ", name='" + name + '\''
-                + ", configVersion='" + configVersion + '\''
-                + ", isDefault=" + isDefault
-                + ", serviceId=" + serviceId
-                + ", value=" + value
-                + ", source='" + source + '\''
-                + ", publicTime=" + publicTime
-                + ", objectVersionNumber=" + objectVersionNumber
-                + '}';
+        return "ConfigDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", configVersion='" + configVersion + '\'' +
+                ", isDefault=" + isDefault +
+                ", serviceId=" + serviceId +
+                ", value=" + value +
+                ", source='" + source + '\'' +
+                ", publicTime=" + publicTime +
+                ", objectVersionNumber=" + objectVersionNumber +
+                ", content='" + content + '\'' +
+                '}';
     }
 }

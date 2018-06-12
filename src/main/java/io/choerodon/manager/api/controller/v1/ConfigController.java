@@ -73,8 +73,9 @@ public class ConfigController {
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("查询配置")
     @GetMapping(value = "/{config_id}")
-    public ResponseEntity<ConfigDTO> query(@PathVariable("config_id") Long configId) {
-        return new ResponseEntity<>(configService.query(configId), HttpStatus.OK);
+    public ResponseEntity<ConfigDTO> query(@PathVariable("config_id") Long configId,
+                                           @RequestParam(value = "type", required = false) String type) {
+        return new ResponseEntity<>(configService.query(configId, type), HttpStatus.OK);
     }
 
     /**

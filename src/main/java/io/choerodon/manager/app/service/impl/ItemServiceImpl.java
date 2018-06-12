@@ -65,7 +65,7 @@ public class ItemServiceImpl implements ItemService {
         if (configId == null || configId < 1) {
             throw new CommonException("error.config.query");
         }
-        ConfigDTO configDTO = configService.query(configId);
+        ConfigDTO configDTO = configService.query(configId, null);
         if (configDTO == null) {
             throw new CommonException("error.config.query");
         }
