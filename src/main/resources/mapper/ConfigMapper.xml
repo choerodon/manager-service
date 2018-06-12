@@ -26,13 +26,6 @@
         LIMIT 1
     </select>
 
-    <update id="closeDefaultByServiceId">
-        UPDATE mgmt_service_config
-        SET is_default = FALSE
-        WHERE
-        service_id=#{serviceId}
-    </update>
-
     <select id="listByServiceName" resultType="io.choerodon.manager.infra.dataobject.ConfigDO">
         SELECT
         mgmt_service_config.*

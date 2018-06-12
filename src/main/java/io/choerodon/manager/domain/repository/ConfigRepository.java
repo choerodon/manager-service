@@ -23,7 +23,7 @@ public interface ConfigRepository {
 
     Page<ConfigDTO> list(PageRequest pageRequest);
 
-    ConfigE setConfigDefault(Long configId);
+    ConfigDO setConfigDefault(Long configId);
 
     ConfigE query(Long serviceConfigId);
 

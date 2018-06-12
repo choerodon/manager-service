@@ -31,6 +31,52 @@ public class ConfigController {
         this.configService = configService;
     }
 
+    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @ApiOperation("创建配置")
+    @PostMapping
+    public ResponseEntity<ConfigDTO> create(@Validated(value = ConfigValidatorGroup.Create.class) ConfigDTO configDTO) {
+        return new ResponseEntity<>(configService.create(configDTO), HttpStatus.OK);
+    }
+
+    /**
+     * 删除配置，默认配置不可删除
+     *
+     * @param configId 配置id
+     * @return ConfigDTO
+     */
+    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @ApiOperation("删除配置，默认配置不可删除")
+    @DeleteMapping(value = "/{config_id}")
+    public ResponseEntity<Boolean> delete(@PathVariable("config_id") Long configId) {
+        return new ResponseEntity<>(configService.delete(configId), HttpStatus.OK);
+    }
+
+    /**
+     * 将某一个配置设置为默认配置
+     *
+     * @param configId 配置id
+     * @return ConfigDTO
+     */
+    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @ApiOperation("设置配置为默认配置")
+    @PutMapping(value = "/{config_id}/default")
+    public ResponseEntity<ConfigDTO> updateConfigDefault(@PathVariable("config_id") Long configId) {
+        return new ResponseEntity<>(configService.setServiceConfigDefault(configId), HttpStatus.OK);
+    }
+
+    /**
+     * 查询某一个配置
+     *
+     * @param configId 配置id
+     * @return ConfigDTO
+     */
+    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @ApiOperation("查询配置")
+    @GetMapping(value = "/{config_id}")
+    public ResponseEntity<ConfigDTO> query(@PathVariable("config_id") Long configId) {
+        return new ResponseEntity<>(configService.query(configId), HttpStatus.OK);
+    }
+
     /**
      * 分页查询服务的配置信息
      *
@@ -48,54 +94,6 @@ public class ConfigController {
         } else {
             return new ResponseEntity<>(configService.listByServiceId(serviceId, pageRequest), HttpStatus.OK);
         }
-
-    }
-
-    /**
-     * 查询某一个配置
-     *
-     * @param configId 配置id
-     * @return ConfigDTO
-     */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
-    @ApiOperation("查询配置")
-    @GetMapping(value = "/{config_id}")
-    public ResponseEntity<ConfigDTO> query(@PathVariable("config_id") Long configId) {
-        return new ResponseEntity<>(configService.query(configId), HttpStatus.OK);
-    }
-
-
-    /**
-     * 将某一个配置设置为默认配置
-     *
-     * @param configId 配置id
-     * @return ConfigDTO
-     */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
-    @ApiOperation("设置配置为默认配置")
-    @PutMapping(value = "/{config_id}/default")
-    public ResponseEntity<ConfigDTO> updateConfigDefault(@PathVariable("config_id") Long configId) {
-        return new ResponseEntity<>(configService.setServiceConfigDefault(configId), HttpStatus.OK);
-    }
-
-    /**
-     * 删除某一个配置，默认配置不可删除
-     *
-     * @param configId 配置id
-     * @return ConfigDTO
-     */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
-    @ApiOperation("删除配置，默认配置不可删除")
-    @DeleteMapping(value = "/{config_id}")
-    public ResponseEntity<Boolean> delete(@PathVariable("config_id") Long configId) {
-        return new ResponseEntity<>(configService.delete(configId), HttpStatus.OK);
-    }
-
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
-    @ApiOperation("创建配置")
-    @PostMapping
-    public ResponseEntity<ConfigDTO> create(@Validated(value = ConfigValidatorGroup.Create.class) ConfigDTO configDTO) {
-        return new ResponseEntity<>(configService.create(configDTO), HttpStatus.OK);
     }
 
 }

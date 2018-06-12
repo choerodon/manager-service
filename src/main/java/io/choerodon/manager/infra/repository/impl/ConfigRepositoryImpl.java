@@ -49,20 +49,24 @@ public class ConfigRepositoryImpl implements ConfigRepository {
 
     @Override
     @Transactional
-    public ConfigE setConfigDefault(Long configId) {
+    public ConfigDO setConfigDefault(Long configId) {
         ConfigDO configDO = configMapper.selectByPrimaryKey(configId);
         if (configDO == null) {
             throw new CommonException(ERROR_CONFIG_NOT_EXIST);
         }
-        ConfigE configE = ConvertHelper.convert(configDO, ConfigE.class);
-        configE.setItDefault();
-        configDO = ConvertHelper.convert(configE, ConfigDO.class);
-        configMapper.closeDefaultByServiceId(configDO.getServiceId());
+
+        ConfigDO oldDefaultConfig = configMapper.selectOne(new ConfigDO(true, configDO.getServiceId()));
+        if (oldDefaultConfig != null) {
+            oldDefaultConfig.setDefault(false);
+            if (configMapper.updateByPrimaryKeySelective(oldDefaultConfig) != 1) {
+                throw new CommonException("error.config.set.default");
+            }
+        }
+        configDO.setDefault(true);
         if (configMapper.updateByPrimaryKeySelective(configDO) != 1) {
             throw new CommonException("error.config.set.default");
         }
-        configDO = configMapper.selectByPrimaryKey(configDO.getId());
-        return ConvertHelper.convert(configDO, ConfigE.class);
+        return configMapper.selectByPrimaryKey(configId);
     }
 
     @Override

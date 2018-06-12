@@ -37,6 +37,11 @@ public class ConfigDO extends AuditDomain {
     public ConfigDO() {
     }
 
+    public ConfigDO(Boolean isDefault, Long serviceId) {
+        this.isDefault = isDefault;
+        this.serviceId = serviceId;
+    }
+
     public ConfigDO(Long id, String name, String configVersion, Boolean isDefault, Long serviceId,
                     String value, String source, Date publicTime, Long objectVersionNumber) {
         this.id = id;
@@ -113,4 +118,6 @@ public class ConfigDO extends AuditDomain {
     public void setPublicTime(Date publicTime) {
         this.publicTime = publicTime;
     }
+
+
 }
