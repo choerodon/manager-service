@@ -1,20 +1,24 @@
 package io.choerodon.manager.api.dto;
 
+import io.choerodon.manager.api.validator.ConfigValidatorGroup;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.Map;
 
 public class ConfigDTO {
 
-    public static final String DEFAULT_VERSION = "default";
-
     private Long id;
 
+    @NotEmpty(message = "error.config.name.empty", groups = ConfigValidatorGroup.Create.class)
     private String name;
 
     private String configVersion;
 
     private Boolean isDefault;
 
+    @NotNull(message = "error.config.serviceId.null", groups = ConfigValidatorGroup.Create.class)
     private Long serviceId;
 
     private Map<String, Object> value;
@@ -39,10 +43,6 @@ public class ConfigDTO {
         this.source = source;
         this.publicTime = publicTime;
         this.objectVersionNumber = objectVersionNumber;
-    }
-
-    public static String getDefaultVersion() {
-        return DEFAULT_VERSION;
     }
 
     public Long getId() {

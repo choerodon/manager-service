@@ -1,26 +1,31 @@
 package io.choerodon.manager.infra.repository.impl;
 
-import io.choerodon.manager.api.dto.ConfigDTO;
-import io.choerodon.manager.infra.dataobject.ConfigDO;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.core.convertor.ConvertPageHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.manager.api.dto.ConfigDTO;
 import io.choerodon.manager.domain.manager.entity.ConfigE;
 import io.choerodon.manager.domain.repository.ConfigRepository;
+import io.choerodon.manager.infra.dataobject.ConfigDO;
 import io.choerodon.manager.infra.mapper.ConfigMapper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * @author wuguokai
  */
 @Component
 public class ConfigRepositoryImpl implements ConfigRepository {
-    private static final String COMMON_EXCEPTION_1 = "error.config.not.exist";
+
+    private static final String SOURCE_PAGE = "页面生成";
+
+    private static final String ERROR_CONFIG_NOT_EXIST = "error.config.item.not.exist";
+
     private ConfigMapper configMapper;
 
     public ConfigRepositoryImpl(ConfigMapper configMapper) {
@@ -47,7 +52,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     public ConfigE setConfigDefault(Long configId) {
         ConfigDO configDO = configMapper.selectByPrimaryKey(configId);
         if (configDO == null) {
-            throw new CommonException(COMMON_EXCEPTION_1);
+            throw new CommonException(ERROR_CONFIG_NOT_EXIST);
         }
         ConfigE configE = ConvertHelper.convert(configDO, ConfigE.class);
         configE.setItDefault();
@@ -67,11 +72,14 @@ public class ConfigRepositoryImpl implements ConfigRepository {
 
     @Override
     public boolean delete(Long configId) {
+        ConfigDO configDO = configMapper.selectByPrimaryKey(configId);
         if (configMapper.selectByPrimaryKey(configId) == null) {
-            throw new CommonException(COMMON_EXCEPTION_1);
+            throw new CommonException(ERROR_CONFIG_NOT_EXIST);
         }
-        int isDelete = configMapper.deleteByPrimaryKey(configId);
-        if (isDelete != 1) {
+        if (configDO.getDefault()) {
+            throw new CommonException("error.config.delete.default");
+        }
+        if (configMapper.deleteByPrimaryKey(configId) != 1) {
             throw new CommonException("error.config.delete");
         }
         return true;
@@ -83,7 +91,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
             throw new CommonException("error.objectVersionNumber.null");
         }
         if (configMapper.selectByPrimaryKey(configId) == null) {
-            throw new CommonException(COMMON_EXCEPTION_1);
+            throw new CommonException(ERROR_CONFIG_NOT_EXIST);
         }
         ConfigDO configDO = ConvertHelper.convert(configE, ConfigDO.class);
         configDO.setId(configId);
@@ -104,5 +112,20 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     public ConfigDTO queryByServiceNameAndConfigVersion(String serviceName, String configVersion) {
         return ConvertHelper.convert(configMapper.selectOneByServiceAndConfigVersion(serviceName, configVersion),
                 ConfigDTO.class);
+    }
+
+    @Override
+    public List<ConfigDTO> listByServiceName(String serviceName) {
+        return ConvertHelper.convertList(configMapper.listByServiceName(serviceName), ConfigDTO.class);
+    }
+
+    @Override
+    public ConfigDO create(ConfigDO configDO) {
+        configDO.setDefault(false);
+        configDO.setSource(SOURCE_PAGE);
+        if (configMapper.insert(configDO) != 1) {
+            throw new CommonException("error.config.create");
+        }
+        return configMapper.selectByPrimaryKey(configDO.getId());
     }
 }

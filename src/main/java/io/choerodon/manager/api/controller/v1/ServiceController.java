@@ -1,10 +1,18 @@
 package io.choerodon.manager.api.controller.v1;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.manager.api.dto.ConfigDTO;
+import io.choerodon.manager.api.dto.InstanceDTO;
+import io.choerodon.manager.api.dto.ServiceDTO;
+import io.choerodon.manager.app.service.ConfigService;
+import io.choerodon.manager.app.service.ServiceService;
+import io.choerodon.manager.infra.common.utils.DiscoveryUtil;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
+import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,18 +20,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.manager.api.dto.InstanceDTO;
-import io.choerodon.manager.api.dto.ServiceDTO;
-import io.choerodon.manager.app.service.ServiceService;
-import io.choerodon.manager.infra.common.utils.DiscoveryUtil;
-import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
-import io.choerodon.swagger.annotation.Permission;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * 操作服务控制器
@@ -35,10 +37,12 @@ import io.choerodon.swagger.annotation.Permission;
 public class ServiceController {
 
     private ServiceService serviceService;
+    private ConfigService configService;
     private DiscoveryUtil discoveryUtil;
 
-    public ServiceController(ServiceService serviceService, DiscoveryUtil discoveryUtil) {
+    public ServiceController(ServiceService serviceService, ConfigService configService, DiscoveryUtil discoveryUtil) {
         this.serviceService = serviceService;
+        this.configService = configService;
         this.discoveryUtil = discoveryUtil;
     }
 
@@ -86,5 +90,47 @@ public class ServiceController {
     @GetMapping(value = "/{service}/instances")
     public List<InstanceDTO> list(@PathVariable("service") String service) {
         return serviceService.getInstancesByService(service);
+    }
+
+
+    /**
+     * 内部接口，由config-server调用
+     * 通过服务名获取配置信息，对外隐藏api
+     *
+     * @param serviceName 服务名
+     * @return ConfigDTO
+     */
+    @GetMapping("/{service_name}/configs/default")
+    @ApiIgnore
+    public ResponseEntity<ConfigDTO> queryDefaultConfigByServiceName(@PathVariable("service_name") String serviceName) {
+        return new ResponseEntity<>(configService.queryDefaultByServiceName(serviceName), HttpStatus.OK);
+    }
+
+    /**
+     * 内部接口，由config-server调用
+     * 通过服务名和配置版本获取配置信息，对外隐藏api
+     *
+     * @param serviceName   服务名
+     * @param configVersion 配置版本
+     * @return ConfigDTO
+     */
+    @ApiIgnore
+    @GetMapping("/{service_name}/configs/{config_version:.*}")
+    public ResponseEntity<ConfigDTO> queryConfigByServiceNameAndVersion(@PathVariable("service_name") String serviceName,
+                                                                        @PathVariable("config_version") String configVersion) {
+        return new ResponseEntity<>(configService.queryByServiceNameAndConfigVersion(serviceName, configVersion),
+                HttpStatus.OK);
+    }
+
+
+    /**
+     * 查询服务下所有配置列表
+     * @param serviceName 服务名
+     * @return 服务的配置列表
+     */
+    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @GetMapping("/{service_name}/configs")
+    public ResponseEntity<List<ConfigDTO>> queryConfigsByService(@PathVariable("service_name") String serviceName) {
+        return new ResponseEntity<>(configService.listByServiceName(serviceName), HttpStatus.OK);
     }
 }

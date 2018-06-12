@@ -1,25 +1,26 @@
 package io.choerodon.manager.app.service.impl;
 
-import java.util.List;
-import java.util.Map;
-
+import io.choerodon.core.convertor.ConvertHelper;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.ConfigDTO;
+import io.choerodon.manager.app.service.ConfigService;
+import io.choerodon.manager.domain.manager.entity.ConfigE;
+import io.choerodon.manager.domain.manager.entity.RouteE;
+import io.choerodon.manager.domain.manager.entity.ServiceE;
+import io.choerodon.manager.domain.repository.ConfigRepository;
+import io.choerodon.manager.domain.repository.RouteRepository;
+import io.choerodon.manager.domain.repository.ServiceRepository;
+import io.choerodon.manager.infra.dataobject.ConfigDO;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import io.choerodon.core.convertor.ConvertHelper;
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.manager.app.service.ConfigService;
-import io.choerodon.manager.domain.manager.entity.RouteE;
-import io.choerodon.manager.domain.manager.entity.ConfigE;
-import io.choerodon.manager.domain.manager.entity.ServiceE;
-import io.choerodon.manager.domain.repository.RouteRepository;
-import io.choerodon.manager.domain.repository.ConfigRepository;
-import io.choerodon.manager.domain.repository.ServiceRepository;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author wuguokai
@@ -48,12 +49,11 @@ public class ConfigServiceImpl implements ConfigService {
     public Page<ConfigDTO> listByServiceId(Long serviceId, PageRequest pageRequest) {
         Page<ConfigDTO> configDTOPage = configRepository.listByServiceId(serviceId, pageRequest);
         ServiceE serviceE = serviceRepository.getService(serviceId);
-        for (String service : getRouteServices) {
-            if (service.equals(serviceE.getName())) {
-                configDTOPage.getContent().forEach(t ->
-                        setRoutes(t.getValue())
-                );
-            }
+        if (ArrayUtils.contains(getRouteServices, serviceE.getName())) {
+            final List<RouteE> routeEList = routeRepository.getAllRoute();
+            configDTOPage.getContent().forEach(t ->
+                    setRoutes(routeEList, t.getValue())
+            );
         }
         return configDTOPage;
     }
@@ -76,16 +76,15 @@ public class ConfigServiceImpl implements ConfigService {
     public ConfigDTO query(Long configId) {
         ConfigDTO configDTO = ConvertHelper.convert(configRepository.query(configId), ConfigDTO.class);
         if (configDTO == null) {
-            return configDTO;
+            return null;
         }
         ServiceE serviceE = serviceRepository.getService(configDTO.getServiceId());
         if (serviceE == null) {
             throw new CommonException("error.service.notExist", configDTO.getServiceId());
         }
-        for (String service : getRouteServices) {
-            if (service.equals(serviceE.getName())) {
-                setRoutes(configDTO.getValue());
-            }
+        if (ArrayUtils.contains(getRouteServices, serviceE.getName())) {
+            final List<RouteE> routeEList = routeRepository.getAllRoute();
+            setRoutes(routeEList, configDTO.getValue());
         }
         return configDTO;
     }
@@ -101,25 +100,22 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     //循环判断配置是否需要添加route信息
-    public void needSetRoute(ConfigDTO configDTO, Long serviceId) {
+    private void needSetRoute(ConfigDTO configDTO, Long serviceId) {
         ServiceE serviceE = serviceRepository.getService(serviceId);
         if (serviceE == null) {
             throw new CommonException("error.service.notExist", serviceId);
         }
-        for (String service : getRouteServices) {
-            if (service.equals(serviceE.getName())) {
-                setRoutes(configDTO.getValue());
-            }
+        if (ArrayUtils.contains(getRouteServices, serviceE.getName())) {
+            final List<RouteE> routeEList = routeRepository.getAllRoute();
+            setRoutes(routeEList, configDTO.getValue());
         }
     }
 
     /**
      * 提取出来的判断方法
-     *
-     * @param map 要添加路由信息的map
      */
-    public void setRoutes(final Map map) {
-        List<RouteE> routeEList = routeRepository.getAllRoute();
+    @SuppressWarnings("unchecked")
+    private void setRoutes(final List<RouteE> routeEList, final Map map) {
         for (RouteE routeE : routeEList) {
             String prefix = "zuul.routes." + routeE.getName() + ".";
             if (routeE.getPath() != null) {
@@ -157,10 +153,9 @@ public class ConfigServiceImpl implements ConfigService {
             LOGGER.info("$${}$$", serviceName);
             throw new CommonException("error.serviceConfigDO.query.serviceNameNotFound");
         }
-        for (String service : getRouteServices) {
-            if (service.equals(serviceName)) {
-                setRoutes(configDTO.getValue());
-            }
+        if (ArrayUtils.contains(getRouteServices, serviceName)) {
+            final List<RouteE> routeEList = routeRepository.getAllRoute();
+            setRoutes(routeEList, configDTO.getValue());
         }
         return configDTO;
     }
@@ -173,12 +168,26 @@ public class ConfigServiceImpl implements ConfigService {
         if (configDTO == null) {
             throw new CommonException("error.serviceConfigDO.query.serviceNameOrConfigVersionNotFound");
         }
-        for (String service : getRouteServices) {
-            if (service.equals(serviceName)) {
-                setRoutes(configDTO.getValue());
-            }
+        if (ArrayUtils.contains(getRouteServices, serviceName)) {
+            final List<RouteE> routeEList = routeRepository.getAllRoute();
+            setRoutes(routeEList, configDTO.getValue());
         }
         return configDTO;
     }
 
+    @Override
+    public List<ConfigDTO> listByServiceName(String serviceName) {
+        List<ConfigDTO> configDTOList = configRepository.listByServiceName(serviceName);
+        if (ArrayUtils.contains(getRouteServices, serviceName)) {
+            final List<RouteE> routeEList = routeRepository.getAllRoute();
+            configDTOList.forEach(t -> setRoutes(routeEList, t.getValue()));
+        }
+        return configDTOList;
+    }
+
+    @Override
+    public ConfigDTO create(ConfigDTO configDTO) {
+        return ConvertHelper.convert(configRepository.create(ConvertHelper
+                .convert(configDTO, ConfigDO.class)), ConfigDTO.class);
+    }
 }

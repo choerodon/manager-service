@@ -1,9 +1,10 @@
 package io.choerodon.manager.infra.mapper;
 
-import org.apache.ibatis.annotations.Param;
-
 import io.choerodon.manager.infra.dataobject.ConfigDO;
 import io.choerodon.mybatis.common.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface ConfigMapper extends BaseMapper<ConfigDO> {
 
@@ -14,4 +15,6 @@ public interface ConfigMapper extends BaseMapper<ConfigDO> {
                                                 @Param("configVersion") String configVersion);
 
     int closeDefaultByServiceId(@Param("serviceId") Long serviceId);
+
+    List<ConfigDO> listByServiceName(@Param("serviceName") String serviceName);
 }

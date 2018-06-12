@@ -32,4 +32,15 @@
         WHERE
         service_id=#{serviceId}
     </update>
+
+    <select id="listByServiceName" resultType="io.choerodon.manager.infra.dataobject.ConfigDO">
+        SELECT
+        mgmt_service_config.*
+        FROM
+        mgmt_service_config
+        INNER JOIN mgmt_service on mgmt_service_config.service_id=mgmt_service.id
+        WHERE
+        mgmt_service.name=#{serviceName}
+    </select>
+
 </mapper>

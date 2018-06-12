@@ -12,10 +12,8 @@ import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.app.service.InstanceService;
 import io.choerodon.swagger.annotation.Permission;
 
-
 /**
  * @author flyleft
- * @date 2018/4/19
  */
 @RestController
 @RequestMapping(value = "/v1/instances")
