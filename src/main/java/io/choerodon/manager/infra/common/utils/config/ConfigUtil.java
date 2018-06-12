@@ -16,8 +16,6 @@ public class ConfigUtil {
 
     private static final ObjectMapper YAM_MAPPER = new ObjectMapper(new YAMLFactory());
 
-    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
-
     private ConfigUtil() {
     }
 
@@ -29,8 +27,6 @@ public class ConfigUtil {
 
     public static Map<String, Object> convertTextToMap(final String type, final String configText) throws IOException {
         switch (type) {
-            case CONFIG_TYPE_JSON:
-                return parseJson(configText);
             case CONFIG_TYPE_YAML:
                 return parseYaml(configText);
             case CONFIG_TYPE_PROPERTIES:
@@ -50,13 +46,6 @@ public class ConfigUtil {
             map.put((String) k, properties.get(k));
         }
         return map;
-    }
-
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> parseJson(String content) throws IOException {
-        LinkedHashMap<String, Object> root = JSON_MAPPER.readValue(content, LinkedHashMap.class);
-        return (LinkedHashMap) TreeProcess.mapParseRecursive(root);
     }
 
     @SuppressWarnings("unchecked")

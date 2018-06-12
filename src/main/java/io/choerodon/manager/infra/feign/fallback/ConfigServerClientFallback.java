@@ -21,6 +21,6 @@ public class ConfigServerClientFallback implements ConfigServerClient {
     @Override
     public ResponseEntity<String> refresh(Map<String, ?> queryMap) {
         LOGGER.error("refresh config failed! map: {}", queryMap);
-        return new ResponseEntity("refresh config failed!", HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>("refresh config failed!", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

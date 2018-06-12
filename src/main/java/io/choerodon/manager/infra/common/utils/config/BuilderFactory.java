@@ -16,7 +16,6 @@ class BuilderFactory {
     static {
         builderFactorys.put(ConfigFileFormat.YAML, YamlBuilder::new);
         builderFactorys.put(ConfigFileFormat.YML, YamlBuilder::new);
-        builderFactorys.put(ConfigFileFormat.JSON, JsonBuilder::new);
         builderFactorys.put(ConfigFileFormat.PROPERTIES, PropertiesBuilder::new);
     }
 

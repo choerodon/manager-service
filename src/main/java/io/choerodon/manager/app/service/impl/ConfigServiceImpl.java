@@ -35,7 +35,6 @@ import java.util.Set;
 public class ConfigServiceImpl implements ConfigService {
 
     public static final String CONFIG_TYPE_PROPERTIES = "properties";
-    public static final String CONFIG_TYPE_JSON = "json";
     public static final String CONFIG_TYPE_YAML = "yaml";
 
 

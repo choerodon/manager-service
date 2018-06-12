@@ -75,7 +75,7 @@ public class ConfigController {
      * @return ConfigDTO
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
-    @ApiOperation("查询配置")
+    @ApiOperation("查询配置，type为properties或者yaml则回传配置文本形式")
     @GetMapping(value = "/{config_id}")
     public ResponseEntity<ConfigDTO> query(@PathVariable("config_id") Long configId,
                                            @RequestParam(value = "type", required = false) String type) {
@@ -102,14 +102,14 @@ public class ConfigController {
     }
 
     /**
-     * 给配置增加或更新配置项
+     * 给配置增加或修改配置项
      *
      * @param configId 配置id
      * @param item     配置项对象
      * @return ItemDto
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
-    @ApiOperation("给某一配置增加或更新配置项")
+    @ApiOperation("给配置增加或修改配置项")
     @PostMapping("/{config_id}/items")
     public ResponseEntity<ItemDto> add(@PathVariable("config_id") Long configId,
                                        @RequestBody ItemDto item) {
@@ -126,7 +126,7 @@ public class ConfigController {
      * @return null
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
-    @ApiOperation("删除某一配置的一个配置项")
+    @ApiOperation("删除配置的一个配置项")
     @DeleteMapping("/{config_id}/items")
     public ResponseEntity delete(@PathVariable("config_id") Long configId,
                                  @RequestParam("property") String property) {
