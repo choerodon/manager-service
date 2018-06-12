@@ -2,6 +2,7 @@ package io.choerodon.manager.api.controller.v1;
 
 import java.util.Optional;
 
+import io.choerodon.manager.api.dto.ConfigDTO;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,9 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.ItemDto;
-import io.choerodon.manager.api.dto.ServiceConfigDTO;
 import io.choerodon.manager.app.service.ItemService;
-import io.choerodon.manager.app.service.ServiceConfigService;
+import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.swagger.annotation.Permission;
 
 /**
@@ -24,11 +24,11 @@ import io.choerodon.swagger.annotation.Permission;
 @RequestMapping(value = "/v1/configs/{serviceName}/default/item")
 public class DefaultItemController {
     private ItemService itemService;
-    private ServiceConfigService serviceConfigService;
+    private ConfigService configService;
 
-    public DefaultItemController(ItemService itemService, ServiceConfigService serviceConfigService) {
+    public DefaultItemController(ItemService itemService, ConfigService configService) {
         this.itemService = itemService;
-        this.serviceConfigService = serviceConfigService;
+        this.configService = configService;
     }
 
     /**
@@ -43,8 +43,8 @@ public class DefaultItemController {
     @PatchMapping
     public ResponseEntity<ItemDto> add(@PathVariable("serviceName") String serviceName,
                                        @RequestBody ItemDto item) {
-        ServiceConfigDTO serviceConfigDTO = serviceConfigService.queryDefaultByServiceName(serviceName);
-        return Optional.ofNullable(itemService.saveItem(serviceConfigDTO.getId(), item))
+        ConfigDTO configDTO = configService.queryDefaultByServiceName(serviceName);
+        return Optional.ofNullable(itemService.saveItem(configDTO.getId(), item))
                 .map(i -> new ResponseEntity<>(i, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.config.item.add"));
     }
@@ -61,8 +61,8 @@ public class DefaultItemController {
     @DeleteMapping
     public ResponseEntity delete(@PathVariable("serviceName") String serviceName,
                                  @RequestParam("property") String property) {
-        ServiceConfigDTO serviceConfigDTO = serviceConfigService.queryDefaultByServiceName(serviceName);
-        itemService.deleteItem(serviceConfigDTO.getId(), property);
+        ConfigDTO configDTO = configService.queryDefaultByServiceName(serviceName);
+        itemService.deleteItem(configDTO.getId(), property);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }

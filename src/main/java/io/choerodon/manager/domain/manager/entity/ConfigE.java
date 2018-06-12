@@ -6,7 +6,7 @@ import java.util.Date;
  * @author superleader8@gmail.com
  * @author wuguokai
  */
-public class ServiceConfigE {
+public class ConfigE {
     private Long id;
 
     private String name;
@@ -25,8 +25,8 @@ public class ServiceConfigE {
 
     private Long objectVersionNumber;
 
-    public ServiceConfigE(Long id, String name, String configVersion, Boolean isDefault, Long serviceId,
-                          String value, String source, Date publicTime, Long objectVersionNumber) {
+    public ConfigE(Long id, String name, String configVersion, Boolean isDefault, Long serviceId,
+                   String value, String source, Date publicTime, Long objectVersionNumber) {
         this.id = id;
         this.name = name;
         this.configVersion = configVersion;

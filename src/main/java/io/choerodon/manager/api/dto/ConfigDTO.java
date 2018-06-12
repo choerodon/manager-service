@@ -3,7 +3,7 @@ package io.choerodon.manager.api.dto;
 import java.util.Date;
 import java.util.Map;
 
-public class ServiceConfigDTO {
+public class ConfigDTO {
 
     public static final String DEFAULT_VERSION = "default";
 
@@ -25,11 +25,11 @@ public class ServiceConfigDTO {
 
     private Long objectVersionNumber;
 
-    public ServiceConfigDTO() {
+    public ConfigDTO() {
     }
 
-    public ServiceConfigDTO(Long id, String name, String configVersion, Boolean isDefault, Long serviceId,
-                            Map<String, Object> value, String source, Date publicTime, Long objectVersionNumber) {
+    public ConfigDTO(Long id, String name, String configVersion, Boolean isDefault, Long serviceId,
+                     Map<String, Object> value, String source, Date publicTime, Long objectVersionNumber) {
         this.id = id;
         this.name = name;
         this.configVersion = configVersion;
@@ -119,7 +119,7 @@ public class ServiceConfigDTO {
 
     @Override
     public String toString() {
-        return "ServiceConfigDTO{"
+        return "ConfigDTO{"
                 + "id=" + id
                 + ", name='" + name + '\''
                 + ", configVersion='" + configVersion + '\''

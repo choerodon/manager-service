@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.ItemDto;
-import io.choerodon.manager.api.dto.ServiceConfigDTO;
+import io.choerodon.manager.api.dto.ConfigDTO;
 import io.choerodon.manager.app.service.ItemService;
-import io.choerodon.manager.app.service.ServiceConfigService;
+import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.manager.infra.common.annotation.ConfigNotifyRefresh;
 import io.choerodon.mybatis.util.StringUtil;
 
@@ -21,10 +21,10 @@ import io.choerodon.mybatis.util.StringUtil;
 @Component
 public class ItemServiceImpl implements ItemService {
 
-    private ServiceConfigService serviceConfigService;
+    private ConfigService configService;
 
-    public ItemServiceImpl(ServiceConfigService serviceConfigService) {
-        this.serviceConfigService = serviceConfigService;
+    public ItemServiceImpl(ConfigService configService) {
+        this.configService = configService;
     }
 
     @Override
@@ -33,12 +33,12 @@ public class ItemServiceImpl implements ItemService {
         if (item == null || StringUtil.isEmpty(item.getProperty()) || StringUtil.isEmpty(item.getValue())) {
             throw new CommonException("error.config.item.add");
         }
-        ServiceConfigDTO serviceConfigDTO = preOp(configId);
-        Map<String, Object> itemMap = serviceConfigDTO.getValue();
+        ConfigDTO configDTO = preOp(configId);
+        Map<String, Object> itemMap = configDTO.getValue();
         if (checkNeedUpdate(itemMap, item)) {
             itemMap.put(item.getProperty(), item.getValue());
-            serviceConfigDTO.setValue(itemMap);
-            if (serviceConfigService.update(serviceConfigDTO.getId(), serviceConfigDTO) == null) {
+            configDTO.setValue(itemMap);
+            if (configService.update(configDTO.getId(), configDTO) == null) {
                 throw new CommonException("error.config.item.add");
             }
         }
@@ -51,25 +51,25 @@ public class ItemServiceImpl implements ItemService {
         if (StringUtil.isEmpty(property)) {
             throw new CommonException("error.config.item.update");
         }
-        ServiceConfigDTO serviceConfigDTO = preOp(configId);
-        Map<String, Object> itemMap = serviceConfigDTO.getValue();
+        ConfigDTO configDTO = preOp(configId);
+        Map<String, Object> itemMap = configDTO.getValue();
         Set<String> keySet = itemMap.keySet();
         if (!keySet.contains(property)) {
             throw new CommonException("error.config.item.not.exist");
         }
         itemMap.remove(property);
-        serviceConfigService.update(serviceConfigDTO.getId(), serviceConfigDTO);
+        configService.update(configDTO.getId(), configDTO);
     }
 
-    private ServiceConfigDTO preOp(Long configId) {
+    private ConfigDTO preOp(Long configId) {
         if (configId == null || configId < 1) {
             throw new CommonException("error.config.query");
         }
-        ServiceConfigDTO serviceConfigDTO = serviceConfigService.query(configId);
-        if (serviceConfigDTO == null) {
+        ConfigDTO configDTO = configService.query(configId);
+        if (configDTO == null) {
             throw new CommonException("error.config.query");
         }
-        return serviceConfigDTO;
+        return configDTO;
     }
 
     private boolean checkNeedUpdate(Map<String, Object> map, ItemDto item) {

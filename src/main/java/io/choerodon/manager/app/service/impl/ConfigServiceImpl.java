@@ -3,6 +3,7 @@ package io.choerodon.manager.app.service.impl;
 import java.util.List;
 import java.util.Map;
 
+import io.choerodon.manager.api.dto.ConfigDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,13 +12,12 @@ import org.springframework.stereotype.Component;
 import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.manager.api.dto.ServiceConfigDTO;
-import io.choerodon.manager.app.service.ServiceConfigService;
+import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.manager.domain.manager.entity.RouteE;
-import io.choerodon.manager.domain.manager.entity.ServiceConfigE;
+import io.choerodon.manager.domain.manager.entity.ConfigE;
 import io.choerodon.manager.domain.manager.entity.ServiceE;
 import io.choerodon.manager.domain.repository.RouteRepository;
-import io.choerodon.manager.domain.repository.ServiceConfigRepository;
+import io.choerodon.manager.domain.repository.ConfigRepository;
 import io.choerodon.manager.domain.repository.ServiceRepository;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -25,90 +25,90 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
  * @author wuguokai
  */
 @Component
-public class ServiceConfigServiceImpl implements ServiceConfigService {
+public class ConfigServiceImpl implements ConfigService {
 
     @Value("${choerodon.gateway.names}")
     private String[] getRouteServices;
 
-    private ServiceConfigRepository serviceConfigRepository;
+    private ConfigRepository configRepository;
     private ServiceRepository serviceRepository;
 
     private RouteRepository routeRepository;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceConfigServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigServiceImpl.class);
 
-    public ServiceConfigServiceImpl(ServiceConfigRepository serviceConfigRepository, ServiceRepository serviceRepository, RouteRepository routeRepository) {
-        this.serviceConfigRepository = serviceConfigRepository;
+    public ConfigServiceImpl(ConfigRepository configRepository, ServiceRepository serviceRepository, RouteRepository routeRepository) {
+        this.configRepository = configRepository;
         this.serviceRepository = serviceRepository;
         this.routeRepository = routeRepository;
     }
 
 
     @Override
-    public Page<ServiceConfigDTO> listByServiceId(Long serviceId, PageRequest pageRequest) {
-        Page<ServiceConfigDTO> serviceConfigDTOPage = serviceConfigRepository.listByServiceId(serviceId, pageRequest);
+    public Page<ConfigDTO> listByServiceId(Long serviceId, PageRequest pageRequest) {
+        Page<ConfigDTO> configDTOPage = configRepository.listByServiceId(serviceId, pageRequest);
         ServiceE serviceE = serviceRepository.getService(serviceId);
         for (String service : getRouteServices) {
             if (service.equals(serviceE.getName())) {
-                serviceConfigDTOPage.getContent().forEach(t ->
+                configDTOPage.getContent().forEach(t ->
                         setRoutes(t.getValue())
                 );
             }
         }
-        return serviceConfigDTOPage;
+        return configDTOPage;
     }
 
     @Override
-    public Page<ServiceConfigDTO> list(PageRequest pageRequest) {
-        Page<ServiceConfigDTO> serviceConfigDTOPage = serviceConfigRepository.list(pageRequest);
-        serviceConfigDTOPage.getContent().forEach(t ->
+    public Page<ConfigDTO> list(PageRequest pageRequest) {
+        Page<ConfigDTO> configDTOPage = configRepository.list(pageRequest);
+        configDTOPage.getContent().forEach(t ->
                 needSetRoute(t, t.getServiceId())
         );
-        return serviceConfigDTOPage;
+        return configDTOPage;
     }
 
     @Override
-    public ServiceConfigDTO setServiceConfigDefault(Long configId) {
-        return ConvertHelper.convert(serviceConfigRepository.setConfigDefault(configId), ServiceConfigDTO.class);
+    public ConfigDTO setServiceConfigDefault(Long configId) {
+        return ConvertHelper.convert(configRepository.setConfigDefault(configId), ConfigDTO.class);
     }
 
     @Override
-    public ServiceConfigDTO query(Long configId) {
-        ServiceConfigDTO serviceConfigDTO = ConvertHelper.convert(serviceConfigRepository.query(configId), ServiceConfigDTO.class);
-        if (serviceConfigDTO == null) {
-            return serviceConfigDTO;
+    public ConfigDTO query(Long configId) {
+        ConfigDTO configDTO = ConvertHelper.convert(configRepository.query(configId), ConfigDTO.class);
+        if (configDTO == null) {
+            return configDTO;
         }
-        ServiceE serviceE = serviceRepository.getService(serviceConfigDTO.getServiceId());
+        ServiceE serviceE = serviceRepository.getService(configDTO.getServiceId());
         if (serviceE == null) {
-            throw new CommonException("error.service.notExist", serviceConfigDTO.getServiceId());
+            throw new CommonException("error.service.notExist", configDTO.getServiceId());
         }
         for (String service : getRouteServices) {
             if (service.equals(serviceE.getName())) {
-                setRoutes(serviceConfigDTO.getValue());
+                setRoutes(configDTO.getValue());
             }
         }
-        return serviceConfigDTO;
+        return configDTO;
     }
 
     @Override
     public Boolean delete(Long configId) {
-        return serviceConfigRepository.delete(configId);
+        return configRepository.delete(configId);
     }
 
     @Override
-    public ServiceConfigDTO update(Long configId, ServiceConfigDTO serviceConfigDTO) {
-        return ConvertHelper.convert(serviceConfigRepository.update(configId, ConvertHelper.convert(serviceConfigDTO, ServiceConfigE.class)), ServiceConfigDTO.class);
+    public ConfigDTO update(Long configId, ConfigDTO configDTO) {
+        return ConvertHelper.convert(configRepository.update(configId, ConvertHelper.convert(configDTO, ConfigE.class)), ConfigDTO.class);
     }
 
     //循环判断配置是否需要添加route信息
-    public void needSetRoute(ServiceConfigDTO serviceConfigDTO, Long serviceId) {
+    public void needSetRoute(ConfigDTO configDTO, Long serviceId) {
         ServiceE serviceE = serviceRepository.getService(serviceId);
         if (serviceE == null) {
             throw new CommonException("error.service.notExist", serviceId);
         }
         for (String service : getRouteServices) {
             if (service.equals(serviceE.getName())) {
-                setRoutes(serviceConfigDTO.getValue());
+                setRoutes(configDTO.getValue());
             }
         }
     }
@@ -151,34 +151,34 @@ public class ServiceConfigServiceImpl implements ServiceConfigService {
 
 
     @Override
-    public ServiceConfigDTO queryDefaultByServiceName(String serviceName) {
-        ServiceConfigDTO serviceConfigDTO = serviceConfigRepository.queryDefaultByServiceName(serviceName);
-        if (serviceConfigDTO == null) {
+    public ConfigDTO queryDefaultByServiceName(String serviceName) {
+        ConfigDTO configDTO = configRepository.queryDefaultByServiceName(serviceName);
+        if (configDTO == null) {
             LOGGER.info("$${}$$", serviceName);
             throw new CommonException("error.serviceConfigDO.query.serviceNameNotFound");
         }
         for (String service : getRouteServices) {
             if (service.equals(serviceName)) {
-                setRoutes(serviceConfigDTO.getValue());
+                setRoutes(configDTO.getValue());
             }
         }
-        return serviceConfigDTO;
+        return configDTO;
     }
 
 
     @Override
-    public ServiceConfigDTO queryByServiceNameAndConfigVersion(String serviceName, String configVersion) {
-        ServiceConfigDTO serviceConfigDTO =
-                serviceConfigRepository.queryByServiceNameAndConfigVersion(serviceName, configVersion);
-        if (serviceConfigDTO == null) {
+    public ConfigDTO queryByServiceNameAndConfigVersion(String serviceName, String configVersion) {
+        ConfigDTO configDTO =
+                configRepository.queryByServiceNameAndConfigVersion(serviceName, configVersion);
+        if (configDTO == null) {
             throw new CommonException("error.serviceConfigDO.query.serviceNameOrConfigVersionNotFound");
         }
         for (String service : getRouteServices) {
             if (service.equals(serviceName)) {
-                setRoutes(serviceConfigDTO.getValue());
+                setRoutes(configDTO.getValue());
             }
         }
-        return serviceConfigDTO;
+        return configDTO;
     }
 
 }

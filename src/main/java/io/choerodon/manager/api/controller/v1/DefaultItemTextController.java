@@ -6,10 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.manager.api.dto.ServiceConfigDTO;
+import io.choerodon.manager.api.dto.ConfigDTO;
 import io.choerodon.manager.api.validator.ConfigFileTypeValidator;
 import io.choerodon.manager.app.service.ItemTextService;
-import io.choerodon.manager.app.service.ServiceConfigService;
+import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.swagger.annotation.Permission;
 
 /**
@@ -21,11 +21,11 @@ import io.choerodon.swagger.annotation.Permission;
 @RestController
 public class DefaultItemTextController {
     private ItemTextService itemTextService;
-    private ServiceConfigService serviceConfigService;
+    private ConfigService configService;
 
-    public DefaultItemTextController(ItemTextService itemTextService, ServiceConfigService serviceConfigService) {
+    public DefaultItemTextController(ItemTextService itemTextService, ConfigService configService) {
         this.itemTextService = itemTextService;
-        this.serviceConfigService = serviceConfigService;
+        this.configService = configService;
     }
 
     /**
@@ -40,9 +40,9 @@ public class DefaultItemTextController {
     @GetMapping(value = "/{type}")
     public ResponseEntity<String> query(@PathVariable("serviceName") String serviceName,
                                         @PathVariable("type") String type) {
-        ServiceConfigDTO serviceConfigDTO = serviceConfigService.queryDefaultByServiceName(serviceName);
+        ConfigDTO configDTO = configService.queryDefaultByServiceName(serviceName);
         ConfigFileTypeValidator.validate(type);
-        return new ResponseEntity<>(itemTextService.getConfigText(serviceConfigDTO.getId(), type), HttpStatus.OK);
+        return new ResponseEntity<>(itemTextService.getConfigText(configDTO.getId(), type), HttpStatus.OK);
     }
 
     /**
@@ -60,8 +60,8 @@ public class DefaultItemTextController {
                                  @PathVariable("type") String type,
                                  @RequestBody String text) {
         ConfigFileTypeValidator.validate(type);
-        ServiceConfigDTO serviceConfigDTO = serviceConfigService.queryDefaultByServiceName(serviceName);
-        itemTextService.updateConfigText(serviceConfigDTO.getId(), type, text);
+        ConfigDTO configDTO = configService.queryDefaultByServiceName(serviceName);
+        itemTextService.updateConfigText(configDTO.getId(), type, text);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }
