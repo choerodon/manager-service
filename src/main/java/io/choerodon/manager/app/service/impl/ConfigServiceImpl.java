@@ -4,6 +4,7 @@ import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.ConfigDTO;
+import io.choerodon.manager.api.dto.ItemDto;
 import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.manager.domain.manager.entity.ConfigE;
 import io.choerodon.manager.domain.manager.entity.RouteE;
@@ -11,9 +12,11 @@ import io.choerodon.manager.domain.manager.entity.ServiceE;
 import io.choerodon.manager.domain.repository.ConfigRepository;
 import io.choerodon.manager.domain.repository.RouteRepository;
 import io.choerodon.manager.domain.repository.ServiceRepository;
+import io.choerodon.manager.infra.common.annotation.ConfigNotifyRefresh;
 import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
 import io.choerodon.manager.infra.dataobject.ConfigDO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.util.StringUtil;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author wuguokai
@@ -199,5 +203,46 @@ public class ConfigServiceImpl implements ConfigService {
     public ConfigDTO create(ConfigDTO configDTO) {
         return ConvertHelper.convert(configRepository.create(ConvertHelper
                 .convert(configDTO, ConfigDO.class)), ConfigDTO.class);
+    }
+
+    @Override
+    @ConfigNotifyRefresh
+    public ItemDto saveItem(Long configId, ItemDto item) {
+        if (item == null || StringUtil.isEmpty(item.getProperty()) || StringUtil.isEmpty(item.getValue())) {
+            throw new CommonException("error.config.item.add");
+        }
+        ConfigDTO configDTO = query(configId, null);
+        Map<String, Object> itemMap = configDTO.getValue();
+        if (checkNeedUpdate(itemMap, item)) {
+            itemMap.put(item.getProperty(), item.getValue());
+            configDTO.setValue(itemMap);
+            if (update(configDTO.getId(), configDTO) == null) {
+                throw new CommonException("error.config.item.add");
+            }
+        }
+        return item;
+    }
+
+    @Override
+    @ConfigNotifyRefresh
+    public void deleteItem(Long configId, String property) {
+        if (StringUtil.isEmpty(property)) {
+            throw new CommonException("error.config.item.update");
+        }
+        ConfigDTO configDTO = query(configId, null);
+        Map<String, Object> itemMap = configDTO.getValue();
+        Set<String> keySet = itemMap.keySet();
+        if (!keySet.contains(property)) {
+            throw new CommonException("error.config.item.not.exist");
+        }
+        itemMap.remove(property);
+        update(configDTO.getId(), configDTO);
+    }
+
+
+    private boolean checkNeedUpdate(Map<String, Object> map, ItemDto item) {
+        String key = item.getProperty();
+        String value = item.getValue();
+        return !map.containsKey(key) || !value.equals(map.get(key));
     }
 }

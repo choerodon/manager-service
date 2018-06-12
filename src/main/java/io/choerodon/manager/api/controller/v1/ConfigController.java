@@ -1,8 +1,10 @@
 package io.choerodon.manager.api.controller.v1;
 
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.ConfigDTO;
+import io.choerodon.manager.api.dto.ItemDto;
 import io.choerodon.manager.api.validator.ConfigValidatorGroup;
 import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -15,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 /**
  * 操作config表的controller
@@ -95,6 +99,39 @@ public class ConfigController {
         } else {
             return new ResponseEntity<>(configService.listByServiceId(serviceId, pageRequest), HttpStatus.OK);
         }
+    }
+
+    /**
+     * 给配置增加或更新配置项
+     *
+     * @param configId 配置id
+     * @param item     配置项对象
+     * @return ItemDto
+     */
+    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @ApiOperation("给某一配置增加或更新配置项")
+    @PostMapping("/{config_id}/items")
+    public ResponseEntity<ItemDto> add(@PathVariable("config_id") Long configId,
+                                       @RequestBody ItemDto item) {
+        return Optional.ofNullable(configService.saveItem(configId, item))
+                .map(i -> new ResponseEntity<>(i, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.config.item.add"));
+    }
+
+    /**
+     * 删除配置的一个配置项
+     *
+     * @param configId 配置id
+     * @param property 配置项key
+     * @return null
+     */
+    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @ApiOperation("删除某一配置的一个配置项")
+    @DeleteMapping("/{config_id}/items")
+    public ResponseEntity delete(@PathVariable("config_id") Long configId,
+                                 @RequestParam("property") String property) {
+        configService.deleteItem(configId, property);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
 }
