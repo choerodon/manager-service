@@ -16,6 +16,7 @@ import io.choerodon.mybatis.domain.AuditDomain;
 @ModifyAudit
 @Table(name = "mgmt_service_config")
 public class ConfigDO extends AuditDomain {
+
     @Id
     @GeneratedValue
     private Long id;

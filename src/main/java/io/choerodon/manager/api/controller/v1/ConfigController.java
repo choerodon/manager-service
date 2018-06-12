@@ -12,6 +12,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -75,9 +76,10 @@ public class ConfigController {
      * @return ConfigDTO
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
-    @ApiOperation("查询配置，type为properties或者yaml则回传配置文本形式")
+    @ApiOperation("查询配置")
     @GetMapping(value = "/{config_id}")
     public ResponseEntity<ConfigDTO> query(@PathVariable("config_id") Long configId,
+                                           @ApiParam("要返回的配置文本类型，可为properties或者yaml，对应DTO的txt字段，为空不返回")
                                            @RequestParam(value = "type", required = false) String type) {
         return new ResponseEntity<>(configService.query(configId, type), HttpStatus.OK);
     }
@@ -132,6 +134,20 @@ public class ConfigController {
                                  @RequestParam("property") String property) {
         configService.deleteItem(configId, property);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    /**
+     * 修改配置
+     */
+    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @ApiOperation("修改配置")
+    @PutMapping("/{config_id}")
+    public ResponseEntity<ConfigDTO> updateConfig(@PathVariable("config_id") Long configId,
+                                            @ApiParam("要更新的配置文本类型，可为properties或者yaml，对应DTO的txt字段，为空则根据value值更新")
+                                            @RequestParam(value = "type", required = false) String type,
+                                            @RequestBody ConfigDTO configDTO) {
+        configDTO.setId(configId);
+        return new ResponseEntity<>(configService.updateConfig(configId, configDTO, type), HttpStatus.OK);
     }
 
 }

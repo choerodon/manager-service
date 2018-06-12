@@ -14,4 +14,6 @@ public interface ConfigMapper extends BaseMapper<ConfigDO> {
                                                 @Param("configVersion") String configVersion);
 
     List<ConfigDO> listByServiceName(@Param("serviceName") String serviceName);
+
+    String selectConfigVersionById(@Param("id") Long id);
 }

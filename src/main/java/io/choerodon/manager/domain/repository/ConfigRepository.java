@@ -29,7 +29,7 @@ public interface ConfigRepository {
 
     boolean delete(Long configId);
 
-    ConfigE update(Long configId, ConfigE configE);
+    ConfigDO update(Long configId, ConfigDO configDO);
 
     List<ConfigDTO> listByServiceName(String serviceName);
 

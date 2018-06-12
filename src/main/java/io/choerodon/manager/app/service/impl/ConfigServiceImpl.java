@@ -6,7 +6,6 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.ConfigDTO;
 import io.choerodon.manager.api.dto.ItemDto;
 import io.choerodon.manager.app.service.ConfigService;
-import io.choerodon.manager.domain.manager.entity.ConfigE;
 import io.choerodon.manager.domain.manager.entity.RouteE;
 import io.choerodon.manager.domain.manager.entity.ServiceE;
 import io.choerodon.manager.domain.repository.ConfigRepository;
@@ -24,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -97,7 +97,7 @@ public class ConfigServiceImpl implements ConfigService {
             setRoutes(routeEList, configDTO.getValue());
         }
         if (!StringUtils.isEmpty(type)) {
-            configDTO.setContent(ConfigUtil.convertMapToText(configDTO.getValue(), type));
+            configDTO.setTxt(ConfigUtil.convertMapToText(configDTO.getValue(), type));
         }
         return configDTO;
     }
@@ -109,10 +109,22 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public ConfigDTO update(Long configId, ConfigDTO configDTO) {
-        return ConvertHelper.convert(configRepository.update(configId, ConvertHelper.convert(configDTO, ConfigE.class)), ConfigDTO.class);
+        return ConvertHelper.convert(configRepository.update(configId, ConvertHelper.convert(configDTO, ConfigDO.class)), ConfigDTO.class);
     }
 
-    //循环判断配置是否需要添加route信息
+    @ConfigNotifyRefresh
+    @Override
+    public ConfigDTO updateConfig(Long configId, ConfigDTO configDTO, String type) {
+        if (!StringUtils.isEmpty(type) && !StringUtils.isEmpty(configDTO.getTxt())) {
+            try {
+                configDTO.setValue(ConfigUtil.convertTextToMap(type, configDTO.getTxt()));
+            } catch (IOException e) {
+                throw new CommonException("error.config.txt");
+            }
+        }
+        return update(configId, configDTO);
+    }
+
     private void needSetRoute(ConfigDTO configDTO, Long serviceId) {
         ServiceE serviceE = serviceRepository.getService(serviceId);
         if (serviceE == null) {
@@ -190,12 +202,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public List<ConfigDTO> listByServiceName(String serviceName) {
-        List<ConfigDTO> configDTOList = configRepository.listByServiceName(serviceName);
-        if (ArrayUtils.contains(getRouteServices, serviceName)) {
-            final List<RouteE> routeEList = routeRepository.getAllRoute();
-            configDTOList.forEach(t -> setRoutes(routeEList, t.getValue()));
-        }
-        return configDTOList;
+        return configRepository.listByServiceName(serviceName);
     }
 
     @Override
@@ -237,7 +244,6 @@ public class ConfigServiceImpl implements ConfigService {
         itemMap.remove(property);
         update(configDTO.getId(), configDTO);
     }
-
 
     private boolean checkNeedUpdate(Map<String, Object> map, ItemDto item) {
         String key = item.getProperty();

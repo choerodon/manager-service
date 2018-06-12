@@ -98,7 +98,7 @@ public class EurekaInstanceRegisteredListener {
                     .subscribeOn(Schedulers.io())
                     .subscribe(this::msgConsumer);
         } catch (IOException e) {
-            LOGGER.warn("error happened when handle message， {} cause {}", message, e.toString());
+            LOGGER.warn("error happened when handle message， {} cause {}", message, e.getCause());
         }
     }
 

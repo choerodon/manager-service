@@ -53,16 +53,17 @@ public class InstanceController {
     }
 
     /**
-     * 修改某个实例的配置
+     * 修改实例的配置
      *
      * @param instanceId    实例ID
-     * @param configVersion 配置的版本
+     * @param configId 配置的id
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
-    @ApiOperation("修改某个实例的配置")
-    @PutMapping(value = "/{instance_id:.*}")
-    public void update(@PathVariable("instance_id") String instanceId, @RequestParam("config_version") String configVersion) {
-        instanceService.update(instanceId, configVersion);
+    @ApiOperation("修改实例的配置")
+    @PutMapping(value = "/{instance_id:.*}/configs/{config_id}")
+    public void update(@PathVariable("instance_id") String instanceId,
+                       @PathVariable("config_id") Long configId) {
+        instanceService.update(instanceId, configId);
     }
 
 }

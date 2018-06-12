@@ -28,12 +28,34 @@
 
     <select id="listByServiceName" resultType="io.choerodon.manager.infra.dataobject.ConfigDO">
         SELECT
-        mgmt_service_config.*
+        mgmt_service_config.id,
+        mgmt_service_config.name,
+        mgmt_service_config.config_version,
+        mgmt_service_config.is_default,
+        mgmt_service_config.service_id,
+        mgmt_service_config.source,
+        mgmt_service_config.public_time,
+        mgmt_service_config.creation_date,
+        mgmt_service_config.created_by,
+        mgmt_service_config.last_update_date,
+        mgmt_service_config.last_updated_by,
+        mgmt_service_config.object_version_number
         FROM
         mgmt_service_config
         INNER JOIN mgmt_service on mgmt_service_config.service_id=mgmt_service.id
         WHERE
         mgmt_service.name=#{serviceName}
+    </select>
+
+
+    <select id="selectConfigVersionById" resultType="java.lang.String">
+        SELECT
+        config_version
+        FROM
+        mgmt_service_config
+        WHERE
+        id = #{id}
+        LIMIT 1
     </select>
 
 </mapper>

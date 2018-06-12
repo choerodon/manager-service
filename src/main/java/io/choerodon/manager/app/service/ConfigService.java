@@ -30,6 +30,8 @@ public interface ConfigService {
 
     ConfigDTO update(Long configId, ConfigDTO configDTO);
 
+    ConfigDTO updateConfig(Long configId, ConfigDTO configDTO, String type);
+
     ConfigDTO create(ConfigDTO configDTO);
 
     /**

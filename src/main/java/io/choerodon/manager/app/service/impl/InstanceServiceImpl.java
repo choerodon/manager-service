@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.netflix.appinfo.InstanceInfo;
+import io.choerodon.manager.infra.mapper.ConfigMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.ServiceInstance;
@@ -25,7 +26,6 @@ import io.choerodon.manager.infra.feign.ConfigServerClient;
 
 /**
  * @author flyleft
- * @date 2018/4/20
  */
 @Service
 public class InstanceServiceImpl implements InstanceService {
@@ -34,14 +34,20 @@ public class InstanceServiceImpl implements InstanceService {
 
     private final ExecutorService asyncExecutor = Executors.newSingleThreadExecutor();
 
+    private static final String CONFIG_VERSION_DEFAULT = "default";
+
     private ConfigServerClient configServerClient;
 
     private DiscoveryClient discoveryClient;
 
+    private ConfigMapper configMapper;
+
     public InstanceServiceImpl(ConfigServerClient configServerClient,
-                               DiscoveryClient discoveryClient) {
+                               DiscoveryClient discoveryClient,
+                               ConfigMapper configMapper) {
         this.configServerClient = configServerClient;
         this.discoveryClient = discoveryClient;
+        this.configMapper = configMapper;
     }
 
     @Override
@@ -85,10 +91,14 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public void update(String instanceId, String configVersion) {
+    public void update(String instanceId, Long configId) {
         String[] strings = instanceId.split(":");
         if (strings.length != 3 || StringUtils.isEmpty(strings[1])) {
             throw new CommonException("error.instance.updateConfig.badParameter");
+        }
+        String configVersion = configMapper.selectConfigVersionById(configId);
+        if (StringUtils.isEmpty(configVersion)) {
+            configVersion = CONFIG_VERSION_DEFAULT;
         }
         Map<String, String> map = new LinkedHashMap<>();
         map.put("path", strings[1]);

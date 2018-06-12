@@ -90,20 +90,18 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     }
 
     @Override
-    public ConfigE update(Long configId, ConfigE configE) {
-        if (configE.getObjectVersionNumber() == null) {
+    public ConfigDO update(Long configId, ConfigDO configDO) {
+        if (configDO.getObjectVersionNumber() == null) {
             throw new CommonException("error.objectVersionNumber.null");
         }
         if (configMapper.selectByPrimaryKey(configId) == null) {
             throw new CommonException(ERROR_CONFIG_NOT_EXIST);
         }
-        ConfigDO configDO = ConvertHelper.convert(configE, ConfigDO.class);
         configDO.setId(configId);
         if (configMapper.updateByPrimaryKeySelective(configDO) != 1) {
             throw new CommonException("error.config.update");
         }
-        configDO = configMapper.selectByPrimaryKey(configDO.getId());
-        return ConvertHelper.convert(configDO, ConfigE.class);
+        return configMapper.selectByPrimaryKey(configDO.getId());
     }
 
     @Override

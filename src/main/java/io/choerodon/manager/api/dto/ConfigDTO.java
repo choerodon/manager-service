@@ -29,7 +29,7 @@ public class ConfigDTO {
 
     private Long objectVersionNumber;
 
-    private String content;
+    private String txt;
 
     public ConfigDTO() {
     }
@@ -119,12 +119,12 @@ public class ConfigDTO {
         this.objectVersionNumber = objectVersionNumber;
     }
 
-    public String getContent() {
-        return content;
+    public String getTxt() {
+        return txt;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setTxt(String txt) {
+        this.txt = txt;
     }
 
     @Override
@@ -139,7 +139,7 @@ public class ConfigDTO {
                 ", source='" + source + '\'' +
                 ", publicTime=" + publicTime +
                 ", objectVersionNumber=" + objectVersionNumber +
-                ", content='" + content + '\'' +
+                ", txt='" + txt + '\'' +
                 '}';
     }
 }
