@@ -50,7 +50,7 @@ public class ConfigConverter implements ConvertorI<ConfigE, ConfigDO, ConfigDTO>
     @Override
     public ConfigE doToEntity(ConfigDO dataObject) {
         return new ConfigE(dataObject.getId(), dataObject.getName(), dataObject.getConfigVersion(),
-                dataObject.getDefault(), dataObject.getServiceId(), dataObject.getValue(),
+                dataObject.getIsDefault(), dataObject.getServiceId(), dataObject.getValue(),
                 dataObject.getSource(), dataObject.getPublicTime(),
                 dataObject.getObjectVersionNumber());
 
@@ -68,7 +68,7 @@ public class ConfigConverter implements ConvertorI<ConfigE, ConfigDO, ConfigDTO>
         try {
             Map<String, Object> value = MAPPER.readValue(dataObject.getValue(), Map.class);
             return new ConfigDTO(dataObject.getId(), dataObject.getName(), dataObject.getConfigVersion(),
-                    dataObject.getDefault(), dataObject.getServiceId(), value, dataObject.getSource(),
+                    dataObject.getIsDefault(), dataObject.getServiceId(), value, dataObject.getSource(),
                     dataObject.getPublicTime(), dataObject.getObjectVersionNumber());
         } catch (IOException e) {
             throw new CommonException(COMMON_EXCEPTION_1);

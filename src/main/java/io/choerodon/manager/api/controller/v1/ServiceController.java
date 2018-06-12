@@ -12,14 +12,12 @@ import io.choerodon.manager.infra.common.utils.DiscoveryUtil;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.HashSet;
@@ -124,13 +122,27 @@ public class ServiceController {
 
 
     /**
-     * 查询服务下所有配置列表
-     * @param serviceName 服务名
-     * @return 服务的配置列表
+     * 分页查询服务的配置信息
+     *
+     * @param serviceName 服务id，可为空，为空则查询所有服务的服务信息
+     * @return Page
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @CustomPageRequest
+    @ApiOperation("分页模糊查询服务的配置")
     @GetMapping("/{service_name}/configs")
-    public ResponseEntity<List<ConfigDTO>> queryConfigsByService(@PathVariable("service_name") String serviceName) {
-        return new ResponseEntity<>(configService.listByServiceName(serviceName), HttpStatus.OK);
+    public ResponseEntity<Page<ConfigDTO>> list(
+            @PathVariable("service_name") String serviceName,
+            @ApiIgnore
+            @SortDefault(value = "id", direction = Sort.Direction.DESC)
+                    PageRequest pageRequest,
+            @RequestParam(required = false, name = "name") String name,
+            @RequestParam(required = false, name = "source") String source,
+            @RequestParam(required = false, name = "configVersion") String configVersion,
+            @RequestParam(required = false, name = "isDefault") Boolean isDefault,
+            @RequestParam(required = false, name = "param") String param) {
+        return new ResponseEntity<>(configService.listByServiceName(serviceName, pageRequest,
+                new ConfigDTO(name, configVersion, isDefault, source), param), HttpStatus.OK);
     }
+
 }

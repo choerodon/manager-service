@@ -16,11 +16,7 @@ public interface ConfigService {
 
     ConfigDTO queryByServiceNameAndConfigVersion(String serviceName, String configVersion);
 
-    List<ConfigDTO> listByServiceName(String serviceName);
-
-    Page<ConfigDTO> listByServiceId(Long serviceId, PageRequest pageRequest);
-
-    Page<ConfigDTO> list(PageRequest pageRequest);
+    Page<ConfigDTO> listByServiceName(String serviceName, PageRequest pageRequest, ConfigDTO queryInfo, String queryParam);
 
     ConfigDTO setServiceConfigDefault(Long configId);
 

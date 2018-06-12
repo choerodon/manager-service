@@ -19,7 +19,7 @@ public interface ConfigRepository {
 
     ConfigDTO queryByServiceNameAndConfigVersion(String serviceName, String configVersion);
 
-    Page<ConfigDTO> listByServiceId(Long serviceId, PageRequest pageRequest);
+    Page<ConfigDTO> listByServiceName(String serviceName, PageRequest pageRequest, ConfigDO queryInfo, String queryParam);
 
     Page<ConfigDTO> list(PageRequest pageRequest);
 
@@ -30,8 +30,6 @@ public interface ConfigRepository {
     boolean delete(Long configId);
 
     ConfigDO update(Long configId, ConfigDO configDO);
-
-    List<ConfigDTO> listByServiceName(String serviceName);
 
     ConfigDO create(ConfigDO configDO);
 }

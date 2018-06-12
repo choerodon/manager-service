@@ -84,24 +84,6 @@ public class ConfigController {
         return new ResponseEntity<>(configService.query(configId, type), HttpStatus.OK);
     }
 
-    /**
-     * 分页查询服务的配置信息
-     *
-     * @param serviceId 服务id，可为空，为空则查询所有服务的服务信息
-     * @return Page
-     */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
-    @ApiOperation("分页查询服务的配置，服务id为空则查询所有服务的配置")
-    @GetMapping
-    public ResponseEntity<Page<ConfigDTO>> list(
-            @RequestParam(value = "service_id", required = false) Long serviceId,
-            @SortDefault(value = "id", direction = Sort.Direction.ASC) PageRequest pageRequest) {
-        if (StringUtils.isEmpty(serviceId)) {
-            return new ResponseEntity<>(configService.list(pageRequest), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(configService.listByServiceId(serviceId, pageRequest), HttpStatus.OK);
-        }
-    }
 
     /**
      * 给配置增加或修改配置项

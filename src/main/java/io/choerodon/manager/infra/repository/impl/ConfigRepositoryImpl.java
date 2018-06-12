@@ -33,11 +33,9 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     }
 
     @Override
-    public Page<ConfigDTO> listByServiceId(Long serviceId, PageRequest pageRequest) {
-        ConfigDO configDO = new ConfigDO();
-        configDO.setServiceId(serviceId);
+    public Page<ConfigDTO> listByServiceName(String serviceName, PageRequest pageRequest, ConfigDO queryInfo, String queryParam) {
         Page<ConfigDO> configDOPage =
-                PageHelper.doPageAndSort(pageRequest, () -> configMapper.select(configDO));
+                PageHelper.doPageAndSort(pageRequest, () -> configMapper.fulltextSearch(queryInfo, serviceName, queryParam));
         return ConvertPageHelper.convertPage(configDOPage, ConfigDTO.class);
     }
 
@@ -57,12 +55,12 @@ public class ConfigRepositoryImpl implements ConfigRepository {
 
         ConfigDO oldDefaultConfig = configMapper.selectOne(new ConfigDO(true, configDO.getServiceId()));
         if (oldDefaultConfig != null) {
-            oldDefaultConfig.setDefault(false);
+            oldDefaultConfig.setIsDefault(false);
             if (configMapper.updateByPrimaryKeySelective(oldDefaultConfig) != 1) {
                 throw new CommonException("error.config.set.default");
             }
         }
-        configDO.setDefault(true);
+        configDO.setIsDefault(true);
         if (configMapper.updateByPrimaryKeySelective(configDO) != 1) {
             throw new CommonException("error.config.set.default");
         }
@@ -80,7 +78,7 @@ public class ConfigRepositoryImpl implements ConfigRepository {
         if (configMapper.selectByPrimaryKey(configId) == null) {
             throw new CommonException(ERROR_CONFIG_NOT_EXIST);
         }
-        if (configDO.getDefault()) {
+        if (configDO.getIsDefault()) {
             throw new CommonException("error.config.delete.default");
         }
         if (configMapper.deleteByPrimaryKey(configId) != 1) {
@@ -117,13 +115,8 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     }
 
     @Override
-    public List<ConfigDTO> listByServiceName(String serviceName) {
-        return ConvertHelper.convertList(configMapper.listByServiceName(serviceName), ConfigDTO.class);
-    }
-
-    @Override
     public ConfigDO create(ConfigDO configDO) {
-        configDO.setDefault(false);
+        configDO.setIsDefault(false);
         configDO.setSource(SOURCE_PAGE);
         if (configMapper.insert(configDO) != 1) {
             throw new CommonException("error.config.create");

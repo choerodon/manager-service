@@ -80,11 +80,11 @@ public class ConfigDO extends AuditDomain {
         this.configVersion = configVersion;
     }
 
-    public Boolean getDefault() {
+    public Boolean getIsDefault() {
         return isDefault;
     }
 
-    public void setDefault(Boolean aDefault) {
+    public void setIsDefault(Boolean aDefault) {
         isDefault = aDefault;
     }
 

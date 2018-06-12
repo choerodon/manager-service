@@ -35,13 +35,14 @@ import java.util.Set;
 public class ConfigServiceImpl implements ConfigService {
 
     public static final String CONFIG_TYPE_PROPERTIES = "properties";
-    public static final String CONFIG_TYPE_YAML = "yaml";
 
+    public static final String CONFIG_TYPE_YAML = "yaml";
 
     @Value("${choerodon.gateway.names}")
     private String[] getRouteServices;
 
     private ConfigRepository configRepository;
+
     private ServiceRepository serviceRepository;
 
     private RouteRepository routeRepository;
@@ -56,25 +57,9 @@ public class ConfigServiceImpl implements ConfigService {
 
 
     @Override
-    public Page<ConfigDTO> listByServiceId(Long serviceId, PageRequest pageRequest) {
-        Page<ConfigDTO> configDTOPage = configRepository.listByServiceId(serviceId, pageRequest);
-        ServiceE serviceE = serviceRepository.getService(serviceId);
-        if (ArrayUtils.contains(getRouteServices, serviceE.getName())) {
-            final List<RouteE> routeEList = routeRepository.getAllRoute();
-            configDTOPage.getContent().forEach(t ->
-                    setRoutes(routeEList, t.getValue())
-            );
-        }
-        return configDTOPage;
-    }
-
-    @Override
-    public Page<ConfigDTO> list(PageRequest pageRequest) {
-        Page<ConfigDTO> configDTOPage = configRepository.list(pageRequest);
-        configDTOPage.getContent().forEach(t ->
-                needSetRoute(t, t.getServiceId())
-        );
-        return configDTOPage;
+    public Page<ConfigDTO> listByServiceName(String serviceName, PageRequest pageRequest, ConfigDTO queryInfo, String queryParam) {
+        return configRepository.listByServiceName(serviceName, pageRequest,
+                ConvertHelper.convert(queryInfo, ConfigDO.class), queryParam);
     }
 
     @Override
@@ -123,17 +108,6 @@ public class ConfigServiceImpl implements ConfigService {
             }
         }
         return update(configId, configDTO);
-    }
-
-    private void needSetRoute(ConfigDTO configDTO, Long serviceId) {
-        ServiceE serviceE = serviceRepository.getService(serviceId);
-        if (serviceE == null) {
-            throw new CommonException("error.service.notExist", serviceId);
-        }
-        if (ArrayUtils.contains(getRouteServices, serviceE.getName())) {
-            final List<RouteE> routeEList = routeRepository.getAllRoute();
-            setRoutes(routeEList, configDTO.getValue());
-        }
     }
 
     /**
@@ -198,11 +172,6 @@ public class ConfigServiceImpl implements ConfigService {
             setRoutes(routeEList, configDTO.getValue());
         }
         return configDTO;
-    }
-
-    @Override
-    public List<ConfigDTO> listByServiceName(String serviceName) {
-        return configRepository.listByServiceName(serviceName);
     }
 
     @Override

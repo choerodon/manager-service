@@ -31,8 +31,25 @@ public class ConfigDTO {
 
     private String txt;
 
+    /*
+             @RequestParam(required = false, name = "name") String name,
+            @RequestParam(required = false, name = "source") String source,
+            @RequestParam(required = false, name = "configVersion") String configVersion,
+            @RequestParam(required = false, name = "isDefault") Boolean isDefault,
+            @RequestParam(required = false, name = "param") String param
+     */
+
+    public ConfigDTO(String name, String configVersion, Boolean isDefault, String source) {
+        this.name = name;
+        this.configVersion = configVersion;
+        this.isDefault = isDefault;
+        this.source = source;
+    }
+
     public ConfigDTO() {
     }
+
+
 
     public ConfigDTO(Long id, String name, String configVersion, Boolean isDefault, Long serviceId,
                      Map<String, Object> value, String source, Date publicTime, Long objectVersionNumber) {

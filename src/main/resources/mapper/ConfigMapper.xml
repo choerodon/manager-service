@@ -58,4 +58,46 @@
         LIMIT 1
     </select>
 
+    <select id="fulltextSearch" resultType="io.choerodon.manager.infra.dataobject.ConfigDO">
+        SELECT
+        mgmt_service_config.id,
+        mgmt_service_config.name,
+        mgmt_service_config.config_version,
+        mgmt_service_config.is_default,
+        mgmt_service_config.service_id,
+        mgmt_service_config.source,
+        mgmt_service_config.public_time,
+        mgmt_service_config.creation_date,
+        mgmt_service_config.created_by,
+        mgmt_service_config.last_update_date,
+        mgmt_service_config.last_updated_by,
+        mgmt_service_config.object_version_number
+        FROM
+        mgmt_service_config
+        INNER JOIN mgmt_service on mgmt_service_config.service_id=mgmt_service.id
+        WHERE
+        mgmt_service.name=#{serviceName}
+        <if test="config.name != null">
+            AND mgmt_service_config.name LIKE concat('%',#{config.name},'%')
+        </if>
+        <if test="config.source!= null">
+            AND mgmt_service_config.source LIKE concat('%',#{config.source},'%')
+        </if>
+
+        <if test="config.configVersion!= null">
+            AND mgmt_service_config.config_version LIKE concat('%',#{config.configVersion},'%')
+        </if>
+
+        <if test="config.isDefault!= null">
+            AND mgmt_service_config.is_default = #{config.isDefault}
+        </if>
+        <if test="param != null">
+            AND(
+            mgmt_service_config.name LIKE concat('%',#{param},'%') OR
+            mgmt_service_config.source LIKE concat('%',#{param},'%') OR
+            mgmt_service_config.config_version LIKE concat('%',#{param},'%')
+            )
+        </if>
+    </select>
+
 </mapper>
