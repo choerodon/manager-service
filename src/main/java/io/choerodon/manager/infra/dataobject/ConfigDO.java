@@ -43,19 +43,6 @@ public class ConfigDO extends AuditDomain {
         this.serviceId = serviceId;
     }
 
-    public ConfigDO(Long id, String name, String configVersion, Boolean isDefault, Long serviceId,
-                    String value, String source, Date publicTime, Long objectVersionNumber) {
-        this.id = id;
-        this.name = name;
-        this.configVersion = configVersion;
-        this.isDefault = isDefault;
-        this.serviceId = serviceId;
-        this.value = value;
-        this.source = source;
-        this.publicTime = publicTime;
-        this.setObjectVersionNumber(objectVersionNumber);
-    }
-
     public Long getId() {
         return id;
     }
@@ -119,6 +106,4 @@ public class ConfigDO extends AuditDomain {
     public void setPublicTime(Date publicTime) {
         this.publicTime = publicTime;
     }
-
-
 }

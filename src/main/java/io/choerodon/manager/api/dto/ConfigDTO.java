@@ -42,20 +42,6 @@ public class ConfigDTO {
     }
 
 
-
-    public ConfigDTO(Long id, String name, String configVersion, Boolean isDefault, Long serviceId,
-                     Map<String, Object> value, String source, Date publicTime, Long objectVersionNumber) {
-        this.id = id;
-        this.name = name;
-        this.configVersion = configVersion;
-        this.isDefault = isDefault;
-        this.serviceId = serviceId;
-        this.value = value;
-        this.source = source;
-        this.publicTime = publicTime;
-        this.objectVersionNumber = objectVersionNumber;
-    }
-
     public Long getId() {
         return id;
     }
