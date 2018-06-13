@@ -6,7 +6,7 @@ import java.util.Date;
  * @author superleader8@gmail.com
  * @author wuguokai
  */
-public class ServiceConfigE {
+public class ConfigE {
     private Long id;
 
     private String name;
@@ -25,45 +25,44 @@ public class ServiceConfigE {
 
     private Long objectVersionNumber;
 
-    public ServiceConfigE(Long id, String name, String configVersion, Boolean isDefault, Long serviceId,
-                          String value, String source, Date publicTime, Long objectVersionNumber) {
-        this.id = id;
-        this.name = name;
-        this.configVersion = configVersion;
-        this.isDefault = isDefault;
-        this.serviceId = serviceId;
-        this.value = value;
-        this.source = source;
-        this.publicTime = publicTime;
-        this.objectVersionNumber = objectVersionNumber;
-    }
-
-    public void setItDefault() {
-        this.isDefault = true;
-    }
-
-    public void setItUnDefault() {
-        this.isDefault = false;
-    }
-
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getConfigVersion() {
         return configVersion;
     }
 
-    public Boolean getDefault() {
+    public void setConfigVersion(String configVersion) {
+        this.configVersion = configVersion;
+    }
+
+    public Boolean getIsDefault() {
         return isDefault;
+    }
+
+    public void setIsDefault(Boolean aDefault) {
+        isDefault = aDefault;
     }
 
     public Long getServiceId() {
         return serviceId;
+    }
+
+    public void setServiceId(Long serviceId) {
+        this.serviceId = serviceId;
     }
 
     public String getValue() {
@@ -78,11 +77,23 @@ public class ServiceConfigE {
         return source;
     }
 
+    public void setSource(String source) {
+        this.source = source;
+    }
+
     public Date getPublicTime() {
         return publicTime;
     }
 
+    public void setPublicTime(Date publicTime) {
+        this.publicTime = publicTime;
+    }
+
     public Long getObjectVersionNumber() {
         return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
     }
 }

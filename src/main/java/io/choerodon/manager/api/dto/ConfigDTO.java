@@ -1,20 +1,24 @@
 package io.choerodon.manager.api.dto;
 
+import io.choerodon.manager.api.validator.ConfigValidatorGroup;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.Map;
 
-public class ServiceConfigDTO {
-
-    public static final String DEFAULT_VERSION = "default";
+public class ConfigDTO {
 
     private Long id;
 
+    @NotEmpty(message = "error.config.name.empty", groups = ConfigValidatorGroup.Create.class)
     private String name;
 
     private String configVersion;
 
     private Boolean isDefault;
 
+    @NotNull(message = "error.config.serviceId.null", groups = ConfigValidatorGroup.Create.class)
     private Long serviceId;
 
     private Map<String, Object> value;
@@ -25,25 +29,18 @@ public class ServiceConfigDTO {
 
     private Long objectVersionNumber;
 
-    public ServiceConfigDTO() {
-    }
+    private String txt;
 
-    public ServiceConfigDTO(Long id, String name, String configVersion, Boolean isDefault, Long serviceId,
-                            Map<String, Object> value, String source, Date publicTime, Long objectVersionNumber) {
-        this.id = id;
+    public ConfigDTO(String name, String configVersion, Boolean isDefault, String source) {
         this.name = name;
         this.configVersion = configVersion;
         this.isDefault = isDefault;
-        this.serviceId = serviceId;
-        this.value = value;
         this.source = source;
-        this.publicTime = publicTime;
-        this.objectVersionNumber = objectVersionNumber;
     }
 
-    public static String getDefaultVersion() {
-        return DEFAULT_VERSION;
+    public ConfigDTO() {
     }
+
 
     public Long getId() {
         return id;
@@ -69,11 +66,11 @@ public class ServiceConfigDTO {
         this.configVersion = configVersion;
     }
 
-    public Boolean getDefault() {
+    public Boolean getIsDefault() {
         return isDefault;
     }
 
-    public void setDefault(Boolean aDefault) {
+    public void setIsDefault(Boolean aDefault) {
         isDefault = aDefault;
     }
 
@@ -117,18 +114,27 @@ public class ServiceConfigDTO {
         this.objectVersionNumber = objectVersionNumber;
     }
 
+    public String getTxt() {
+        return txt;
+    }
+
+    public void setTxt(String txt) {
+        this.txt = txt;
+    }
+
     @Override
     public String toString() {
-        return "ServiceConfigDTO{"
-                + "id=" + id
-                + ", name='" + name + '\''
-                + ", configVersion='" + configVersion + '\''
-                + ", isDefault=" + isDefault
-                + ", serviceId=" + serviceId
-                + ", value=" + value
-                + ", source='" + source + '\''
-                + ", publicTime=" + publicTime
-                + ", objectVersionNumber=" + objectVersionNumber
-                + '}';
+        return "ConfigDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", configVersion='" + configVersion + '\'' +
+                ", isDefault=" + isDefault +
+                ", serviceId=" + serviceId +
+                ", value=" + value +
+                ", source='" + source + '\'' +
+                ", publicTime=" + publicTime +
+                ", objectVersionNumber=" + objectVersionNumber +
+                ", txt='" + txt + '\'' +
+                '}';
     }
 }

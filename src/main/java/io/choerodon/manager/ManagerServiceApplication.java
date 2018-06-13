@@ -1,5 +1,6 @@
 package io.choerodon.manager;
 
+import io.choerodon.manager.infra.common.utils.GatewayProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -11,10 +12,6 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
-import io.choerodon.manager.infra.common.utils.GatewayProperties;
-import io.choerodon.resource.annoation.EnableChoerodonResourceServer;
-
-//@EnableChoerodonResourceServer
 @EnableEurekaClient
 @EnableFeignClients
 @EnableScheduling

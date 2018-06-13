@@ -1,4 +1,4 @@
-package io.choerodon.manager.infra.common.utils.format.builder;
+package io.choerodon.manager.infra.common.utils.config;
 
 import java.util.Map;
 import java.util.Set;

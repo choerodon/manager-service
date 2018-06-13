@@ -16,6 +16,6 @@ public interface InstanceService {
 
     InstanceInfo query(String instanceId);
 
-    void update(String instanceId, String configVersion);
+    void update(String instanceId, Long configId);
 
 }

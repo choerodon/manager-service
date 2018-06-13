@@ -1,8 +1,9 @@
-package io.choerodon.manager.infra.common.utils;
+package io.choerodon.manager.infra.common.utils.config;
 
 import io.choerodon.core.exception.CommonException;
 
 public enum ConfigFileFormat {
+
     PROPERTIES("properties"), YML("yml"), YAML("yaml"), JSON("json");
 
     private String value;

@@ -15,7 +15,8 @@ import io.choerodon.mybatis.domain.AuditDomain;
 @VersionAudit
 @ModifyAudit
 @Table(name = "mgmt_service_config")
-public class ServiceConfigDO extends AuditDomain {
+public class ConfigDO extends AuditDomain {
+
     @Id
     @GeneratedValue
     private Long id;
@@ -34,20 +35,12 @@ public class ServiceConfigDO extends AuditDomain {
 
     private Date publicTime;
 
-    public ServiceConfigDO() {
+    public ConfigDO() {
     }
 
-    public ServiceConfigDO(Long id, String name, String configVersion, Boolean isDefault, Long serviceId,
-                           String value, String source, Date publicTime, Long objectVersionNumber) {
-        this.id = id;
-        this.name = name;
-        this.configVersion = configVersion;
+    public ConfigDO(Boolean isDefault, Long serviceId) {
         this.isDefault = isDefault;
         this.serviceId = serviceId;
-        this.value = value;
-        this.source = source;
-        this.publicTime = publicTime;
-        this.setObjectVersionNumber(objectVersionNumber);
     }
 
     public Long getId() {
@@ -74,11 +67,11 @@ public class ServiceConfigDO extends AuditDomain {
         this.configVersion = configVersion;
     }
 
-    public Boolean getDefault() {
+    public Boolean getIsDefault() {
         return isDefault;
     }
 
-    public void setDefault(Boolean aDefault) {
+    public void setIsDefault(Boolean aDefault) {
         isDefault = aDefault;
     }
 

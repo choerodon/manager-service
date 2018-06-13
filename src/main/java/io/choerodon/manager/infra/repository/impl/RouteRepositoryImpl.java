@@ -47,9 +47,9 @@ public class RouteRepositoryImpl implements RouteRepository {
             }
         } catch (DuplicateKeyException e) {
             if (routeMapper.selectCount(new RouteDO(routeE.getName())) > 0) {
-                throw new CommonException("error.insert.route.nameDuplicate");
+                throw new CommonException("error.route.insert.nameDuplicate");
             } else {
-                throw new CommonException("error.insert.route.pathDuplicate");
+                throw new CommonException("error.route.insert.pathDuplicate");
             }
         }
         return ConvertHelper.convert(routeMapper.selectByPrimaryKey(routeDO.getId()), RouteE.class);
@@ -59,10 +59,10 @@ public class RouteRepositoryImpl implements RouteRepository {
     public RouteE updateRoute(RouteE routeE) {
         RouteDO oldRouteD = routeMapper.selectByPrimaryKey(routeE.getId());
         if (oldRouteD == null) {
-            throw new CommonException("error.routeDO.not.exist");
+            throw new CommonException("error.route.not.exist");
         }
         if (oldRouteD.getBuiltIn()) {
-            throw new CommonException("error.routeDO.updateBuiltIn");
+            throw new CommonException("error.route.updateBuiltIn");
         }
         RouteDO routeDO = ConvertHelper.convert(routeE, RouteDO.class);
         if (routeDO.getObjectVersionNumber() == null) {
@@ -76,9 +76,9 @@ public class RouteRepositoryImpl implements RouteRepository {
             }
         } catch (DuplicateKeyException e) {
             if (routeE.getName() != null && routeMapper.selectCount(new RouteDO(routeE.getName())) > 0) {
-                throw new CommonException("error.insert.route.nameDuplicate");
+                throw new CommonException("error.route.insert.nameDuplicate");
             } else {
-                throw new CommonException("error.insert.route.pathDuplicate");
+                throw new CommonException("error.route.insert.pathDuplicate");
             }
         }
         return ConvertHelper.convert(routeMapper.selectByPrimaryKey(routeE.getId()), RouteE.class);
