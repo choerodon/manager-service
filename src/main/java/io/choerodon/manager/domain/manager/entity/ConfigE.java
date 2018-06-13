@@ -38,12 +38,8 @@ public class ConfigE {
         this.objectVersionNumber = objectVersionNumber;
     }
 
-    public void setItDefault() {
-        this.isDefault = true;
-    }
-
-    public void setItUnDefault() {
-        this.isDefault = false;
+    public void setIsDefault(Boolean aDefault) {
+        isDefault = aDefault;
     }
 
     public Long getId() {

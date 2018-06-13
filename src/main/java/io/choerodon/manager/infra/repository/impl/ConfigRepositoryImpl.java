@@ -14,7 +14,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Date;
 
 /**
  * @author wuguokai
@@ -118,6 +118,9 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     public ConfigDO create(ConfigDO configDO) {
         configDO.setIsDefault(false);
         configDO.setSource(SOURCE_PAGE);
+        if (configDO.getPublicTime() == null) {
+            configDO.setPublicTime(new Date(System.currentTimeMillis()));
+        }
         if (configMapper.insert(configDO) != 1) {
             throw new CommonException("error.config.create");
         }

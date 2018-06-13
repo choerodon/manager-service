@@ -31,14 +31,6 @@ public class ConfigDTO {
 
     private String txt;
 
-    /*
-             @RequestParam(required = false, name = "name") String name,
-            @RequestParam(required = false, name = "source") String source,
-            @RequestParam(required = false, name = "configVersion") String configVersion,
-            @RequestParam(required = false, name = "isDefault") Boolean isDefault,
-            @RequestParam(required = false, name = "param") String param
-     */
-
     public ConfigDTO(String name, String configVersion, Boolean isDefault, String source) {
         this.name = name;
         this.configVersion = configVersion;
@@ -88,11 +80,11 @@ public class ConfigDTO {
         this.configVersion = configVersion;
     }
 
-    public Boolean getDefault() {
+    public Boolean getIsDefault() {
         return isDefault;
     }
 
-    public void setDefault(Boolean aDefault) {
+    public void setIsDefault(Boolean aDefault) {
         isDefault = aDefault;
     }
 

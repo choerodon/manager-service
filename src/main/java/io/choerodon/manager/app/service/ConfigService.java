@@ -5,8 +5,6 @@ import io.choerodon.manager.api.dto.ConfigDTO;
 import io.choerodon.manager.api.dto.ItemDto;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
-import java.util.List;
-
 /**
  * @author wuguokai
  */

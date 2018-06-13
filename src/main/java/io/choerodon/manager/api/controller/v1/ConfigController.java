@@ -1,21 +1,16 @@
 package io.choerodon.manager.api.controller.v1;
 
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.ConfigDTO;
 import io.choerodon.manager.api.dto.ItemDto;
 import io.choerodon.manager.api.validator.ConfigValidatorGroup;
 import io.choerodon.manager.app.service.ConfigService;
-import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,7 +34,8 @@ public class ConfigController {
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("创建配置")
     @PostMapping
-    public ResponseEntity<ConfigDTO> create(@Validated(value = ConfigValidatorGroup.Create.class) ConfigDTO configDTO) {
+    public ResponseEntity<ConfigDTO> create(@Validated(value = ConfigValidatorGroup.Create.class)
+                                            @RequestBody ConfigDTO configDTO) {
         return new ResponseEntity<>(configService.create(configDTO), HttpStatus.OK);
     }
 
@@ -93,7 +89,7 @@ public class ConfigController {
      * @return ItemDto
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
-    @ApiOperation("给配置增加或修改配置项")
+    @ApiOperation("增加或修改配置项")
     @PostMapping("/{config_id}/items")
     public ResponseEntity<ItemDto> add(@PathVariable("config_id") Long configId,
                                        @RequestBody ItemDto item) {
@@ -110,7 +106,7 @@ public class ConfigController {
      * @return null
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
-    @ApiOperation("删除配置的一个配置项")
+    @ApiOperation("删除配置项")
     @DeleteMapping("/{config_id}/items")
     public ResponseEntity delete(@PathVariable("config_id") Long configId,
                                  @RequestParam("property") String property) {
@@ -125,9 +121,9 @@ public class ConfigController {
     @ApiOperation("修改配置")
     @PutMapping("/{config_id}")
     public ResponseEntity<ConfigDTO> updateConfig(@PathVariable("config_id") Long configId,
-                                            @ApiParam("要更新的配置文本类型，可为properties或者yaml，对应DTO的txt字段，为空则根据value值更新")
-                                            @RequestParam(value = "type", required = false) String type,
-                                            @RequestBody ConfigDTO configDTO) {
+                                                  @ApiParam("要更新的配置文本类型，可为properties或者yaml，对应DTO的txt字段，为空则根据value值更新")
+                                                  @RequestParam(value = "type", required = false) String type,
+                                                  @RequestBody ConfigDTO configDTO) {
         configDTO.setId(configId);
         return new ResponseEntity<>(configService.updateConfig(configId, configDTO, type), HttpStatus.OK);
     }

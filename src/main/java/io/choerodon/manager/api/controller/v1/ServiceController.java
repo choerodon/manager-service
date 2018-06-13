@@ -51,7 +51,7 @@ public class ServiceController {
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("分页查询服务信息")
-    @GetMapping(value = "/page")
+    @GetMapping
     public ResponseEntity<Page<ServiceDTO>> pageAll(@SortDefault(value = "id", direction = Sort.Direction.ASC) PageRequest pageRequest) {
         return Optional.ofNullable(serviceService.pageAll(pageRequest))
                 .map(i -> new ResponseEntity<>(i, HttpStatus.OK))
@@ -67,8 +67,8 @@ public class ServiceController {
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("查询某一个服务现有的标签")
-    @GetMapping(value = "/{service}/labels")
-    public ResponseEntity<Set<String>> queryByServiceName(@PathVariable("service") String serviceName) {
+    @GetMapping(value = "/{service_name}/labels")
+    public ResponseEntity<Set<String>> queryByServiceName(@PathVariable("service_name") String serviceName) {
         try {
             Set<String> labelSet = discoveryUtil.getServiceLabelSet(serviceName);
             return new ResponseEntity<>(new HashSet<>(labelSet), HttpStatus.OK);
@@ -85,8 +85,8 @@ public class ServiceController {
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("查询服务实例列表")
-    @GetMapping(value = "/{service}/instances")
-    public List<InstanceDTO> list(@PathVariable("service") String service) {
+    @GetMapping(value = "/{service_name}/instances")
+    public List<InstanceDTO> list(@PathVariable("service_name") String service) {
         return serviceService.getInstancesByService(service);
     }
 
@@ -140,7 +140,7 @@ public class ServiceController {
             @RequestParam(required = false, name = "source") String source,
             @RequestParam(required = false, name = "configVersion") String configVersion,
             @RequestParam(required = false, name = "isDefault") Boolean isDefault,
-            @RequestParam(required = false, name = "param") String param) {
+            @RequestParam(required = false, name = "params") String param) {
         return new ResponseEntity<>(configService.listByServiceName(serviceName, pageRequest,
                 new ConfigDTO(name, configVersion, isDefault, source), param), HttpStatus.OK);
     }

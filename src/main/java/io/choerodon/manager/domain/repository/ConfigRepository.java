@@ -6,8 +6,6 @@ import io.choerodon.manager.domain.manager.entity.ConfigE;
 import io.choerodon.manager.infra.dataobject.ConfigDO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
-import java.util.List;
-
 /**
  * {@inheritDoc}
  *
