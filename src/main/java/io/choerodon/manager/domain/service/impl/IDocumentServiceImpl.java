@@ -134,10 +134,9 @@ public class IDocumentServiceImpl implements IDocumentService, IDocumentService.
         if (routeE == null) {
             return "";
         }
-        //todo
         String basePath = routeE.getPath().replace("/**", "");
         ObjectNode root = getSwaggerJsonByIdAndVersion(routeE.getServiceId(), version);
-        root.put("basePath", "/");
+        root.put("basePath", basePath);
         root.put("host", gatewayDomain);
         LOGGER.debug("put basePath:{}, host:{}", basePath, root.get("host"));
         return MAPPER.writeValueAsString(root);
