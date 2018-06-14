@@ -8,7 +8,6 @@ import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.api.dto.ServiceDTO;
 import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.manager.app.service.ServiceService;
-import io.choerodon.manager.infra.common.utils.DiscoveryUtil;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -20,10 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * 操作服务控制器
@@ -36,12 +33,10 @@ public class ServiceController {
 
     private ServiceService serviceService;
     private ConfigService configService;
-    private DiscoveryUtil discoveryUtil;
 
-    public ServiceController(ServiceService serviceService, ConfigService configService, DiscoveryUtil discoveryUtil) {
+    public ServiceController(ServiceService serviceService, ConfigService configService) {
         this.serviceService = serviceService;
         this.configService = configService;
-        this.discoveryUtil = discoveryUtil;
     }
 
     /**
@@ -56,25 +51,6 @@ public class ServiceController {
         return Optional.ofNullable(serviceService.pageAll(pageRequest))
                 .map(i -> new ResponseEntity<>(i, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.service.query"));
-    }
-
-
-    /**
-     * 查询某一个服务现有的标签
-     *
-     * @param serviceName 服务名
-     * @return Set
-     */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
-    @ApiOperation("查询某一个服务现有的标签")
-    @GetMapping(value = "/{service_name}/labels")
-    public ResponseEntity<Set<String>> queryByServiceName(@PathVariable("service_name") String serviceName) {
-        try {
-            Set<String> labelSet = discoveryUtil.getServiceLabelSet(serviceName);
-            return new ResponseEntity<>(new HashSet<>(labelSet), HttpStatus.OK);
-        } catch (Exception e) {
-            throw new CommonException("error.label.service.query");
-        }
     }
 
     /**
