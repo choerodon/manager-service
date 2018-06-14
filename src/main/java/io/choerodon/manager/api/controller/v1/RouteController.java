@@ -81,8 +81,8 @@ public class RouteController {
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("更新一个路由")
-    @PostMapping("/{id}")
-    public ResponseEntity<RouteDTO> update(@PathVariable("id") Long id, @RequestBody RouteDTO routeDTO) {
+    @PostMapping("/{route_id}")
+    public ResponseEntity<RouteDTO> update(@PathVariable("route_id") Long id, @RequestBody RouteDTO routeDTO) {
         return new ResponseEntity<>(routeService.update(id, routeDTO), HttpStatus.OK);
     }
 
@@ -94,8 +94,8 @@ public class RouteController {
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("根据routeId删除一个路由")
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Boolean> delete(@PathVariable("id") Long id) {
+    @DeleteMapping(value = "/{route_id}")
+    public ResponseEntity<Boolean> delete(@PathVariable("route_id") Long id) {
         return Optional.ofNullable(routeService.delete(id))
                 .map(i -> new ResponseEntity<>(i, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.route.delete"));

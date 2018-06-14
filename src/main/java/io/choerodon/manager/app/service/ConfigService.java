@@ -2,7 +2,9 @@ package io.choerodon.manager.app.service;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.manager.api.dto.ConfigDTO;
+import io.choerodon.manager.api.dto.CreateConfigDTO;
 import io.choerodon.manager.api.dto.ItemDto;
+import io.choerodon.manager.api.dto.YamlDto;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
@@ -20,13 +22,15 @@ public interface ConfigService {
 
     ConfigDTO query(Long configId, String type);
 
+    YamlDto queryYaml(Long configId);
+
     Boolean delete(Long configId);
 
     ConfigDTO update(Long configId, ConfigDTO configDTO);
 
     ConfigDTO updateConfig(Long configId, ConfigDTO configDTO, String type);
 
-    ConfigDTO create(ConfigDTO configDTO);
+    ConfigDTO create(CreateConfigDTO createConfigDTO);
 
     /**
      * 保存配置项信息到指定的config

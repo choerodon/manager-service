@@ -1,10 +1,13 @@
 package io.choerodon.manager.app.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.ConfigDTO;
+import io.choerodon.manager.api.dto.CreateConfigDTO;
 import io.choerodon.manager.api.dto.ItemDto;
+import io.choerodon.manager.api.dto.YamlDto;
 import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.manager.domain.manager.entity.RouteE;
 import io.choerodon.manager.domain.manager.entity.ServiceE;
@@ -14,6 +17,7 @@ import io.choerodon.manager.domain.repository.ServiceRepository;
 import io.choerodon.manager.infra.common.annotation.ConfigNotifyRefresh;
 import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
 import io.choerodon.manager.infra.dataobject.ConfigDO;
+import io.choerodon.manager.infra.dataobject.ServiceDO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.util.StringUtil;
 import org.apache.commons.lang.ArrayUtils;
@@ -33,6 +37,8 @@ import java.util.Set;
  */
 @Component
 public class ConfigServiceImpl implements ConfigService {
+
+    private final ObjectMapper MAPPER = new ObjectMapper();
 
     public static final String CONFIG_TYPE_PROPERTIES = "properties";
 
@@ -71,7 +77,7 @@ public class ConfigServiceImpl implements ConfigService {
     public ConfigDTO query(Long configId, String type) {
         ConfigDTO configDTO = ConvertHelper.convert(configRepository.query(configId), ConfigDTO.class);
         if (configDTO == null) {
-            return null;
+            throw new CommonException("error.config.not.exist");
         }
         ServiceE serviceE = serviceRepository.getService(configDTO.getServiceId());
         if (serviceE == null) {
@@ -177,9 +183,22 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public ConfigDTO create(ConfigDTO configDTO) {
-        return ConvertHelper.convert(configRepository.create(ConvertHelper
-                .convert(configDTO, ConfigDO.class)), ConfigDTO.class);
+    public ConfigDTO create(CreateConfigDTO ccd) {
+        ServiceDO serviceDO = serviceRepository.getService(ccd.getServiceName());
+        if (serviceDO == null) {
+           throw new CommonException("error.config.serviceName.notExist");
+        }
+        try {
+            ConfigDO configDO = new ConfigDO();
+            configDO.setName(ccd.getName());
+            configDO.setServiceId(serviceDO.getId());
+            configDO.setConfigVersion(ccd.getVersion());
+            Map<String, Object> value = ConfigUtil.convertTextToMap(CONFIG_TYPE_YAML, ccd.getYaml());
+            configDO.setValue(MAPPER.writeValueAsString(value));
+            return ConvertHelper.convert(configRepository.create(configDO), ConfigDTO.class);
+        } catch (IOException e) {
+            throw new CommonException("error.config.yml");
+        }
     }
 
     @Override
@@ -220,5 +239,24 @@ public class ConfigServiceImpl implements ConfigService {
         String key = item.getProperty();
         String value = item.getValue();
         return !map.containsKey(key) || !value.equals(map.get(key));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public YamlDto queryYaml(Long configId) {
+        ConfigDO configDO = configRepository.query(configId);
+        if (configDO == null) {
+            throw new CommonException("error.config.not.exist");
+        }
+        try {
+            YamlDto yamlDto = new YamlDto();
+            Map<String, Object> map = MAPPER.readValue(configDO.getValue(), Map.class);
+            String yaml = ConfigUtil.convertMapToText(map, CONFIG_TYPE_YAML);
+            yamlDto.setYaml(yaml);
+            yamlDto.setTotalLine(ConfigUtil.appearNumber(yaml, "\n") + 1);
+            return yamlDto;
+        } catch (IOException e) {
+            throw new CommonException("error.config.parser");
+        }
     }
 }

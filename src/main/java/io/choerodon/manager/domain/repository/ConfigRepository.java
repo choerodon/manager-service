@@ -2,7 +2,6 @@ package io.choerodon.manager.domain.repository;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.manager.api.dto.ConfigDTO;
-import io.choerodon.manager.domain.manager.entity.ConfigE;
 import io.choerodon.manager.infra.dataobject.ConfigDO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
@@ -23,7 +22,7 @@ public interface ConfigRepository {
 
     ConfigDO setConfigDefault(Long configId);
 
-    ConfigE query(Long serviceConfigId);
+    ConfigDO query(Long serviceConfigId);
 
     boolean delete(Long configId);
 

@@ -72,4 +72,9 @@ public class ServiceRepositoryImpl implements ServiceRepository {
         Page<ServiceDO> serviceDOPage = PageHelper.doPageAndSort(pageRequest, () -> serviceMapper.selectAll());
         return ConvertPageHelper.convertPage(serviceDOPage, ServiceE.class);
     }
+
+    @Override
+    public ServiceDO getService(String serviceName) {
+        return serviceMapper.selectOne(new ServiceDO(serviceName));
+    }
 }

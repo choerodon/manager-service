@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.manager.domain.manager.entity.ServiceE;
+import io.choerodon.manager.infra.dataobject.ServiceDO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
@@ -11,6 +12,9 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
  * @author wuguokai
  */
 public interface ServiceRepository {
+
+    ServiceDO getService(String serviceName);
+
     ServiceE getService(Long serviceId);
 
     ServiceE addService(ServiceE serviceE);

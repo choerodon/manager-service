@@ -5,7 +5,6 @@ import io.choerodon.core.convertor.ConvertPageHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.ConfigDTO;
-import io.choerodon.manager.domain.manager.entity.ConfigE;
 import io.choerodon.manager.domain.repository.ConfigRepository;
 import io.choerodon.manager.infra.dataobject.ConfigDO;
 import io.choerodon.manager.infra.mapper.ConfigMapper;
@@ -68,8 +67,8 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     }
 
     @Override
-    public ConfigE query(Long serviceConfigId) {
-        return ConvertHelper.convert(configMapper.selectByPrimaryKey(serviceConfigId), ConfigE.class);
+    public ConfigDO query(Long serviceConfigId) {
+        return configMapper.selectByPrimaryKey(serviceConfigId);
     }
 
     @Override
