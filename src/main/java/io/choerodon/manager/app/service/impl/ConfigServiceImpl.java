@@ -38,7 +38,7 @@ import java.util.Set;
 @Component
 public class ConfigServiceImpl implements ConfigService {
 
-    private final ObjectMapper MAPPER = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public static final String CONFIG_TYPE_PROPERTIES = "properties";
 
@@ -194,7 +194,7 @@ public class ConfigServiceImpl implements ConfigService {
             configDO.setServiceId(serviceDO.getId());
             configDO.setConfigVersion(ccd.getVersion());
             Map<String, Object> value = ConfigUtil.convertTextToMap(CONFIG_TYPE_YAML, ccd.getYaml());
-            configDO.setValue(MAPPER.writeValueAsString(value));
+            configDO.setValue(mapper.writeValueAsString(value));
             return ConvertHelper.convert(configRepository.create(configDO), ConfigDTO.class);
         } catch (IOException e) {
             throw new CommonException("error.config.yml");
@@ -250,7 +250,7 @@ public class ConfigServiceImpl implements ConfigService {
         }
         try {
             YamlDto yamlDto = new YamlDto();
-            Map<String, Object> map = MAPPER.readValue(configDO.getValue(), Map.class);
+            Map<String, Object> map = mapper.readValue(configDO.getValue(), Map.class);
             String yaml = ConfigUtil.convertMapToText(map, CONFIG_TYPE_YAML);
             yamlDto.setYaml(yaml);
             yamlDto.setTotalLine(ConfigUtil.appearNumber(yaml, "\n") + 1);
