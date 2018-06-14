@@ -39,6 +39,7 @@ public class ConfigConverter implements ConvertorI<ConfigE, ConfigDO, ConfigDTO>
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ConfigDTO entityToDto(ConfigE entity) {
         try {
             ConfigDTO configDTO = new ConfigDTO();
@@ -70,6 +71,7 @@ public class ConfigConverter implements ConvertorI<ConfigE, ConfigDO, ConfigDTO>
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ConfigDTO doToDto(ConfigDO dataObject) {
         try {
             ConfigDTO configDTO = new ConfigDTO();

@@ -3,17 +3,18 @@ package io.choerodon.manager.api.controller.v1;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.ConfigDTO;
+import io.choerodon.manager.api.dto.CreateConfigDTO;
 import io.choerodon.manager.api.dto.ItemDto;
-import io.choerodon.manager.api.validator.ConfigValidatorGroup;
+import io.choerodon.manager.api.dto.YamlDto;
 import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Optional;
 
 /**
@@ -34,8 +35,7 @@ public class ConfigController {
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("创建配置")
     @PostMapping
-    public ResponseEntity<ConfigDTO> create(@Validated(value = ConfigValidatorGroup.Create.class)
-                                            @RequestBody ConfigDTO configDTO) {
+    public ResponseEntity<ConfigDTO> create(@RequestBody @Valid CreateConfigDTO configDTO) {
         return new ResponseEntity<>(configService.create(configDTO), HttpStatus.OK);
     }
 
@@ -78,6 +78,19 @@ public class ConfigController {
                                            @ApiParam("要返回的配置文本类型，可为properties或者yaml，对应DTO的txt字段，为空不返回")
                                            @RequestParam(value = "type", required = false) String type) {
         return new ResponseEntity<>(configService.query(configId, type), HttpStatus.OK);
+    }
+
+    /**
+     * 查询配置的yaml形式
+     *
+     * @param configId 配置id
+     * @return 查询配置的yaml形式
+     */
+    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @ApiOperation("查询配置的yaml形式")
+    @GetMapping(value = "/{config_id}/yaml")
+    public ResponseEntity<YamlDto> queryYaml(@PathVariable("config_id") Long configId) {
+        return new ResponseEntity<>(configService.queryYaml(configId), HttpStatus.OK);
     }
 
 

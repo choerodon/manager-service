@@ -33,4 +33,11 @@ public class ServiceDO extends AuditDomain {
     public void setName(String name) {
         this.name = name;
     }
+
+    public ServiceDO() {
+    }
+
+    public ServiceDO(String name) {
+        this.name = name;
+    }
 }

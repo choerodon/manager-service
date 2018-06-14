@@ -9,6 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.choerodon.manager.app.service.impl.ConfigServiceImpl.*;
 
@@ -52,6 +54,16 @@ public class ConfigUtil {
     private static Map<String, Object> parseYaml(String content) throws IOException {
         LinkedHashMap<String, Object> root = YAM_MAPPER.readValue(content, LinkedHashMap.class);
         return (LinkedHashMap) TreeProcess.mapParseRecursive(root);
+    }
+
+    public static int appearNumber(String srcText, String findText) {
+        int count = 0;
+        Pattern p = Pattern.compile(findText);
+        Matcher m = p.matcher(srcText);
+        while (m.find()) {
+            count++;
+        }
+        return count;
     }
 
 }
