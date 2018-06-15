@@ -49,6 +49,8 @@ public class IDocumentServiceImpl implements IDocumentService, IDocumentService.
     private String oauthUrl;
     @Value("${choerodon.swagger.client:client}")
     private String client;
+    @Value("${choerodon.swagger.local.enabled:false}")
+    private Boolean swaggerLocal;
     @Value("${choerodon.gateway.domain:localhost}")
     private String gatewayDomain;
     private RestTemplate restTemplate = new RestTemplate();
@@ -135,6 +137,10 @@ public class IDocumentServiceImpl implements IDocumentService, IDocumentService.
             return "";
         }
         String basePath = routeE.getPath().replace("/**", "");
+        if (swaggerLocal) {
+            basePath = "/";
+            gatewayDomain = "localhost:8963";
+        }
         ObjectNode root = getSwaggerJsonByIdAndVersion(routeE.getServiceId(), version);
         root.put("basePath", basePath);
         root.put("host", gatewayDomain);

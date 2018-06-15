@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -61,11 +60,19 @@ public class ServiceController {
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("查询服务实例列表")
+    @CustomPageRequest
     @GetMapping(value = "/{service_name}/instances")
-    public List<InstanceDTO> list(@PathVariable("service_name") String service) {
-        return serviceService.getInstancesByService(service);
+    public ResponseEntity<Page<InstanceDTO>> listByServiceName(@PathVariable("service_name") String service,
+                                                               @ApiIgnore
+                                                               @SortDefault(value = "id", direction = Sort.Direction.DESC)
+                                                                       PageRequest pageRequest,
+                                                               @RequestParam(required = false, name = "instanceId") String instanceId,
+                                                               @RequestParam(required = false, name = "version") String version,
+                                                               @RequestParam(required = false, name = "status") String status,
+                                                               @RequestParam(required = false, name = "params") String params) {
+        return new ResponseEntity<>(serviceService.listByServiceName(new InstanceDTO(instanceId,
+                service, version, status, params), pageRequest), HttpStatus.OK);
     }
-
 
     /**
      * 内部接口，由config-server调用
@@ -95,7 +102,6 @@ public class ServiceController {
         return new ResponseEntity<>(configService.queryByServiceNameAndConfigVersion(serviceName, configVersion),
                 HttpStatus.OK);
     }
-
 
     /**
      * 分页查询服务的配置信息
