@@ -8,7 +8,6 @@ import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.api.dto.ServiceDTO;
 import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.manager.app.service.ServiceService;
-import io.choerodon.manager.infra.common.utils.DiscoveryUtil;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -20,10 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * 操作服务控制器
@@ -36,12 +32,10 @@ public class ServiceController {
 
     private ServiceService serviceService;
     private ConfigService configService;
-    private DiscoveryUtil discoveryUtil;
 
-    public ServiceController(ServiceService serviceService, ConfigService configService, DiscoveryUtil discoveryUtil) {
+    public ServiceController(ServiceService serviceService, ConfigService configService) {
         this.serviceService = serviceService;
         this.configService = configService;
-        this.discoveryUtil = discoveryUtil;
     }
 
     /**
@@ -58,25 +52,6 @@ public class ServiceController {
                 .orElseThrow(() -> new CommonException("error.service.query"));
     }
 
-
-    /**
-     * 查询某一个服务现有的标签
-     *
-     * @param serviceName 服务名
-     * @return Set
-     */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
-    @ApiOperation("查询某一个服务现有的标签")
-    @GetMapping(value = "/{service_name}/labels")
-    public ResponseEntity<Set<String>> queryByServiceName(@PathVariable("service_name") String serviceName) {
-        try {
-            Set<String> labelSet = discoveryUtil.getServiceLabelSet(serviceName);
-            return new ResponseEntity<>(new HashSet<>(labelSet), HttpStatus.OK);
-        } catch (Exception e) {
-            throw new CommonException("error.label.service.query");
-        }
-    }
-
     /**
      * 查询服务实例列表
      *
@@ -85,11 +60,19 @@ public class ServiceController {
      */
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("查询服务实例列表")
+    @CustomPageRequest
     @GetMapping(value = "/{service_name}/instances")
-    public List<InstanceDTO> list(@PathVariable("service_name") String service) {
-        return serviceService.getInstancesByService(service);
+    public ResponseEntity<Page<InstanceDTO>> listByServiceName(@PathVariable("service_name") String service,
+                                                               @ApiIgnore
+                                                               @SortDefault(value = "id", direction = Sort.Direction.DESC)
+                                                                       PageRequest pageRequest,
+                                                               @RequestParam(required = false, name = "instanceId") String instanceId,
+                                                               @RequestParam(required = false, name = "version") String version,
+                                                               @RequestParam(required = false, name = "status") String status,
+                                                               @RequestParam(required = false, name = "params") String params) {
+        return new ResponseEntity<>(serviceService.listByServiceName(new InstanceDTO(instanceId,
+                service, version, status, params), pageRequest), HttpStatus.OK);
     }
-
 
     /**
      * 内部接口，由config-server调用
@@ -119,7 +102,6 @@ public class ServiceController {
         return new ResponseEntity<>(configService.queryByServiceNameAndConfigVersion(serviceName, configVersion),
                 HttpStatus.OK);
     }
-
 
     /**
      * 分页查询服务的配置信息
