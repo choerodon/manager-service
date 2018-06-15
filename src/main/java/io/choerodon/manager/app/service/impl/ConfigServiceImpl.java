@@ -100,7 +100,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public ConfigDTO update(Long configId, ConfigDTO configDTO) {
-        configDTO.setIsDefault(false);
+        configDTO.setIsDefault(null);
         configDTO.setSource(null);
         return ConvertHelper.convert(configRepository.update(configId, ConvertHelper.convert(configDTO, ConfigDO.class)), ConfigDTO.class);
     }
@@ -186,7 +186,7 @@ public class ConfigServiceImpl implements ConfigService {
     public ConfigDTO create(CreateConfigDTO ccd) {
         ServiceDO serviceDO = serviceRepository.getService(ccd.getServiceName());
         if (serviceDO == null) {
-           throw new CommonException("error.config.serviceName.notExist");
+            throw new CommonException("error.config.serviceName.notExist");
         }
         try {
             ConfigDO configDO = new ConfigDO();
