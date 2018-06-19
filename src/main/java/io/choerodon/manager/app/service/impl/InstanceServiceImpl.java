@@ -55,11 +55,9 @@ public class InstanceServiceImpl implements InstanceService {
         List<InstanceDTO> instanceInfoList = new ArrayList<>();
         if (StringUtils.isEmpty(service)) {
             discoveryClient.getServices().forEach(t -> addIntoInstanceInfoList(instanceInfoList, t));
-
         } else {
             addIntoInstanceInfoList(instanceInfoList, service);
         }
-
         return instanceInfoList;
     }
 

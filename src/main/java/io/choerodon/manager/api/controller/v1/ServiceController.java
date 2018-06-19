@@ -45,8 +45,10 @@ public class ServiceController {
      */
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("分页查询服务信息")
+    @CustomPageRequest
     @GetMapping
-    public ResponseEntity<Page<ServiceDTO>> pageAll(@SortDefault(value = "id", direction = Sort.Direction.ASC) PageRequest pageRequest) {
+    public ResponseEntity<Page<ServiceDTO>> pageAll(
+            @ApiIgnore @SortDefault(value = "id", direction = Sort.Direction.ASC) PageRequest pageRequest) {
         return Optional.ofNullable(serviceService.pageAll(pageRequest))
                 .map(i -> new ResponseEntity<>(i, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.service.query"));
