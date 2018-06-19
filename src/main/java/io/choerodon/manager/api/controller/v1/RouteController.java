@@ -42,7 +42,7 @@ public class RouteController {
      *
      * @return page
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("分页查询路由信息")
     @CustomPageRequest
     @GetMapping
@@ -66,7 +66,7 @@ public class RouteController {
      * @param routeDTO 路由信息对象
      * @return RouteDO
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("增加一个新路由")
     @PostMapping
     public ResponseEntity<RouteDTO> create(@RequestBody @Valid RouteDTO routeDTO) {
@@ -79,7 +79,7 @@ public class RouteController {
      * @param routeDTO 路由对象
      * @return RouteDO
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("更新一个路由")
     @PostMapping("/{route_id}")
     public ResponseEntity<RouteDTO> update(@PathVariable("route_id") Long id, @RequestBody RouteDTO routeDTO) {
@@ -92,7 +92,7 @@ public class RouteController {
      * @param id 路由id
      * @return null
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("根据routeId删除一个路由")
     @DeleteMapping(value = "/{route_id}")
     public ResponseEntity<Boolean> delete(@PathVariable("route_id") Long id) {
@@ -101,7 +101,7 @@ public class RouteController {
                 .orElseThrow(() -> new CommonException("error.route.delete"));
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation(value = "route 校验接口")
     @PostMapping(value = "/check")
     public ResponseEntity check(@RequestBody RouteDTO routeDTO) {
