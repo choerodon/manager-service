@@ -124,6 +124,7 @@ public class IRouteServiceImpl implements IRouteService {
             LOGGER.info("{} : 初始化路由成功", routeDO.getName());
         } else {
             routeDO.setObjectVersionNumber(routeE.getObjectVersionNumber());
+            routeDO.setId(routeE.getId());
             routeRepository.updateRoute(ConvertHelper.convert(routeDO, RouteE.class));
             LOGGER.info("{} : rout update success", routeDO.getName());
         }
