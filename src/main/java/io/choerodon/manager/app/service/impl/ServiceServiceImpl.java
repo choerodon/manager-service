@@ -1,14 +1,14 @@
 package io.choerodon.manager.app.service.impl;
 
 import com.netflix.appinfo.InstanceInfo;
-import io.choerodon.core.convertor.ConvertPageHelper;
+import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.api.dto.ServiceDTO;
 import io.choerodon.manager.app.service.ServiceService;
-import io.choerodon.manager.domain.manager.entity.ServiceE;
-import io.choerodon.manager.domain.service.IServiceService;
+import io.choerodon.manager.domain.repository.ServiceRepository;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.netflix.eureka.EurekaDiscoveryClient;
@@ -27,19 +27,21 @@ import static io.choerodon.manager.infra.common.utils.VersionUtil.METADATA_VERSI
 @Component
 public class ServiceServiceImpl implements ServiceService {
 
-    private IServiceService iserviceService;
-
     private DiscoveryClient discoveryClient;
 
-    public ServiceServiceImpl(IServiceService iserviceService, DiscoveryClient discoveryClient) {
-        this.iserviceService = iserviceService;
+    private ServiceRepository serviceRepository;
+
+    public ServiceServiceImpl(DiscoveryClient discoveryClient, ServiceRepository serviceRepository) {
         this.discoveryClient = discoveryClient;
+        this.serviceRepository = serviceRepository;
     }
 
     @Override
-    public Page<ServiceDTO> pageAll(PageRequest pageRequest) {
-        Page<ServiceE> serviceEPage = iserviceService.pageAll(pageRequest);
-        return ConvertPageHelper.convertPage(serviceEPage, ServiceDTO.class);
+    public List<ServiceDTO> list(String param) {
+        if (StringUtils.isEmpty(param)) {
+            return ConvertHelper.convertList(serviceRepository.getAllService(), ServiceDTO.class);
+        }
+        return ConvertHelper.convertList(serviceRepository.selectServicesByFilter(param), ServiceDTO.class);
     }
 
     @Override
@@ -73,18 +75,18 @@ public class ServiceServiceImpl implements ServiceService {
 
     private List<InstanceDTO> filter(final InstanceDTO queryInfo, List<InstanceDTO> list) {
         if (queryInfo.getInstanceId() != null) {
-            return list.stream().filter(t -> t.getInstanceId()!=null && t.getInstanceId().contains(queryInfo.getInstanceId()))
+            return list.stream().filter(t -> t.getInstanceId() != null && t.getInstanceId().contains(queryInfo.getInstanceId()))
                     .collect(Collectors.toList());
         } else if (queryInfo.getStatus() != null) {
-            return list.stream().filter(t -> t.getStatus()!=null && t.getStatus().contains(queryInfo.getStatus()))
+            return list.stream().filter(t -> t.getStatus() != null && t.getStatus().contains(queryInfo.getStatus()))
                     .collect(Collectors.toList());
         } else if (queryInfo.getVersion() != null) {
-            return list.stream().filter(t -> t.getVersion()!=null && t.getVersion().contains(queryInfo.getVersion()))
+            return list.stream().filter(t -> t.getVersion() != null && t.getVersion().contains(queryInfo.getVersion()))
                     .collect(Collectors.toList());
         } else if (queryInfo.getParams() != null) {
-            return list.stream().filter(t -> t.getInstanceId()!=null && t.getInstanceId().contains(queryInfo.getParams()) ||
-                            t.getStatus()!=null && t.getStatus().contains(queryInfo.getParams()) ||
-                    t.getVersion()!=null && t.getVersion().contains(queryInfo.getParams())
+            return list.stream().filter(t -> t.getInstanceId() != null && t.getInstanceId().contains(queryInfo.getParams()) ||
+                    t.getStatus() != null && t.getStatus().contains(queryInfo.getParams()) ||
+                    t.getVersion() != null && t.getVersion().contains(queryInfo.getParams())
             ).collect(Collectors.toList());
         }
         return list;
