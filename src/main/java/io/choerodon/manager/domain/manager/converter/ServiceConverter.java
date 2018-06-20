@@ -47,4 +47,20 @@ public class ServiceConverter implements ConvertorI<ServiceE, ServiceDO, Service
         serviceDTO.setName(serviceE.getName());
         return serviceDTO;
     }
+
+    @Override
+    public ServiceDTO doToDto(ServiceDO dataObject) {
+        ServiceDTO serviceDTO = new ServiceDTO();
+        serviceDTO.setId(dataObject.getId());
+        serviceDTO.setName(dataObject.getName());
+        return serviceDTO;
+    }
+
+    @Override
+    public ServiceDO dtoToDo(ServiceDTO dto) {
+        ServiceDO serviceDO = new ServiceDO();
+        serviceDO.setId(dto.getId());
+        serviceDO.setName(dto.getName());
+        return serviceDO;
+    }
 }
