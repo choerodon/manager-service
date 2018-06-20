@@ -110,7 +110,9 @@ public class ConfigServiceImpl implements ConfigService {
     public ConfigDTO updateConfig(Long configId, ConfigDTO configDTO, String type) {
         if (!StringUtils.isEmpty(type) && !StringUtils.isEmpty(configDTO.getTxt())) {
             try {
-                configDTO.setValue(ConfigUtil.convertTextToMap(type, configDTO.getTxt()));
+                Map<String, Object> map = ConfigUtil.convertTextToMap(type, configDTO.getTxt());
+                removeZuulRoute(map);
+                configDTO.setValue(map);
             } catch (IOException e) {
                 throw new CommonException("error.config.txt");
             }
@@ -194,10 +196,19 @@ public class ConfigServiceImpl implements ConfigService {
             configDO.setServiceId(serviceDO.getId());
             configDO.setConfigVersion(ccd.getVersion());
             Map<String, Object> value = ConfigUtil.convertTextToMap(CONFIG_TYPE_YAML, ccd.getYaml());
+            removeZuulRoute(value);
             configDO.setValue(mapper.writeValueAsString(value));
             return ConvertHelper.convert(configRepository.create(configDO), ConfigDTO.class);
         } catch (IOException e) {
             throw new CommonException("error.config.yml");
+        }
+    }
+
+    private void removeZuulRoute(final Map<String, Object> value) {
+        for (Map.Entry<String, Object> entry : value.entrySet()) {
+            if (entry.getKey().startsWith("zuul.routes.")) {
+                value.remove(entry.getKey());
+            }
         }
     }
 
@@ -249,8 +260,16 @@ public class ConfigServiceImpl implements ConfigService {
             throw new CommonException("error.config.not.exist");
         }
         try {
-            YamlDto yamlDto = new YamlDto();
             Map<String, Object> map = mapper.readValue(configDO.getValue(), Map.class);
+            ServiceE serviceE = serviceRepository.getService(configDO.getServiceId());
+            if (serviceE == null) {
+                throw new CommonException("error.config.service.not.exist");
+            }
+            if (ArrayUtils.contains(getRouteServices, serviceE.getName())) {
+                final List<RouteE> routeEList = routeRepository.getAllRoute();
+                setRoutes(routeEList, map);
+            }
+            YamlDto yamlDto = new YamlDto();
             String yaml = ConfigUtil.convertMapToText(map, CONFIG_TYPE_YAML);
             yamlDto.setYaml(yaml);
             yamlDto.setTotalLine(ConfigUtil.appearNumber(yaml, "\n") + 1);

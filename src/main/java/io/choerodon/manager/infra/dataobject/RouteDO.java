@@ -132,4 +132,9 @@ public class RouteDO extends AuditDomain {
 
     public RouteDO() {
     }
+
+    public RouteDO(String name, String path) {
+        this.name = name;
+        this.path = path;
+    }
 }

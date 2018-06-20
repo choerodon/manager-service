@@ -128,10 +128,11 @@ public class EurekaInstanceRegisteredListener {
         } else {
             swaggerConsumer(instancePayload, json);
             permissionConsumer(instancePayload, json);
-            routeConsumer(instancePayload, json);
+            routeConsumer(json);
             failTimeMap.remove(instancePayload.getInstanceAddress());
         }
     }
+
     private boolean swaggerConsumer(final RegisterInstancePayload payload, final String json) {
         try {
             swaggerRefreshService.updateOrInsertSwagger(payload, json);
@@ -152,11 +153,9 @@ public class EurekaInstanceRegisteredListener {
         return false;
     }
 
-    private boolean routeConsumer(final RegisterInstancePayload payload, final String json) {
+    private boolean routeConsumer(final String json) {
         try {
-            if (iRouteService.queryRouteByService(payload.getAppName()) == null) {
-                iRouteService.autoRefreshRoute(json);
-            }
+            iRouteService.autoRefreshRoute(json);
             return true;
         } catch (Exception e) {
             LOGGER.warn("message has bean consumed failed when autoRefreshRoute, e {}", e.getMessage());
