@@ -104,7 +104,7 @@ public class ConfigController {
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("增加或修改配置项")
     @PostMapping("/{config_id}/items")
-    public ResponseEntity<ItemDto> add(@PathVariable("config_id") Long configId,
+    public ResponseEntity<ItemDto> addItem(@PathVariable("config_id") Long configId,
                                        @RequestBody ItemDto item) {
         return Optional.ofNullable(configService.saveItem(configId, item))
                 .map(i -> new ResponseEntity<>(i, HttpStatus.OK))
@@ -121,7 +121,7 @@ public class ConfigController {
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation("删除配置项")
     @DeleteMapping("/{config_id}/items")
-    public ResponseEntity delete(@PathVariable("config_id") Long configId,
+    public ResponseEntity deleteItem(@PathVariable("config_id") Long configId,
                                  @RequestParam("property") String property) {
         configService.deleteItem(configId, property);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
