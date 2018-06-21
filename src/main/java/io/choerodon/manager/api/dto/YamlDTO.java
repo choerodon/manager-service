@@ -3,7 +3,7 @@ package io.choerodon.manager.api.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-public class YamlDto {
+public class YamlDTO {
 
     private String yaml;
 
@@ -13,10 +13,10 @@ public class YamlDto {
 
     private Long objectVersionNumber;
 
-    public YamlDto() {
+    public YamlDTO() {
     }
 
-    public YamlDto(String yaml, int totalLine) {
+    public YamlDTO(String yaml, int totalLine) {
         this.yaml = yaml;
         this.totalLine = totalLine;
     }

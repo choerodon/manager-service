@@ -255,7 +255,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public YamlDto queryYaml(Long configId) {
+    public YamlDTO queryYaml(Long configId) {
         ConfigDO configDO = configRepository.query(configId);
         if (configDO == null) {
             throw new CommonException("error.config.not.exist");
@@ -270,12 +270,12 @@ public class ConfigServiceImpl implements ConfigService {
                 final List<RouteE> routeEList = routeRepository.getAllRoute();
                 setRoutes(routeEList, map);
             }
-            YamlDto yamlDto = new YamlDto();
+            YamlDTO yamlDTO = new YamlDTO();
             String yaml = ConfigUtil.convertMapToText(map, CONFIG_TYPE_YAML);
-            yamlDto.setObjectVersionNumber(configDO.getObjectVersionNumber());
-            yamlDto.setYaml(yaml);
-            yamlDto.setTotalLine(ConfigUtil.appearNumber(yaml, "\n") + 1);
-            return yamlDto;
+            yamlDTO.setObjectVersionNumber(configDO.getObjectVersionNumber());
+            yamlDTO.setYaml(yaml);
+            yamlDTO.setTotalLine(ConfigUtil.appearNumber(yaml, "\n") + 1);
+            return yamlDTO;
         } catch (IOException e) {
             throw new CommonException("error.config.parser");
         }

@@ -86,7 +86,7 @@ public class ConfigController {
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("查询配置的yaml形式")
     @GetMapping(value = "/{config_id}/yaml")
-    public ResponseEntity<YamlDto> queryYaml(@PathVariable("config_id") Long configId) {
+    public ResponseEntity<YamlDTO> queryYaml(@PathVariable("config_id") Long configId) {
         return new ResponseEntity<>(configService.queryYaml(configId), HttpStatus.OK);
     }
 

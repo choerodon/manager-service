@@ -19,7 +19,7 @@ public interface ConfigService {
 
     ConfigDTO query(Long configId, String type);
 
-    YamlDto queryYaml(Long configId);
+    YamlDTO queryYaml(Long configId);
 
     Boolean delete(Long configId);
 
