@@ -11,6 +11,8 @@ public class YamlDto {
 
     private int totalLine;
 
+    private Long objectVersionNumber;
+
     public YamlDto() {
     }
 
@@ -41,6 +43,14 @@ public class YamlDto {
 
     public void setTotalLine(int totalLine) {
         this.totalLine = totalLine;
+    }
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
     }
 
     static class HighlightMarker {

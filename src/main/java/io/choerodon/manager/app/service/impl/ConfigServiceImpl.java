@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.manager.api.dto.ConfigDTO;
-import io.choerodon.manager.api.dto.CreateConfigDTO;
-import io.choerodon.manager.api.dto.ItemDto;
-import io.choerodon.manager.api.dto.YamlDto;
+import io.choerodon.manager.api.dto.*;
 import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.manager.domain.manager.entity.RouteE;
 import io.choerodon.manager.domain.manager.entity.ServiceE;
@@ -44,6 +41,8 @@ public class ConfigServiceImpl implements ConfigService {
     public static final String CONFIG_TYPE_PROPERTIES = "properties";
 
     public static final String CONFIG_TYPE_YAML = "yaml";
+
+    private static final String ERROR_SERVICENAME_NOTEXIST = "error.config.serviceName.notExist";
 
     @Value("${choerodon.gateway.names}")
     private String[] getRouteServices;
@@ -189,7 +188,7 @@ public class ConfigServiceImpl implements ConfigService {
     public ConfigDTO create(CreateConfigDTO ccd) {
         ServiceDO serviceDO = serviceRepository.getService(ccd.getServiceName());
         if (serviceDO == null) {
-            throw new CommonException("error.config.serviceName.notExist");
+            throw new CommonException(ERROR_SERVICENAME_NOTEXIST);
         }
         try {
             ConfigDO configDO = new ConfigDO();
@@ -273,6 +272,7 @@ public class ConfigServiceImpl implements ConfigService {
             }
             YamlDto yamlDto = new YamlDto();
             String yaml = ConfigUtil.convertMapToText(map, CONFIG_TYPE_YAML);
+            yamlDto.setObjectVersionNumber(configDO.getObjectVersionNumber());
             yamlDto.setYaml(yaml);
             yamlDto.setTotalLine(ConfigUtil.appearNumber(yaml, "\n") + 1);
             return yamlDto;
@@ -282,23 +282,27 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public void check(ConfigDTO configDTO) {
+    public void check(ConfigCheckDTO configDTO) {
         if (configDTO == null) {
             return;
         }
-        if (configDTO.getServiceId() == null) {
-            throw new CommonException("error.config.serviceId.notExist");
+        if (configDTO.getServiceName() == null) {
+            throw new CommonException(ERROR_SERVICENAME_NOTEXIST);
+        }
+        ServiceDO serviceDO = serviceRepository.getService(configDTO.getServiceName());
+        if (serviceDO == null) {
+            throw new CommonException(ERROR_SERVICENAME_NOTEXIST);
         }
         if (configDTO.getConfigVersion() != null) {
             ConfigDO configDO = configRepository.queryByServiceIdAndVersion(
-                    configDTO.getServiceId(), configDTO.getConfigVersion());
+                    serviceDO.getId(), configDTO.getConfigVersion());
             if (configDO != null) {
                 throw new CommonException("error.config.insert.versionDuplicate");
             }
         }
         if (configDTO.getName() != null) {
             ConfigDO configDO = configRepository.queryByServiceIdAndName(
-                    configDTO.getServiceId(), configDTO.getName());
+                    serviceDO.getId(), configDTO.getName());
             if (configDO != null) {
                 throw new CommonException("error.config.insert.nameDuplicate");
             }

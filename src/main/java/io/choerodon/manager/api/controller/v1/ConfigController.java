@@ -141,7 +141,7 @@ public class ConfigController {
     @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
     @ApiOperation(value = "配置校验接口")
     @PostMapping(value = "/check")
-    public ResponseEntity check(@RequestBody ConfigDTO configDTO) {
+    public ResponseEntity check(@RequestBody ConfigCheckDTO configDTO) {
         configService.check(configDTO);
         return new ResponseEntity(HttpStatus.OK);
     }
