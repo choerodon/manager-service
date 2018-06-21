@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,8 +68,14 @@ public class ServiceServiceImpl implements ServiceService {
             EurekaDiscoveryClient.EurekaServiceInstance eurekaServiceInstance =
                     (EurekaDiscoveryClient.EurekaServiceInstance) serviceInstance;
             InstanceInfo info = eurekaServiceInstance.getInstanceInfo();
-            instanceInfoList.add(new InstanceDTO(info.getInstanceId(), info.getAppName(),
-                    info.getMetadata().get(METADATA_VERSION), info.getStatus().name()));
+            String instanceId = info.getInstanceId();
+            String[] arr = instanceId.split(":");
+            String pod = arr[arr.length - 1];
+            String version = info.getMetadata().get(METADATA_VERSION);
+            String status = info.getStatus().name();
+            String serviceName = info.getAppName();
+            Date registrationTime = new Date(info.getLeaseInfo().getRegistrationTimestamp());
+            instanceInfoList.add(new InstanceDTO(instanceId, serviceName, version, status, pod, registrationTime));
         }
         return instanceInfoList;
     }

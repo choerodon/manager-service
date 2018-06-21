@@ -2,10 +2,7 @@ package io.choerodon.manager.app.service.impl;
 
 import static io.choerodon.manager.infra.common.utils.VersionUtil.METADATA_VERSION;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -66,8 +63,14 @@ public class InstanceServiceImpl implements InstanceService {
                 .filter(t -> t instanceof EurekaDiscoveryClient.EurekaServiceInstance)
                 .forEach(t -> {
                     InstanceInfo info = ((EurekaDiscoveryClient.EurekaServiceInstance) t).getInstanceInfo();
-                    instanceInfoList.add(new InstanceDTO(info.getInstanceId(), info.getAppName(),
-                            info.getMetadata().get(METADATA_VERSION), info.getStatus().name()));
+                    String instanceId = info.getInstanceId();
+                    String[] arr = instanceId.split(":");
+                    String pod = arr[arr.length - 1];
+                    String version = info.getMetadata().get(METADATA_VERSION);
+                    String status = info.getStatus().name();
+                    String serviceName = info.getAppName();
+                    Date registrationTime = new Date(info.getLeaseInfo().getRegistrationTimestamp());
+                    instanceInfoList.add(new InstanceDTO(instanceId, serviceName, version, status, pod, registrationTime));
                 });
     }
 
