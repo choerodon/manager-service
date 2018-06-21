@@ -29,4 +29,8 @@ public interface ConfigRepository {
     ConfigDO update(Long configId, ConfigDO configDO);
 
     ConfigDO create(ConfigDO configDO);
+
+    ConfigDO queryByServiceIdAndVersion(Long serviceId, String configVersion);
+
+    ConfigDO queryByServiceIdAndName(Long serviceId, String name);
 }

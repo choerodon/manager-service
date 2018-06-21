@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -102,7 +103,8 @@ public class ConfigServiceImpl implements ConfigService {
     public ConfigDTO update(Long configId, ConfigDTO configDTO) {
         configDTO.setIsDefault(null);
         configDTO.setSource(null);
-        return ConvertHelper.convert(configRepository.update(configId, ConvertHelper.convert(configDTO, ConfigDO.class)), ConfigDTO.class);
+        return ConvertHelper.convert(configRepository.update(configId,
+                ConvertHelper.convert(configDTO, ConfigDO.class)), ConfigDTO.class);
     }
 
     @ConfigNotifyRefresh
@@ -111,8 +113,7 @@ public class ConfigServiceImpl implements ConfigService {
         if (!StringUtils.isEmpty(type) && !StringUtils.isEmpty(configDTO.getTxt())) {
             try {
                 Map<String, Object> map = ConfigUtil.convertTextToMap(type, configDTO.getTxt());
-                removeZuulRoute(map);
-                configDTO.setValue(map);
+                configDTO.setValue(removeZuulRoute(map));
             } catch (IOException e) {
                 throw new CommonException("error.config.txt");
             }
@@ -196,20 +197,21 @@ public class ConfigServiceImpl implements ConfigService {
             configDO.setServiceId(serviceDO.getId());
             configDO.setConfigVersion(ccd.getVersion());
             Map<String, Object> value = ConfigUtil.convertTextToMap(CONFIG_TYPE_YAML, ccd.getYaml());
-            removeZuulRoute(value);
-            configDO.setValue(mapper.writeValueAsString(value));
+            configDO.setValue(mapper.writeValueAsString(removeZuulRoute(value)));
             return ConvertHelper.convert(configRepository.create(configDO), ConfigDTO.class);
         } catch (IOException e) {
             throw new CommonException("error.config.yml");
         }
     }
 
-    private void removeZuulRoute(final Map<String, Object> value) {
+    private Map<String, Object> removeZuulRoute(final Map<String, Object> value) {
+        Map<String, Object> newValue = new HashMap<>(value.size());
         for (Map.Entry<String, Object> entry : value.entrySet()) {
-            if (entry.getKey().startsWith("zuul.routes.")) {
-                value.remove(entry.getKey());
+            if (!entry.getKey().startsWith("zuul.routes.")) {
+                newValue.put(entry.getKey(), entry.getValue());
             }
         }
+        return newValue;
     }
 
     @Override
@@ -276,6 +278,30 @@ public class ConfigServiceImpl implements ConfigService {
             return yamlDto;
         } catch (IOException e) {
             throw new CommonException("error.config.parser");
+        }
+    }
+
+    @Override
+    public void check(ConfigDTO configDTO) {
+        if (configDTO == null) {
+            return;
+        }
+        if (configDTO.getServiceId() == null) {
+            throw new CommonException("error.config.serviceId.notExist");
+        }
+        if (configDTO.getConfigVersion() != null) {
+            ConfigDO configDO = configRepository.queryByServiceIdAndVersion(
+                    configDTO.getServiceId(), configDTO.getConfigVersion());
+            if (configDO != null) {
+                throw new CommonException("error.config.insert.versionDuplicate");
+            }
+        }
+        if (configDTO.getName() != null) {
+            ConfigDO configDO = configRepository.queryByServiceIdAndName(
+                    configDTO.getServiceId(), configDTO.getName());
+            if (configDO != null) {
+                throw new CommonException("error.config.insert.nameDuplicate");
+            }
         }
     }
 }
