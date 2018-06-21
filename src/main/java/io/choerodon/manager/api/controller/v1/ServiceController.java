@@ -68,7 +68,7 @@ public class ServiceController {
                                                                @RequestParam(required = false, name = "status") String status,
                                                                @RequestParam(required = false, name = "params") String params) {
         return new ResponseEntity<>(serviceService.listByServiceName(new InstanceDTO(instanceId,
-                service, version, status, params), pageRequest), HttpStatus.OK);
+                service, version, status, params, null, null), pageRequest), HttpStatus.OK);
     }
 
     /**
