@@ -2,7 +2,7 @@ package io.choerodon.manager.api.controller.v1;
 
 import java.util.List;
 
-import com.netflix.appinfo.InstanceInfo;
+import io.choerodon.manager.api.dto.InstanceDetailDTO;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,7 @@ public class InstanceController {
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("查询实例详情")
     @GetMapping(value = "/{instance_id:.*}")
-    public InstanceInfo query(@PathVariable("instance_id") String instanceId) {
+    public InstanceDetailDTO query(@PathVariable("instance_id") String instanceId) {
         return instanceService.query(instanceId);
     }
 
