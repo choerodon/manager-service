@@ -42,7 +42,7 @@ public class ServiceController {
      *
      * @return page
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("查询服务列表")
     @GetMapping
     public ResponseEntity<List<ServiceDTO>> pageAll(@RequestParam(required = false) String param) {
@@ -55,7 +55,7 @@ public class ServiceController {
      * @param service 服务名
      * @return 实例列表
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("查询服务实例列表")
     @CustomPageRequest
     @GetMapping(value = "/{service_name}/instances")
@@ -106,7 +106,7 @@ public class ServiceController {
      * @param serviceName 服务id，可为空，为空则查询所有服务的服务信息
      * @return Page
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @CustomPageRequest
     @ApiOperation("分页模糊查询服务的配置")
     @GetMapping("/{service_name}/configs")

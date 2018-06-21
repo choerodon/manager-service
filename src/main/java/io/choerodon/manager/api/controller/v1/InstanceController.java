@@ -3,6 +3,7 @@ package io.choerodon.manager.api.controller.v1;
 import java.util.List;
 
 import com.netflix.appinfo.InstanceInfo;
+import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +33,9 @@ public class InstanceController {
      * @param service 服务名, 为空则查询所有
      * @return 实例列表
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("查询实例列表")
+    @CustomPageRequest
     @GetMapping
     public List<InstanceDTO> list(@RequestParam(value = "service", required = false) String service) {
         return instanceService.list(service);
@@ -45,7 +47,7 @@ public class InstanceController {
      * @param instanceId 实例ID
      * @return 实例详情
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("查询实例详情")
     @GetMapping(value = "/{instance_id:.*}")
     public InstanceInfo query(@PathVariable("instance_id") String instanceId) {
@@ -58,7 +60,7 @@ public class InstanceController {
      * @param instanceId    实例ID
      * @param configId 配置的id
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("修改实例的配置")
     @PutMapping(value = "/{instance_id:.*}/configs/{config_id}")
     public void update(@PathVariable("instance_id") String instanceId,
