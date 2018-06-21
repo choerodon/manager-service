@@ -1,11 +1,18 @@
 package io.choerodon.manager.domain.service.impl;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.core.convertor.ConvertHelper;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.swagger.ChoerodonRouteData;
+import io.choerodon.manager.api.dto.RouteDTO;
+import io.choerodon.manager.domain.factory.RouteEFactory;
+import io.choerodon.manager.domain.manager.entity.RouteE;
+import io.choerodon.manager.domain.repository.RouteRepository;
+import io.choerodon.manager.domain.service.IRouteService;
+import io.choerodon.manager.infra.common.utils.VersionUtil;
+import io.choerodon.manager.infra.dataobject.RouteDO;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.swagger.custom.extra.ExtraData;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -20,19 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import io.choerodon.core.convertor.ConvertHelper;
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.swagger.ChoerodonRouteData;
-import io.choerodon.manager.api.dto.RouteDTO;
-import io.choerodon.manager.domain.factory.RouteEFactory;
-import io.choerodon.manager.domain.manager.entity.RouteE;
-import io.choerodon.manager.domain.repository.RouteRepository;
-import io.choerodon.manager.domain.service.IRouteService;
-import io.choerodon.manager.infra.common.annotation.RouteNotifyRefresh;
-import io.choerodon.manager.infra.common.utils.VersionUtil;
-import io.choerodon.manager.infra.dataobject.RouteDO;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.swagger.custom.extra.ExtraData;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 实现类
@@ -61,7 +59,6 @@ public class IRouteServiceImpl implements IRouteService {
 
     @Override
     @Transactional
-    @RouteNotifyRefresh
     public List<RouteE> addRoutes(List<RouteE> routeEList) {
         return routeRepository.addRoutesBatch(routeEList);
     }
@@ -77,6 +74,7 @@ public class IRouteServiceImpl implements IRouteService {
         RouteE re = RouteEFactory.createRouteE();
         return re.getAllRunningInstances();
     }
+
     @Override
     public RouteE getRouteFromRunningInstancesMap(MultiKeyMap runningMap, String name, String version) {
         Iterator iterator = runningMap.values().iterator();
@@ -97,7 +95,7 @@ public class IRouteServiceImpl implements IRouteService {
     public void autoRefreshRoute(String swaggerJson) {
         ExtraData extraData;
         Map swaggerMap = null;
-        ChoerodonRouteData choerodonRouteData;
+        ChoerodonRouteData data;
         try {
             swaggerMap = objectMapper.readValue(swaggerJson, Map.class);
         } catch (IOException e) {
@@ -108,23 +106,33 @@ public class IRouteServiceImpl implements IRouteService {
             if (object != null) {
                 extraData = objectMapper.convertValue(object, ExtraData.class);
                 if (extraData != null) {
-                    choerodonRouteData = objectMapper.convertValue(extraData.getData().get(ExtraData.ZUUL_ROUTE_DATA), ChoerodonRouteData.class);
-                    if (choerodonRouteData != null) {
-                        LOGGER.info("{} autoRefreshRoute", choerodonRouteData.getServiceId());
-                        RouteDO routeDO = new RouteDO();
-                        routeDO.setName(choerodonRouteData.getName());
-                        routeDO.setPath(choerodonRouteData.getPath());
-                        if (routeRepository.queryRoute(ConvertHelper.convert(routeDO, RouteE.class)) == null) {
-                            insertRoute(choerodonRouteData, routeDO);
-                        }
+                    data = objectMapper.convertValue(extraData.getData().get(ExtraData.ZUUL_ROUTE_DATA), ChoerodonRouteData.class);
+                    if (data != null) {
+                        executeRefreshRoute(data);
                     }
                 }
             }
         }
     }
 
-    @RouteNotifyRefresh
-    private void insertRoute(ChoerodonRouteData choerodonRouteData, RouteDO routeDO) {
+    private void executeRefreshRoute(final ChoerodonRouteData data) {
+        RouteDO routeDO = new RouteDO();
+        setRoute(data, routeDO);
+        RouteE routeE = routeRepository.queryRoute(ConvertHelper.convert(new RouteDO(data.getName(), data.getPath()), RouteE.class));
+        if (routeE == null) {
+            routeRepository.addRoute(ConvertHelper.convert(routeDO, RouteE.class));
+            LOGGER.info("{} : 初始化路由成功", routeDO.getName());
+        } else {
+            routeDO.setObjectVersionNumber(routeE.getObjectVersionNumber());
+            routeDO.setId(routeE.getId());
+            routeRepository.updateRoute(ConvertHelper.convert(routeDO, RouteE.class));
+            LOGGER.info("{} : rout update success", routeDO.getName());
+        }
+    }
+
+    private void setRoute(ChoerodonRouteData choerodonRouteData, RouteDO routeDO) {
+        routeDO.setName(choerodonRouteData.getName());
+        routeDO.setPath(choerodonRouteData.getPath());
         routeDO.setServiceId(choerodonRouteData.getServiceId());
         routeDO.setRetryable(choerodonRouteData.getRetryable());
         routeDO.setCustomSensitiveHeaders(choerodonRouteData.getCustomSensitiveHeaders());
@@ -132,8 +140,6 @@ public class IRouteServiceImpl implements IRouteService {
         routeDO.setSensitiveHeaders(choerodonRouteData.getSensitiveHeaders());
         routeDO.setStripPrefix(choerodonRouteData.getStripPrefix());
         routeDO.setUrl(choerodonRouteData.getUrl());
-        routeRepository.addRoute(ConvertHelper.convert(routeDO, RouteE.class));
-        LOGGER.info("{} : 初始化路由成功",routeDO.getName() );
     }
 
     @Override
@@ -171,7 +177,7 @@ public class IRouteServiceImpl implements IRouteService {
             throw new RemoteAccessException("fetch failed : " + response);
         }
         try {
-            return  mapper.readValue(response.getBody(), ChoerodonRouteData.class);
+            return mapper.readValue(response.getBody(), ChoerodonRouteData.class);
         } catch (IOException e) {
             LOGGER.info("fetch ChoerodonRouteData error");
             return null;

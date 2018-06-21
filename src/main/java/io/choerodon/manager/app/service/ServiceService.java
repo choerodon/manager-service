@@ -5,12 +5,14 @@ import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.api.dto.ServiceDTO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
+import java.util.List;
+
 /**
  * @author wuguokai
  */
 public interface ServiceService {
 
-    Page<ServiceDTO> pageAll(PageRequest pageRequest);
+    List<ServiceDTO> list(String param);
 
     Page<InstanceDTO> listByServiceName(InstanceDTO instanceDTO, PageRequest pageRequest);
 

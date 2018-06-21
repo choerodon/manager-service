@@ -125,4 +125,20 @@ public class ConfigRepositoryImpl implements ConfigRepository {
         }
         return configMapper.selectByPrimaryKey(configDO.getId());
     }
+
+    @Override
+    public ConfigDO queryByServiceIdAndVersion(Long serviceId, String configVersion) {
+        ConfigDO configDO = new ConfigDO();
+        configDO.setServiceId(serviceId);
+        configDO.setConfigVersion(configVersion);
+        return configMapper.selectOne(configDO);
+    }
+
+    @Override
+    public ConfigDO queryByServiceIdAndName(Long serviceId, String name) {
+        ConfigDO configDO = new ConfigDO();
+        configDO.setServiceId(serviceId);
+        configDO.setName(name);
+        return configMapper.selectOne(configDO);
+    }
 }

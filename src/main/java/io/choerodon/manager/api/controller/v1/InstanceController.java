@@ -3,6 +3,7 @@ package io.choerodon.manager.api.controller.v1;
 import java.util.List;
 
 import com.netflix.appinfo.InstanceInfo;
+import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,7 @@ public class InstanceController {
      */
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("查询实例列表")
+    @CustomPageRequest
     @GetMapping
     public List<InstanceDTO> list(@RequestParam(value = "service", required = false) String service) {
         return instanceService.list(service);

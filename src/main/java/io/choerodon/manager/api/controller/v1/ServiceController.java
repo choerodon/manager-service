@@ -1,7 +1,6 @@
 package io.choerodon.manager.api.controller.v1;
 
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.ConfigDTO;
 import io.choerodon.manager.api.dto.InstanceDTO;
@@ -19,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.Optional;
+import java.util.List;
 
 /**
  * 操作服务控制器
@@ -39,19 +38,15 @@ public class ServiceController {
     }
 
     /**
-     * 分页查询服务信息
+     * 查询服务列表
      *
      * @return page
      */
     @Permission(level = ResourceLevel.SITE)
-    @ApiOperation("分页查询服务信息")
-    @CustomPageRequest
+    @ApiOperation("查询服务列表")
     @GetMapping
-    public ResponseEntity<Page<ServiceDTO>> pageAll(
-            @ApiIgnore @SortDefault(value = "id", direction = Sort.Direction.ASC) PageRequest pageRequest) {
-        return Optional.ofNullable(serviceService.pageAll(pageRequest))
-                .map(i -> new ResponseEntity<>(i, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.service.query"));
+    public ResponseEntity<List<ServiceDTO>> pageAll(@RequestParam(required = false) String param) {
+        return new ResponseEntity<>(serviceService.list(param), HttpStatus.OK);
     }
 
     /**

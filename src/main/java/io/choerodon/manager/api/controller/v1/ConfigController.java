@@ -2,10 +2,7 @@ package io.choerodon.manager.api.controller.v1;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.manager.api.dto.ConfigDTO;
-import io.choerodon.manager.api.dto.CreateConfigDTO;
-import io.choerodon.manager.api.dto.ItemDto;
-import io.choerodon.manager.api.dto.YamlDto;
+import io.choerodon.manager.api.dto.*;
 import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
@@ -89,7 +86,7 @@ public class ConfigController {
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("查询配置的yaml形式")
     @GetMapping(value = "/{config_id}/yaml")
-    public ResponseEntity<YamlDto> queryYaml(@PathVariable("config_id") Long configId) {
+    public ResponseEntity<YamlDTO> queryYaml(@PathVariable("config_id") Long configId) {
         return new ResponseEntity<>(configService.queryYaml(configId), HttpStatus.OK);
     }
 
@@ -104,7 +101,7 @@ public class ConfigController {
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("增加或修改配置项")
     @PostMapping("/{config_id}/items")
-    public ResponseEntity<ItemDto> add(@PathVariable("config_id") Long configId,
+    public ResponseEntity<ItemDto> addItem(@PathVariable("config_id") Long configId,
                                        @RequestBody ItemDto item) {
         return Optional.ofNullable(configService.saveItem(configId, item))
                 .map(i -> new ResponseEntity<>(i, HttpStatus.OK))
@@ -121,7 +118,7 @@ public class ConfigController {
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("删除配置项")
     @DeleteMapping("/{config_id}/items")
-    public ResponseEntity delete(@PathVariable("config_id") Long configId,
+    public ResponseEntity deleteItem(@PathVariable("config_id") Long configId,
                                  @RequestParam("property") String property) {
         configService.deleteItem(configId, property);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -141,4 +138,11 @@ public class ConfigController {
         return new ResponseEntity<>(configService.updateConfig(configId, configDTO, type), HttpStatus.OK);
     }
 
+    @Permission(level = ResourceLevel.SITE)
+    @ApiOperation(value = "配置校验接口")
+    @PostMapping(value = "/check")
+    public ResponseEntity check(@RequestBody ConfigCheckDTO configDTO) {
+        configService.check(configDTO);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }

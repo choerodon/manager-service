@@ -1,7 +1,6 @@
 package io.choerodon.manager.domain.manager.entity;
 
 import io.choerodon.manager.domain.repository.RouteRepository;
-import io.choerodon.manager.infra.common.annotation.RouteNotifyRefresh;
 import io.choerodon.manager.infra.common.utils.VersionUtil;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,7 +106,6 @@ public class RouteE {
      *
      * @return RouteE
      */
-    @RouteNotifyRefresh
     public RouteE addRoute() {
         return routeRepository.addRoute(this);
     }
@@ -117,7 +115,6 @@ public class RouteE {
      *
      * @return RouteE
      */
-    @RouteNotifyRefresh
     public RouteE updateRoute() {
         return routeRepository.updateRoute(this);
     }
@@ -127,7 +124,6 @@ public class RouteE {
      *
      * @return boolean
      */
-    @RouteNotifyRefresh
     public boolean deleteRoute() {
         return routeRepository.deleteRoute(this);
     }

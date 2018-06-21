@@ -6,6 +6,7 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.domain.manager.entity.RouteE;
 import io.choerodon.manager.domain.repository.RouteRepository;
+import io.choerodon.manager.infra.common.annotation.RouteNotifyRefresh;
 import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.manager.infra.mapper.RouteMapper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -35,6 +36,7 @@ public class RouteRepositoryImpl implements RouteRepository {
     }
 
     @Override
+    @RouteNotifyRefresh
     public RouteE addRoute(RouteE routeE) {
         if (routeE.getBuiltIn() == null) {
             routeE.setBuiltIn(false);
@@ -56,6 +58,7 @@ public class RouteRepositoryImpl implements RouteRepository {
     }
 
     @Override
+    @RouteNotifyRefresh
     public RouteE updateRoute(RouteE routeE) {
         RouteDO oldRouteD = routeMapper.selectByPrimaryKey(routeE.getId());
         if (oldRouteD == null) {
@@ -68,7 +71,7 @@ public class RouteRepositoryImpl implements RouteRepository {
         if (routeDO.getObjectVersionNumber() == null) {
             throw new CommonException("error.objectVersionNumber.empty");
         }
-        routeDO.setBuiltIn(false);
+        routeDO.setBuiltIn(null);
         try {
             int isUpdate = routeMapper.updateByPrimaryKeySelective(routeDO);
             if (isUpdate != 1) {
@@ -85,6 +88,7 @@ public class RouteRepositoryImpl implements RouteRepository {
     }
 
     @Override
+    @RouteNotifyRefresh
     public boolean deleteRoute(RouteE routeE) {
         RouteDO routeDO = ConvertHelper.convert(routeE, RouteDO.class);
         int isDelete = routeMapper.delete(routeDO);

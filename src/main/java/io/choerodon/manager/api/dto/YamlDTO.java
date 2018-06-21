@@ -3,7 +3,7 @@ package io.choerodon.manager.api.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-public class YamlDto {
+public class YamlDTO {
 
     private String yaml;
 
@@ -11,10 +11,12 @@ public class YamlDto {
 
     private int totalLine;
 
-    public YamlDto() {
+    private Long objectVersionNumber;
+
+    public YamlDTO() {
     }
 
-    public YamlDto(String yaml, int totalLine) {
+    public YamlDTO(String yaml, int totalLine) {
         this.yaml = yaml;
         this.totalLine = totalLine;
     }
@@ -41,6 +43,14 @@ public class YamlDto {
 
     public void setTotalLine(int totalLine) {
         this.totalLine = totalLine;
+    }
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
     }
 
     static class HighlightMarker {
