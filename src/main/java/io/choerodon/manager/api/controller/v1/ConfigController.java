@@ -2,10 +2,7 @@ package io.choerodon.manager.api.controller.v1;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.manager.api.dto.ConfigDTO;
-import io.choerodon.manager.api.dto.CreateConfigDTO;
-import io.choerodon.manager.api.dto.ItemDto;
-import io.choerodon.manager.api.dto.YamlDto;
+import io.choerodon.manager.api.dto.*;
 import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
@@ -141,4 +138,11 @@ public class ConfigController {
         return new ResponseEntity<>(configService.updateConfig(configId, configDTO, type), HttpStatus.OK);
     }
 
+    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @ApiOperation(value = "配置校验接口")
+    @PostMapping(value = "/check")
+    public ResponseEntity check(@RequestBody ConfigDTO configDTO) {
+        configService.check(configDTO);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }

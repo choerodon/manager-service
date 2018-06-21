@@ -32,6 +32,8 @@ public interface ConfigService {
 
     ConfigDTO create(CreateConfigDTO createConfigDTO);
 
+    void check(ConfigDTO configDTO);
+
     /**
      * 保存配置项信息到指定的config
      *
