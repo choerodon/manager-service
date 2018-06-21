@@ -29,7 +29,7 @@ public class ConfigController {
         this.configService = configService;
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("创建配置")
     @PostMapping
     public ResponseEntity<ConfigDTO> create(@RequestBody @Valid CreateConfigDTO configDTO) {
@@ -42,7 +42,7 @@ public class ConfigController {
      * @param configId 配置id
      * @return ConfigDTO
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("删除配置，默认配置不可删除")
     @DeleteMapping(value = "/{config_id}")
     public ResponseEntity<Boolean> delete(@PathVariable("config_id") Long configId) {
@@ -55,7 +55,7 @@ public class ConfigController {
      * @param configId 配置id
      * @return ConfigDTO
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("设置配置为默认配置")
     @PutMapping(value = "/{config_id}/default")
     public ResponseEntity<ConfigDTO> updateConfigDefault(@PathVariable("config_id") Long configId) {
@@ -68,7 +68,7 @@ public class ConfigController {
      * @param configId 配置id
      * @return ConfigDTO
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("查询配置")
     @GetMapping(value = "/{config_id}")
     public ResponseEntity<ConfigDTO> query(@PathVariable("config_id") Long configId,
@@ -83,7 +83,7 @@ public class ConfigController {
      * @param configId 配置id
      * @return 查询配置的yaml形式
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("查询配置的yaml形式")
     @GetMapping(value = "/{config_id}/yaml")
     public ResponseEntity<YamlDto> queryYaml(@PathVariable("config_id") Long configId) {
@@ -98,7 +98,7 @@ public class ConfigController {
      * @param item     配置项对象
      * @return ItemDto
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("增加或修改配置项")
     @PostMapping("/{config_id}/items")
     public ResponseEntity<ItemDto> addItem(@PathVariable("config_id") Long configId,
@@ -115,7 +115,7 @@ public class ConfigController {
      * @param property 配置项key
      * @return null
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("删除配置项")
     @DeleteMapping("/{config_id}/items")
     public ResponseEntity deleteItem(@PathVariable("config_id") Long configId,
@@ -127,7 +127,7 @@ public class ConfigController {
     /**
      * 修改配置
      */
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("修改配置")
     @PutMapping("/{config_id}")
     public ResponseEntity<ConfigDTO> updateConfig(@PathVariable("config_id") Long configId,
@@ -138,7 +138,7 @@ public class ConfigController {
         return new ResponseEntity<>(configService.updateConfig(configId, configDTO, type), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {"managerAdmin"})
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation(value = "配置校验接口")
     @PostMapping(value = "/check")
     public ResponseEntity check(@RequestBody ConfigCheckDTO configDTO) {

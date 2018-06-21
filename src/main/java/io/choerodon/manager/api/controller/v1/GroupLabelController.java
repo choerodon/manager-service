@@ -36,7 +36,7 @@ public class GroupLabelController {
      * @param groupLabelDTO 标签名
      * @return 用户组列表
      */
-    @Permission(level = ResourceLevel.SITE, roles = "managerAdmin", permissionPublic = true)
+    @Permission(level = ResourceLevel.SITE, permissionPublic = true)
     @ApiOperation("可以查询对应labelValue的用户组id列表")
     @GetMapping
     public ResponseEntity<List<GroupLabelDTO>> query(GroupLabelDTO groupLabelDTO) {
@@ -51,7 +51,7 @@ public class GroupLabelController {
      * @param groupLabelDTOList 用户组标签对象
      * @return null
      */
-    @Permission(level = ResourceLevel.SITE, roles = "managerAdmin", permissionPublic = true)
+    @Permission(level = ResourceLevel.SITE, permissionPublic = true)
     @ApiOperation("更新对应用户组")
     @PutMapping
     public ResponseEntity<List<GroupLabelDTO>> update(@RequestBody List<GroupLabelDTO> groupLabelDTOList) {
@@ -66,7 +66,7 @@ public class GroupLabelController {
      * @param groupLabelDTO 用户组标签对象
      * @return null
      */
-    @Permission(level = ResourceLevel.SITE, roles = "managerAdmin", permissionPublic = true)
+    @Permission(level = ResourceLevel.SITE, permissionPublic = true)
     @ApiOperation("插入对应用户组标签")
     @PostMapping
     public ResponseEntity<GroupLabelDTO> creat(@RequestBody GroupLabelDTO groupLabelDTO) {
@@ -82,7 +82,7 @@ public class GroupLabelController {
      * @param labelValue 标签名
      * @return null
      */
-    @Permission(level = ResourceLevel.SITE, roles = "managerAdmin", permissionPublic = true)
+    @Permission(level = ResourceLevel.SITE, permissionPublic = true)
     @ApiOperation("删除对应用户组")
     @DeleteMapping
     public ResponseEntity delete(@RequestParam(value = "labelValue") String labelValue) {
