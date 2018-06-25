@@ -14,10 +14,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.netflix.eureka.EurekaDiscoveryClient;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.choerodon.manager.infra.common.utils.VersionUtil.METADATA_VERSION;
@@ -52,6 +49,7 @@ public class ServiceServiceImpl implements ServiceService {
         page.setNumber(pageRequest.getPage());
         List<InstanceDTO> serviceInstances = toInstanceDTOList(discoveryClient.getInstances(queryInfo.getService()));
         List<InstanceDTO> instanceDTOS = filter(queryInfo, serviceInstances);
+        instanceDTOS.sort(Comparator.comparing(InstanceDTO::getInstanceId));
         List<InstanceDTO> pageContent = getListPage(pageRequest.getPage(), pageRequest.getSize(), instanceDTOS);
         int pageSize = instanceDTOS.size() / pageRequest.getSize() + (instanceDTOS.size() % pageRequest.getSize() > 0 ? 1 : 0);
         page.setTotalPages(pageSize);

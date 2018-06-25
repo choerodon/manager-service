@@ -135,7 +135,6 @@ public class InstanceServiceImpl implements InstanceService {
         String envUrl = url + "env";
         ResponseEntity<String> response;
         try {
-            LOGGER.info("%%%envUrl : {}", envUrl);
             response = restTemplate.getForEntity(envUrl, String.class);
             if (response.getStatusCode() == HttpStatus.OK) {
                 processEnvJson(instanceDetail, response.getBody());
