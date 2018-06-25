@@ -8,12 +8,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.appinfo.InstanceInfo;
+import io.choerodon.core.domain.Page;
 import io.choerodon.manager.api.dto.InstanceDetailDTO;
 import io.choerodon.manager.infra.mapper.ConfigMapper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.ServiceInstance;
@@ -58,34 +61,6 @@ public class InstanceServiceImpl implements InstanceService {
         this.configServerClient = configServerClient;
         this.discoveryClient = discoveryClient;
         this.configMapper = configMapper;
-    }
-
-    @Override
-    public List<InstanceDTO> list(String service) {
-        List<InstanceDTO> instanceInfoList = new ArrayList<>();
-        if (StringUtils.isEmpty(service)) {
-            discoveryClient.getServices().forEach(t -> addIntoInstanceInfoList(instanceInfoList, t));
-        } else {
-            addIntoInstanceInfoList(instanceInfoList, service);
-        }
-        return instanceInfoList;
-    }
-
-    private void addIntoInstanceInfoList(final List<InstanceDTO> instanceInfoList, final String service) {
-        discoveryClient.getInstances(service).stream()
-                .filter(t -> t instanceof EurekaDiscoveryClient.EurekaServiceInstance)
-                .forEach(t -> {
-                    InstanceInfo info = ((EurekaDiscoveryClient.EurekaServiceInstance) t).getInstanceInfo();
-                    String instanceId = info.getInstanceId();
-                    String[] arr = instanceId.split(":");
-                    String pod = arr[arr.length - 1];
-                    String version = info.getMetadata().get(METADATA_VERSION);
-                    String status = info.getStatus().name();
-                    String serviceName = info.getAppName();
-                    //go语言registrationTimestamp的时间为10位，java版注册中心的registrationTimestamp的时间为13位，所以这里按服务器处理，自动乘以1000
-                    Date registrationTime = new Date(info.getLeaseInfo().getRegistrationTimestamp() * 1000);
-                    instanceInfoList.add(new InstanceDTO(instanceId, serviceName, version, status, pod, registrationTime));
-                });
     }
 
     @Override
@@ -181,5 +156,84 @@ public class InstanceServiceImpl implements InstanceService {
         asyncExecutor.submit(() ->
                 configServerClient.refresh(map)
         );
+    }
+
+    @Override
+    public Page<InstanceDTO> listByOptions(InstanceDTO queryInfo, PageRequest pageRequest) {
+        Page<InstanceDTO> page = new Page<>();
+        page.setSize(pageRequest.getSize());
+        page.setNumber(pageRequest.getPage());
+        List<InstanceDTO> serviceInstances = new ArrayList<>();
+        if (StringUtils.isEmpty(queryInfo.getService())) {
+            List<String> services = discoveryClient.getServices();
+            if (services != null) {
+                services.forEach( s -> serviceInstances.addAll(toInstanceDTOList(discoveryClient.getInstances(s))));
+            }
+        } else {
+            serviceInstances.addAll(toInstanceDTOList(discoveryClient.getInstances(queryInfo.getService())));
+        }
+        List<InstanceDTO> instanceDTOS = filter(queryInfo, serviceInstances);
+        instanceDTOS.sort(Comparator.comparing(InstanceDTO::getInstanceId));
+        List<InstanceDTO> pageContent = getListPage(pageRequest.getPage(), pageRequest.getSize(), instanceDTOS);
+        int pageSize = instanceDTOS.size() / pageRequest.getSize() + (instanceDTOS.size() % pageRequest.getSize() > 0 ? 1 : 0);
+        page.setTotalPages(pageSize);
+        page.setTotalElements(instanceDTOS.size());
+        page.setNumberOfElements(pageContent.size());
+        page.setContent(pageContent);
+        return page;
+    }
+
+    private List<InstanceDTO> toInstanceDTOList(final List<ServiceInstance> serviceInstances) {
+        List<InstanceDTO> instanceInfoList = new ArrayList<>();
+        for (ServiceInstance serviceInstance : serviceInstances) {
+            EurekaDiscoveryClient.EurekaServiceInstance eurekaServiceInstance =
+                    (EurekaDiscoveryClient.EurekaServiceInstance) serviceInstance;
+            InstanceInfo info = eurekaServiceInstance.getInstanceInfo();
+            String instanceId = info.getInstanceId();
+            String[] arr = instanceId.split(":");
+            String pod = arr[arr.length - 1];
+            String version = info.getMetadata().get(METADATA_VERSION);
+            String status = info.getStatus().name();
+            String serviceName = info.getAppName();
+            //go语言registrationTimestamp的时间为10位，java版注册中心的registrationTimestamp的时间为13位，所以这里按服务器处理，自动乘以1000
+            Date registrationTime = new Date(info.getLeaseInfo().getRegistrationTimestamp() * 1000);
+            instanceInfoList.add(new InstanceDTO(instanceId, serviceName, version, status, pod, registrationTime));
+        }
+        return instanceInfoList;
+    }
+
+    private List<InstanceDTO> filter(final InstanceDTO queryInfo, List<InstanceDTO> list) {
+        if (queryInfo.getInstanceId() != null) {
+            return list.stream().filter(t -> t.getInstanceId() != null && t.getInstanceId().contains(queryInfo.getInstanceId()))
+                    .collect(Collectors.toList());
+        } else if (queryInfo.getStatus() != null) {
+            return list.stream().filter(t -> t.getStatus() != null && t.getStatus().contains(queryInfo.getStatus()))
+                    .collect(Collectors.toList());
+        } else if (queryInfo.getVersion() != null) {
+            return list.stream().filter(t -> t.getVersion() != null && t.getVersion().contains(queryInfo.getVersion()))
+                    .collect(Collectors.toList());
+        } else if (queryInfo.getParams() != null) {
+            return list.stream().filter(t -> t.getInstanceId() != null && t.getInstanceId().contains(queryInfo.getParams()) ||
+                    t.getStatus() != null && t.getStatus().contains(queryInfo.getParams()) ||
+                    t.getVersion() != null && t.getVersion().contains(queryInfo.getParams())
+            ).collect(Collectors.toList());
+        }
+        return list;
+    }
+
+    private List<InstanceDTO> getListPage(int page, int pageSize, List<InstanceDTO> list) {
+        if (list == null || list.isEmpty()) {
+            return Collections.emptyList();
+        }
+        int totalCount = list.size();
+        int fromIndex = page * pageSize;
+        if (fromIndex >= totalCount) {
+            return Collections.emptyList();
+        }
+        int toIndex = ((page + 1) * pageSize);
+        if (toIndex > totalCount) {
+            toIndex = totalCount;
+        }
+        return list.subList(fromIndex, toIndex);
     }
 }

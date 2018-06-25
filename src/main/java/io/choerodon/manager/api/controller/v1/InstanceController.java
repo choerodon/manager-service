@@ -1,17 +1,22 @@
 package io.choerodon.manager.api.controller.v1;
 
-import java.util.List;
-
+import io.choerodon.core.domain.Page;
 import io.choerodon.manager.api.dto.InstanceDetailDTO;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.app.service.InstanceService;
 import io.choerodon.swagger.annotation.Permission;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * @author flyleft
@@ -37,8 +42,16 @@ public class InstanceController {
     @ApiOperation("查询实例列表")
     @CustomPageRequest
     @GetMapping
-    public List<InstanceDTO> list(@RequestParam(value = "service", required = false) String service) {
-        return instanceService.list(service);
+    public ResponseEntity<Page<InstanceDTO>> list(@RequestParam(value = "service", required = false) String service,
+                                  @ApiIgnore
+                                  @SortDefault(value = "id", direction = Sort.Direction.DESC)
+                                          PageRequest pageRequest,
+                                  @RequestParam(required = false, name = "instanceId") String instanceId,
+                                  @RequestParam(required = false, name = "version") String version,
+                                  @RequestParam(required = false, name = "status") String status,
+                                  @RequestParam(required = false, name = "params") String params) {
+        return new ResponseEntity<>(instanceService.listByOptions(new InstanceDTO(instanceId,
+                service, version, status, params, null, null), pageRequest), HttpStatus.OK);
     }
 
     /**
