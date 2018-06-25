@@ -141,8 +141,7 @@ public class InstanceServiceImpl implements InstanceService {
                 processEnvJson(instanceDetail, response.getBody());
             }
         } catch (Exception e) {
-            LOGGER.info("error.restTemplate.fetchEnvInfo {}", e.getMessage());
-            throw new CommonException("error.restTemplate.fetchEnvInfo");
+            LOGGER.info("can not fetch env info, request url : {}, exception message : {}", envUrl, e.getMessage());
         }
     }
 
