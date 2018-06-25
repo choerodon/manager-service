@@ -3,7 +3,6 @@ package io.choerodon.manager.api.controller.v1;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.ConfigDTO;
-import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.api.dto.ServiceDTO;
 import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.manager.app.service.ServiceService;
@@ -49,27 +48,6 @@ public class ServiceController {
         return new ResponseEntity<>(serviceService.list(param), HttpStatus.OK);
     }
 
-    /**
-     * 查询服务实例列表
-     *
-     * @param service 服务名
-     * @return 实例列表
-     */
-    @Permission(level = ResourceLevel.SITE)
-    @ApiOperation("查询服务实例列表")
-    @CustomPageRequest
-    @GetMapping(value = "/{service_name}/instances")
-    public ResponseEntity<Page<InstanceDTO>> listByServiceName(@PathVariable("service_name") String service,
-                                                               @ApiIgnore
-                                                               @SortDefault(value = "id", direction = Sort.Direction.DESC)
-                                                                       PageRequest pageRequest,
-                                                               @RequestParam(required = false, name = "instanceId") String instanceId,
-                                                               @RequestParam(required = false, name = "version") String version,
-                                                               @RequestParam(required = false, name = "status") String status,
-                                                               @RequestParam(required = false, name = "params") String params) {
-        return new ResponseEntity<>(serviceService.listByServiceName(new InstanceDTO(instanceId,
-                service, version, status, params, null, null), pageRequest), HttpStatus.OK);
-    }
 
     /**
      * 内部接口，由config-server调用
