@@ -4,6 +4,7 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.ConfigDTO;
 import io.choerodon.manager.api.dto.ServiceDTO;
+import io.choerodon.manager.api.dto.ServiceManagerDTO;
 import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.manager.app.service.ServiceService;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -35,6 +36,25 @@ public class ServiceController {
         this.serviceService = serviceService;
         this.configService = configService;
     }
+
+    /**
+     * 查询服务列表
+     *
+     * @return page
+     */
+    @Permission(level = ResourceLevel.SITE)
+    @ApiOperation("微服务管理列表")
+    @CustomPageRequest
+    @GetMapping("/manager")
+    public ResponseEntity<Page<ServiceManagerDTO>> pageManager(
+            @RequestParam(required = false, name = "service_name") String serviceName,
+            @RequestParam(required = false) String params,
+            @ApiIgnore
+            @SortDefault(value = "name", direction = Sort.Direction.DESC)
+                    PageRequest pageRequest) {
+        return new ResponseEntity<>(serviceService.pageManager(serviceName, params, pageRequest), HttpStatus.OK);
+    }
+
 
     /**
      * 查询服务列表
