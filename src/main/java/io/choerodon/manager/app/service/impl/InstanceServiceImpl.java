@@ -1,20 +1,15 @@
 package io.choerodon.manager.app.service.impl;
 
-import static io.choerodon.manager.infra.common.utils.VersionUtil.METADATA_VERSION;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.appinfo.InstanceInfo;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.api.dto.InstanceDetailDTO;
+import io.choerodon.manager.app.service.InstanceService;
+import io.choerodon.manager.infra.common.utils.ManualPageHelper;
+import io.choerodon.manager.infra.feign.ConfigServerClient;
 import io.choerodon.manager.infra.mapper.ConfigMapper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.slf4j.Logger;
@@ -26,12 +21,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.manager.api.dto.InstanceDTO;
-import io.choerodon.manager.app.service.InstanceService;
-import io.choerodon.manager.infra.feign.ConfigServerClient;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static io.choerodon.manager.infra.common.utils.VersionUtil.METADATA_VERSION;
 
 /**
  * @author flyleft
@@ -159,28 +158,18 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public Page<InstanceDTO> listByOptions(InstanceDTO queryInfo, PageRequest pageRequest) {
-        Page<InstanceDTO> page = new Page<>();
-        page.setSize(pageRequest.getSize());
-        page.setNumber(pageRequest.getPage());
+    public Page<InstanceDTO> listByOptions(String service, Map<String, Object> map, PageRequest pageRequest) {
         List<InstanceDTO> serviceInstances = new ArrayList<>();
-        if (StringUtils.isEmpty(queryInfo.getService())) {
+        if (StringUtils.isEmpty(service)) {
             List<String> services = discoveryClient.getServices();
             if (services != null) {
-                services.forEach( s -> serviceInstances.addAll(toInstanceDTOList(discoveryClient.getInstances(s))));
+                services.forEach(s -> serviceInstances.addAll(toInstanceDTOList(discoveryClient.getInstances(s))));
             }
         } else {
-            serviceInstances.addAll(toInstanceDTOList(discoveryClient.getInstances(queryInfo.getService())));
+            serviceInstances.addAll(toInstanceDTOList(discoveryClient.getInstances(service)));
         }
-        List<InstanceDTO> instanceDTOS = filter(queryInfo, serviceInstances);
-        instanceDTOS.sort(Comparator.comparing(InstanceDTO::getInstanceId));
-        List<InstanceDTO> pageContent = getListPage(pageRequest.getPage(), pageRequest.getSize(), instanceDTOS);
-        int pageSize = instanceDTOS.size() / pageRequest.getSize() + (instanceDTOS.size() % pageRequest.getSize() > 0 ? 1 : 0);
-        page.setTotalPages(pageSize);
-        page.setTotalElements(instanceDTOS.size());
-        page.setNumberOfElements(pageContent.size());
-        page.setContent(pageContent);
-        return page;
+
+        return ManualPageHelper.postPage(serviceInstances, pageRequest, map);
     }
 
     private List<InstanceDTO> toInstanceDTOList(final List<ServiceInstance> serviceInstances) {
@@ -202,38 +191,4 @@ public class InstanceServiceImpl implements InstanceService {
         return instanceInfoList;
     }
 
-    private List<InstanceDTO> filter(final InstanceDTO queryInfo, List<InstanceDTO> list) {
-        if (queryInfo.getInstanceId() != null) {
-            return list.stream().filter(t -> t.getInstanceId() != null && t.getInstanceId().contains(queryInfo.getInstanceId()))
-                    .collect(Collectors.toList());
-        } else if (queryInfo.getStatus() != null) {
-            return list.stream().filter(t -> t.getStatus() != null && t.getStatus().contains(queryInfo.getStatus()))
-                    .collect(Collectors.toList());
-        } else if (queryInfo.getVersion() != null) {
-            return list.stream().filter(t -> t.getVersion() != null && t.getVersion().contains(queryInfo.getVersion()))
-                    .collect(Collectors.toList());
-        } else if (queryInfo.getParams() != null) {
-            return list.stream().filter(t -> t.getInstanceId() != null && t.getInstanceId().contains(queryInfo.getParams()) ||
-                    t.getStatus() != null && t.getStatus().contains(queryInfo.getParams()) ||
-                    t.getVersion() != null && t.getVersion().contains(queryInfo.getParams())
-            ).collect(Collectors.toList());
-        }
-        return list;
-    }
-
-    private List<InstanceDTO> getListPage(int page, int pageSize, List<InstanceDTO> list) {
-        if (list == null || list.isEmpty()) {
-            return Collections.emptyList();
-        }
-        int totalCount = list.size();
-        int fromIndex = page * pageSize;
-        if (fromIndex >= totalCount) {
-            return Collections.emptyList();
-        }
-        int toIndex = ((page + 1) * pageSize);
-        if (toIndex > totalCount) {
-            toIndex = totalCount;
-        }
-        return list.subList(fromIndex, toIndex);
-    }
 }
