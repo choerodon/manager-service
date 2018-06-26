@@ -125,11 +125,12 @@ public class InstanceServiceImpl implements InstanceService {
             map.put("systemEnvironment", node.findValue("systemEnvironment"));
             map.put("applicationConfig: [classpath:/application.yml]", node.findValue("applicationConfig: [classpath:/application.yml]"));
             map.put("applicationConfig: [classpath:/bootstrap.yml]", node.findValue("applicationConfig: [classpath:/bootstrap.yml]"));
-            map.put("defaultProperties", node.findValue("defaultProperties"));
             instanceDetail.setEnvInfo(map);
             Map<String, JsonNode> map1 = new HashMap<>(5);
             map1.put("configService:configClient", node.findValue("configService:configClient"));
-            map1.put("configService:iam-service-default-null", node.findValue("configService:iam-service-default-null"));
+            String app = instanceDetail.getApp().toLowerCase();
+            String key = "configService:" + app + "-service-default-null";
+            map1.put(key, node.findValue(key));
             instanceDetail.setConfigInfo(map1);
         } catch (IOException e) {
             LOGGER.info("error.restTemplate.fetchEnvInfo {}", e.getMessage());
