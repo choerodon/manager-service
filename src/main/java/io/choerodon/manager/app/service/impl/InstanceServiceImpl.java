@@ -130,7 +130,7 @@ public class InstanceServiceImpl implements InstanceService {
             Map<String, JsonNode> map1 = new HashMap<>(5);
             map1.put("configService:configClient", node.findValue("configService:configClient"));
             String app = instanceDetail.getApp().toLowerCase();
-            String key = "configService:" + app + "-default-null";
+            String key = "configService:" + app + "-service-default-null";
             map1.put(key, node.findValue(key));
             instanceDetail.setConfigInfo(map1);
         } catch (IOException e) {
