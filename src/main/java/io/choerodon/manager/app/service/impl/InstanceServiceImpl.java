@@ -15,6 +15,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.appinfo.InstanceInfo;
 import io.choerodon.core.domain.Page;
 import io.choerodon.manager.api.dto.InstanceDetailDTO;
+import io.choerodon.manager.api.dto.YamlDTO;
+import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
 import io.choerodon.manager.infra.mapper.ConfigMapper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.slf4j.Logger;
@@ -122,17 +124,28 @@ public class InstanceServiceImpl implements InstanceService {
     private void processEnvJson(InstanceDetailDTO instanceDetail, String json) {
         try {
             JsonNode node = objectMapper.readTree(json);
-            Map<String, JsonNode> map = new HashMap<>(5);
+            Map<String, Object> map = new HashMap<>(5);
             map.put("systemEnvironment", node.findValue("systemEnvironment"));
             map.put("applicationConfig: [classpath:/application.yml]", node.findValue("applicationConfig: [classpath:/application.yml]"));
             map.put("applicationConfig: [classpath:/bootstrap.yml]", node.findValue("applicationConfig: [classpath:/bootstrap.yml]"));
-            instanceDetail.setEnvInfo(map);
-            Map<String, JsonNode> map1 = new HashMap<>(5);
-            map1.put("configService:configClient", node.findValue("configService:configClient"));
-            String app = instanceDetail.getApp().toLowerCase();
-            String key = "configService:" + app + "-service-default-null";
-            map1.put(key, node.findValue(key));
-            instanceDetail.setConfigInfo(map1);
+            YamlDTO envInfoYml = new YamlDTO();
+            String yaml = ConfigUtil.convertMapToText(map, "yaml");
+            envInfoYml.setYaml(yaml);
+            envInfoYml.setTotalLine(ConfigUtil.appearNumber(yaml, "\n") + 1);
+            instanceDetail.setEnvInfoYml(envInfoYml);
+            YamlDTO configInfoYml = new YamlDTO();
+            Iterator<String> fieldNames = node.fieldNames();
+            Map<String, Object> map1 = new HashMap<>();
+            while (fieldNames.hasNext()) {
+                String fieldName = fieldNames.next();
+                if (fieldName.contains("configService")) {
+                    map1.put(fieldName, node.findValue(fieldName));
+                }
+            }
+            String yaml1 = ConfigUtil.convertMapToText(map1, "yaml");
+            configInfoYml.setYaml(yaml1);
+            configInfoYml.setTotalLine(ConfigUtil.appearNumber(yaml, "\n") + 1);
+            instanceDetail.setConfigInfoYml(configInfoYml);
         } catch (IOException e) {
             LOGGER.info("error.restTemplate.fetchEnvInfo {}", e.getMessage());
             throw new CommonException("error.parse.envJson");
