@@ -54,6 +54,7 @@ public class InstanceController {
                                                   @RequestParam(required = false, name = "params") String params) {
         Map<String, Object> map = new HashMap<>();
         map.put("instanceId", instanceId);
+        map.put("service", service);
         map.put("version", version);
         map.put("status", status);
         map.put("params", params);
