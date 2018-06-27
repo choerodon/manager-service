@@ -123,32 +123,52 @@ public class InstanceServiceImpl implements InstanceService {
     private void processEnvJson(InstanceDetailDTO instanceDetail, String json) {
         try {
             JsonNode node = objectMapper.readTree(json);
-            Map<String, Object> map = new HashMap<>(5);
-            map.put("systemEnvironment", node.findValue("systemEnvironment"));
-            map.put("applicationConfig: [classpath:/application.yml]", node.findValue("applicationConfig: [classpath:/application.yml]"));
-            map.put("applicationConfig: [classpath:/bootstrap.yml]", node.findValue("applicationConfig: [classpath:/bootstrap.yml]"));
+            Map<String, Object> envMap = processEnvMap(node);
             YamlDTO envInfoYml = new YamlDTO();
-            String yaml = ConfigUtil.convertMapToText(map, "yaml");
+            String yaml = ConfigUtil.convertMapToText(envMap, "yaml");
+            System.out.println(yaml);
             envInfoYml.setYaml(yaml);
             envInfoYml.setTotalLine(ConfigUtil.appearNumber(yaml, "\n") + 1);
             instanceDetail.setEnvInfoYml(envInfoYml);
+            Map<String, Object> configMap = processConfigMap(node);
             YamlDTO configInfoYml = new YamlDTO();
-            Iterator<String> fieldNames = node.fieldNames();
-            Map<String, Object> map1 = new HashMap<>();
-            while (fieldNames.hasNext()) {
-                String fieldName = fieldNames.next();
-                if (fieldName.contains("configService")) {
-                    map1.put(fieldName, node.findValue(fieldName));
-                }
-            }
-            String yaml1 = ConfigUtil.convertMapToText(map1, "yaml");
+            String yaml1 = ConfigUtil.convertMapToText(configMap, "yaml");
             configInfoYml.setYaml(yaml1);
-            configInfoYml.setTotalLine(ConfigUtil.appearNumber(yaml, "\n") + 1);
+            configInfoYml.setTotalLine(ConfigUtil.appearNumber(yaml1, "\n") + 1);
             instanceDetail.setConfigInfoYml(configInfoYml);
         } catch (IOException e) {
             LOGGER.info("error.restTemplate.fetchEnvInfo {}", e.getMessage());
             throw new CommonException("error.parse.envJson");
         }
+    }
+
+    private Map<String,Object> processEnvMap(JsonNode node) {
+        Map<String, Object> map1 = objectMapper.convertValue(node.findValue("systemEnvironment"), Map.class);
+        Map<String, Object> map2 = objectMapper.convertValue(node.findValue("applicationConfig: [classpath:/application.yml]"), Map.class);
+        Map<String, Object> map3 = objectMapper.convertValue(node.findValue("applicationConfig: [classpath:/bootstrap.yml]"), Map.class);
+        Map<String, Object> map = new HashMap<>();
+        map1.entrySet().forEach(t -> map.put("systemEnvironment."+t.getKey(), t.getValue()));
+        map2.entrySet().forEach(t -> map.put("application."+t.getKey(), t.getValue()));
+        map3.entrySet().forEach(t -> map.put("bootstrap."+t.getKey(), t.getValue()));
+        return map;
+    }
+
+    private Map<String, Object> processConfigMap(JsonNode node) {
+        Iterator<String> fieldNames = node.fieldNames();
+        List<Map<String, Object>> list = new ArrayList<>();
+        while (fieldNames.hasNext()) {
+            String fieldName = fieldNames.next();
+            if (fieldName.contains("configService")) {
+                list.add(objectMapper.convertValue(node.findValue(fieldName), Map.class));
+            }
+        }
+        Map<String, Object> map = new HashMap<>();
+        list.forEach(m -> {
+            for (Map.Entry<String, Object> entry : m.entrySet()) {
+                map.put(entry.getKey(), entry.getValue());
+            }
+        });
+        return map;
     }
 
     @Override
