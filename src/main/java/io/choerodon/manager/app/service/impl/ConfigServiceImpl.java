@@ -83,10 +83,6 @@ public class ConfigServiceImpl implements ConfigService {
         if (serviceE == null) {
             throw new CommonException("error.service.notExist", configDTO.getServiceId());
         }
-        if (ArrayUtils.contains(getRouteServices, serviceE.getName())) {
-            final List<RouteE> routeEList = routeRepository.getAllRoute();
-            setRoutes(routeEList, configDTO.getValue());
-        }
         if (!StringUtils.isEmpty(type)) {
             configDTO.setTxt(ConfigUtil.convertMapToText(configDTO.getValue(), type));
         }
@@ -265,10 +261,6 @@ public class ConfigServiceImpl implements ConfigService {
             ServiceE serviceE = serviceRepository.getService(configDO.getServiceId());
             if (serviceE == null) {
                 throw new CommonException("error.config.service.not.exist");
-            }
-            if (ArrayUtils.contains(getRouteServices, serviceE.getName())) {
-                final List<RouteE> routeEList = routeRepository.getAllRoute();
-                setRoutes(routeEList, map);
             }
             YamlDTO yamlDTO = new YamlDTO();
             String yaml = ConfigUtil.convertMapToText(map, CONFIG_TYPE_YAML);
