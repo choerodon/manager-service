@@ -18,8 +18,8 @@ public class InstanceDetailDTO {
     private String version;
     private Date registrationTime;
     private Map<String, String> metadata;
-    private Map<String, JsonNode> configInfo;
-    private Map<String, JsonNode> envInfo;
+    private YamlDTO configInfoYml;
+    private YamlDTO envInfoYml;
 
     public String getInstanceId() {
         return instanceId;
@@ -85,19 +85,19 @@ public class InstanceDetailDTO {
         this.metadata = metadata;
     }
 
-    public Map<String, JsonNode> getConfigInfo() {
-        return configInfo;
+    public YamlDTO getConfigInfoYml() {
+        return configInfoYml;
     }
 
-    public void setConfigInfo(Map<String, JsonNode> configInfo) {
-        this.configInfo = configInfo;
+    public void setConfigInfoYml(YamlDTO configInfoYml) {
+        this.configInfoYml = configInfoYml;
     }
 
-    public Map<String, JsonNode> getEnvInfo() {
-        return envInfo;
+    public YamlDTO getEnvInfoYml() {
+        return envInfoYml;
     }
 
-    public void setEnvInfo(Map<String, JsonNode> envInfo) {
-        this.envInfo = envInfo;
+    public void setEnvInfoYml(YamlDTO envInfoYml) {
+        this.envInfoYml = envInfoYml;
     }
 }

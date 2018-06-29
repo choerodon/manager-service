@@ -1,20 +1,17 @@
 package io.choerodon.manager.app.service.impl;
 
-import static io.choerodon.manager.infra.common.utils.VersionUtil.METADATA_VERSION;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.appinfo.InstanceInfo;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.api.dto.InstanceDetailDTO;
+import io.choerodon.manager.api.dto.YamlDTO;
+import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
+import io.choerodon.manager.app.service.InstanceService;
+import io.choerodon.manager.infra.common.utils.ManualPageHelper;
+import io.choerodon.manager.infra.feign.ConfigServerClient;
 import io.choerodon.manager.infra.mapper.ConfigMapper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.slf4j.Logger;
@@ -26,12 +23,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.manager.api.dto.InstanceDTO;
-import io.choerodon.manager.app.service.InstanceService;
-import io.choerodon.manager.infra.feign.ConfigServerClient;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static io.choerodon.manager.infra.common.utils.VersionUtil.METADATA_VERSION;
 
 /**
  * @author flyleft
@@ -122,20 +123,52 @@ public class InstanceServiceImpl implements InstanceService {
     private void processEnvJson(InstanceDetailDTO instanceDetail, String json) {
         try {
             JsonNode node = objectMapper.readTree(json);
-            Map<String, JsonNode> map = new HashMap<>(5);
-            map.put("systemEnvironment", node.findValue("systemEnvironment"));
-            map.put("applicationConfig: [classpath:/application.yml]", node.findValue("applicationConfig: [classpath:/application.yml]"));
-            map.put("applicationConfig: [classpath:/bootstrap.yml]", node.findValue("applicationConfig: [classpath:/bootstrap.yml]"));
-            map.put("defaultProperties", node.findValue("defaultProperties"));
-            instanceDetail.setEnvInfo(map);
-            Map<String, JsonNode> map1 = new HashMap<>(5);
-            map1.put("configService:configClient", node.findValue("configService:configClient"));
-            map1.put("configService:iam-service-default-null", node.findValue("configService:iam-service-default-null"));
-            instanceDetail.setConfigInfo(map1);
+            Map<String, Object> envMap = processEnvMap(node);
+            YamlDTO envInfoYml = new YamlDTO();
+            String yaml = ConfigUtil.convertMapToText(envMap, "yaml");
+            System.out.println(yaml);
+            envInfoYml.setYaml(yaml);
+            envInfoYml.setTotalLine(ConfigUtil.appearNumber(yaml, "\n") + 1);
+            instanceDetail.setEnvInfoYml(envInfoYml);
+            Map<String, Object> configMap = processConfigMap(node);
+            YamlDTO configInfoYml = new YamlDTO();
+            String yaml1 = ConfigUtil.convertMapToText(configMap, "yaml");
+            configInfoYml.setYaml(yaml1);
+            configInfoYml.setTotalLine(ConfigUtil.appearNumber(yaml1, "\n") + 1);
+            instanceDetail.setConfigInfoYml(configInfoYml);
         } catch (IOException e) {
             LOGGER.info("error.restTemplate.fetchEnvInfo {}", e.getMessage());
             throw new CommonException("error.parse.envJson");
         }
+    }
+
+    private Map<String,Object> processEnvMap(JsonNode node) {
+        Map<String, Object> map1 = objectMapper.convertValue(node.findValue("systemEnvironment"), Map.class);
+        Map<String, Object> map2 = objectMapper.convertValue(node.findValue("applicationConfig: [classpath:/application.yml]"), Map.class);
+        Map<String, Object> map3 = objectMapper.convertValue(node.findValue("applicationConfig: [classpath:/bootstrap.yml]"), Map.class);
+        Map<String, Object> map = new HashMap<>();
+        map1.entrySet().forEach(t -> map.put("systemEnvironment."+t.getKey(), t.getValue()));
+        map2.entrySet().forEach(t -> map.put("application."+t.getKey(), t.getValue()));
+        map3.entrySet().forEach(t -> map.put("bootstrap."+t.getKey(), t.getValue()));
+        return map;
+    }
+
+    private Map<String, Object> processConfigMap(JsonNode node) {
+        Iterator<String> fieldNames = node.fieldNames();
+        List<Map<String, Object>> list = new ArrayList<>();
+        while (fieldNames.hasNext()) {
+            String fieldName = fieldNames.next();
+            if (fieldName.contains("configService")) {
+                list.add(objectMapper.convertValue(node.findValue(fieldName), Map.class));
+            }
+        }
+        Map<String, Object> map = new HashMap<>();
+        list.forEach(m -> {
+            for (Map.Entry<String, Object> entry : m.entrySet()) {
+                map.put(entry.getKey(), entry.getValue());
+            }
+        });
+        return map;
     }
 
     @Override
@@ -159,28 +192,18 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public Page<InstanceDTO> listByOptions(InstanceDTO queryInfo, PageRequest pageRequest) {
-        Page<InstanceDTO> page = new Page<>();
-        page.setSize(pageRequest.getSize());
-        page.setNumber(pageRequest.getPage());
+    public Page<InstanceDTO> listByOptions(String service, Map<String, Object> map, PageRequest pageRequest) {
         List<InstanceDTO> serviceInstances = new ArrayList<>();
-        if (StringUtils.isEmpty(queryInfo.getService())) {
+        if (StringUtils.isEmpty(service)) {
             List<String> services = discoveryClient.getServices();
             if (services != null) {
-                services.forEach( s -> serviceInstances.addAll(toInstanceDTOList(discoveryClient.getInstances(s))));
+                services.forEach(s -> serviceInstances.addAll(toInstanceDTOList(discoveryClient.getInstances(s))));
             }
         } else {
-            serviceInstances.addAll(toInstanceDTOList(discoveryClient.getInstances(queryInfo.getService())));
+            serviceInstances.addAll(toInstanceDTOList(discoveryClient.getInstances(service)));
         }
-        List<InstanceDTO> instanceDTOS = filter(queryInfo, serviceInstances);
-        instanceDTOS.sort(Comparator.comparing(InstanceDTO::getInstanceId));
-        List<InstanceDTO> pageContent = getListPage(pageRequest.getPage(), pageRequest.getSize(), instanceDTOS);
-        int pageSize = instanceDTOS.size() / pageRequest.getSize() + (instanceDTOS.size() % pageRequest.getSize() > 0 ? 1 : 0);
-        page.setTotalPages(pageSize);
-        page.setTotalElements(instanceDTOS.size());
-        page.setNumberOfElements(pageContent.size());
-        page.setContent(pageContent);
-        return page;
+
+        return ManualPageHelper.postPage(serviceInstances, pageRequest, map);
     }
 
     private List<InstanceDTO> toInstanceDTOList(final List<ServiceInstance> serviceInstances) {
@@ -202,38 +225,4 @@ public class InstanceServiceImpl implements InstanceService {
         return instanceInfoList;
     }
 
-    private List<InstanceDTO> filter(final InstanceDTO queryInfo, List<InstanceDTO> list) {
-        if (queryInfo.getInstanceId() != null) {
-            return list.stream().filter(t -> t.getInstanceId() != null && t.getInstanceId().contains(queryInfo.getInstanceId()))
-                    .collect(Collectors.toList());
-        } else if (queryInfo.getStatus() != null) {
-            return list.stream().filter(t -> t.getStatus() != null && t.getStatus().contains(queryInfo.getStatus()))
-                    .collect(Collectors.toList());
-        } else if (queryInfo.getVersion() != null) {
-            return list.stream().filter(t -> t.getVersion() != null && t.getVersion().contains(queryInfo.getVersion()))
-                    .collect(Collectors.toList());
-        } else if (queryInfo.getParams() != null) {
-            return list.stream().filter(t -> t.getInstanceId() != null && t.getInstanceId().contains(queryInfo.getParams()) ||
-                    t.getStatus() != null && t.getStatus().contains(queryInfo.getParams()) ||
-                    t.getVersion() != null && t.getVersion().contains(queryInfo.getParams())
-            ).collect(Collectors.toList());
-        }
-        return list;
-    }
-
-    private List<InstanceDTO> getListPage(int page, int pageSize, List<InstanceDTO> list) {
-        if (list == null || list.isEmpty()) {
-            return Collections.emptyList();
-        }
-        int totalCount = list.size();
-        int fromIndex = page * pageSize;
-        if (fromIndex >= totalCount) {
-            return Collections.emptyList();
-        }
-        int toIndex = ((page + 1) * pageSize);
-        if (toIndex > totalCount) {
-            toIndex = totalCount;
-        }
-        return list.subList(fromIndex, toIndex);
-    }
 }

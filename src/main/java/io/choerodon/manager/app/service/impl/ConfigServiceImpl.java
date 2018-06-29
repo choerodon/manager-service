@@ -16,6 +16,7 @@ import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
 import io.choerodon.manager.infra.dataobject.ConfigDO;
 import io.choerodon.manager.infra.dataobject.ServiceDO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.mybatis.util.StringUtil;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -25,10 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author wuguokai
@@ -64,6 +62,13 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public Page<ConfigDTO> listByServiceName(String serviceName, PageRequest pageRequest, ConfigDTO queryInfo, String queryParam) {
+        List<Sort.Order> orders = new ArrayList<>();
+        Iterator<Sort.Order> iterator = pageRequest.getSort().iterator();
+        while (iterator.hasNext()) {
+            orders.add(iterator.next());
+        }
+        orders.add(new Sort.Order(Sort.Direction.DESC, "isDefault"));
+        pageRequest.setSort(new Sort(orders));
         return configRepository.listByServiceName(serviceName, pageRequest,
                 ConvertHelper.convert(queryInfo, ConfigDO.class), queryParam);
     }
@@ -82,10 +87,6 @@ public class ConfigServiceImpl implements ConfigService {
         ServiceE serviceE = serviceRepository.getService(configDTO.getServiceId());
         if (serviceE == null) {
             throw new CommonException("error.service.notExist", configDTO.getServiceId());
-        }
-        if (ArrayUtils.contains(getRouteServices, serviceE.getName())) {
-            final List<RouteE> routeEList = routeRepository.getAllRoute();
-            setRoutes(routeEList, configDTO.getValue());
         }
         if (!StringUtils.isEmpty(type)) {
             configDTO.setTxt(ConfigUtil.convertMapToText(configDTO.getValue(), type));
@@ -265,10 +266,6 @@ public class ConfigServiceImpl implements ConfigService {
             ServiceE serviceE = serviceRepository.getService(configDO.getServiceId());
             if (serviceE == null) {
                 throw new CommonException("error.config.service.not.exist");
-            }
-            if (ArrayUtils.contains(getRouteServices, serviceE.getName())) {
-                final List<RouteE> routeEList = routeRepository.getAllRoute();
-                setRoutes(routeEList, map);
             }
             YamlDTO yamlDTO = new YamlDTO();
             String yaml = ConfigUtil.convertMapToText(map, CONFIG_TYPE_YAML);
