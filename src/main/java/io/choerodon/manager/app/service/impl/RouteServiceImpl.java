@@ -89,14 +89,14 @@ public class RouteServiceImpl implements RouteService {
             RouteDO routeDO = new RouteDO();
             routeDO.setName(routeDTO.getName());
             if (routeRepository.countRoute(routeDO) > 0) {
-                throw new CommonException("error.insert.route.nameDuplicate");
+                throw new CommonException("error.route.insert.nameDuplicate");
             }
         }
         if (!StringUtils.isEmpty(routeDTO.getPath())) {
             RouteDO routeDO = new RouteDO();
             routeDO.setPath(routeDTO.getPath());
             if (routeRepository.countRoute(routeDO) > 0) {
-                throw new CommonException("error.insert.route.pathDuplicate");
+                throw new CommonException("error.route.insert.pathDuplicate");
             }
         }
     }

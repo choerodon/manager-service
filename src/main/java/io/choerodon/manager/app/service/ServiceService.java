@@ -1,19 +1,19 @@
 package io.choerodon.manager.app.service;
 
-import java.util.List;
-
 import io.choerodon.core.domain.Page;
-import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.api.dto.ServiceDTO;
+import io.choerodon.manager.api.dto.ServiceManagerDTO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
+import java.util.List;
 
 /**
  * @author wuguokai
  */
 public interface ServiceService {
 
-    Page<ServiceDTO> pageAll(PageRequest pageRequest);
+    List<ServiceDTO> list(String param);
 
-    List<InstanceDTO> getInstancesByService(String service);
+    Page<ServiceManagerDTO> pageManager(String serviceName, String params, PageRequest pageRequest);
 
 }

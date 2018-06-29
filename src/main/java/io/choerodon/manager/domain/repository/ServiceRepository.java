@@ -1,16 +1,18 @@
 package io.choerodon.manager.domain.repository;
 
-import java.util.List;
-
-import io.choerodon.core.domain.Page;
 import io.choerodon.manager.domain.manager.entity.ServiceE;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.manager.infra.dataobject.ServiceDO;
+
+import java.util.List;
 
 /**
  * @author superleader8@gmail.com
  * @author wuguokai
  */
 public interface ServiceRepository {
+
+    ServiceDO getService(String serviceName);
+
     ServiceE getService(Long serviceId);
 
     ServiceE addService(ServiceE serviceE);
@@ -19,7 +21,7 @@ public interface ServiceRepository {
 
     boolean deleteService(Long serviceId);
 
-    List<ServiceE> getAllService();
+    List<ServiceDO> getAllService();
 
-    Page<ServiceE> pageAllService(PageRequest pageRequest);
+    List<ServiceDO> selectServicesByFilter(String param);
 }

@@ -1,25 +1,21 @@
 package io.choerodon.manager.infra.repository.impl;
 
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
 import io.choerodon.core.convertor.ConvertHelper;
-import io.choerodon.core.convertor.ConvertPageHelper;
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.domain.manager.entity.ServiceE;
 import io.choerodon.manager.domain.repository.ServiceRepository;
 import io.choerodon.manager.infra.dataobject.ServiceDO;
 import io.choerodon.manager.infra.mapper.ServiceMapper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @author wuguokai
  */
 @Component
 public class ServiceRepositoryImpl implements ServiceRepository {
+
     private ServiceMapper serviceMapper;
 
     public ServiceRepositoryImpl(ServiceMapper serviceMapper) {
@@ -63,13 +59,17 @@ public class ServiceRepositoryImpl implements ServiceRepository {
     }
 
     @Override
-    public List<ServiceE> getAllService() {
-        return ConvertHelper.convertList(serviceMapper.selectAll(), ServiceE.class);
+    public List<ServiceDO> getAllService() {
+        return serviceMapper.selectAll();
     }
 
     @Override
-    public Page<ServiceE> pageAllService(PageRequest pageRequest) {
-        Page<ServiceDO> serviceDOPage = PageHelper.doPageAndSort(pageRequest, () -> serviceMapper.selectAll());
-        return ConvertPageHelper.convertPage(serviceDOPage, ServiceE.class);
+    public ServiceDO getService(String serviceName) {
+        return serviceMapper.selectOne(new ServiceDO(serviceName));
+    }
+
+    @Override
+    public List<ServiceDO> selectServicesByFilter(String param) {
+        return serviceMapper.selectServicesByFilter(param);
     }
 }

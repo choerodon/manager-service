@@ -45,8 +45,8 @@ public class DocumentController {
      */
     @Permission(permissionPublic = true)
     @ApiOperation("获取服务id对应的版本swagger json字符串")
-    @GetMapping(value = "/{name}")
-    public ResponseEntity<String> get(@PathVariable("name") String name,
+    @GetMapping(value = "/{service_prefix}")
+    public ResponseEntity<String> get(@PathVariable("service_prefix") String name,
                                       @RequestParam(value = "version", required = false,
                                               defaultValue = VersionUtil.NULL_VERSION) String version) {
         String swaggerJson;
@@ -72,8 +72,8 @@ public class DocumentController {
      * @return null
      */
     @ApiOperation("手动刷新表中swagger json和权限")
-    @PutMapping(value = "/permission/refresh/{serviceName}")
-    public ResponseEntity refresh(@PathVariable("serviceName") String serviceName,
+    @PutMapping(value = "/permission/refresh/{service_name}")
+    public ResponseEntity refresh(@PathVariable("service_name") String serviceName,
                                   @RequestParam(value = "version", required = false, defaultValue = VersionUtil.NULL_VERSION) String version) {
         try {
             documentService.manualRefresh(serviceName, version);

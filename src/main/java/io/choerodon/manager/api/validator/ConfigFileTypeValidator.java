@@ -1,7 +1,7 @@
 package io.choerodon.manager.api.validator;
 
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.manager.infra.common.utils.ConfigFileFormat;
+import io.choerodon.manager.infra.common.utils.config.ConfigFileFormat;
 
 /**
  * @author wuguokai
