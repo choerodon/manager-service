@@ -9,13 +9,12 @@ import io.choerodon.manager.domain.repository.ServiceRepository;
 import io.choerodon.manager.infra.common.utils.ManualPageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -27,6 +26,9 @@ public class ServiceServiceImpl implements ServiceService {
     private ServiceRepository serviceRepository;
 
     private DiscoveryClient discoveryClient;
+
+    @Value("${choerodon.swagger.skip.service}")
+    private String[] skipService;
 
     public ServiceServiceImpl(ServiceRepository serviceRepository, DiscoveryClient discoveryClient) {
         this.serviceRepository = serviceRepository;
@@ -51,5 +53,15 @@ public class ServiceServiceImpl implements ServiceService {
         map.put("serviceName", serviceName);
         map.put("params", params);
         return ManualPageHelper.postPage(serviceManagerDTOS, pageRequest, map);
+    }
+
+    @Override
+    public List<String> queryServiceExceptSkipped() {
+        List<String> serviceId = discoveryClient.getServices();
+        List<String> skipServices = Arrays.asList(skipService);
+        List<String> intersection = serviceId.stream().filter(skipServices::contains).collect(Collectors.toList());
+        List<String> returnServices = serviceId.stream().filter(item ->
+                !intersection.contains(item)).collect(Collectors.toList());
+        return returnServices;
     }
 }
