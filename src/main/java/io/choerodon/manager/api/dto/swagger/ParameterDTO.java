@@ -1,8 +1,13 @@
 package io.choerodon.manager.api.dto.swagger;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.Map;
+
 /**
  * @author superlee
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ParameterDTO {
 
     private String description;
@@ -11,6 +16,8 @@ public class ParameterDTO {
     private Boolean required;
     private String type;
     private String format;
+    private String collectionFormat;
+    private Map<String, String> items;
 
     public String getDescription() {
         return description;
@@ -60,6 +67,22 @@ public class ParameterDTO {
         this.format = format;
     }
 
+    public Map<String, String> getItems() {
+        return items;
+    }
+
+    public void setItems(Map<String, String> items) {
+        this.items = items;
+    }
+
+    public String getCollectionFormat() {
+        return collectionFormat;
+    }
+
+    public void setCollectionFormat(String collectionFormat) {
+        this.collectionFormat = collectionFormat;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -72,7 +95,10 @@ public class ParameterDTO {
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (required != null ? !required.equals(that.required) : that.required != null) return false;
         if (type != null ? !type.equals(that.type) : that.type != null) return false;
-        return format != null ? format.equals(that.format) : that.format == null;
+        if (format != null ? !format.equals(that.format) : that.format != null) return false;
+        if (collectionFormat != null ? !collectionFormat.equals(that.collectionFormat) : that.collectionFormat != null)
+            return false;
+        return items != null ? items.equals(that.items) : that.items == null;
     }
 
     @Override
@@ -83,6 +109,8 @@ public class ParameterDTO {
         result = 31 * result + (required != null ? required.hashCode() : 0);
         result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (format != null ? format.hashCode() : 0);
+        result = 31 * result + (collectionFormat != null ? collectionFormat.hashCode() : 0);
+        result = 31 * result + (items != null ? items.hashCode() : 0);
         return result;
     }
 }
