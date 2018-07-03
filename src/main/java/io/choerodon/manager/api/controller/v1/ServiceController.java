@@ -55,14 +55,6 @@ public class ServiceController {
         return new ResponseEntity<>(serviceService.pageManager(serviceName, params, pageRequest), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE)
-    @ApiOperation("查询运行服务列表，不包含跳过的服务")
-    @GetMapping("/except_skipped")
-    public ResponseEntity<List<String>> queryServiceExceptSkipped() {
-        return new ResponseEntity<>(serviceService.queryServiceExceptSkipped(), HttpStatus.OK);
-
-    }
-
     /**
      * 查询服务列表
      *
