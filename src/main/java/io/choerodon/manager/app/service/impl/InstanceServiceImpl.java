@@ -126,7 +126,6 @@ public class InstanceServiceImpl implements InstanceService {
             Map<String, Object> envMap = processEnvMap(node);
             YamlDTO envInfoYml = new YamlDTO();
             String yaml = ConfigUtil.convertMapToText(envMap, "yaml");
-            System.out.println(yaml);
             envInfoYml.setYaml(yaml);
             envInfoYml.setTotalLine(ConfigUtil.appearNumber(yaml, "\n") + 1);
             instanceDetail.setEnvInfoYml(envInfoYml);

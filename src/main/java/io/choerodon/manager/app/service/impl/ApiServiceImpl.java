@@ -25,6 +25,8 @@ public class ApiServiceImpl implements ApiService {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiServiceImpl.class);
 
+    private final String DESCRIPTION = "description";
+
     private IDocumentService iDocumentService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -83,7 +85,7 @@ public class ApiServiceImpl implements ApiService {
                     });
                 }
                 path.setSummary(Optional.ofNullable(jsonNode.get("summary")).map(n -> n.asText()).orElse(null));
-                path.setDescription(Optional.ofNullable(jsonNode.get("description")).map(n -> n.asText()).orElse(null));
+                path.setDescription(Optional.ofNullable(jsonNode.get(DESCRIPTION)).map(n -> n.asText()).orElse(null));
                 path.setOperationId(Optional.ofNullable(jsonNode.get("operationId")).map(n -> n.asText()).orElse(null));
                 path.setOperationId(jsonNode.get("operationId").asText());
                 processConsumes(path, jsonNode);
@@ -103,7 +105,7 @@ public class ApiServiceImpl implements ApiService {
             JsonNode node = responseNode.get(status);
             ResponseDTO response = new ResponseDTO();
             response.setHttpStatus(status);
-            response.setDescription(node.get("description").asText());
+            response.setDescription(node.get(DESCRIPTION).asText());
             JsonNode schemaNode = node.get("schema");
             List<String> schemas = new ArrayList<>();
             if (schemaNode != null) {
@@ -158,7 +160,7 @@ public class ApiServiceImpl implements ApiService {
         while (iterator.hasNext()) {
             JsonNode jsonNode = iterator.next();
             String name = jsonNode.findValue("name").asText();
-            String description = jsonNode.findValue("description").asText();
+            String description = jsonNode.findValue(DESCRIPTION).asText();
             ControllerDTO controller = new ControllerDTO();
             controller.setName(name);
             controller.setDescription(description);
