@@ -15,6 +15,4 @@ public interface ServiceService {
     List<ServiceDTO> list(String param);
 
     Page<ServiceManagerDTO> pageManager(String serviceName, String params, PageRequest pageRequest);
-
-    List<String> queryServiceExceptSkipped();
 }

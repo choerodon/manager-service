@@ -54,14 +54,4 @@ public class ServiceServiceImpl implements ServiceService {
         map.put("params", params);
         return ManualPageHelper.postPage(serviceManagerDTOS, pageRequest, map);
     }
-
-    @Override
-    public List<String> queryServiceExceptSkipped() {
-        List<String> serviceId = discoveryClient.getServices();
-        List<String> skipServices = Arrays.asList(skipService);
-        List<String> intersection = serviceId.stream().filter(skipServices::contains).collect(Collectors.toList());
-        List<String> returnServices = serviceId.stream().filter(item ->
-                !intersection.contains(item)).collect(Collectors.toList());
-        return returnServices;
-    }
 }
