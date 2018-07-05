@@ -137,7 +137,7 @@ public class ManualPageHelper {
             field.setAccessible(true);
             if (field.getType().equals(String.class) && i.getValue() instanceof String) {
                 final Object value = field.get(obj);
-                if (value ==null || !((String)value).contains((String)i.getValue())) {
+                if (value ==null || !((String)value).toLowerCase().contains((String)i.getValue())) {
                     return true;
                 }
             } else {
