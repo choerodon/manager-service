@@ -141,14 +141,14 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private Map<String,Object> processEnvMap(JsonNode node) {
+    private Map<String, Object> processEnvMap(JsonNode node) {
         Map<String, Object> map1 = objectMapper.convertValue(node.findValue("systemEnvironment"), Map.class);
         Map<String, Object> map2 = objectMapper.convertValue(node.findValue("applicationConfig: [classpath:/application.yml]"), Map.class);
         Map<String, Object> map3 = objectMapper.convertValue(node.findValue("applicationConfig: [classpath:/bootstrap.yml]"), Map.class);
         Map<String, Object> map = new HashMap<>();
-        map1.entrySet().forEach(t -> map.put("systemEnvironment."+t.getKey(), t.getValue()));
-        map2.entrySet().forEach(t -> map.put("application."+t.getKey(), t.getValue()));
-        map3.entrySet().forEach(t -> map.put("bootstrap."+t.getKey(), t.getValue()));
+        map1.entrySet().forEach(t -> map.put("systemEnvironment." + t.getKey(), t.getValue()));
+        map2.entrySet().forEach(t -> map.put("application." + t.getKey(), t.getValue()));
+        map3.entrySet().forEach(t -> map.put("bootstrap." + t.getKey(), t.getValue()));
         return map;
     }
 
@@ -211,6 +211,9 @@ public class InstanceServiceImpl implements InstanceService {
             EurekaDiscoveryClient.EurekaServiceInstance eurekaServiceInstance =
                     (EurekaDiscoveryClient.EurekaServiceInstance) serviceInstance;
             InstanceInfo info = eurekaServiceInstance.getInstanceInfo();
+            if (info.getAppName().equals("go-register-server")) {
+                continue;
+            }
             String instanceId = info.getInstanceId();
             String[] arr = instanceId.split(":");
             String pod = arr[arr.length - 1];
