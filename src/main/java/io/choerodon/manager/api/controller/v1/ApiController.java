@@ -45,7 +45,4 @@ public class ApiController {
             @RequestParam(value = "version", required = false,defaultValue = VersionUtil.NULL_VERSION) String version) {
         return new ResponseEntity<>(apiService.getControllers(name, version), HttpStatus.OK);
     }
-
-
-
 }

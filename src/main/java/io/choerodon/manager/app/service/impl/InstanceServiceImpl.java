@@ -211,7 +211,7 @@ public class InstanceServiceImpl implements InstanceService {
             EurekaDiscoveryClient.EurekaServiceInstance eurekaServiceInstance =
                     (EurekaDiscoveryClient.EurekaServiceInstance) serviceInstance;
             InstanceInfo info = eurekaServiceInstance.getInstanceInfo();
-            if (info.getAppName().equals("go-register-server")) {
+            if (info.getAppName().equalsIgnoreCase("go-register-server")) {
                 continue;
             }
             String instanceId = info.getInstanceId();
