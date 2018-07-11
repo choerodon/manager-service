@@ -14,7 +14,7 @@ public class PathDTO implements Comparable<PathDTO> {
     private String operationId;
     private List<ParameterDTO> parameters;
     private List<ResponseDTO> responses;
-    private String summary;
+    private String remark;
     private String description;
 
     public String getUrl() {
@@ -73,12 +73,12 @@ public class PathDTO implements Comparable<PathDTO> {
         this.responses = responses;
     }
 
-    public String getSummary() {
-        return summary;
+    public String getRemark() {
+        return remark;
     }
 
-    public void setSummary(String summary) {
-        this.summary = summary;
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
     public String getDescription() {
@@ -98,9 +98,12 @@ public class PathDTO implements Comparable<PathDTO> {
 
         if (url != null ? !url.equals(pathDTO.url) : pathDTO.url != null) return false;
         if (method != null ? !method.equals(pathDTO.method) : pathDTO.method != null) return false;
+        if (consumes != null ? !consumes.equals(pathDTO.consumes) : pathDTO.consumes != null) return false;
+        if (produces != null ? !produces.equals(pathDTO.produces) : pathDTO.produces != null) return false;
         if (operationId != null ? !operationId.equals(pathDTO.operationId) : pathDTO.operationId != null) return false;
         if (parameters != null ? !parameters.equals(pathDTO.parameters) : pathDTO.parameters != null) return false;
-        if (summary != null ? !summary.equals(pathDTO.summary) : pathDTO.summary != null) return false;
+        if (responses != null ? !responses.equals(pathDTO.responses) : pathDTO.responses != null) return false;
+        if (remark != null ? !remark.equals(pathDTO.remark) : pathDTO.remark != null) return false;
         return description != null ? description.equals(pathDTO.description) : pathDTO.description == null;
     }
 
@@ -108,9 +111,12 @@ public class PathDTO implements Comparable<PathDTO> {
     public int hashCode() {
         int result = url != null ? url.hashCode() : 0;
         result = 31 * result + (method != null ? method.hashCode() : 0);
+        result = 31 * result + (consumes != null ? consumes.hashCode() : 0);
+        result = 31 * result + (produces != null ? produces.hashCode() : 0);
         result = 31 * result + (operationId != null ? operationId.hashCode() : 0);
         result = 31 * result + (parameters != null ? parameters.hashCode() : 0);
-        result = 31 * result + (summary != null ? summary.hashCode() : 0);
+        result = 31 * result + (responses != null ? responses.hashCode() : 0);
+        result = 31 * result + (remark != null ? remark.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
         return result;
     }
@@ -125,7 +131,7 @@ public class PathDTO implements Comparable<PathDTO> {
                 ", operationId='" + operationId + '\'' +
                 ", parameters=" + parameters +
                 ", responses=" + responses +
-                ", summary='" + summary + '\'' +
+                ", remark='" + remark + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }
