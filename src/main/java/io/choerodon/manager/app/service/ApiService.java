@@ -1,12 +1,14 @@
 package io.choerodon.manager.app.service;
 
+import io.choerodon.core.domain.Page;
 import io.choerodon.manager.api.dto.swagger.ControllerDTO;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * @author superlee
  */
 public interface ApiService {
-    List<ControllerDTO> getControllers(String name, String version);
+    Page<ControllerDTO> getControllers(String name, String version, PageRequest pageRequest, Map<String, Object> map);
 }

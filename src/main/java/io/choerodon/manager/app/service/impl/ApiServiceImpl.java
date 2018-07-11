@@ -3,6 +3,7 @@ package io.choerodon.manager.app.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.swagger.ControllerDTO;
 import io.choerodon.manager.api.dto.swagger.ParameterDTO;
@@ -10,6 +11,8 @@ import io.choerodon.manager.api.dto.swagger.PathDTO;
 import io.choerodon.manager.api.dto.swagger.ResponseDTO;
 import io.choerodon.manager.app.service.ApiService;
 import io.choerodon.manager.domain.service.IDocumentService;
+import io.choerodon.manager.infra.common.utils.ManualPageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -36,7 +39,7 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public List<ControllerDTO> getControllers(String name, String version) {
+    public Page<ControllerDTO> getControllers(String name, String version, PageRequest pageRequest, Map<String, Object> map) {
         String json;
         try {
             json = iDocumentService.getSwaggerJson(name, version);
@@ -45,7 +48,7 @@ public class ApiServiceImpl implements ApiService {
             throw new CommonException("error.service.not.run", name, version);
         }
         return Optional.ofNullable(json)
-                .map(j -> processJson2ControllerDTO(j))
+                .map(j -> ManualPageHelper.postPage(processJson2ControllerDTO(j), pageRequest, map))
                 .orElseThrow(() -> new CommonException("error.service.swaggerJson.empty"));
     }
 
@@ -84,7 +87,7 @@ public class ApiServiceImpl implements ApiService {
                         }
                     });
                 }
-                path.setSummary(Optional.ofNullable(jsonNode.get("summary")).map(n -> n.asText()).orElse(null));
+                path.setRemark(Optional.ofNullable(jsonNode.get("summary")).map(n -> n.asText()).orElse(null));
                 path.setDescription(Optional.ofNullable(jsonNode.get(DESCRIPTION)).map(n -> n.asText()).orElse(null));
                 path.setOperationId(Optional.ofNullable(jsonNode.get("operationId")).map(n -> n.asText()).orElse(null));
                 path.setOperationId(jsonNode.get("operationId").asText());
