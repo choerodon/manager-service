@@ -192,12 +192,15 @@ public class IDocumentServiceImpl implements IDocumentService, IDocumentService.
     public String fetchSwaggerJsonByIp(final RegisterInstancePayload payload) {
         List<ServiceInstance> serviceInstances = discoveryClient.getInstances(payload.getAppName());
         for (ServiceInstance serviceInstance : serviceInstances) {
-            fetchByIp(payload, serviceInstance);
+            String instanceAddress = serviceInstance.getHost() + ":" + serviceInstance.getPort();
+            if (instanceAddress.equals(payload.getInstanceAddress())) {
+                return fetchByIp(payload, serviceInstance);
+            }
         }
         return null;
     }
 
-    public String fetchByIp(final RegisterInstancePayload payload, ServiceInstance instance) {
+    private String fetchByIp(final RegisterInstancePayload payload, ServiceInstance instance) {
         ResponseEntity<String> response;
         String contextPath = instance.getMetadata().get(METADATA_CONTEXT);
         if (contextPath == null) {
