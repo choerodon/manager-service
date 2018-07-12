@@ -133,11 +133,11 @@
     <build>
         <finalName>app</finalName>
         <!-- 用自定义swagger-ui.html和springfox.js覆盖 jar包中的文件-->
-        <resources>
-            <resource>
-                <directory>src/main/swagger-ui</directory>
-                <targetPath>META-INF/resources</targetPath>
-            </resource>
-        </resources>
+        <!--<resources>-->
+            <!--<resource>-->
+                <!--<directory>src/main/swagger-ui</directory>-->
+                <!--<targetPath>META-INF/resources</targetPath>-->
+            <!--</resource>-->
+        <!--</resources>-->
     </build>
 </project>
