@@ -16,6 +16,7 @@ public class PathDTO implements Comparable<PathDTO> {
     private List<ResponseDTO> responses;
     private String remark;
     private String description;
+    private String refController;
 
     public String getUrl() {
         return url;
@@ -89,6 +90,14 @@ public class PathDTO implements Comparable<PathDTO> {
         this.description = description;
     }
 
+    public String getRefController() {
+        return refController;
+    }
+
+    public void setRefController(String refController) {
+        this.refController = refController;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -104,7 +113,8 @@ public class PathDTO implements Comparable<PathDTO> {
         if (parameters != null ? !parameters.equals(pathDTO.parameters) : pathDTO.parameters != null) return false;
         if (responses != null ? !responses.equals(pathDTO.responses) : pathDTO.responses != null) return false;
         if (remark != null ? !remark.equals(pathDTO.remark) : pathDTO.remark != null) return false;
-        return description != null ? description.equals(pathDTO.description) : pathDTO.description == null;
+        if (description != null ? !description.equals(pathDTO.description) : pathDTO.description != null) return false;
+        return refController != null ? refController.equals(pathDTO.refController) : pathDTO.refController == null;
     }
 
     @Override
@@ -118,6 +128,7 @@ public class PathDTO implements Comparable<PathDTO> {
         result = 31 * result + (responses != null ? responses.hashCode() : 0);
         result = 31 * result + (remark != null ? remark.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (refController != null ? refController.hashCode() : 0);
         return result;
     }
 
@@ -133,6 +144,7 @@ public class PathDTO implements Comparable<PathDTO> {
                 ", responses=" + responses +
                 ", remark='" + remark + '\'' +
                 ", description='" + description + '\'' +
+                ", refController='" + refController + '\'' +
                 '}';
     }
 
