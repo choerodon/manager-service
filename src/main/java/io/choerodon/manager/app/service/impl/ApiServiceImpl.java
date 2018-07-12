@@ -83,6 +83,7 @@ public class ApiServiceImpl implements ApiService {
                     controllers.forEach(c -> {
                         Set<PathDTO> paths = c.getPaths();
                         if (tag.equals(c.getName())) {
+                            path.setRefController(c.getName());
                             paths.add(path);
                         }
                     });
