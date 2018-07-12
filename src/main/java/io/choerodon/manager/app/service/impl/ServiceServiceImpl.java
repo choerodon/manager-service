@@ -27,9 +27,6 @@ public class ServiceServiceImpl implements ServiceService {
 
     private DiscoveryClient discoveryClient;
 
-    @Value("${choerodon.swagger.skip.service}")
-    private String[] skipService;
-
     public ServiceServiceImpl(ServiceRepository serviceRepository, DiscoveryClient discoveryClient) {
         this.serviceRepository = serviceRepository;
         this.discoveryClient = discoveryClient;
