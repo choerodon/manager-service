@@ -220,6 +220,7 @@ public class InstanceServiceImpl implements InstanceService {
             String version = info.getMetadata().get(METADATA_VERSION);
             String status = info.getStatus().name();
             String serviceName = info.getAppName();
+            instanceId = arr[1] + ":" + arr[0] + ":" + pod;
             //go语言registrationTimestamp的时间为10位，java版注册中心的registrationTimestamp的时间为13位，所以这里按服务器处理，自动乘以1000
             Date registrationTime = new Date(info.getLeaseInfo().getRegistrationTimestamp() * 1000);
             instanceInfoList.add(new InstanceDTO(instanceId, serviceName, version, status, pod, registrationTime));
