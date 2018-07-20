@@ -66,6 +66,11 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public InstanceDetailDTO query(String instanceId) {
+        String[] str = instanceId.split(":");
+        if (str.length != 3) {
+            throw new CommonException("error.illegal.instanceId");
+        }
+        instanceId = str[1] + ":" + str[0] + ":" + str[2];
         for (String service : discoveryClient.getServices()) {
             for (ServiceInstance serviceInstance : discoveryClient.getInstances(service)) {
                 if (serviceInstance instanceof EurekaDiscoveryClient.EurekaServiceInstance) {
@@ -126,7 +131,6 @@ public class InstanceServiceImpl implements InstanceService {
             Map<String, Object> envMap = processEnvMap(node);
             YamlDTO envInfoYml = new YamlDTO();
             String yaml = ConfigUtil.convertMapToText(envMap, "yaml");
-            System.out.println(yaml);
             envInfoYml.setYaml(yaml);
             envInfoYml.setTotalLine(ConfigUtil.appearNumber(yaml, "\n") + 1);
             instanceDetail.setEnvInfoYml(envInfoYml);
@@ -142,14 +146,14 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private Map<String,Object> processEnvMap(JsonNode node) {
+    private Map<String, Object> processEnvMap(JsonNode node) {
         Map<String, Object> map1 = objectMapper.convertValue(node.findValue("systemEnvironment"), Map.class);
         Map<String, Object> map2 = objectMapper.convertValue(node.findValue("applicationConfig: [classpath:/application.yml]"), Map.class);
         Map<String, Object> map3 = objectMapper.convertValue(node.findValue("applicationConfig: [classpath:/bootstrap.yml]"), Map.class);
         Map<String, Object> map = new HashMap<>();
-        map1.entrySet().forEach(t -> map.put("systemEnvironment."+t.getKey(), t.getValue()));
-        map2.entrySet().forEach(t -> map.put("application."+t.getKey(), t.getValue()));
-        map3.entrySet().forEach(t -> map.put("bootstrap."+t.getKey(), t.getValue()));
+        map1.entrySet().forEach(t -> map.put("systemEnvironment." + t.getKey(), t.getValue()));
+        map2.entrySet().forEach(t -> map.put("application." + t.getKey(), t.getValue()));
+        map3.entrySet().forEach(t -> map.put("bootstrap." + t.getKey(), t.getValue()));
         return map;
     }
 
@@ -212,12 +216,16 @@ public class InstanceServiceImpl implements InstanceService {
             EurekaDiscoveryClient.EurekaServiceInstance eurekaServiceInstance =
                     (EurekaDiscoveryClient.EurekaServiceInstance) serviceInstance;
             InstanceInfo info = eurekaServiceInstance.getInstanceInfo();
+            if (info.getAppName().equalsIgnoreCase("go-register-server")) {
+                continue;
+            }
             String instanceId = info.getInstanceId();
             String[] arr = instanceId.split(":");
             String pod = arr[arr.length - 1];
             String version = info.getMetadata().get(METADATA_VERSION);
             String status = info.getStatus().name();
             String serviceName = info.getAppName();
+            instanceId = arr[1] + ":" + arr[0] + ":" + pod;
             //go语言registrationTimestamp的时间为10位，java版注册中心的registrationTimestamp的时间为13位，所以这里按服务器处理，自动乘以1000
             Date registrationTime = new Date(info.getLeaseInfo().getRegistrationTimestamp() * 1000);
             instanceInfoList.add(new InstanceDTO(instanceId, serviceName, version, status, pod, registrationTime));

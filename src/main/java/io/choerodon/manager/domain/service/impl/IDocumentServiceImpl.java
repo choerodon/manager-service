@@ -190,9 +190,25 @@ public class IDocumentServiceImpl implements IDocumentService, IDocumentService.
 
     @Override
     public String fetchSwaggerJsonByIp(final RegisterInstancePayload payload) {
+        List<ServiceInstance> serviceInstances = discoveryClient.getInstances(payload.getAppName());
+        for (ServiceInstance serviceInstance : serviceInstances) {
+            String instanceAddress = serviceInstance.getHost() + ":" + serviceInstance.getPort();
+            if (instanceAddress.equals(payload.getInstanceAddress())) {
+                return fetchByIp(payload, serviceInstance);
+            }
+        }
+        return null;
+    }
+
+    private String fetchByIp(final RegisterInstancePayload payload, ServiceInstance instance) {
         ResponseEntity<String> response;
+        String contextPath = instance.getMetadata().get(METADATA_CONTEXT);
+        if (contextPath == null) {
+            contextPath = "";
+        }
+        LOGGER.info("service: {} metadata : {}" + instance.getMetadata());
         try {
-            response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + "/v2/choerodon/api-docs",
+            response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + contextPath + "/v2/choerodon/api-docs",
                     String.class);
             if (response.getStatusCode() == HttpStatus.OK) {
                 return response.getBody();

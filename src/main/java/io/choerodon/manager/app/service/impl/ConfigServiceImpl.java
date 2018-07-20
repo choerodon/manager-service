@@ -64,10 +64,10 @@ public class ConfigServiceImpl implements ConfigService {
     public Page<ConfigDTO> listByServiceName(String serviceName, PageRequest pageRequest, ConfigDTO queryInfo, String queryParam) {
         List<Sort.Order> orders = new ArrayList<>();
         Iterator<Sort.Order> iterator = pageRequest.getSort().iterator();
+        orders.add(new Sort.Order(Sort.Direction.DESC, "isDefault"));
         while (iterator.hasNext()) {
             orders.add(iterator.next());
         }
-        orders.add(new Sort.Order(Sort.Direction.DESC, "isDefault"));
         pageRequest.setSort(new Sort(orders));
         return configRepository.listByServiceName(serviceName, pageRequest,
                 ConvertHelper.convert(queryInfo, ConfigDO.class), queryParam);
