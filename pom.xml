@@ -13,7 +13,7 @@
         <version>0.6.0.RELEASE</version>
     </parent>
     <properties>
-        <choerodon.starters.version>0.5.3.RELEASE</choerodon.starters.version>
+        <choerodon.starters.version>0.5.4.RELEASE</choerodon.starters.version>
     </properties>
 
     <dependencies>
@@ -39,7 +39,7 @@
         <dependency>
             <groupId>io.choerodon</groupId>
             <artifactId>choerodon-starter-swagger</artifactId>
-            <version>0.5.2.RELEASE</version>
+            <version>${choerodon.starters.version}</version>
         </dependency>
         <dependency>
             <groupId>io.choerodon</groupId>

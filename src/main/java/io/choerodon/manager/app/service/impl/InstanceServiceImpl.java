@@ -66,6 +66,11 @@ public class InstanceServiceImpl implements InstanceService {
 
     @Override
     public InstanceDetailDTO query(String instanceId) {
+        String[] str = instanceId.split(":");
+        if (str.length != 3) {
+            throw new CommonException("error.illegal.instanceId");
+        }
+        instanceId = str[1] + ":" + str[0] + ":" + str[2];
         for (String service : discoveryClient.getServices()) {
             for (ServiceInstance serviceInstance : discoveryClient.getInstances(service)) {
                 if (serviceInstance instanceof EurekaDiscoveryClient.EurekaServiceInstance) {
