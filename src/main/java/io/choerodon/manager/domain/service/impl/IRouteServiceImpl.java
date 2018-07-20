@@ -12,7 +12,7 @@ import io.choerodon.manager.domain.service.IRouteService;
 import io.choerodon.manager.infra.common.utils.VersionUtil;
 import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.swagger.custom.extra.ExtraData;
+import io.choerodon.swagger.swagger.extra.ExtraData;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
