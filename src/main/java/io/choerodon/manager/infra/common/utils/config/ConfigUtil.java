@@ -1,7 +1,11 @@
 package io.choerodon.manager.infra.common.utils.config;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import io.choerodon.manager.app.service.impl.InstanceServiceImpl;
+import io.codearte.props2yaml.Props2YAML;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -12,13 +16,26 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.choerodon.manager.app.service.impl.ConfigServiceImpl.*;
+import static io.choerodon.manager.app.service.impl.ConfigServiceImpl.CONFIG_TYPE_PROPERTIES;
+import static io.choerodon.manager.app.service.impl.ConfigServiceImpl.CONFIG_TYPE_YAML;
 
 public class ConfigUtil {
 
     private static final ObjectMapper YAM_MAPPER = new ObjectMapper(new YAMLFactory());
 
     private ConfigUtil() {
+    }
+
+    public static String convertDataMapToYaml(final Map<String, InstanceServiceImpl.Data> dataMap) {
+        StringBuilder res = new StringBuilder();
+        for (Map.Entry<String, InstanceServiceImpl.Data> entry : dataMap.entrySet()) {
+            res.append(entry.getKey());
+            res.append("=");
+            res.append(entry.getValue().getValue());
+            res.append("\n");
+        }
+        return Props2YAML.fromContent(res.toString())
+                .convert();
     }
 
     public static String convertMapToText(final Map<String, Object> configMap, final String type) {
@@ -38,6 +55,10 @@ public class ConfigUtil {
         }
     }
 
+    public static String convertJsonToYaml(String jsonString) throws IOException {
+        JsonNode jsonNodeTree = new ObjectMapper().readTree(jsonString);
+        return new YAMLMapper().writeValueAsString(jsonNodeTree);
+    }
 
     private static Map<String, Object> parseProperties(String content) throws IOException {
         Properties properties = new Properties();
