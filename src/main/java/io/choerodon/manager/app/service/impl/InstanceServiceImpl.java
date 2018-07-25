@@ -114,29 +114,54 @@ public class InstanceServiceImpl implements InstanceService {
         } else {
             throw new CommonException("error.illegal.management.url");
         }
-        String envUrl = url + "env";
+        //todo modify
+        //String envUrl = url + "env";
+        String envUrl = "http://127.0.0.1:8964/env";
         ResponseEntity<String> response;
         try {
             response = restTemplate.getForEntity(envUrl, String.class);
             if (response.getStatusCode() == HttpStatus.OK) {
                 processEnvJson(instanceDetail, response.getBody());
+            } else {
+                throw new CommonException("error.config.fetchEnv");
             }
         } catch (Exception e) {
-            LOGGER.info("can not fetch env info, request url : {}, exception message : {}", envUrl, e.getMessage());
+            LOGGER.warn("can not fetch env info, request url : {}, exception message : {}", envUrl, e.getMessage());
+            throw new CommonException("error.config.fetchEnv");
         }
     }
 
     private void processEnvJson(InstanceDetailDTO instanceDetail, String json) {
         try {
-            String allConfigYaml = ConfigUtil.convertJsonToYaml(json);
-            instanceDetail.setEnvInfoYml(new YamlDTO(allConfigYaml, ConfigUtil.appearNumber(allConfigYaml, "\n") + 1));
             JsonNode node = objectMapper.readTree(json);
+            String allConfigYaml = getAllConfigYaml(node);
+            instanceDetail.setEnvInfoYml(new YamlDTO(allConfigYaml, ConfigUtil.appearNumber(allConfigYaml, "\n") + 1));
             String activeConfigYaml = getActiveConfigYaml(node);
-            instanceDetail.setEnvInfoYml(new YamlDTO(activeConfigYaml, ConfigUtil.appearNumber(activeConfigYaml, "\n") + 1));
+            instanceDetail.setConfigInfoYml(new YamlDTO(activeConfigYaml, ConfigUtil.appearNumber(activeConfigYaml, "\n") + 1));
         } catch (IOException e) {
             LOGGER.info("error.restTemplate.fetchEnvInfo {}", e.getMessage());
             throw new CommonException("error.parse.envJson");
         }
+    }
+
+    private String getAllConfigYaml(final JsonNode root) {
+        Map<String, Object> map = new HashMap<>();
+        Iterator<Map.Entry<String, JsonNode>> it = root.fields();
+        while (it.hasNext()) {
+            Map.Entry<String, JsonNode> entry = it.next();
+            String key = entry.getKey();
+            if (key.startsWith("applicationConfig: [classpath:")) {
+                key = key.replace("applicationConfig: [classpath", "").replace("]", "");
+            }
+            Iterator<Map.Entry<String, JsonNode>> vit = entry.getValue().fields();
+            while (vit.hasNext()) {
+                Map.Entry<String, JsonNode> value = vit.next();
+                if (value.getValue().isValueNode()) {
+                    map.put(key+"."+value.getKey(), value.getValue().toString());
+                }
+            }
+        }
+        return ConfigUtil.convertMapToText(map, "yaml");
     }
 
     private String getActiveConfigYaml(final JsonNode root) {
@@ -177,7 +202,6 @@ public class InstanceServiceImpl implements InstanceService {
         }
 
         public static PropertySourceBuilder newInstance(final JsonNode node) {
-
             return new PropertySourceBuilder(node);
         }
 
