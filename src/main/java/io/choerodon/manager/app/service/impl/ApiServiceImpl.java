@@ -79,7 +79,8 @@ public class ApiServiceImpl implements ApiService {
 
     private void process2String(String ref, Map<String, Map<String, FieldDTO>> map, StringBuilder sb) {
         for (Map.Entry<String, Map<String, FieldDTO>> entry : map.entrySet()) {
-            if (ref.endsWith(entry.getKey())) {
+            String className = subString4ClassName(ref);
+            if (className.equals(entry.getKey())) {
                 sb.append("{\n");
                 Map<String, FieldDTO> fileds = entry.getValue();
                 //两个空格为缩进单位
@@ -97,8 +98,14 @@ public class ApiServiceImpl implements ApiService {
                         appendField(sb, field);
                         sb.append("[\n");
                         if (dto.getRef() != null) {
-                            //递归解析
-                            process2String(dto.getRef(), map, sb);
+                            //例外自引用，如果自引用直接返回{}
+                            String refClassName = subString4ClassName(dto.getRef());
+                            if (className.equals(refClassName)) {
+                                sb.append("{}");
+                            } else {
+                                //递归解析
+                                process2String(dto.getRef(), map, sb);
+                            }
                         } else {
                             sb.append(type);
                             sb.append("\n");
@@ -128,6 +135,12 @@ public class ApiServiceImpl implements ApiService {
         }
     }
 
+    private String subString4ClassName(String ref) {
+        //截取#/definitions/RouteDTO字符串，拿到类名
+        String[] arr = ref.split("/");
+        return arr[arr.length - 1];
+    }
+
     private void appendField(StringBuilder sb, String field) {
         sb.append("\"");
         sb.append(field);
@@ -153,7 +166,7 @@ public class ApiServiceImpl implements ApiService {
             ControllerDTO controller = new ControllerDTO();
             controller.setName(name);
             controller.setDescription(description);
-            controller.setPaths(new TreeSet<>());
+            controller.setPaths(new ArrayList<>());
             controllers.add(controller);
         }
         return controllers;
@@ -196,12 +209,12 @@ public class ApiServiceImpl implements ApiService {
         JsonNode pathNode = node.get("paths");
         Iterator<String> urlIterator = pathNode.fieldNames();
         while (urlIterator.hasNext()) {
-            PathDTO path = new PathDTO();
             String url = urlIterator.next();
-            path.setUrl(url);
             JsonNode methodNode = pathNode.get(url);
             Iterator<String> methodIterator = methodNode.fieldNames();
             while (methodIterator.hasNext()) {
+                PathDTO path = new PathDTO();
+                path.setUrl(url);
                 String method = methodIterator.next();
                 path.setMethod(method);
                 JsonNode jsonNode = methodNode.findValue(method);
@@ -209,7 +222,7 @@ public class ApiServiceImpl implements ApiService {
                 for (int i = 0; i < tagNode.size(); i++) {
                     String tag = tagNode.get(i).asText();
                     controllers.forEach(c -> {
-                        Set<PathDTO> paths = c.getPaths();
+                        List<PathDTO> paths = c.getPaths();
                         if (tag.equals(c.getName())) {
                             path.setRefController(c.getName());
                             paths.add(path);
@@ -243,7 +256,8 @@ public class ApiServiceImpl implements ApiService {
                 JsonNode refNode = schemaNode.get("$ref");
                 if (refNode != null) {
                     for (Map.Entry<String, String> entry : controllerMaps.entrySet()) {
-                        if (refNode.asText().endsWith(entry.getKey())) {
+                        String className = subString4ClassName(refNode.asText());
+                        if (className.equals(entry.getKey())) {
                             response.setBody(entry.getValue());
                         }
                     }
@@ -258,7 +272,8 @@ public class ApiServiceImpl implements ApiService {
                     if (ref != null) {
                         String body = "";
                         for (Map.Entry<String, String> entry : controllerMaps.entrySet()) {
-                            if (ref.endsWith(entry.getKey())) {
+                            String className = subString4ClassName(ref);
+                            if (className.equals(entry.getKey())) {
                                 body = entry.getValue();
                             }
                         }
@@ -353,12 +368,13 @@ public class ApiServiceImpl implements ApiService {
             for (int i = 0; i < parameterNode.size(); i++) {
                 try {
                     ParameterDTO parameter = objectMapper.treeToValue(parameterNode.get(i), ParameterDTO.class);
-                    Map<String, String> items = parameter.getItems();
-                    if ("body".equals(parameter.getIn()) && items != null && !items.isEmpty()) {
-                        String ref = items.get("$ref");
+                    Map<String, String> schema = parameter.getSchema();
+                    if ("body".equals(parameter.getIn()) && schema != null && !schema.isEmpty()) {
+                        String ref = schema.get("$ref");
                         if (ref != null) {
                             for (Map.Entry<String, String> entry : controllerMaps.entrySet()) {
-                                if (ref.endsWith(entry.getKey())) {
+                                String className = subString4ClassName(ref);
+                                if (className.equals(entry.getKey())) {
                                     String body = entry.getValue();
                                     parameter.setBody(addIndent2Comments(body));
                                 }
@@ -373,6 +389,4 @@ public class ApiServiceImpl implements ApiService {
         }
         path.setParameters(parameters);
     }
-
-
 }

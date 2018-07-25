@@ -2,7 +2,7 @@ package io.choerodon.manager.api.dto.swagger;
 
 import io.swagger.annotations.ApiModelProperty;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author superlee
@@ -14,7 +14,7 @@ public class ControllerDTO {
     @ApiModelProperty(value = "controller的描述")
     private String description;
     @ApiModelProperty(value = "controller下的方法集")
-    private Set<PathDTO> paths;
+    private List<PathDTO> paths;
 
     public String getName() {
         return name;
@@ -32,11 +32,11 @@ public class ControllerDTO {
         this.description = description;
     }
 
-    public Set<PathDTO> getPaths() {
+    public List<PathDTO> getPaths() {
         return paths;
     }
 
-    public void setPaths(Set<PathDTO> paths) {
+    public void setPaths(List<PathDTO> paths) {
         this.paths = paths;
     }
 }
