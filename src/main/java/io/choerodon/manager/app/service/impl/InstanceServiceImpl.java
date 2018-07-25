@@ -114,9 +114,7 @@ public class InstanceServiceImpl implements InstanceService {
         } else {
             throw new CommonException("error.illegal.management.url");
         }
-        //todo modify
-        //String envUrl = url + "env";
-        String envUrl = "http://127.0.0.1:8964/env";
+        String envUrl = url + "env";
         ResponseEntity<String> response;
         try {
             response = restTemplate.getForEntity(envUrl, String.class);
@@ -150,14 +148,21 @@ public class InstanceServiceImpl implements InstanceService {
         while (it.hasNext()) {
             Map.Entry<String, JsonNode> entry = it.next();
             String key = entry.getKey();
-            if (key.startsWith("applicationConfig: [classpath:")) {
-                key = key.replace("applicationConfig: [classpath", "").replace("]", "");
+            if (key.startsWith("applicationConfig: [classpath:/")) {
+                key = key.replace("applicationConfig: [classpath:/", "").replace(".properties]", "")
+                        .replace(".yml]", "");
+            }
+            if (key.startsWith("configService:")) {
+                key = "config-server";
             }
             Iterator<Map.Entry<String, JsonNode>> vit = entry.getValue().fields();
             while (vit.hasNext()) {
                 Map.Entry<String, JsonNode> value = vit.next();
                 if (value.getValue().isValueNode()) {
-                    map.put(key+"."+value.getKey(), value.getValue().toString());
+                    String jsonValue = value.getValue().toString();
+                    if (!StringUtils.isEmpty(jsonValue) && !value.getKey().startsWith("java")){
+                        map.put(key+"."+value.getKey(), value.getValue().toString());
+                    }
                 }
             }
         }
