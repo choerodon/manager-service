@@ -1,5 +1,7 @@
 package io.choerodon.manager.api.dto.swagger;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.Set;
 
 /**
@@ -7,8 +9,11 @@ import java.util.Set;
  */
 public class ControllerDTO {
 
+    @ApiModelProperty(value = "controller的名字")
     private String name;
+    @ApiModelProperty(value = "controller的描述")
     private String description;
+    @ApiModelProperty(value = "controller下的方法集")
     private Set<PathDTO> paths;
 
     public String getName() {

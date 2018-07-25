@@ -1,14 +1,19 @@
 package io.choerodon.manager.api.dto.swagger;
 
-import java.util.List;
+import io.swagger.annotations.ApiModelProperty;
+
 
 /**
  * @author superlee
  */
 public class ResponseDTO {
+
+    @ApiModelProperty(value = "http状态码")
     private String httpStatus;
+
     private String description;
-    private List<String> schema;
+
+    private String body;
 
     public String getHttpStatus() {
         return httpStatus;
@@ -26,11 +31,11 @@ public class ResponseDTO {
         this.description = description;
     }
 
-    public List<String> getSchema() {
-        return schema;
+    public String getBody() {
+        return body;
     }
 
-    public void setSchema(List<String> schema) {
-        this.schema = schema;
+    public void setBody(String body) {
+        this.body = body;
     }
 }

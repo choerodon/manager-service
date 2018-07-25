@@ -18,6 +18,15 @@ public class ParameterDTO {
     private String format;
     private String collectionFormat;
     private Map<String, String> items;
+    private String body;
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
 
     public String getDescription() {
         return description;

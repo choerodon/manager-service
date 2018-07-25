@@ -9,6 +9,7 @@ import io.choerodon.manager.infra.common.utils.VersionUtil;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,7 @@ public class ApiController {
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("查询服务controller和接口")
     @GetMapping("/controllers/{service_prefix}")
+    @CustomPageRequest
     public ResponseEntity<Page<ControllerDTO>> queryByNameAndVersion(
             @PathVariable("service_prefix") String serviceName,
             @RequestParam(value = "version", required = false,defaultValue = VersionUtil.NULL_VERSION) String version,
