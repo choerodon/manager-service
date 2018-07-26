@@ -50,7 +50,6 @@ choerodon:
     client: client
     oauth-url: http://localhost:8080/oauth/oauth/authorize
     fetch:
-      callBack: true
       time: 10
     skip:
       service: register-server, api-gateway, gateway-helper, oauth-server, config-server, event-store-service
