@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 import springfox.documentation.swagger.web.SwaggerResource;
 
 import java.util.HashMap;
@@ -46,7 +47,7 @@ public class ApiController {
 
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("查询服务controller和接口")
-    @GetMapping("/controllers/{service_prefix}")
+    @GetMapping("/{service_prefix}/controllers")
     @CustomPageRequest
     public ResponseEntity<Page<ControllerDTO>> queryByNameAndVersion(
             @PathVariable("service_prefix") String serviceName,
@@ -54,7 +55,7 @@ public class ApiController {
             @RequestParam(required = false, name = "params") String params,
             @RequestParam(required = false, name = "name") String name,
             @RequestParam(required = false, name = "description") String description,
-            @SortDefault(value = "name", direction = Sort.Direction.ASC)
+            @ApiIgnore @SortDefault(value = "name", direction = Sort.Direction.ASC)
                     PageRequest pageRequest) {
         Map<String, Object> map = new HashMap<>();
         map.put("params", params);
@@ -62,4 +63,17 @@ public class ApiController {
         map.put("description", description);
         return new ResponseEntity<>(apiService.getControllers(serviceName, version, pageRequest, map), HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.SITE)
+    @ApiOperation("根据path")
+    @GetMapping("/{service_prefix}/controllers/{name}/paths")
+    public ResponseEntity<ControllerDTO> queryPathDetail(@PathVariable("service_prefix") String serviceName,
+                                                   @PathVariable("name") String controllerName,
+                                                   @RequestParam(value = "version", required = false,defaultValue = VersionUtil.NULL_VERSION) String version,
+                                                   @RequestParam String url,
+                                                   @RequestParam String method) {
+        return new ResponseEntity<>(apiService.queryPathDetail(serviceName, version, controllerName, url, method), HttpStatus.OK);
+    }
+
+
 }
