@@ -65,7 +65,7 @@ public class ApiController {
     }
 
     @Permission(level = ResourceLevel.SITE)
-    @ApiOperation("根据path")
+    @ApiOperation("根据path的url和method查询单个path")
     @GetMapping("/{service_prefix}/controllers/{name}/paths")
     public ResponseEntity<ControllerDTO> queryPathDetail(@PathVariable("service_prefix") String serviceName,
                                                    @PathVariable("name") String controllerName,

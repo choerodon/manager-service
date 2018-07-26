@@ -1,6 +1,7 @@
 package io.choerodon.manager.api.dto.swagger;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.util.Map;
 
@@ -10,14 +11,16 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ParameterDTO {
 
+    @ApiModelProperty("参数描述")
     private String description;
     private String in;
     private String name;
+    @ApiModelProperty("是否必填")
     private Boolean required;
+    @ApiModelProperty("参数类型")
     private String type;
     private String format;
     private String collectionFormat;
-//    private Map<String, String> items;
     private Map<String, String> schema;
     private String body;
 
@@ -76,14 +79,6 @@ public class ParameterDTO {
     public void setFormat(String format) {
         this.format = format;
     }
-
-//    public Map<String, String> getItems() {
-//        return items;
-//    }
-//
-//    public void setItems(Map<String, String> items) {
-//        this.items = items;
-//    }
 
     public String getCollectionFormat() {
         return collectionFormat;

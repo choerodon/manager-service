@@ -1,12 +1,16 @@
 package io.choerodon.manager.api.dto.swagger;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author superlee
  */
 public class FieldDTO {
 
+    @ApiModelProperty("字段注释")
     private String comment;
     private String type;
+    @ApiModelProperty(hidden = true)
     private String ref;
     private String itemType;
 
