@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author superlee
@@ -51,6 +52,29 @@ public class ApiServiceImpl implements ApiService {
                 .orElseThrow(() -> new CommonException("error.service.swaggerJson.empty"));
     }
 
+    @Override
+    public ControllerDTO queryPathDetail(String serviceName, String version, String controllerName, String url, String method) {
+        try {
+            String json = iDocumentService.getSwaggerJson(serviceName, version);
+            JsonNode node = objectMapper.readTree(json);
+            List<ControllerDTO> controllers = processControllers(node);
+            List<ControllerDTO> targetControllers =
+                    controllers.stream().filter(c -> controllerName.equals(c.getName())).collect(Collectors.toList());
+            if (targetControllers.isEmpty()) {
+                throw new CommonException("error.controller.not.found", controllerName);
+            }
+            Map<String, Map<String, FieldDTO>> map = processDefinitions(node);
+            Map<String, String> dtoMap = convertMap2JsonWithComments(map);
+            JsonNode pathNode = node.get("paths");
+            return queryPathDetailByOptions(pathNode, targetControllers, url, method, dtoMap).get(0);
+        } catch (IOException e) {
+            logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", serviceName, version, e.getMessage());
+            throw new CommonException("error.service.not.run", serviceName, version);
+        }
+    }
+
+
+
     private List<ControllerDTO> processJson2ControllerDTO(String json) {
         List<ControllerDTO> controllers;
         try {
@@ -59,7 +83,8 @@ public class ApiServiceImpl implements ApiService {
             Map<String, Map<String, FieldDTO>> map = processDefinitions(node);
             Map<String, String> dtoMap = convertMap2JsonWithComments(map);
             controllers = processControllers(node);
-            processPaths(node, controllers, dtoMap);
+            JsonNode pathNode = node.get("paths");
+            processPaths(pathNode, controllers, dtoMap);
         } catch (IOException e) {
             throw new CommonException("error.parseJson");
         }
@@ -205,40 +230,61 @@ public class ApiServiceImpl implements ApiService {
         return map;
     }
 
-    private void processPaths(JsonNode node, List<ControllerDTO> controllers, Map<String, String> controllerMaps) {
-        JsonNode pathNode = node.get("paths");
+    private List<ControllerDTO> queryPathDetailByOptions(JsonNode pathNode, List<ControllerDTO> targetControllers, String url, String method,
+                                             Map<String, String> dtoMap) {
+        Iterator<String> urlIterator = pathNode.fieldNames();
+        while (urlIterator.hasNext()) {
+            String pathUrl = urlIterator.next();
+            if (url.equals(pathUrl)) {
+                JsonNode methodNode = pathNode.get(pathUrl);
+                Iterator<String> methodIterator = methodNode.fieldNames();
+                while (methodIterator.hasNext()) {
+                    String pathMethod = methodIterator.next();
+                    if (method.equals(pathMethod)) {
+                        processPathDetail(targetControllers, dtoMap, url, methodNode, method);
+                    }
+                }
+            }
+        }
+        return targetControllers;
+    }
+
+    private void processPaths(JsonNode pathNode, List<ControllerDTO> controllers, Map<String, String> dtoMap) {
         Iterator<String> urlIterator = pathNode.fieldNames();
         while (urlIterator.hasNext()) {
             String url = urlIterator.next();
             JsonNode methodNode = pathNode.get(url);
             Iterator<String> methodIterator = methodNode.fieldNames();
             while (methodIterator.hasNext()) {
-                PathDTO path = new PathDTO();
-                path.setUrl(url);
                 String method = methodIterator.next();
-                path.setMethod(method);
-                JsonNode jsonNode = methodNode.findValue(method);
-                JsonNode tagNode = jsonNode.get("tags");
-                for (int i = 0; i < tagNode.size(); i++) {
-                    String tag = tagNode.get(i).asText();
-                    controllers.forEach(c -> {
-                        List<PathDTO> paths = c.getPaths();
-                        if (tag.equals(c.getName())) {
-                            path.setRefController(c.getName());
-                            paths.add(path);
-                        }
-                    });
-                }
-                path.setRemark(Optional.ofNullable(jsonNode.get("summary")).map(JsonNode::asText).orElse(null));
-                path.setDescription(Optional.ofNullable(jsonNode.get(DESCRIPTION)).map(JsonNode::asText).orElse(null));
-                path.setOperationId(Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
-                path.setOperationId(jsonNode.get("operationId").asText());
-                processConsumes(path, jsonNode);
-                processProduces(path, jsonNode);
-                processResponses(path, jsonNode, controllerMaps);
-                processParameters(path, jsonNode, controllerMaps);
+                processPathDetail(controllers, dtoMap, url, methodNode, method);
             }
         }
+    }
+
+    private void processPathDetail(List<ControllerDTO> controllers, Map<String, String> dtoMap, String url, JsonNode methodNode, String method) {
+        PathDTO path = new PathDTO();
+        path.setUrl(url);
+        path.setMethod(method);
+        JsonNode jsonNode = methodNode.findValue(method);
+        JsonNode tagNode = jsonNode.get("tags");
+        for (int i = 0; i < tagNode.size(); i++) {
+            String tag = tagNode.get(i).asText();
+            controllers.forEach(c -> {
+                List<PathDTO> paths = c.getPaths();
+                if (tag.equals(c.getName())) {
+                    path.setRefController(c.getName());
+                    paths.add(path);
+                }
+            });
+        }
+        path.setRemark(Optional.ofNullable(jsonNode.get("summary")).map(JsonNode::asText).orElse(null));
+        path.setDescription(Optional.ofNullable(jsonNode.get(DESCRIPTION)).map(JsonNode::asText).orElse(null));
+        path.setOperationId(Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
+        processConsumes(path, jsonNode);
+        processProduces(path, jsonNode);
+        processResponses(path, jsonNode, dtoMap);
+        processParameters(path, jsonNode, dtoMap);
     }
 
     private void processResponses(PathDTO path, JsonNode jsonNode, Map<String, String> controllerMaps) {
@@ -287,6 +333,12 @@ public class ApiServiceImpl implements ApiService {
                         }
                         //给array前面的注释加上缩进，即满足\n//\\S+\n的注释
                         response.setBody(addIndent2Comments(sb.toString()));
+                    } else {
+                        if ("object".equals(type)) {
+                            response.setBody("{}");
+                        } else {
+                            response.setBody(type);
+                        }
                     }
                 }
             }
@@ -306,6 +358,7 @@ public class ApiServiceImpl implements ApiService {
             StringBuilder sb = new StringBuilder();
             String prefix = str.substring(0, start);
             sb.append(prefix);
+            sb.append("\n");
             sb.append(appendIndent(targetStr, prefix));
             String suffix = str.substring(end, str.length());
             sb.append(suffix);
@@ -323,7 +376,6 @@ public class ApiServiceImpl implements ApiService {
         int d = count(prefix,"\\}");
         int num = a + b - c - d;
         StringBuilder sb = new StringBuilder();
-        sb.append("\n");
         for(int i = 0; i< num; i++) {
             sb.append("  ");
         }
