@@ -8,14 +8,15 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.api.dto.InstanceDetailDTO;
 import io.choerodon.manager.api.dto.YamlDTO;
-import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
 import io.choerodon.manager.app.service.InstanceService;
 import io.choerodon.manager.infra.common.utils.ManualPageHelper;
+import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
 import io.choerodon.manager.infra.feign.ConfigServerClient;
 import io.choerodon.manager.infra.mapper.ConfigMapper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.bind.RelaxedNames;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.netflix.eureka.EurekaDiscoveryClient;
@@ -119,61 +120,230 @@ public class InstanceServiceImpl implements InstanceService {
             response = restTemplate.getForEntity(envUrl, String.class);
             if (response.getStatusCode() == HttpStatus.OK) {
                 processEnvJson(instanceDetail, response.getBody());
+            } else {
+                throw new CommonException("error.config.fetchEnv");
             }
         } catch (Exception e) {
-            LOGGER.info("can not fetch env info, request url : {}, exception message : {}", envUrl, e.getMessage());
+            LOGGER.warn("can not fetch env info, request url : {}, exception message : {}", envUrl, e.getMessage());
+            throw new CommonException("error.config.fetchEnv");
         }
     }
 
     private void processEnvJson(InstanceDetailDTO instanceDetail, String json) {
         try {
             JsonNode node = objectMapper.readTree(json);
-            Map<String, Object> envMap = processEnvMap(node);
-            YamlDTO envInfoYml = new YamlDTO();
-            String yaml = ConfigUtil.convertMapToText(envMap, "yaml");
-            envInfoYml.setYaml(yaml);
-            envInfoYml.setTotalLine(ConfigUtil.appearNumber(yaml, "\n") + 1);
-            instanceDetail.setEnvInfoYml(envInfoYml);
-            Map<String, Object> configMap = processConfigMap(node);
-            YamlDTO configInfoYml = new YamlDTO();
-            String yaml1 = ConfigUtil.convertMapToText(configMap, "yaml");
-            configInfoYml.setYaml(yaml1);
-            configInfoYml.setTotalLine(ConfigUtil.appearNumber(yaml1, "\n") + 1);
-            instanceDetail.setConfigInfoYml(configInfoYml);
+            String allConfigYaml = getAllConfigYaml(node);
+            instanceDetail.setEnvInfoYml(new YamlDTO(allConfigYaml, ConfigUtil.appearNumber(allConfigYaml, "\n") + 1));
+            String activeConfigYaml = getActiveConfigYaml(node);
+            instanceDetail.setConfigInfoYml(new YamlDTO(activeConfigYaml, ConfigUtil.appearNumber(activeConfigYaml, "\n") + 1));
         } catch (IOException e) {
             LOGGER.info("error.restTemplate.fetchEnvInfo {}", e.getMessage());
             throw new CommonException("error.parse.envJson");
         }
     }
 
-    private Map<String, Object> processEnvMap(JsonNode node) {
-        Map<String, Object> map1 = objectMapper.convertValue(node.findValue("systemEnvironment"), Map.class);
-        Map<String, Object> map2 = objectMapper.convertValue(node.findValue("applicationConfig: [classpath:/application.yml]"), Map.class);
-        Map<String, Object> map3 = objectMapper.convertValue(node.findValue("applicationConfig: [classpath:/bootstrap.yml]"), Map.class);
+    private String getAllConfigYaml(final JsonNode root) {
         Map<String, Object> map = new HashMap<>();
-        map1.entrySet().forEach(t -> map.put("systemEnvironment." + t.getKey(), t.getValue()));
-        map2.entrySet().forEach(t -> map.put("application." + t.getKey(), t.getValue()));
-        map3.entrySet().forEach(t -> map.put("bootstrap." + t.getKey(), t.getValue()));
-        return map;
-    }
-
-    private Map<String, Object> processConfigMap(JsonNode node) {
-        Iterator<String> fieldNames = node.fieldNames();
-        List<Map<String, Object>> list = new ArrayList<>();
-        while (fieldNames.hasNext()) {
-            String fieldName = fieldNames.next();
-            if (fieldName.contains("configService")) {
-                list.add(objectMapper.convertValue(node.findValue(fieldName), Map.class));
+        Iterator<Map.Entry<String, JsonNode>> it = root.fields();
+        while (it.hasNext()) {
+            Map.Entry<String, JsonNode> entry = it.next();
+            String key = entry.getKey();
+            if (key.startsWith("applicationConfig: [classpath:/")) {
+                key = key.replace("applicationConfig: [classpath:/", "").replace(".properties]", "")
+                        .replace(".yml]", "");
+            }
+            if (key.startsWith("configService:")) {
+                key = "config-server";
+            }
+            Iterator<Map.Entry<String, JsonNode>> vit = entry.getValue().fields();
+            while (vit.hasNext()) {
+                Map.Entry<String, JsonNode> value = vit.next();
+                if (value.getValue().isValueNode()) {
+                    String jsonValue = value.getValue().toString();
+                    if (!StringUtils.isEmpty(jsonValue) && !value.getKey().startsWith("java")){
+                        map.put(key+"."+value.getKey(), value.getValue().toString());
+                    }
+                }
             }
         }
-        Map<String, Object> map = new HashMap<>();
-        list.forEach(m -> {
-            for (Map.Entry<String, Object> entry : m.entrySet()) {
-                map.put(entry.getKey(), entry.getValue());
-            }
-        });
-        return map;
+        return ConfigUtil.convertMapToText(map, "yaml");
     }
+
+    private String getActiveConfigYaml(final JsonNode root) {
+        String config = getConfigPropertySource(root);
+        String activeProfile = "default";
+        JsonNode profileNode = root.findValue("profiles");
+        if (profileNode != null && !profileNode.toString().isEmpty()) {
+            activeProfile = profileNode.toString();
+        }
+        activeProfile = "applicationConfig: [classpath:/application-" + activeProfile;
+        Map<String, Data> map = PropertySourceBuilder.newInstance(root)
+                .appendApply("defaultProperties")
+                .appendApply("applicationConfig: [classpath:/bootstrap.properties]")
+                .appendApply("applicationConfig: [classpath:/bootstrap.yml]")
+                .appendApply("kafkaBinderDefaultProperties")
+                .appendApply("applicationConfig: [classpath:/application.properties]")
+                .appendApply("applicationConfig: [classpath:/application.yml]")
+                .appendApply(activeProfile + ".properties]")
+                .appendApply(activeProfile + ".yml]")
+                .appendApply("random")
+                .appendApply(config)
+                .coverApply("systemEnvironment")
+                .coverApply("systemProperties")
+                .appendApply("servletConfigInitParams")
+                .appendApply("commandLineArgs")
+                .coverApplyServerPort()
+                .data();
+        return ConfigUtil.convertDataMapToYaml(map);
+    }
+
+    private static class PropertySourceBuilder {
+
+        private final JsonNode root;
+        private final Map<String, Data> map = new HashMap<>();
+
+        public PropertySourceBuilder(JsonNode node) {
+            this.root = node;
+        }
+
+        public static PropertySourceBuilder newInstance(final JsonNode node) {
+            return new PropertySourceBuilder(node);
+        }
+
+
+        public PropertySourceBuilder appendApply(final String property) {
+            if (property == null) {
+                return this;
+            }
+            JsonNode value = root.findValue(property);
+            if (value == null) {
+                return this;
+            }
+            Iterator<Map.Entry<String, JsonNode>> it = value.fields();
+
+            while (it.hasNext()) {
+                Map.Entry<String, JsonNode> entry = it.next();
+                Data data = getDataByRelaxedNames(entry.getKey());
+                if (data == null) {
+                    map.put(entry.getKey(), new Data(entry.getValue().toString(), property));
+                } else {
+                    data.setValue(entry.getValue().toString());
+                }
+            }
+            return this;
+        }
+
+
+        public PropertySourceBuilder coverApplyServerPort() {
+            JsonNode value = root.findValue("server.ports");
+            if (value == null) {
+                return this;
+            }
+            JsonNode serverPort = value.findValue("local.server.port");
+            if (serverPort != null) {
+                map.put("server.port", new Data(serverPort.toString(), "server.ports"));
+            }
+            JsonNode managementServerPort = value.findValue("local.management.port");
+            if (serverPort != null) {
+                map.put("management.port", new Data(managementServerPort.toString(), "server.ports"));
+            }
+            return this;
+        }
+
+        public PropertySourceBuilder coverApply(final String property) {
+            if (property == null) {
+                return this;
+            }
+            JsonNode value = root.findValue(property);
+            if (value == null) {
+                return this;
+            }
+            Iterator<Map.Entry<String, JsonNode>> it = value.fields();
+            while (it.hasNext()) {
+                Map.Entry<String, JsonNode> entry = it.next();
+                String mapExistKey = getKeyByRelaxedNames(entry.getKey());
+                if (mapExistKey != null) {
+                    Data data = map.get(mapExistKey);
+                    data.setValue(entry.getValue().toString());
+                }
+            }
+            return this;
+        }
+
+        public Map<String, Data> data() {
+            return this.map;
+        }
+
+
+        private String getKeyByRelaxedNames(final String key) {
+            for (String i : map.keySet()) {
+                RelaxedNames relaxedNames = RelaxedNames.forCamelCase(i);
+                for (String j : relaxedNames) {
+                    if (j.contains(key)) {
+                        return i;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private Data getDataByRelaxedNames(final String key) {
+            RelaxedNames relaxedNames = RelaxedNames.forCamelCase(key);
+            for (String i : relaxedNames) {
+                if (map.containsKey(i)) {
+                    return map.get(i);
+                }
+            }
+            return null;
+        }
+
+    }
+
+    public static class Data {
+        private Object value;
+        private String source;
+
+        public Data(Object value, String source) {
+            this.value = value;
+            this.source = source;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public void setValue(Object value) {
+            this.value = value;
+        }
+
+        public String getSource() {
+            return source;
+        }
+
+        public void setSource(String source) {
+            this.source = source;
+        }
+
+        @Override
+        public String toString() {
+            return "Data{" +
+                    "value=" + value +
+                    ", source='" + source + '\'' +
+                    '}';
+        }
+    }
+
+    private String getConfigPropertySource(final JsonNode root) {
+        Iterator<Map.Entry<String, JsonNode>> it = root.fields();
+        while (it.hasNext()) {
+            Map.Entry<String, JsonNode> entry = it.next();
+            if (entry.getKey().startsWith("configService:")) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
 
     @Override
     public void update(String instanceId, Long configId) {
