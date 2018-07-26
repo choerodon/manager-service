@@ -10,9 +10,10 @@ public class ResponseDTO {
 
     @ApiModelProperty(value = "http状态码")
     private String httpStatus;
-
+    @ApiModelProperty(value = "状态码描述")
     private String description;
 
+    @ApiModelProperty(value = "接口返回的结果")
     private String body;
 
     public String getHttpStatus() {
