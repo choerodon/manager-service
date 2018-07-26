@@ -287,6 +287,12 @@ public class ApiServiceImpl implements ApiService {
                         }
                         //给array前面的注释加上缩进，即满足\n//\\S+\n的注释
                         response.setBody(addIndent2Comments(sb.toString()));
+                    } else {
+                        if ("object".equals(type)) {
+                            response.setBody("{}");
+                        } else {
+                            response.setBody(type);
+                        }
                     }
                 }
             }
@@ -306,6 +312,7 @@ public class ApiServiceImpl implements ApiService {
             StringBuilder sb = new StringBuilder();
             String prefix = str.substring(0, start);
             sb.append(prefix);
+            sb.append("\n");
             sb.append(appendIndent(targetStr, prefix));
             String suffix = str.substring(end, str.length());
             sb.append(suffix);
@@ -323,7 +330,6 @@ public class ApiServiceImpl implements ApiService {
         int d = count(prefix,"\\}");
         int num = a + b - c - d;
         StringBuilder sb = new StringBuilder();
-        sb.append("\n");
         for(int i = 0; i< num; i++) {
             sb.append("  ");
         }
