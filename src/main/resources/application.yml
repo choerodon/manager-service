@@ -60,3 +60,6 @@ choerodon:
     executetTime: 100
   profiles:
     active: sit
+logging:
+  level:
+   io.choerodon.manager: debug
