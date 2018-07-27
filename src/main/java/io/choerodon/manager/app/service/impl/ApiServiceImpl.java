@@ -53,7 +53,7 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public ControllerDTO queryPathDetail(String serviceName, String version, String controllerName, String url, String method) {
+    public ControllerDTO queryPathDetail(String serviceName, String version, String controllerName, String operationId) {
         try {
             String json = iDocumentService.getSwaggerJson(serviceName, version);
             JsonNode node = objectMapper.readTree(json);
@@ -66,7 +66,7 @@ public class ApiServiceImpl implements ApiService {
             Map<String, Map<String, FieldDTO>> map = processDefinitions(node);
             Map<String, String> dtoMap = convertMap2JsonWithComments(map);
             JsonNode pathNode = node.get("paths");
-            return queryPathDetailByOptions(pathNode, targetControllers, url, method, dtoMap).get(0);
+            return queryPathDetailByOptions(pathNode, targetControllers, operationId, dtoMap).get(0);
         } catch (IOException e) {
             logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", serviceName, version, e.getMessage());
             throw new CommonException("error.service.not.run", serviceName, version);
@@ -230,19 +230,19 @@ public class ApiServiceImpl implements ApiService {
         return map;
     }
 
-    private List<ControllerDTO> queryPathDetailByOptions(JsonNode pathNode, List<ControllerDTO> targetControllers, String url, String method,
+    private List<ControllerDTO> queryPathDetailByOptions(JsonNode pathNode, List<ControllerDTO> targetControllers, String operationId,
                                              Map<String, String> dtoMap) {
         Iterator<String> urlIterator = pathNode.fieldNames();
         while (urlIterator.hasNext()) {
-            String pathUrl = urlIterator.next();
-            if (url.equals(pathUrl)) {
-                JsonNode methodNode = pathNode.get(pathUrl);
-                Iterator<String> methodIterator = methodNode.fieldNames();
-                while (methodIterator.hasNext()) {
-                    String pathMethod = methodIterator.next();
-                    if (method.equals(pathMethod)) {
-                        processPathDetail(targetControllers, dtoMap, url, methodNode, method);
-                    }
+            String url = urlIterator.next();
+            JsonNode methodNode = pathNode.get(url);
+            Iterator<String> methodIterator = methodNode.fieldNames();
+            while (methodIterator.hasNext()) {
+                String method = methodIterator.next();
+                JsonNode pathDetailNode = methodNode.get(method);
+                String pathOperationId = pathDetailNode.get("operationId").asText();
+                if (operationId.equals(pathOperationId)) {
+                    processPathDetail(targetControllers, dtoMap, url, methodNode, method);
                 }
             }
         }

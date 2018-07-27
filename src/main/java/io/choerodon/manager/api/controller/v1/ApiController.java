@@ -70,9 +70,8 @@ public class ApiController {
     public ResponseEntity<ControllerDTO> queryPathDetail(@PathVariable("service_prefix") String serviceName,
                                                    @PathVariable("name") String controllerName,
                                                    @RequestParam(value = "version", required = false,defaultValue = VersionUtil.NULL_VERSION) String version,
-                                                   @RequestParam String url,
-                                                   @RequestParam String method) {
-        return new ResponseEntity<>(apiService.queryPathDetail(serviceName, version, controllerName, url, method), HttpStatus.OK);
+                                                   @RequestParam("operation_id") String operationId) {
+        return new ResponseEntity<>(apiService.queryPathDetail(serviceName, version, controllerName, operationId), HttpStatus.OK);
     }
 
 
