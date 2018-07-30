@@ -25,6 +25,8 @@ public class PathDTO implements Comparable<PathDTO> {
     private String description;
     @ApiModelProperty(value = "接口相关联的controller")
     private String refController;
+    @ApiModelProperty(value = "内部调用的接口")
+    private Boolean innerInterface;
 
     public String getUrl() {
         return url;
@@ -104,6 +106,14 @@ public class PathDTO implements Comparable<PathDTO> {
 
     public void setRefController(String refController) {
         this.refController = refController;
+    }
+
+    public Boolean getInnerInterface() {
+        return innerInterface;
+    }
+
+    public void setInnerInterface(Boolean innerInterface) {
+        this.innerInterface = innerInterface;
     }
 
     @Override

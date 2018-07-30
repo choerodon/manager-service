@@ -279,6 +279,13 @@ public class ApiServiceImpl implements ApiService {
             });
         }
         path.setRemark(Optional.ofNullable(jsonNode.get("summary")).map(JsonNode::asText).orElse(null));
+        JsonNode descriptionNode = jsonNode.get(DESCRIPTION);
+        if(descriptionNode != null) {
+            path.setDescription(descriptionNode.asText());
+            path.setInnerInterface(false);
+        } else {
+            path.setInnerInterface(true);
+        }
         path.setDescription(Optional.ofNullable(jsonNode.get(DESCRIPTION)).map(JsonNode::asText).orElse(null));
         path.setOperationId(Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
         processConsumes(path, jsonNode);
