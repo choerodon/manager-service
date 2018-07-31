@@ -27,6 +27,16 @@ public class PathDTO implements Comparable<PathDTO> {
     private String refController;
     @ApiModelProperty(value = "内部调用的接口")
     private Boolean innerInterface;
+    @ApiModelProperty(value = "请求的basePath")
+    private String basePath;
+
+    public String getBasePath() {
+        return basePath;
+    }
+
+    public void setBasePath(String basePath) {
+        this.basePath = basePath;
+    }
 
     public String getUrl() {
         return url;
