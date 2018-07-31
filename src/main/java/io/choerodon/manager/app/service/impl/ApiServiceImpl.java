@@ -66,25 +66,25 @@ public class ApiServiceImpl implements ApiService {
             Map<String, Map<String, FieldDTO>> map = processDefinitions(node);
             Map<String, String> dtoMap = convertMap2JsonWithComments(map);
             JsonNode pathNode = node.get("paths");
-            return queryPathDetailByOptions(pathNode, targetControllers, operationId, dtoMap).get(0);
+            String basePath = node.get("basePath").asText();
+            return queryPathDetailByOptions(pathNode, targetControllers, operationId, dtoMap, basePath).get(0);
         } catch (IOException e) {
             logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", serviceName, version, e.getMessage());
             throw new CommonException("error.service.not.run", serviceName, version);
         }
     }
 
-
-
     private List<ControllerDTO> processJson2ControllerDTO(String json) {
         List<ControllerDTO> controllers;
         try {
             JsonNode node = objectMapper.readTree(json);
             //解析definitions,构造json
+            String basePath = node.get("basePath").asText();
             Map<String, Map<String, FieldDTO>> map = processDefinitions(node);
             Map<String, String> dtoMap = convertMap2JsonWithComments(map);
             controllers = processControllers(node);
             JsonNode pathNode = node.get("paths");
-            processPaths(pathNode, controllers, dtoMap);
+            processPaths(pathNode, controllers, dtoMap, basePath);
         } catch (IOException e) {
             throw new CommonException("error.parseJson");
         }
@@ -231,7 +231,7 @@ public class ApiServiceImpl implements ApiService {
     }
 
     private List<ControllerDTO> queryPathDetailByOptions(JsonNode pathNode, List<ControllerDTO> targetControllers, String operationId,
-                                             Map<String, String> dtoMap) {
+                                             Map<String, String> dtoMap, String basePath) {
         Iterator<String> urlIterator = pathNode.fieldNames();
         while (urlIterator.hasNext()) {
             String url = urlIterator.next();
@@ -242,14 +242,14 @@ public class ApiServiceImpl implements ApiService {
                 JsonNode pathDetailNode = methodNode.get(method);
                 String pathOperationId = pathDetailNode.get("operationId").asText();
                 if (operationId.equals(pathOperationId)) {
-                    processPathDetail(targetControllers, dtoMap, url, methodNode, method);
+                    processPathDetail(targetControllers, dtoMap, url, methodNode, method, basePath);
                 }
             }
         }
         return targetControllers;
     }
 
-    private void processPaths(JsonNode pathNode, List<ControllerDTO> controllers, Map<String, String> dtoMap) {
+    private void processPaths(JsonNode pathNode, List<ControllerDTO> controllers, Map<String, String> dtoMap, String basePath) {
         Iterator<String> urlIterator = pathNode.fieldNames();
         while (urlIterator.hasNext()) {
             String url = urlIterator.next();
@@ -257,13 +257,15 @@ public class ApiServiceImpl implements ApiService {
             Iterator<String> methodIterator = methodNode.fieldNames();
             while (methodIterator.hasNext()) {
                 String method = methodIterator.next();
-                processPathDetail(controllers, dtoMap, url, methodNode, method);
+                processPathDetail(controllers, dtoMap, url, methodNode, method, basePath);
             }
         }
     }
 
-    private void processPathDetail(List<ControllerDTO> controllers, Map<String, String> dtoMap, String url, JsonNode methodNode, String method) {
+    private void processPathDetail(List<ControllerDTO> controllers, Map<String, String> dtoMap,
+                                   String url, JsonNode methodNode, String method, String basePath) {
         PathDTO path = new PathDTO();
+        path.setBasePath(basePath);
         path.setUrl(url);
         path.setMethod(method);
         JsonNode jsonNode = methodNode.findValue(method);
