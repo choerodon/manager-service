@@ -1,9 +1,8 @@
 package io.choerodon.manager.api.dto.swagger;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
-
-import java.util.Map;
 
 /**
  * @author superlee
@@ -21,7 +20,9 @@ public class ParameterDTO {
     private String type;
     private String format;
     private String collectionFormat;
-    private Map<String, String> schema;
+    @JsonProperty("schema")
+    private SchemaDTO schema;
+
     private String body;
 
     public String getBody() {
@@ -88,11 +89,11 @@ public class ParameterDTO {
         this.collectionFormat = collectionFormat;
     }
 
-    public Map<String, String> getSchema() {
+    public SchemaDTO getSchema() {
         return schema;
     }
 
-    public void setSchema(Map<String, String> schema) {
+    public void setSchema(SchemaDTO schema) {
         this.schema = schema;
     }
 
