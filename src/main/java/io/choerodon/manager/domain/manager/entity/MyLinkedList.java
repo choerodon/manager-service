@@ -35,14 +35,31 @@ public class MyLinkedList<T> {
         if (fast == null) {
             return false;
         }
-        while (fast != null && fast.next != null) {
-            fast = fast.next.next;
-            slow = slow.next;
+        while (slow.next != null) {
+            fast = fast.next;
             if (fast != null && fast.data.equals(slow.data)) {
                 return true;
             }
+            if (fast.next == null) {
+                slow = slow.next;
+                fast = slow;
+            }
         }
         return !(fast == null || fast.next == null);
+    }
+
+    /**
+     * 深拷贝
+     * @return
+     */
+    public MyLinkedList<T> deepCopy() {
+        MyLinkedList<T> myLinkedList = new MyLinkedList<>();
+        Node head = this.head;
+        while (head != null) {
+            myLinkedList.addNode(head.data);
+            head = head.next;
+        }
+        return myLinkedList;
     }
 
     class Node {

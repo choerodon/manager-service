@@ -127,14 +127,16 @@ public class ApiServiceImpl implements ApiService {
                         appendField(sb, field);
                         sb.append("[\n");
                         if (dto.getRef() != null) {
-                            //例外自引用，如果自引用直接返回{}
                             String refClassName = subString4ClassName(dto.getRef());
-                            linkedList.addNode(refClassName);
-                            if (linkedList.isLoop()) {
+                            //linkedList深拷贝一份，处理同一个对象对另一个对象的多次引用的情况
+                            MyLinkedList<String> copyLinkedList = linkedList.deepCopy();
+                            copyLinkedList.addNode(refClassName);
+                            //循环引用直接跳出递归
+                            if (copyLinkedList.isLoop()) {
                                 sb.append("{}");
                             } else {
                                 //递归解析
-                                process2String(dto.getRef(), map, sb, linkedList);
+                                process2String(dto.getRef(), map, sb, copyLinkedList);
                             }
                         } else {
                             sb.append(type);
