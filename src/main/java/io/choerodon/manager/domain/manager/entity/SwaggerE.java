@@ -1,17 +1,11 @@
 package io.choerodon.manager.domain.manager.entity;
 
-import org.apache.commons.collections.keyvalue.MultiKey;
-import org.apache.commons.collections.map.MultiKeyMap;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import springfox.documentation.swagger.web.ApiKeyVehicle;
 import springfox.documentation.swagger.web.SecurityConfiguration;
-import springfox.documentation.swagger.web.SwaggerResource;
 import springfox.documentation.swagger.web.UiConfiguration;
-
-import java.util.*;
 
 /**
  * @author superleader8@gmail.com
@@ -37,9 +31,6 @@ public class SwaggerE {
     @Value("${choerodon.swagger.skip.service}")
     private String[] skipService;
 
-    @Autowired
-    private RouteE routeE;
-
     public SecurityConfiguration getSecurityConfiguration() {
         return new SecurityConfiguration(
                 client, "unknown", "default",
@@ -51,43 +42,12 @@ public class SwaggerE {
         return new UiConfiguration(null);
     }
 
-
-    public List<SwaggerResource> getSwaggerResource() {
-        List<SwaggerResource> resources = new LinkedList<>();
-        MultiKeyMap multiKeyMap = routeE.getAllRunningInstances();
-        Set set = multiKeyMap.keySet();
-        Iterator iterator = set.iterator();
-        while (iterator.hasNext()) {
-            MultiKey multiKey = (MultiKey) iterator.next();
-            RouteE localRouteE = (RouteE) multiKeyMap.get(multiKey);
-            if (localRouteE.getServiceId() != null) {
-                boolean isSkipService = Arrays.stream(skipService).anyMatch(t -> t.equals(localRouteE.getServiceId()));
-                if (!isSkipService) {
-                    SwaggerResource resource = new SwaggerResource();
-                    resource.setName(localRouteE.getName() + ":" + localRouteE.getServiceId());
-                    resource.setSwaggerVersion("2.0");
-                    resource.setLocation("/docs/" + localRouteE.getName() + "?version=" + multiKey.getKey(1));
-                    resources.add(resource);
-                }
-            }
-        }
-        return resources;
-    }
-
     public String getClient() {
         return client;
     }
 
     public void setClient(String client) {
         this.client = client;
-    }
-
-    public RouteE getRouteE() {
-        return routeE;
-    }
-
-    public void setRouteE(RouteE routeE) {
-        this.routeE = routeE;
     }
 
     public Long getId() {
