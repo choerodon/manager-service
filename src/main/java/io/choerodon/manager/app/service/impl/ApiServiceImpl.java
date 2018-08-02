@@ -332,14 +332,7 @@ public class ApiServiceImpl implements ApiService {
                                 body = entry.getValue();
                             }
                         }
-                        StringBuilder sb = new StringBuilder();
-                        if ("array".equals(type)) {
-                            sb.append("[\n");
-                            sb.append(body);
-                            sb.append("\n]");
-                        } else {
-                            sb.append(body);
-                        }
+                        StringBuilder sb = arrayTypeAppendBrackets(type, body);
                         //给array前面的注释加上缩进，即满足\n//\\S+\n的注释
                         response.setBody(addIndent2Comments(sb.toString()));
                     } else {
@@ -429,15 +422,35 @@ public class ApiServiceImpl implements ApiService {
             for (int i = 0; i < parameterNode.size(); i++) {
                 try {
                     ParameterDTO parameter = objectMapper.treeToValue(parameterNode.get(i), ParameterDTO.class);
-                    Map<String, String> schema = parameter.getSchema();
-                    if ("body".equals(parameter.getIn()) && schema != null && !schema.isEmpty()) {
-                        String ref = schema.get("$ref");
+                    SchemaDTO schema = parameter.getSchema();
+                    if ("body".equals(parameter.getIn()) && schema != null) {
+                        String ref = schema.getRef();
                         if (ref != null) {
                             for (Map.Entry<String, String> entry : controllerMaps.entrySet()) {
                                 String className = subString4ClassName(ref);
                                 if (className.equals(entry.getKey())) {
                                     String body = entry.getValue();
                                     parameter.setBody(addIndent2Comments(body));
+                                }
+                            }
+                        } else {
+                            String type = schema.getType();
+                            String itemRef = Optional.ofNullable(schema.getItems()).map(m -> m.get("$ref")).orElse(null);
+                            if (itemRef != null) {
+                                String body = "";
+                                for (Map.Entry<String, String> entry : controllerMaps.entrySet()) {
+                                    String className = subString4ClassName(itemRef);
+                                    if (className.equals(entry.getKey())) {
+                                        body = entry.getValue();
+                                    }
+                                }
+                                StringBuilder sb = arrayTypeAppendBrackets(type, body);
+                                parameter.setBody(addIndent2Comments(sb.toString()));
+                            } else {
+                                if (!"object".equals(type)) {
+                                    parameter.setBody(type);
+                                } else {
+                                    parameter.setBody("{}");
                                 }
                             }
                         }
@@ -449,5 +462,17 @@ public class ApiServiceImpl implements ApiService {
             }
         }
         path.setParameters(parameters);
+    }
+
+    private StringBuilder arrayTypeAppendBrackets(String type, String body) {
+        StringBuilder sb = new StringBuilder();
+        if ("array".equals(type)) {
+            sb.append("[\n");
+            sb.append(body);
+            sb.append("\n]");
+        } else {
+            sb.append(body);
+        }
+        return sb;
     }
 }
