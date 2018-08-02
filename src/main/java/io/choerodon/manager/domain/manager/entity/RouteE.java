@@ -49,40 +49,6 @@ public class RouteE {
     @Autowired
     private RouteRepository routeRepository;
 
-    @Autowired
-    private DiscoveryClient discoveryClient;
-
-    public MultiKeyMap getAllRunningInstances() {
-        List<RouteE> routeEList = getAllRoute();
-        List<String> serviceIds = discoveryClient.getServices();
-        MultiKeyMap multiKeyMap = new MultiKeyMap();
-        for (String serviceIdInList : serviceIds) {
-            for (ServiceInstance instance : discoveryClient.getInstances(serviceIdInList)) {
-                String version = instance.getMetadata().get(VersionUtil.METADATA_VERSION);
-                if (StringUtils.isEmpty(version)) {
-                    version = VersionUtil.NULL_VERSION;
-                }
-                if (multiKeyMap.get(serviceIdInList, version) == null) {
-                    RouteE routeE = selectZuulRouteByServiceId(routeEList, serviceIdInList);
-                    if (routeE == null) {
-                        continue;
-                    }
-                    multiKeyMap.put(serviceIdInList, version, routeE);
-                }
-            }
-        }
-        return multiKeyMap;
-    }
-
-    private RouteE selectZuulRouteByServiceId(List<RouteE> routeEList, String serviceId) {
-        for (RouteE routeE : routeEList) {
-            if (routeE.getServiceId().equals(serviceId)) {
-                return routeE;
-            }
-        }
-        return null;
-    }
-
     /**
      * 通过路由名称获取对象
      *
@@ -126,15 +92,6 @@ public class RouteE {
      */
     public boolean deleteRoute() {
         return routeRepository.deleteRoute(this);
-    }
-
-    /**
-     * 获取所有的路由
-     *
-     * @return list
-     */
-    public List<RouteE> getAllRoute() {
-        return routeRepository.getAllRoute();
     }
 
     public Long getId() {
@@ -248,7 +205,6 @@ public class RouteE {
                 + ", helperService='" + helperService + '\''
                 + ", objectVersionNumber=" + objectVersionNumber
                 + ", routeRepository=" + routeRepository
-                + ", discoveryClient=" + discoveryClient
                 + '}';
     }
 }

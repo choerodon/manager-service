@@ -1,17 +1,18 @@
 package io.choerodon.manager.domain.service.impl;
 
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.choerodon.manager.domain.factory.SwaggerEFactory;
+import io.choerodon.manager.domain.manager.entity.RouteE;
+import io.choerodon.manager.domain.service.IRouteService;
+import io.choerodon.manager.domain.service.ISwaggerService;
+import org.apache.commons.collections.keyvalue.MultiKey;
+import org.apache.commons.collections.map.MultiKeyMap;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import springfox.documentation.swagger.web.SecurityConfiguration;
 import springfox.documentation.swagger.web.SwaggerResource;
 import springfox.documentation.swagger.web.UiConfiguration;
 
-import io.choerodon.manager.api.dto.RegisterInstancePayload;
-import io.choerodon.manager.domain.factory.SwaggerEFactory;
-import io.choerodon.manager.domain.service.ISwaggerService;
+import java.util.*;
 
 
 /**
@@ -23,16 +24,44 @@ import io.choerodon.manager.domain.service.ISwaggerService;
 @Service
 public class ISwaggerServiceImpl implements ISwaggerService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ISwaggerServiceImpl.class);
+    @Value("${choerodon.swagger.skip.service}")
+    private String[] skipService;
 
-    @Override
-    public void updateOrInsertSwagger(RegisterInstancePayload registerInstancePayload, String swaggerJson) {
-        LOGGER.info("method is empty");
+    private IRouteService iRouteService;
+
+    public ISwaggerServiceImpl(IRouteService iRouteService) {
+        this.iRouteService = iRouteService;
+    }
+
+    /**
+     * 单元测试支持
+     * @param iRouteService
+     */
+    public void setIRouteService(IRouteService iRouteService) {
+        this.iRouteService = iRouteService;
     }
 
     @Override
     public List<SwaggerResource> getSwaggerResource() {
-        return SwaggerEFactory.createSwaggerE().getSwaggerResource();
+        List<SwaggerResource> resources = new LinkedList<>();
+        MultiKeyMap multiKeyMap = iRouteService.getAllRunningInstances();
+        Set set = multiKeyMap.keySet();
+        Iterator iterator = set.iterator();
+        while (iterator.hasNext()) {
+            MultiKey multiKey = (MultiKey) iterator.next();
+            RouteE localRouteE = (RouteE) multiKeyMap.get(multiKey);
+            if (localRouteE.getServiceId() != null) {
+                boolean isSkipService = Arrays.stream(skipService).anyMatch(t -> t.equals(localRouteE.getServiceId()));
+                if (!isSkipService) {
+                    SwaggerResource resource = new SwaggerResource();
+                    resource.setName(localRouteE.getName() + ":" + localRouteE.getServiceId());
+                    resource.setSwaggerVersion("2.0");
+                    resource.setLocation("/docs/" + localRouteE.getName() + "?version=" + multiKey.getKey(1));
+                    resources.add(resource);
+                }
+            }
+        }
+        return resources;
     }
 
     @Override
