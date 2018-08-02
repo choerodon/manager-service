@@ -7,6 +7,7 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.swagger.*;
 import io.choerodon.manager.app.service.ApiService;
+import io.choerodon.manager.domain.manager.entity.MyLinkedList;
 import io.choerodon.manager.domain.service.IDocumentService;
 import io.choerodon.manager.infra.common.utils.ManualPageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -96,13 +97,16 @@ public class ApiServiceImpl implements ApiService {
         for (Map.Entry<String, Map<String, FieldDTO>> entry : map.entrySet() ) {
             StringBuilder sb = new StringBuilder();
             String className = entry.getKey();
-            process2String(className, map, sb);
+            //dto引用链表，用于判断是否有循环引用
+            MyLinkedList<String> linkedList = new MyLinkedList<>();
+            linkedList.addNode(className);
+            process2String(className, map, sb, linkedList);
             returnMap.put(className, sb.toString());
         }
         return returnMap;
     }
 
-    private void process2String(String ref, Map<String, Map<String, FieldDTO>> map, StringBuilder sb) {
+    private void process2String(String ref, Map<String, Map<String, FieldDTO>> map, StringBuilder sb, MyLinkedList<String> linkedList) {
         for (Map.Entry<String, Map<String, FieldDTO>> entry : map.entrySet()) {
             String className = subString4ClassName(ref);
             if (className.equals(entry.getKey())) {
@@ -125,11 +129,12 @@ public class ApiServiceImpl implements ApiService {
                         if (dto.getRef() != null) {
                             //例外自引用，如果自引用直接返回{}
                             String refClassName = subString4ClassName(dto.getRef());
-                            if (className.equals(refClassName)) {
+                            linkedList.addNode(refClassName);
+                            if (linkedList.isLoop()) {
                                 sb.append("{}");
                             } else {
                                 //递归解析
-                                process2String(dto.getRef(), map, sb);
+                                process2String(dto.getRef(), map, sb, linkedList);
                             }
                         } else {
                             sb.append(type);
@@ -205,6 +210,9 @@ public class ApiServiceImpl implements ApiService {
             String className = classNameIterator.next();
             JsonNode jsonNode = definitionNodes.get(className);
             JsonNode propertyNode = jsonNode.get("properties");
+            if (propertyNode == null) {
+                continue;
+            }
             Iterator<String> filedNameIterator = propertyNode.fieldNames();
             Map<String, FieldDTO> fieldMap = new HashMap<>();
             while (filedNameIterator.hasNext()) {
