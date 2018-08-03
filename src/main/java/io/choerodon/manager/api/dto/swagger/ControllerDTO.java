@@ -13,7 +13,7 @@ public class ControllerDTO {
     private String name;
     @ApiModelProperty(value = "controller的描述")
     private String description;
-    @ApiModelProperty(value = "controller下的方法集")
+    @ApiModelProperty(value = "接口集合")
     private List<PathDTO> paths;
 
     public String getName() {

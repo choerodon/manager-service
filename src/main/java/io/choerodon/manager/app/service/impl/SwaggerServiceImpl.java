@@ -1,5 +1,6 @@
 package io.choerodon.manager.app.service.impl;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -25,7 +26,9 @@ public class SwaggerServiceImpl implements SwaggerService {
 
     @Override
     public List<SwaggerResource> getSwaggerResource() {
-        return service.getSwaggerResource();
+        List<SwaggerResource> swaggerResources = service.getSwaggerResource();
+        swaggerResources.sort(Comparator.comparing(SwaggerResource::getName));
+        return swaggerResources;
     }
 
     @Override
