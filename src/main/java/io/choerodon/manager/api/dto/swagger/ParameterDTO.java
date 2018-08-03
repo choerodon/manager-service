@@ -12,6 +12,7 @@ public class ParameterDTO {
 
     @ApiModelProperty("参数描述")
     private String description;
+    @ApiModelProperty("参数位置")
     private String in;
     private String name;
     @ApiModelProperty("是否必填")

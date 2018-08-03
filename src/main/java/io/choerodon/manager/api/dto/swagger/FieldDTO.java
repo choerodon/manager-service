@@ -12,6 +12,7 @@ public class FieldDTO {
     private String type;
     @ApiModelProperty(hidden = true)
     private String ref;
+    @ApiModelProperty(hidden = true)
     private String itemType;
 
     public String getComment() {

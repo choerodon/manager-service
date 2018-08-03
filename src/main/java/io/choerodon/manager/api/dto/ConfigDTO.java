@@ -1,5 +1,7 @@
 package io.choerodon.manager.api.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.Date;
 import java.util.Map;
 
@@ -8,7 +10,7 @@ public class ConfigDTO {
     private Long id;
 
     private String name;
-
+    @ApiModelProperty("配置版本")
     private String configVersion;
 
     private Boolean isDefault;
@@ -20,7 +22,7 @@ public class ConfigDTO {
     private String source;
 
     private Date publicTime;
-
+    @ApiModelProperty("乐观锁版本号")
     private Long objectVersionNumber;
 
     private String txt;
