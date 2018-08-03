@@ -14,6 +14,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -119,6 +120,7 @@ public class ApiServiceImpl implements ApiService {
                     //如果是集合类型，注释拼到字段的上一行
                     String type = dto.getType();
                     if ("array".equals(type)) {
+                        //处理集合引用的情况，type为array
                         if (dto.getComment() != null) {
                             sb.append("//");
                             sb.append(dto.getComment());
@@ -136,14 +138,36 @@ public class ApiServiceImpl implements ApiService {
                                 sb.append("{}");
                             } else {
                                 //递归解析
-                                process2String(dto.getRef(), map, sb, copyLinkedList);
+                                process2String(refClassName, map, sb, copyLinkedList);
                             }
                         } else {
                             sb.append(type);
                             sb.append("\n");
                         }
                         sb.append("]\n");
-
+                    } else if (StringUtils.isEmpty(type)) {
+                        //单一对象引用的情况，只有ref
+                        if (dto.getRef() != null) {
+                            if (dto.getComment() != null) {
+                                sb.append("//");
+                                sb.append(dto.getComment());
+                                sb.append("\n");
+                            }
+                            appendField(sb, field);
+                            String refClassName = subString4ClassName(dto.getRef());
+                            //linkedList深拷贝一份，处理同一个对象对另一个对象的多次引用的情况
+                            MyLinkedList<String> copyLinkedList = linkedList.deepCopy();
+                            copyLinkedList.addNode(refClassName);
+                            //循环引用直接跳出递归
+                            if (copyLinkedList.isLoop()) {
+                                sb.append("{}");
+                            } else {
+                                //递归解析
+                                process2String(refClassName, map, sb, copyLinkedList);
+                            }
+                        } else {
+                            sb.append("{}\n");
+                        }
                     } else {
                         appendField(sb, field);
                         if ("integer".equals(type) || "string".equals(type) || "boolean".equals(type)) {
@@ -220,11 +244,13 @@ public class ApiServiceImpl implements ApiService {
             while (filedNameIterator.hasNext()) {
                 FieldDTO field = new FieldDTO();
                 String filedName = filedNameIterator.next();
-                String type = Optional.ofNullable(propertyNode.get(filedName).get("type")).map(JsonNode::asText).orElse(null);
+                JsonNode fieldNode = propertyNode.get(filedName);
+                String type = Optional.ofNullable(fieldNode.get("type")).map(JsonNode::asText).orElse(null);
                 field.setType(type);
-                String description = Optional.ofNullable(propertyNode.get(filedName).get(DESCRIPTION)).map(JsonNode::asText).orElse(null);
+                String description = Optional.ofNullable(fieldNode.get(DESCRIPTION)).map(JsonNode::asText).orElse(null);
                 field.setComment(description);
-                JsonNode itemNode = propertyNode.get(filedName).get("items");
+                field.setRef(Optional.ofNullable(fieldNode.get("$ref")).map(JsonNode::asText).orElse(null));
+                JsonNode itemNode = fieldNode.get("items");
                 Optional.ofNullable(itemNode).ifPresent(i -> {
                     if (i.get("type") != null) {
                         field.setItemType(i.get("type").asText());
