@@ -51,9 +51,8 @@ public class IRouteServiceImpl implements IRouteService {
         this.discoveryClient = discoveryClient;
     }
 
-    public void unitTestInit(DiscoveryClient discoveryClient, RouteRepository routeRepository) {
+    public void unitTestInit(DiscoveryClient discoveryClient) {
         this.discoveryClient = discoveryClient;
-        this.routeRepository = routeRepository;
     }
 
     @Override

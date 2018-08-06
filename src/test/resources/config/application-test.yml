@@ -19,7 +19,9 @@ hystrix:
     queue:
       enabled: false
 data:
-  dir: src/main/resources
+  dir: src/test/resources
 eureka:
   client:
     enabled: false
+management:
+  port: 0 #设置管理端口为随机端口
