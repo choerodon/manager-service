@@ -22,14 +22,20 @@ class ApiControllerSpec extends Specification {
     def "Resources"() {
 
         when: "发送一个get请求"
-        def entity = restTemplate.getForEntity("/v1/swaggers/resources", String.class)
+        def entity = restTemplate.getForEntity("/v1/swaggers/resources", String)
 
         then: "请求通过"
-//        entity.statusCode.is2xxSuccessful()
-        true
+        entity.statusCode.is2xxSuccessful()
     }
 
     def "QueryByNameAndVersion"() {
+
+        when:"发送请求"
+        def entity = restTemplate.getForEntity("/v1/swaggers/manager/controllers", String)
+
+        then:"状态码200，调用成功"
+        entity.statusCode.is2xxSuccessful()
+        
     }
 
     def "QueryPathDetail"() {
