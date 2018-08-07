@@ -59,8 +59,6 @@ public class IDocumentServiceImpl implements IDocumentService, IDocumentService.
     private IRouteService iRouteService;
     private SwaggerRefreshService swaggerRefreshService;
 
-    public IDocumentServiceImpl() {}
-
     /**
      * 构造器
      */
