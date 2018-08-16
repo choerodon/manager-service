@@ -9,10 +9,19 @@ import java.util.Map;
  */
 public class SchemaDTO {
     private String type;
+    private String format;
     private Map<String, String> items;
     private Map<String, String> additionalProperties;
     @JsonProperty("$ref")
     private String ref;
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
+    }
 
     public Map<String, String> getAdditionalProperties() {
         return additionalProperties;
