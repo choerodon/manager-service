@@ -10,8 +10,17 @@ import java.util.Map;
 public class SchemaDTO {
     private String type;
     private Map<String, String> items;
+    private Map<String, String> additionalProperties;
     @JsonProperty("$ref")
     private String ref;
+
+    public Map<String, String> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(Map<String, String> additionalProperties) {
+        this.additionalProperties = additionalProperties;
+    }
 
     public String getRef() {
         return ref;

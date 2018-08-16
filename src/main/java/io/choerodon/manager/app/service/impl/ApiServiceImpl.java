@@ -486,7 +486,12 @@ public class ApiServiceImpl implements ApiService {
                                 if (!"object".equals(type)) {
                                     parameter.setBody(type);
                                 } else {
-                                    parameter.setBody("{}");
+                                    Map<String, String> map = schema.getAdditionalProperties();
+                                    if ("array".equals(map.get("type"))) {
+                                        parameter.setBody("[{}]");
+                                    } else {
+                                        parameter.setBody("{}");
+                                    }
                                 }
                             }
                         }
