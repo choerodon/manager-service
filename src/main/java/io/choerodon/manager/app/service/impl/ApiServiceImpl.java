@@ -370,7 +370,7 @@ public class ApiServiceImpl implements ApiService {
                         }
                         StringBuilder sb = arrayTypeAppendBrackets(type, body);
                         //给array前面的注释加上缩进，即满足\n//\\S+\n的注释
-                        response.setBody(addIndent2Comments(sb.toString()));
+                        response.setBody(sb.toString());
                     } else {
                         if ("object".equals(type)) {
                             response.setBody("{}");
@@ -385,53 +385,53 @@ public class ApiServiceImpl implements ApiService {
         path.setResponses(responses);
     }
 
-    private String addIndent2Comments(String str) {
-        String regex = "\\n//\\S+\\n";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(str);
-        if (matcher.find()) {
-            String targetStr = matcher.group();
-            int start = matcher.start();
-            int end = matcher.end();
-            StringBuilder sb = new StringBuilder();
-            String prefix = str.substring(0, start);
-            sb.append(prefix);
-            sb.append("\n");
-            sb.append(appendIndent(targetStr, prefix));
-            String suffix = str.substring(end, str.length());
-            sb.append(suffix);
-            str = addIndent2Comments(sb.toString());
-        }
-        return str;
-    }
+//    private String addIndent2Comments(String str) {
+//        String regex = "\\n//\\S+\\n";
+//        Pattern pattern = Pattern.compile(regex);
+//        Matcher matcher = pattern.matcher(str);
+//        if (matcher.find()) {
+//            String targetStr = matcher.group();
+//            int start = matcher.start();
+//            int end = matcher.end();
+//            StringBuilder sb = new StringBuilder();
+//            String prefix = str.substring(0, start);
+//            sb.append(prefix);
+//            sb.append("\n");
+//            sb.append(appendIndent(targetStr, prefix));
+//            String suffix = str.substring(end, str.length());
+//            sb.append(suffix);
+//            str = addIndent2Comments(sb.toString());
+//        }
+//        return str;
+//    }
 
-    private String appendIndent(String targetStr, String prefix) {
-        String comment = targetStr.substring(3, targetStr.length()-1);
-        //计算有几个缩进
-        int a = count(prefix,"\\[");
-        int b = count(prefix,"\\{");
-        int c = count(prefix,"\\]");
-        int d = count(prefix,"\\}");
-        int num = a + b - c - d;
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i< num; i++) {
-            sb.append("  ");
-        }
-        sb.append("//");
-        sb.append(comment);
-        sb.append("\n");
-        return sb.toString();
-    }
+//    private String appendIndent(String targetStr, String prefix) {
+//        String comment = targetStr.substring(3, targetStr.length()-1);
+//        //计算有几个缩进
+//        int a = count(prefix,"\\[");
+//        int b = count(prefix,"\\{");
+//        int c = count(prefix,"\\]");
+//        int d = count(prefix,"\\}");
+//        int num = a + b - c - d;
+//        StringBuilder sb = new StringBuilder();
+//        for(int i = 0; i< num; i++) {
+//            sb.append("  ");
+//        }
+//        sb.append("//");
+//        sb.append(comment);
+//        sb.append("\n");
+//        return sb.toString();
+//    }
 
-    private int count(String prefix, String regex) {
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(prefix);
-        int count = 0;
-        while (matcher.find()) {
-            count ++;
-        }
-        return count;
-    }
+//    private int count(String prefix, String regex) {
+//        Pattern pattern = Pattern.compile(regex);
+//        Matcher matcher = pattern.matcher(prefix);
+//        int count = 0;
+//        while (matcher.find()) {
+//            count ++;
+//        }
+//        return count;
+//    }
 
     private void processConsumes(PathDTO path, JsonNode jsonNode) {
         JsonNode consumeNode = jsonNode.get("consumes");
@@ -466,7 +466,7 @@ public class ApiServiceImpl implements ApiService {
                                 String className = subString4ClassName(ref);
                                 if (className.equals(entry.getKey())) {
                                     String body = entry.getValue();
-                                    parameter.setBody(addIndent2Comments(body));
+                                    parameter.setBody(body);
                                 }
                             }
                         } else {
@@ -481,7 +481,7 @@ public class ApiServiceImpl implements ApiService {
                                     }
                                 }
                                 StringBuilder sb = arrayTypeAppendBrackets(type, body);
-                                parameter.setBody(addIndent2Comments(sb.toString()));
+                                parameter.setBody(sb.toString());
                             } else {
                                 if (!"object".equals(type)) {
                                     parameter.setBody(type);
