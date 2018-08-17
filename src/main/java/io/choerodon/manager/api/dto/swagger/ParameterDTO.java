@@ -1,8 +1,8 @@
 package io.choerodon.manager.api.dto.swagger;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author superlee
@@ -10,14 +10,29 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ParameterDTO {
 
+    @ApiModelProperty("参数描述")
     private String description;
+    @ApiModelProperty("参数位置")
     private String in;
     private String name;
+    @ApiModelProperty("是否必填")
     private Boolean required;
+    @ApiModelProperty("参数类型")
     private String type;
     private String format;
     private String collectionFormat;
-    private Map<String, String> items;
+    @JsonProperty("schema")
+    private SchemaDTO schema;
+
+    private String body;
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
 
     public String getDescription() {
         return description;
@@ -67,20 +82,20 @@ public class ParameterDTO {
         this.format = format;
     }
 
-    public Map<String, String> getItems() {
-        return items;
-    }
-
-    public void setItems(Map<String, String> items) {
-        this.items = items;
-    }
-
     public String getCollectionFormat() {
         return collectionFormat;
     }
 
     public void setCollectionFormat(String collectionFormat) {
         this.collectionFormat = collectionFormat;
+    }
+
+    public SchemaDTO getSchema() {
+        return schema;
+    }
+
+    public void setSchema(SchemaDTO schema) {
+        this.schema = schema;
     }
 
     @Override
@@ -98,7 +113,8 @@ public class ParameterDTO {
         if (format != null ? !format.equals(that.format) : that.format != null) return false;
         if (collectionFormat != null ? !collectionFormat.equals(that.collectionFormat) : that.collectionFormat != null)
             return false;
-        return items != null ? items.equals(that.items) : that.items == null;
+        if (schema != null ? !schema.equals(that.schema) : that.schema != null) return false;
+        return body != null ? body.equals(that.body) : that.body == null;
     }
 
     @Override
@@ -110,7 +126,8 @@ public class ParameterDTO {
         result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (format != null ? format.hashCode() : 0);
         result = 31 * result + (collectionFormat != null ? collectionFormat.hashCode() : 0);
-        result = 31 * result + (items != null ? items.hashCode() : 0);
+        result = 31 * result + (schema != null ? schema.hashCode() : 0);
+        result = 31 * result + (body != null ? body.hashCode() : 0);
         return result;
     }
 }

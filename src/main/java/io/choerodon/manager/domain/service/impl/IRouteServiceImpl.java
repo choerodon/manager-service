@@ -5,7 +5,6 @@ import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.swagger.ChoerodonRouteData;
 import io.choerodon.manager.api.dto.RouteDTO;
-import io.choerodon.manager.domain.factory.RouteEFactory;
 import io.choerodon.manager.domain.manager.entity.RouteE;
 import io.choerodon.manager.domain.repository.RouteRepository;
 import io.choerodon.manager.domain.service.IRouteService;
@@ -52,6 +51,10 @@ public class IRouteServiceImpl implements IRouteService {
         this.discoveryClient = discoveryClient;
     }
 
+    public void unitTestInit(DiscoveryClient discoveryClient) {
+        this.discoveryClient = discoveryClient;
+    }
+
     @Override
     public Page<RouteE> pageAll(PageRequest pageRequest, RouteDO routeDO, String params) {
         return routeRepository.pageAllRoutes(pageRequest, routeDO, params);
@@ -70,9 +73,34 @@ public class IRouteServiceImpl implements IRouteService {
 
     @Override
     public MultiKeyMap getAllRunningInstances() {
-        //获得所有的路由信息route表
-        RouteE re = RouteEFactory.createRouteE();
-        return re.getAllRunningInstances();
+        List<RouteE> routeEList = routeRepository.getAllRoute();
+        List<String> serviceIds = discoveryClient.getServices();
+        MultiKeyMap multiKeyMap = new MultiKeyMap();
+        for (String serviceIdInList : serviceIds) {
+            for (ServiceInstance instance : discoveryClient.getInstances(serviceIdInList)) {
+                String version = instance.getMetadata().get(VersionUtil.METADATA_VERSION);
+                if (org.springframework.util.StringUtils.isEmpty(version)) {
+                    version = VersionUtil.NULL_VERSION;
+                }
+                if (multiKeyMap.get(serviceIdInList, version) == null) {
+                    RouteE routeE = selectZuulRouteByServiceId(routeEList, serviceIdInList);
+                    if (routeE == null) {
+                        continue;
+                    }
+                    multiKeyMap.put(serviceIdInList, version, routeE);
+                }
+            }
+        }
+        return multiKeyMap;
+    }
+
+    private RouteE selectZuulRouteByServiceId(List<RouteE> routeEList, String serviceId) {
+        for (RouteE routeE : routeEList) {
+            if (routeE.getServiceId().equals(serviceId)) {
+                return routeE;
+            }
+        }
+        return null;
     }
 
     @Override

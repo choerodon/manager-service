@@ -1,5 +1,7 @@
 package io.choerodon.manager.api.dto.swagger;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
 /**
@@ -7,16 +9,34 @@ import java.util.List;
  */
 public class PathDTO implements Comparable<PathDTO> {
 
+    @ApiModelProperty(value = "请求url")
     private String url;
+    @ApiModelProperty(value = "请求方法")
     private String method;
     private List<String> consumes;
     private List<String> produces;
     private String operationId;
     private List<ParameterDTO> parameters;
+    @ApiModelProperty(value = "响应集合")
     private List<ResponseDTO> responses;
+    @ApiModelProperty(value = "接口描述")
     private String remark;
+    @ApiModelProperty(value = "接口自定义扩展详细信息")
     private String description;
+    @ApiModelProperty(value = "接口相关联的controller")
     private String refController;
+    @ApiModelProperty(value = "内部调用的接口")
+    private Boolean innerInterface;
+    @ApiModelProperty(value = "请求的basePath")
+    private String basePath;
+
+    public String getBasePath() {
+        return basePath;
+    }
+
+    public void setBasePath(String basePath) {
+        this.basePath = basePath;
+    }
 
     public String getUrl() {
         return url;
@@ -98,6 +118,14 @@ public class PathDTO implements Comparable<PathDTO> {
         this.refController = refController;
     }
 
+    public Boolean getInnerInterface() {
+        return innerInterface;
+    }
+
+    public void setInnerInterface(Boolean innerInterface) {
+        this.innerInterface = innerInterface;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -107,11 +135,7 @@ public class PathDTO implements Comparable<PathDTO> {
 
         if (url != null ? !url.equals(pathDTO.url) : pathDTO.url != null) return false;
         if (method != null ? !method.equals(pathDTO.method) : pathDTO.method != null) return false;
-        if (consumes != null ? !consumes.equals(pathDTO.consumes) : pathDTO.consumes != null) return false;
-        if (produces != null ? !produces.equals(pathDTO.produces) : pathDTO.produces != null) return false;
         if (operationId != null ? !operationId.equals(pathDTO.operationId) : pathDTO.operationId != null) return false;
-        if (parameters != null ? !parameters.equals(pathDTO.parameters) : pathDTO.parameters != null) return false;
-        if (responses != null ? !responses.equals(pathDTO.responses) : pathDTO.responses != null) return false;
         if (remark != null ? !remark.equals(pathDTO.remark) : pathDTO.remark != null) return false;
         if (description != null ? !description.equals(pathDTO.description) : pathDTO.description != null) return false;
         return refController != null ? refController.equals(pathDTO.refController) : pathDTO.refController == null;
@@ -121,11 +145,7 @@ public class PathDTO implements Comparable<PathDTO> {
     public int hashCode() {
         int result = url != null ? url.hashCode() : 0;
         result = 31 * result + (method != null ? method.hashCode() : 0);
-        result = 31 * result + (consumes != null ? consumes.hashCode() : 0);
-        result = 31 * result + (produces != null ? produces.hashCode() : 0);
         result = 31 * result + (operationId != null ? operationId.hashCode() : 0);
-        result = 31 * result + (parameters != null ? parameters.hashCode() : 0);
-        result = 31 * result + (responses != null ? responses.hashCode() : 0);
         result = 31 * result + (remark != null ? remark.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (refController != null ? refController.hashCode() : 0);

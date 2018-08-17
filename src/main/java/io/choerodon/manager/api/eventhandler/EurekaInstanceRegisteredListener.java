@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.remoting.RemoteAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rx.Observable;
@@ -20,8 +20,6 @@ import rx.schedulers.Schedulers;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,13 +40,8 @@ public class EurekaInstanceRegisteredListener {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private Map<String, Integer> failTimeMap = new HashMap<>();
-
     @Value("${choerodon.swagger.skip.service}")
     private String[] skipServices;
-
-    @Value("${choerodon.swagger.fetch.callBack:true}")
-    private boolean fetchSwaggerJsonCallBack;
 
     @Value("${choerodon.swagger.fetch.time:10}")
     private Integer fetchSwaggerJsonTime;
@@ -59,17 +52,12 @@ public class EurekaInstanceRegisteredListener {
 
     private IRouteService iRouteService;
 
-    private KafkaTemplate<byte[], byte[]> kafkaTemplate;
-
-
     public EurekaInstanceRegisteredListener(IDocumentService iDocumentService,
                                             SwaggerRefreshService swaggerRefreshService,
-                                            IRouteService iRouteService,
-                                            KafkaTemplate<byte[], byte[]> kafkaTemplate) {
+                                            IRouteService iRouteService) {
         this.iDocumentService = iDocumentService;
         this.swaggerRefreshService = swaggerRefreshService;
         this.iRouteService = iRouteService;
-        this.kafkaTemplate = kafkaTemplate;
     }
 
     /**
@@ -94,74 +82,41 @@ public class EurekaInstanceRegisteredListener {
                 return;
             }
             Observable.just(payload)
-                    .delay(2, TimeUnit.SECONDS)
+                    .map(this::msgConsumer)
+                    .retryWhen(x -> x.zipWith(Observable.range(1, fetchSwaggerJsonTime),
+                            (t, retryCount) -> {
+                                if (retryCount >= fetchSwaggerJsonTime) {
+                                    if (t instanceof RemoteAccessException) {
+                                        LOGGER.warn("error.registerConsumer.fetchDataError, payload {}", payload);
+                                    } else {
+                                        LOGGER.warn("error.registerConsumer.msgConsumerError, payload {}", payload);
+                                    }
+                                }
+                                return retryCount;
+                            }).flatMap(y -> Observable.timer(2, TimeUnit.SECONDS)))
                     .subscribeOn(Schedulers.io())
-                    .subscribe(this::msgConsumer);
+                    .subscribe((RegisterInstancePayload registerInstancePayload) -> {
+                    });
         } catch (IOException e) {
             LOGGER.warn("error happened when handle message， {} cause {}", message, e.getCause());
         }
     }
 
-    private void msgConsumer(final RegisterInstancePayload instancePayload) {
-        String json = iDocumentService.fetchSwaggerJsonByIp(instancePayload);
-        if (StringUtils.isEmpty(json)) {
-            LOGGER.info("fetched swagger json data is empty, {}", instancePayload);
-            Integer time = failTimeMap.get(instancePayload.getInstanceAddress());
-            if (time == null) {
-                time = 0;
-            }
-            if (fetchSwaggerJsonCallBack) {
-                instancePayload.setApiData(null);
-                try {
-                    if (time < fetchSwaggerJsonTime) {
-                        kafkaTemplate.send(REGISTER_TOPIC, mapper.writeValueAsBytes(instancePayload));
-                        failTimeMap.put(instancePayload.getInstanceAddress(), ++time);
-                    } else {
-                        failTimeMap.remove(instancePayload.getInstanceAddress());
-                        LOGGER.warn("fetched swagger json data failed too many times {}", instancePayload);
-                    }
-
-                } catch (JsonProcessingException e) {
-                    LOGGER.warn("error happened when instancePayload serialize {}", e.getMessage());
-                }
-            }
-        } else {
-            swaggerConsumer(instancePayload, json);
-            permissionConsumer(instancePayload, json);
-            routeConsumer(json);
-            failTimeMap.remove(instancePayload.getInstanceAddress());
-        }
-    }
-
-    private boolean swaggerConsumer(final RegisterInstancePayload payload, final String json) {
+    private RegisterInstancePayload msgConsumer(final RegisterInstancePayload payload) {
         try {
+            String json = iDocumentService.fetchSwaggerJsonByIp(payload);
+            if (StringUtils.isEmpty(json)) {
+                throw new RemoteAccessException("fetched swagger json data is empty, " + payload);
+            }
             swaggerRefreshService.updateOrInsertSwagger(payload, json);
-            return true;
-        } catch (Exception e) {
-            LOGGER.warn("message has bean consumed failed when updateOrInsertSwagger, e {}", e.getMessage());
-        }
-        return false;
-    }
-
-    private boolean permissionConsumer(final RegisterInstancePayload payload, final String json) {
-        try {
             swaggerRefreshService.parsePermission(payload, json);
-            return true;
-        } catch (Exception e) {
-            LOGGER.warn("message has bean consumed failed when parsePermission, e {}", e.getMessage());
+            iRouteService.autoRefreshRoute(json);
+        } catch (JsonProcessingException e) {
+            LOGGER.warn("JsonProcessingException cause {}", e.getCause());
         }
-        return false;
+        return payload;
     }
 
-    private boolean routeConsumer(final String json) {
-        try {
-            iRouteService.autoRefreshRoute(json);
-            return true;
-        } catch (Exception e) {
-            LOGGER.warn("message has bean consumed failed when autoRefreshRoute, e {}", e.getMessage());
-        }
-        return false;
-    }
 
 }
 

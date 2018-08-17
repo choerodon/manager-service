@@ -1,20 +1,25 @@
 package io.choerodon.manager.api.dto;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 
 public class CreateConfigDTO {
 
+    @ApiModelProperty("配置名/必填")
     @NotEmpty(message = "error.config.name.empty")
     private String name;
 
+    @ApiModelProperty("版本号/必填")
     @NotEmpty(message = "error.config.version.empty")
     private String version;
 
+    @ApiModelProperty("服务名/必填")
     @NotEmpty(message = "error.config.serviceName.empty")
     private String serviceName;
 
+    @ApiModelProperty("yml格式的配置信息/必填")
     @NotNull(message = "error.config.yaml.null")
     private String yaml;
 

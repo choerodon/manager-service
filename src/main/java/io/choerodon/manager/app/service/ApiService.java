@@ -11,4 +11,6 @@ import java.util.Map;
  */
 public interface ApiService {
     Page<ControllerDTO> getControllers(String name, String version, PageRequest pageRequest, Map<String, Object> map);
+
+    ControllerDTO queryPathDetail(String serviceName, String version, String controllerName, String operationId);
 }
