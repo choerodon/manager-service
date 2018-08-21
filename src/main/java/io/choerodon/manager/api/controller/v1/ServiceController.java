@@ -1,6 +1,15 @@
 package io.choerodon.manager.api.controller.v1;
 
+import java.util.List;
+
+import io.swagger.annotations.ApiOperation;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
+
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.ConfigDTO;
 import io.choerodon.manager.api.dto.ServiceDTO;
@@ -12,13 +21,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.choerodon.swagger.annotation.Permission;
-import io.swagger.annotations.ApiOperation;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
-
-import java.util.List;
 
 /**
  * 操作服务控制器
@@ -42,7 +44,7 @@ public class ServiceController {
      *
      * @return page
      */
-    @Permission(level = ResourceLevel.SITE)
+    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("微服务管理列表")
     @CustomPageRequest
     @GetMapping("/manager")
@@ -60,7 +62,7 @@ public class ServiceController {
      *
      * @return page
      */
-    @Permission(level = ResourceLevel.SITE)
+    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询服务列表")
     @GetMapping
     public ResponseEntity<List<ServiceDTO>> pageAll(@RequestParam(required = false) String param) {
@@ -103,7 +105,7 @@ public class ServiceController {
      * @param serviceName 服务id，可为空，为空则查询所有服务的服务信息
      * @return Page
      */
-    @Permission(level = ResourceLevel.SITE)
+    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @CustomPageRequest
     @ApiOperation("分页模糊查询服务的配置")
     @GetMapping("/{service_name}/configs")

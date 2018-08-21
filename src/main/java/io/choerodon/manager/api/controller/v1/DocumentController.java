@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.web.bind.annotation.*;
 
+import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.manager.app.service.DocumentService;
 import io.choerodon.manager.infra.common.utils.VersionUtil;
 import io.choerodon.swagger.annotation.Permission;
@@ -43,7 +44,7 @@ public class DocumentController {
      * @param version 服务版本
      * @return String
      */
-    @Permission(permissionPublic = true)
+    @Permission(permissionPublic = true, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("获取服务id对应的版本swagger json字符串")
     @GetMapping(value = "/{service_prefix}")
     public ResponseEntity<String> get(@PathVariable("service_prefix") String name,
