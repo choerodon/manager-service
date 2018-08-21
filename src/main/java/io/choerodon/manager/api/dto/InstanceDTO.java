@@ -1,8 +1,9 @@
 package io.choerodon.manager.api.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author flyleft
@@ -10,16 +11,18 @@ import java.util.Date;
  */
 public class InstanceDTO {
 
+    @ApiModelProperty(value = "实例ID")
     private String instanceId;
 
+    @ApiModelProperty(value = "所属微服务")
     private String service;
-
+    @ApiModelProperty(value = "实例版本")
     private String version;
-
+    @ApiModelProperty(value = "实例状态")
     private String status;
-
+    @ApiModelProperty(value = "端口号")
     private String pod;
-
+    @ApiModelProperty(value = "实例注册时间")
     private Date registrationTime;
 
     @JsonIgnore

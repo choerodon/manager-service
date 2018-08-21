@@ -1,11 +1,16 @@
 package io.choerodon.manager.api.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author wuguokai
  */
 public class ServiceDTO {
+
+    @ApiModelProperty(value = "主键ID")
     private Long id;
 
+    @ApiModelProperty(value = "服务名")
     private String name;
 
     public Long getId() {
