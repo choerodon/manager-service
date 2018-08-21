@@ -1,5 +1,6 @@
 package io.choerodon.manager.api.dto;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
@@ -9,31 +10,42 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 public class RouteDTO {
 
+    @ApiModelProperty(value = "主键ID")
     private Long id;
 
+    @ApiModelProperty(value = "名称/必填")
     @NotEmpty(message = "name不可为空")
     private String name;
 
+    @ApiModelProperty(value = "路径/必填")
     @NotEmpty(message = "path不可为空")
     private String path;
 
+    @ApiModelProperty(value = "服务ID/必填")
     @NotEmpty(message = "serviceId不可为空")
     private String serviceId;
 
     private String url;
 
+    @ApiModelProperty(value = "是否去除前缀/非必填")
     private Boolean stripPrefix;
 
+    @ApiModelProperty(value = "是否重试/非必填")
     private Boolean retryable;
 
+    @ApiModelProperty(value = "是否过滤敏感头信息/非必填")
     private String sensitiveHeaders;
 
+    @ApiModelProperty(value = "敏感头信息/非必填")
     private Boolean customSensitiveHeaders;
 
+    @ApiModelProperty(value = "Helper服务名")
     private String helperService;
 
+    @ApiModelProperty(value = "乐观锁版本号")
     private Long objectVersionNumber;
 
+    @ApiModelProperty(value = "是否内置")
     private Boolean builtIn;
 
     public Long getId() {

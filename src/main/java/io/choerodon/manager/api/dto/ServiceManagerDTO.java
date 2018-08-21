@@ -1,9 +1,13 @@
 package io.choerodon.manager.api.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 public class ServiceManagerDTO {
 
+    @ApiModelProperty(value = "服务名")
     private String serviceName;
 
+    @ApiModelProperty(value = "实例数量")
     private Integer instanceNum;
 
     public ServiceManagerDTO(String serviceName, Integer instanceNum) {

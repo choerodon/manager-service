@@ -1,30 +1,36 @@
 package io.choerodon.manager.api.dto;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import java.util.Date;
 import java.util.Map;
 
+import io.swagger.annotations.ApiModelProperty;
+
 public class ConfigDTO {
 
+    @ApiModelProperty(value = "主键ID")
     private Long id;
 
+    @ApiModelProperty(value = "配置名")
     private String name;
-    @ApiModelProperty("配置版本")
+    @ApiModelProperty(value = "配置版本")
     private String configVersion;
-
+    @ApiModelProperty(value = "是否是默认配置")
     private Boolean isDefault;
 
+    @ApiModelProperty(value = "对应微服务ID")
     private Long serviceId;
 
+    @ApiModelProperty(value = "配置值列表")
     private Map<String, Object> value;
 
+    @ApiModelProperty(value = "来源（自定义/预定义）")
     private String source;
 
+    @ApiModelProperty(value = "发布时间")
     private Date publicTime;
-    @ApiModelProperty("乐观锁版本号")
+    @ApiModelProperty(value = "乐观锁版本号")
     private Long objectVersionNumber;
-
+    @ApiModelProperty(value = "文本格式")
     private String txt;
 
     public ConfigDTO(String name, String configVersion, Boolean isDefault, String source) {

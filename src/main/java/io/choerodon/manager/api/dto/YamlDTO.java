@@ -3,14 +3,19 @@ package io.choerodon.manager.api.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.swagger.annotations.ApiModelProperty;
+
 public class YamlDTO {
 
+    @ApiModelProperty(value = "yaml 内容体")
     private String yaml;
 
     private List<HighlightMarker> highlightMarkers = new ArrayList<>();
 
+    @ApiModelProperty(value = "总行数")
     private int totalLine;
 
+    @ApiModelProperty(value = "乐观锁版本号")
     private Long objectVersionNumber;
 
     public YamlDTO() {
