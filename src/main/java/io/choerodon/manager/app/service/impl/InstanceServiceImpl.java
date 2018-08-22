@@ -3,17 +3,6 @@ package io.choerodon.manager.app.service.impl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.appinfo.InstanceInfo;
-import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
-import io.choerodon.manager.api.dto.InstanceDTO;
-import io.choerodon.manager.api.dto.InstanceDetailDTO;
-import io.choerodon.manager.api.dto.YamlDTO;
-import io.choerodon.manager.app.service.InstanceService;
-import io.choerodon.manager.infra.common.utils.ManualPageHelper;
-import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
-import io.choerodon.manager.infra.feign.ConfigServerClient;
-import io.choerodon.manager.infra.mapper.ConfigMapper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.bind.RelaxedNames;
@@ -26,6 +15,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.manager.api.dto.InstanceDTO;
+import io.choerodon.manager.api.dto.InstanceDetailDTO;
+import io.choerodon.manager.api.dto.YamlDTO;
+import io.choerodon.manager.app.service.InstanceService;
+import io.choerodon.manager.infra.common.utils.ManualPageHelper;
+import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
+import io.choerodon.manager.infra.feign.ConfigServerClient;
+import io.choerodon.manager.infra.mapper.ConfigMapper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -159,9 +159,9 @@ public class InstanceServiceImpl implements InstanceService {
             while (vit.hasNext()) {
                 Map.Entry<String, JsonNode> value = vit.next();
                 if (value.getValue().isValueNode()) {
-                    String jsonValue = value.getValue().toString();
-                    if (!StringUtils.isEmpty(jsonValue) && !value.getKey().startsWith("java")){
-                        map.put(key+"."+value.getKey(), value.getValue().toString());
+                    String jsonValue = value.getValue().asText();
+                    if (!StringUtils.isEmpty(jsonValue) && !value.getKey().startsWith("java")) {
+                        map.put(key + "." + value.getKey(), value.getValue().asText());
                     }
                 }
             }
@@ -173,8 +173,8 @@ public class InstanceServiceImpl implements InstanceService {
         String config = getConfigPropertySource(root);
         String activeProfile = "default";
         JsonNode profileNode = root.findValue("profiles");
-        if (profileNode != null && !profileNode.toString().isEmpty()) {
-            activeProfile = profileNode.toString();
+        if (profileNode != null && !profileNode.asText().isEmpty()) {
+            activeProfile = profileNode.asText();
         }
         activeProfile = "applicationConfig: [classpath:/application-" + activeProfile;
         Map<String, Data> map = PropertySourceBuilder.newInstance(root)
@@ -225,9 +225,9 @@ public class InstanceServiceImpl implements InstanceService {
                 Map.Entry<String, JsonNode> entry = it.next();
                 Data data = getDataByRelaxedNames(entry.getKey());
                 if (data == null) {
-                    map.put(entry.getKey(), new Data(entry.getValue().toString(), property));
+                    map.put(entry.getKey(), new Data(entry.getValue().asText(), property));
                 } else {
-                    data.setValue(entry.getValue().toString());
+                    data.setValue(entry.getValue().asText());
                 }
             }
             return this;
@@ -241,11 +241,11 @@ public class InstanceServiceImpl implements InstanceService {
             }
             JsonNode serverPort = value.findValue("local.server.port");
             if (serverPort != null) {
-                map.put("server.port", new Data(serverPort.toString(), "server.ports"));
+                map.put("server.port", new Data(serverPort.asText(), "server.ports"));
             }
             JsonNode managementServerPort = value.findValue("local.management.port");
             if (serverPort != null) {
-                map.put("management.port", new Data(managementServerPort.toString(), "server.ports"));
+                map.put("management.port", new Data(managementServerPort.asText(), "server.ports"));
             }
             return this;
         }
@@ -264,7 +264,7 @@ public class InstanceServiceImpl implements InstanceService {
                 String mapExistKey = getKeyByRelaxedNames(entry.getKey());
                 if (mapExistKey != null) {
                     Data data = map.get(mapExistKey);
-                    data.setValue(entry.getValue().toString());
+                    data.setValue(entry.getValue().asText());
                 }
             }
             return this;
