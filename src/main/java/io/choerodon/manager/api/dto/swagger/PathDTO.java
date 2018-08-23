@@ -1,8 +1,8 @@
 package io.choerodon.manager.api.dto.swagger;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import java.util.List;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author superlee
@@ -13,9 +13,13 @@ public class PathDTO implements Comparable<PathDTO> {
     private String url;
     @ApiModelProperty(value = "请求方法")
     private String method;
+    @ApiModelProperty(value = "请求接受类型")
     private List<String> consumes;
+    @ApiModelProperty(value = "请求响应类型")
     private List<String> produces;
+    @ApiModelProperty(hidden = true)
     private String operationId;
+    @ApiModelProperty(value = "参数集合")
     private List<ParameterDTO> parameters;
     @ApiModelProperty(value = "响应集合")
     private List<ResponseDTO> responses;

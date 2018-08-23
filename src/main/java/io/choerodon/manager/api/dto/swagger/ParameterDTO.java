@@ -14,16 +14,20 @@ public class ParameterDTO {
     private String description;
     @ApiModelProperty("参数位置")
     private String in;
+    @ApiModelProperty("参数名称")
     private String name;
     @ApiModelProperty("是否必填")
     private Boolean required;
     @ApiModelProperty("参数类型")
     private String type;
+    @ApiModelProperty("格式")
     private String format;
+    @ApiModelProperty(hidden = true)
     private String collectionFormat;
+    @ApiModelProperty(hidden = true)
     @JsonProperty("schema")
     private SchemaDTO schema;
-
+    @ApiModelProperty(hidden = true)
     private String body;
 
     public String getBody() {

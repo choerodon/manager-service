@@ -1,17 +1,23 @@
 package io.choerodon.manager.api.dto.swagger;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author superlee
  */
 public class SchemaDTO {
+    @ApiModelProperty("类型")
     private String type;
+    @ApiModelProperty(hidden = true)
     private String format;
+    @ApiModelProperty(hidden = true)
     private Map<String, String> items;
+    @ApiModelProperty(hidden = true)
     private Map<String, String> additionalProperties;
+    @ApiModelProperty(hidden = true)
     @JsonProperty("$ref")
     private String ref;
 
