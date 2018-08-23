@@ -25,6 +25,7 @@ public class RouteDTO {
     @NotEmpty(message = "serviceId不可为空")
     private String serviceId;
 
+    @ApiModelProperty(hidden = true)
     private String url;
 
     @ApiModelProperty(value = "是否去除前缀/非必填")

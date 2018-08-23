@@ -10,6 +10,7 @@ public class YamlDTO {
     @ApiModelProperty(value = "yaml 内容体")
     private String yaml;
 
+    @ApiModelProperty(value = "yaml 高量显示")
     private List<HighlightMarker> highlightMarkers = new ArrayList<>();
 
     @ApiModelProperty(value = "总行数")
@@ -60,10 +61,15 @@ public class YamlDTO {
 
     static class HighlightMarker {
 
+        @ApiModelProperty("行")
         private int line;
+        @ApiModelProperty("开始坐标")
         private int startIndex;
+        @ApiModelProperty("结束坐标")
         private int endIndex;
+        @ApiModelProperty("开始列")
         private int startColumn;
+        @ApiModelProperty("结束列")
         private int endColumn;
 
         public int getLine() {
