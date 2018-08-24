@@ -1,8 +1,8 @@
 package io.choerodon.manager.api.dto.swagger;
 
-import java.util.List;
-
 import io.swagger.annotations.ApiModelProperty;
+
+import java.util.List;
 
 /**
  * @author superlee
@@ -33,6 +33,8 @@ public class PathDTO implements Comparable<PathDTO> {
     private Boolean innerInterface;
     @ApiModelProperty(value = "请求的basePath")
     private String basePath;
+    @ApiModelProperty(value = "权限code")
+    private String code;
 
     public String getBasePath() {
         return basePath;
@@ -128,6 +130,14 @@ public class PathDTO implements Comparable<PathDTO> {
 
     public void setInnerInterface(Boolean innerInterface) {
         this.innerInterface = innerInterface;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     @Override

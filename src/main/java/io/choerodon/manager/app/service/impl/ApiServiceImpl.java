@@ -3,23 +3,23 @@ package io.choerodon.manager.app.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.swagger.PermissionData;
+import io.choerodon.core.swagger.SwaggerExtraData;
 import io.choerodon.manager.api.dto.swagger.*;
 import io.choerodon.manager.app.service.ApiService;
 import io.choerodon.manager.domain.manager.entity.MyLinkedList;
 import io.choerodon.manager.domain.service.IDocumentService;
 import io.choerodon.manager.infra.common.utils.ManualPageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -36,7 +36,7 @@ public class ApiServiceImpl implements ApiService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ApiServiceImpl (IDocumentService iDocumentService) {
+    public ApiServiceImpl(IDocumentService iDocumentService) {
         this.iDocumentService = iDocumentService;
     }
 
@@ -50,7 +50,7 @@ public class ApiServiceImpl implements ApiService {
             throw new CommonException("error.service.not.run", name, version);
         }
         return Optional.ofNullable(json)
-                .map(j -> ManualPageHelper.postPage(processJson2ControllerDTO(j), pageRequest, map))
+                .map(j -> ManualPageHelper.postPage(processJson2ControllerDTO(name, j), pageRequest, map))
                 .orElseThrow(() -> new CommonException("error.service.swaggerJson.empty"));
     }
 
@@ -69,14 +69,14 @@ public class ApiServiceImpl implements ApiService {
             Map<String, String> dtoMap = convertMap2JsonWithComments(map);
             JsonNode pathNode = node.get("paths");
             String basePath = node.get("basePath").asText();
-            return queryPathDetailByOptions(pathNode, targetControllers, operationId, dtoMap, basePath).get(0);
+            return queryPathDetailByOptions(serviceName, pathNode, targetControllers, operationId, dtoMap, basePath).get(0);
         } catch (IOException e) {
             logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", serviceName, version, e.getMessage());
             throw new CommonException("error.service.not.run", serviceName, version);
         }
     }
 
-    private List<ControllerDTO> processJson2ControllerDTO(String json) {
+    private List<ControllerDTO> processJson2ControllerDTO(String serviceName, String json) {
         List<ControllerDTO> controllers;
         try {
             JsonNode node = objectMapper.readTree(json);
@@ -86,16 +86,16 @@ public class ApiServiceImpl implements ApiService {
             Map<String, String> dtoMap = convertMap2JsonWithComments(map);
             controllers = processControllers(node);
             JsonNode pathNode = node.get("paths");
-            processPaths(pathNode, controllers, dtoMap, basePath);
+            processPaths(serviceName, pathNode, controllers, dtoMap, basePath);
         } catch (IOException e) {
             throw new CommonException("error.parseJson");
         }
         return controllers;
     }
 
-    private Map<String,String> convertMap2JsonWithComments(Map<String, Map<String, FieldDTO>> map) {
+    private Map<String, String> convertMap2JsonWithComments(Map<String, Map<String, FieldDTO>> map) {
         Map<String, String> returnMap = new HashMap<>();
-        for (Map.Entry<String, Map<String, FieldDTO>> entry : map.entrySet() ) {
+        for (Map.Entry<String, Map<String, FieldDTO>> entry : map.entrySet()) {
             StringBuilder sb = new StringBuilder();
             String className = entry.getKey();
             //dto引用链表，用于判断是否有循环引用
@@ -266,8 +266,8 @@ public class ApiServiceImpl implements ApiService {
         return map;
     }
 
-    private List<ControllerDTO> queryPathDetailByOptions(JsonNode pathNode, List<ControllerDTO> targetControllers, String operationId,
-                                             Map<String, String> dtoMap, String basePath) {
+    private List<ControllerDTO> queryPathDetailByOptions(String serviceName, JsonNode pathNode, List<ControllerDTO> targetControllers, String operationId,
+                                                         Map<String, String> dtoMap, String basePath) {
         Iterator<String> urlIterator = pathNode.fieldNames();
         while (urlIterator.hasNext()) {
             String url = urlIterator.next();
@@ -278,14 +278,14 @@ public class ApiServiceImpl implements ApiService {
                 JsonNode pathDetailNode = methodNode.get(method);
                 String pathOperationId = pathDetailNode.get("operationId").asText();
                 if (operationId.equals(pathOperationId)) {
-                    processPathDetail(targetControllers, dtoMap, url, methodNode, method, basePath);
+                    processPathDetail(serviceName, targetControllers, dtoMap, url, methodNode, method, basePath);
                 }
             }
         }
         return targetControllers;
     }
 
-    private void processPaths(JsonNode pathNode, List<ControllerDTO> controllers, Map<String, String> dtoMap, String basePath) {
+    private void processPaths(String serviceName, JsonNode pathNode, List<ControllerDTO> controllers, Map<String, String> dtoMap, String basePath) {
         Iterator<String> urlIterator = pathNode.fieldNames();
         while (urlIterator.hasNext()) {
             String url = urlIterator.next();
@@ -293,12 +293,12 @@ public class ApiServiceImpl implements ApiService {
             Iterator<String> methodIterator = methodNode.fieldNames();
             while (methodIterator.hasNext()) {
                 String method = methodIterator.next();
-                processPathDetail(controllers, dtoMap, url, methodNode, method, basePath);
+                processPathDetail(serviceName, controllers, dtoMap, url, methodNode, method, basePath);
             }
         }
     }
 
-    private void processPathDetail(List<ControllerDTO> controllers, Map<String, String> dtoMap,
+    private void processPathDetail(String serviceName, List<ControllerDTO> controllers, Map<String, String> dtoMap,
                                    String url, JsonNode methodNode, String method, String basePath) {
         PathDTO path = new PathDTO();
         path.setBasePath(basePath);
@@ -306,6 +306,9 @@ public class ApiServiceImpl implements ApiService {
         path.setMethod(method);
         JsonNode jsonNode = methodNode.findValue(method);
         JsonNode tagNode = jsonNode.get("tags");
+
+        setCodeOfPathIfExsits(serviceName, path, jsonNode.get("description"), tagNode);
+
         for (int i = 0; i < tagNode.size(); i++) {
             String tag = tagNode.get(i).asText();
             controllers.forEach(c -> {
@@ -318,7 +321,7 @@ public class ApiServiceImpl implements ApiService {
         }
         path.setRemark(Optional.ofNullable(jsonNode.get("summary")).map(JsonNode::asText).orElse(null));
         JsonNode descriptionNode = jsonNode.get(DESCRIPTION);
-        if(descriptionNode != null) {
+        if (descriptionNode != null) {
             path.setDescription(descriptionNode.asText());
             path.setInnerInterface(false);
         } else {
@@ -383,6 +386,36 @@ public class ApiServiceImpl implements ApiService {
             responses.add(response);
         }
         path.setResponses(responses);
+    }
+
+    /**
+     * set the code field of the instance of {@link PathDTO} if the extraDataNode parameter
+     * is not null
+     *
+     * @param serviceName   the name of the service
+     * @param path          the dto
+     * @param extraDataNode the extra data node
+     * @param tagNode       the tag node
+     */
+    private void setCodeOfPathIfExsits(String serviceName, PathDTO path, JsonNode extraDataNode, JsonNode tagNode) {
+        if (extraDataNode != null) {
+            try {
+                SwaggerExtraData extraData;
+                String resourceCode = null;
+                for (int i = 0; i < tagNode.size(); i++) {
+                    String tag = tagNode.get(i).asText();
+                    if (tag.endsWith("-controller")) {
+                        resourceCode = tag.substring(0, tag.length() - "-controller".length());
+                    }
+                }
+                extraData = new ObjectMapper().readValue(extraDataNode.asText(), SwaggerExtraData.class);
+                PermissionData permission = extraData.getPermission();
+                String action = permission.getAction();
+                path.setCode(String.format("%s-service.%s.%s", serviceName, resourceCode, action));
+            } catch (IOException e) {
+                logger.info("extraData read failed.", e);
+            }
+        }
     }
 
 //    private String addIndent2Comments(String str) {
