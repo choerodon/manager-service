@@ -1,9 +1,10 @@
 package io.choerodon.manager.api.dto;
 
-import java.util.Date;
-import java.util.Map;
 
 import io.swagger.annotations.ApiModelProperty;
+
+import java.util.Date;
+import java.util.Map;
 
 public class ConfigDTO {
 
@@ -32,6 +33,8 @@ public class ConfigDTO {
     private Long objectVersionNumber;
     @ApiModelProperty(value = "文本格式")
     private String txt;
+    @ApiModelProperty(value = "修改时间")
+    private Date lastUpdateDate;
 
     public ConfigDTO(String name, String configVersion, Boolean isDefault, String source) {
         this.name = name;
@@ -122,6 +125,14 @@ public class ConfigDTO {
 
     public void setTxt(String txt) {
         this.txt = txt;
+    }
+
+    public Date getLastUpdateDate() {
+        return lastUpdateDate;
+    }
+
+    public void setLastUpdateDate(Date lastUpdateDate) {
+        this.lastUpdateDate = lastUpdateDate;
     }
 
     @Override
