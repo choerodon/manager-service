@@ -114,75 +114,78 @@ public class ApiServiceImpl implements ApiService {
                 sb.append("{\n");
                 Map<String, FieldDTO> fileds = entry.getValue();
                 //两个空格为缩进单位
-                for (Map.Entry<String, FieldDTO> entry1 : fileds.entrySet()) {
-                    String field = entry1.getKey();
-                    FieldDTO dto = entry1.getValue();
-                    //如果是集合类型，注释拼到字段的上一行
-                    String type = dto.getType();
-                    if ("array".equals(type)) {
-                        //处理集合引用的情况，type为array
-                        if (dto.getComment() != null) {
-                            sb.append("//");
-                            sb.append(dto.getComment());
-                            sb.append("\n");
-                        }
-                        appendField(sb, field);
-                        sb.append("[\n");
-                        if (dto.getRef() != null) {
-                            String refClassName = subString4ClassName(dto.getRef());
-                            //linkedList深拷贝一份，处理同一个对象对另一个对象的多次引用的情况
-                            MyLinkedList<String> copyLinkedList = linkedList.deepCopy();
-                            copyLinkedList.addNode(refClassName);
-                            //循环引用直接跳出递归
-                            if (copyLinkedList.isLoop()) {
-                                sb.append("{}");
-                            } else {
-                                //递归解析
-                                process2String(refClassName, map, sb, copyLinkedList);
-                            }
-                        } else {
-                            sb.append(type);
-                            sb.append("\n");
-                        }
-                        sb.append("]\n");
-                    } else if (StringUtils.isEmpty(type)) {
-                        //单一对象引用的情况，只有ref
-                        if (dto.getRef() != null) {
+                if(fileds != null) {
+                    for (Map.Entry<String, FieldDTO> entry1 : fileds.entrySet()) {
+                        String field = entry1.getKey();
+                        FieldDTO dto = entry1.getValue();
+                        //如果是集合类型，注释拼到字段的上一行
+                        String type = dto.getType();
+                        if ("array".equals(type)) {
+                            //处理集合引用的情况，type为array
                             if (dto.getComment() != null) {
                                 sb.append("//");
                                 sb.append(dto.getComment());
                                 sb.append("\n");
                             }
                             appendField(sb, field);
-                            String refClassName = subString4ClassName(dto.getRef());
-                            //linkedList深拷贝一份，处理同一个对象对另一个对象的多次引用的情况
-                            MyLinkedList<String> copyLinkedList = linkedList.deepCopy();
-                            copyLinkedList.addNode(refClassName);
-                            //循环引用直接跳出递归
-                            if (copyLinkedList.isLoop()) {
-                                sb.append("{}");
+                            sb.append("[\n");
+                            if (dto.getRef() != null) {
+                                String refClassName = subString4ClassName(dto.getRef());
+                                //linkedList深拷贝一份，处理同一个对象对另一个对象的多次引用的情况
+                                MyLinkedList<String> copyLinkedList = linkedList.deepCopy();
+                                copyLinkedList.addNode(refClassName);
+                                //循环引用直接跳出递归
+                                if (copyLinkedList.isLoop()) {
+                                    sb.append("{}");
+                                } else {
+                                    //递归解析
+                                    process2String(refClassName, map, sb, copyLinkedList);
+                                }
                             } else {
-                                //递归解析
-                                process2String(refClassName, map, sb, copyLinkedList);
+                                sb.append(type);
+                                sb.append("\n");
+                            }
+                            sb.append("]\n");
+                        } else if (StringUtils.isEmpty(type)) {
+                            //单一对象引用的情况，只有ref
+                            if (dto.getRef() != null) {
+                                if (dto.getComment() != null) {
+                                    sb.append("//");
+                                    sb.append(dto.getComment());
+                                    sb.append("\n");
+                                }
+                                appendField(sb, field);
+                                String refClassName = subString4ClassName(dto.getRef());
+                                //linkedList深拷贝一份，处理同一个对象对另一个对象的多次引用的情况
+                                MyLinkedList<String> copyLinkedList = linkedList.deepCopy();
+                                copyLinkedList.addNode(refClassName);
+                                //循环引用直接跳出递归
+                                if (copyLinkedList.isLoop()) {
+                                    sb.append("{}");
+                                } else {
+                                    //递归解析
+                                    process2String(refClassName, map, sb, copyLinkedList);
+                                }
+                            } else {
+                                sb.append("{}\n");
                             }
                         } else {
-                            sb.append("{}\n");
-                        }
-                    } else {
-                        appendField(sb, field);
-                        if ("integer".equals(type) || "string".equals(type) || "boolean".equals(type)) {
-                            sb.append("\"");
-                            sb.append(type);
-                            sb.append("\"");
-                            //拼注释
-                            appendComment(sb, dto);
-                            sb.append("\n");
-                        }
-                        if ("object".equals(type)) {
-                            sb.append("\"{}\"");
-                            //拼注释
-                            appendComment(sb, dto);
-                            sb.append("\n");
+                            if ("integer".equals(type) || "string".equals(type) || "boolean".equals(type)) {
+                                appendField(sb, field);
+                                sb.append("\"");
+                                sb.append(type);
+                                sb.append("\"");
+                                //拼注释
+                                appendComment(sb, dto);
+                                sb.append("\n");
+                            }
+                            if ("object".equals(type)) {
+                                appendField(sb, field);
+                                sb.append("\"{}\"");
+                                //拼注释
+                                appendComment(sb, dto);
+                                sb.append("\n");
+                            }
                         }
                     }
                 }
@@ -237,6 +240,10 @@ public class ApiServiceImpl implements ApiService {
             JsonNode jsonNode = definitionNodes.get(className);
             JsonNode propertyNode = jsonNode.get("properties");
             if (propertyNode == null) {
+                String type = jsonNode.get("type").asText();
+                if ("object".equals(type)) {
+                    map.put(className, null);
+                }
                 continue;
             }
             Iterator<String> filedNameIterator = propertyNode.fieldNames();
@@ -307,7 +314,7 @@ public class ApiServiceImpl implements ApiService {
         JsonNode jsonNode = methodNode.findValue(method);
         JsonNode tagNode = jsonNode.get("tags");
 
-        setCodeOfPathIfExsits(serviceName, path, jsonNode.get("description"), tagNode);
+        setCodeOfPathIfExists(serviceName, path, jsonNode.get("description"), tagNode);
 
         for (int i = 0; i < tagNode.size(); i++) {
             String tag = tagNode.get(i).asText();
@@ -397,7 +404,7 @@ public class ApiServiceImpl implements ApiService {
      * @param extraDataNode the extra data node
      * @param tagNode       the tag node
      */
-    private void setCodeOfPathIfExsits(String serviceName, PathDTO path, JsonNode extraDataNode, JsonNode tagNode) {
+    private void setCodeOfPathIfExists(String serviceName, PathDTO path, JsonNode extraDataNode, JsonNode tagNode) {
         if (extraDataNode != null) {
             try {
                 SwaggerExtraData extraData;
