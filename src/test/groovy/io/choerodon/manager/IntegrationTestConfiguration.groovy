@@ -46,7 +46,7 @@ class IntegrationTestConfiguration {
     LiquibaseExecutor liquibaseExecutor
 
     @Bean
-    KafkaTemplate kafkaTemplate() {
+    KafkaTemplate<byte[], byte[]> kafkaTemplate() {
         detachedMockFactory.Mock(KafkaTemplate)
     }
 
