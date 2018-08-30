@@ -161,12 +161,9 @@ class ConfigControllerSpec extends Specification {
         when: '向【删除配置，默认配置不可删除】接口发送请求'
         HttpEntity<Object> httpEntity = new HttpEntity<>()
         def entity = restTemplate.exchange('/v1/configs/' + id1, HttpMethod.DELETE, httpEntity, Boolean)
-        def entity2 = restTemplate.exchange('/v1/configs/' + id2, HttpMethod.DELETE, httpEntity, String)
 
         then: '删除结果'
         entity.statusCode.is2xxSuccessful()
-        entity2.statusCode.is2xxSuccessful()
         serviceRepository.deleteService(serviceE.getId())
-
     }
 }
