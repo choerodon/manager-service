@@ -30,14 +30,22 @@ class ApiControllerSpec extends Specification {
 
     def "QueryByNameAndVersion"() {
 
-        when:"发送请求"
+        when: "发送请求"
         def entity = restTemplate.getForEntity("/v1/swaggers/manager/controllers", String)
 
-        then:"状态码200，调用成功"
+        then: "状态码200，调用成功"
         entity.statusCode.is2xxSuccessful()
-        
+
     }
 
     def "QueryPathDetail"() {
+        given: '准备参数'
+        def version = 'test_version'
+        def operationId = '1'
+        when: "发送请求"
+        def entity = restTemplate.getForEntity("/v1/swaggers/manager/controllers/ApiController/paths?version={version}&operation_id={operationId}", String, version, operationId)
+
+        then: "状态码200，调用成功"
+        entity.statusCode.is2xxSuccessful()
     }
 }
