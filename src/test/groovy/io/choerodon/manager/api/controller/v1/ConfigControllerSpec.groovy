@@ -82,7 +82,7 @@ class ConfigControllerSpec extends Specification {
 
     def "create"() {
         given: '准备创建配置所需的服务'
-        serviceRepository.addService(serviceE)
+        serviceE = serviceRepository.addService(serviceE)
 
         when: '向【创建配置】接口发请求'
         def entity1 = restTemplate.postForEntity('/v1/configs', data1, CreateConfigDTO)
@@ -166,5 +166,7 @@ class ConfigControllerSpec extends Specification {
         then: '删除结果'
         entity.statusCode.is2xxSuccessful()
         entity2.statusCode.is2xxSuccessful()
+        serviceRepository.deleteService(serviceE.getId())
+
     }
 }
