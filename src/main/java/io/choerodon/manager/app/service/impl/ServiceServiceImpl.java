@@ -32,6 +32,14 @@ public class ServiceServiceImpl implements ServiceService {
         this.discoveryClient = discoveryClient;
     }
 
+    /**
+     * 单元测试使用
+     * @param discoveryClient
+     */
+    public void setDiscoveryClient(DiscoveryClient discoveryClient) {
+        this.discoveryClient = discoveryClient;
+    }
+
     @Override
     public List<ServiceDTO> list(String param) {
         if (StringUtils.isEmpty(param)) {
