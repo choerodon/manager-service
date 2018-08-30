@@ -35,6 +35,9 @@ class DocumentServiceImplSpec extends Specification {
     }
 
     def "GetSwaggerJson"() {
+//        given:
+//        def discoveryClient = Spy(DiscoveryClient)
+//        discoveryClient.getServices() >> { ["test-service"] }
         when: '测试方法'
         def json = documentService.getSwaggerJson(name, version)
         printf json

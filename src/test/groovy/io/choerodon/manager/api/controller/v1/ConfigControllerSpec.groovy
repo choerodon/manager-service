@@ -61,7 +61,6 @@ class ConfigControllerSpec extends Specification {
         data2.setYaml("test: test")
 
         configDTO = new ConfigDTO()
-        configDTO.setServiceId(3L)
         configDTO.setName()
         configDTO.setValue()
         Map<String, String> map = new HashMap<>()
@@ -72,9 +71,6 @@ class ConfigControllerSpec extends Specification {
         serviceE = new ServiceE()
         serviceE.setName("test_service")
 
-        id1 = 1L
-        id2 = 2L
-
         item1 = new ItemDto()
         item1.setProperty("item1")
         item1.setValue("value1")
@@ -83,15 +79,17 @@ class ConfigControllerSpec extends Specification {
     def "create"() {
         given: '准备创建配置所需的服务'
         serviceE = serviceRepository.addService(serviceE)
-
+        configDTO.setServiceId(serviceE.getId())
         when: '向【创建配置】接口发请求'
-        def entity1 = restTemplate.postForEntity('/v1/configs', data1, CreateConfigDTO)
-        def entity2 = restTemplate.postForEntity('/v1/configs', data2, CreateConfigDTO)
-
-
+        def entity1 = restTemplate.postForEntity('/v1/configs', data1, ConfigDTO)
+        def entity2 = restTemplate.postForEntity('/v1/configs', data2, ConfigDTO)
+        id1 = entity1.body.id
+        id2 = entity2.body.id
         then: '查看接口返回值'
         entity1.statusCode.is2xxSuccessful()
         entity2.statusCode.is2xxSuccessful()
+
+
     }
 
 
