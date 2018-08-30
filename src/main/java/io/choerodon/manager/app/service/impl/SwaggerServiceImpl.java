@@ -24,6 +24,14 @@ public class SwaggerServiceImpl implements SwaggerService {
         this.service = service;
     }
 
+    /**
+     * 单元测试支持
+     * @param service
+     */
+    public void setService(ISwaggerService service) {
+        this.service = service;
+    }
+
     @Override
     public List<SwaggerResource> getSwaggerResource() {
         List<SwaggerResource> swaggerResources = service.getSwaggerResource();
