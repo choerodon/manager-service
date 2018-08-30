@@ -49,10 +49,10 @@ class RouteServiceImplSpec extends Specification {
         createdRouteDTO = objectMapper.readValue(routeDTOJson, RouteDTO)
         nameDuplicateRouteDTO = new RouteDTO()
         BeanUtils.copyProperties(createdRouteDTO, nameDuplicateRouteDTO)
-        nameDuplicateRouteDTO.setName("manager")
+        nameDuplicateRouteDTO.setName("iam")
         pathDuplicateRouteDTO = new RouteDTO()
         BeanUtils.copyProperties(createdRouteDTO, pathDuplicateRouteDTO)
-        pathDuplicateRouteDTO.setPath("/manager/**")
+        pathDuplicateRouteDTO.setPath("/iam/**")
     }
 
     def "List"() {
