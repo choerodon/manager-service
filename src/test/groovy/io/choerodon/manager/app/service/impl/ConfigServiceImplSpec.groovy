@@ -8,6 +8,7 @@ import io.choerodon.manager.api.dto.CreateConfigDTO
 import io.choerodon.manager.api.dto.ItemDto
 import io.choerodon.manager.app.service.ConfigService
 import io.choerodon.manager.domain.manager.entity.ServiceE
+import io.choerodon.manager.domain.repository.ConfigRepository
 import io.choerodon.manager.domain.repository.ServiceRepository
 import io.choerodon.manager.infra.common.utils.config.ConfigUtil
 import io.choerodon.mybatis.pagehelper.domain.PageRequest
@@ -28,6 +29,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 class ConfigServiceImplSpec extends Specification {
     @Autowired
     ConfigService configService
+    @Autowired
+    private ConfigRepository configRepository
     @Autowired
     private ServiceRepository serviceRepository
     @Shared
@@ -103,8 +106,26 @@ class ConfigServiceImplSpec extends Specification {
         nullServiceName.setServiceName(null)
         nullServiceName.setConfigVersion(configDTO.getConfigVersion())
 
+        ConfigCheckDTO serviceNotExist = new ConfigCheckDTO()
+        serviceNotExist.setName(configDTO.getName())
+        serviceNotExist.setServiceName("test_notExist_service")
+        serviceNotExist.setConfigVersion(configDTO.getConfigVersion())
+
+        ConfigCheckDTO checkException1 = new ConfigCheckDTO()
+        checkException1.setName(testDataCreateConfig.getName())
+        checkException1.setServiceName(serviceE.getName())
+        checkException1.setConfigVersion(testDataCreateConfig.getVersion())
+
+        ConfigCheckDTO checkException2 = new ConfigCheckDTO()
+        checkException2.setName('update2')
+        checkException2.setServiceName(serviceE.getName())
+        checkException2.setConfigVersion('notExist_version')
+
         checkDTOList.add(duplicate)
         checkDTOList.add(nullServiceName)
+        checkDTOList.add(serviceNotExist)
+        checkDTOList.add(checkException1)
+        checkDTOList.add(checkException2)
 
         pageRequest = new PageRequest()
         pageRequest.setPage(1)
@@ -132,7 +153,6 @@ class ConfigServiceImplSpec extends Specification {
     def "create[Exception]"() {
         given: '创建测试用服务'
         serviceE = serviceRepository.addService(serviceE)
-
         when: '为服务创建配置 - 异常 '
         configService.create(createConfigDTO)
         then: '校验 并 删除测试用服务'
@@ -244,6 +264,7 @@ class ConfigServiceImplSpec extends Specification {
 
     def "queryDefaultByServiceName"() {
         given: '创建测试用服务'
+
         serviceE = serviceRepository.addService(serviceE)
 
         when: '指定查询所需的服务名'
@@ -253,7 +274,7 @@ class ConfigServiceImplSpec extends Specification {
 
         when: '指定查询所需的服务名'
         configService.queryDefaultByServiceName(name)
-        then: '测试默认配置不为空'
+        then: '测试默认配置不为空-服务名不存在'
         def error = thrown(expectedException)
         error.message == expectedMessage
         serviceRepository.deleteService(serviceE.getId())
@@ -279,9 +300,11 @@ class ConfigServiceImplSpec extends Specification {
 
     def "updateConfig"() {
         given: '准备需更新的配置'
+        def type = 'yaml'
         configDTO.setName('update2')
+        configDTO.setTxt(ConfigUtil.convertMapToText(configDTO.getValue(), type))
         when: '更新配置'
-        def update = configService.updateConfig(configDTO.getId(), configDTO, 'yaml')
+        def update = configService.updateConfig(configDTO.getId(), configDTO, type)
         then: '解析更新后的配置'
         noExceptionThrown()
         update.name == 'update2'
@@ -292,6 +315,11 @@ class ConfigServiceImplSpec extends Specification {
     def "check"() {
         given: '创建测试用服务'
         serviceE = serviceRepository.addService(serviceE)
+
+        when: '配置校验-configDTO为null'
+        configService.check(null)
+        then: '校验'
+        noExceptionThrown()
 
         when: '配置校验'
         configService.check(checkDTOList.get(0))
@@ -307,10 +335,26 @@ class ConfigServiceImplSpec extends Specification {
 
         where: '结果比对'
         checkBody           || expectedException | expectedMessage
-//        checkDTOList.get(0) || CommonException   | 'error.config.insert.versionDuplicate'
         checkDTOList.get(1) || CommonException   | 'error.config.serviceName.notExist'
+        checkDTOList.get(2) || CommonException   | 'error.config.serviceName.notExist'
+    }
+
+    def "check[Exception]"() {
+        given: '准备测试用服务'
+        serviceE = serviceRepository.addService(serviceE)
+        when: '配置校验'
+        configService.check(configBody)
+        then: '结果分析'
+        serviceRepository.deleteService(serviceE.getId())
+        def error = thrown(expectedException)
+        error.message == expectedMessage
+        where: '结果比对'
+        configBody          || expectedException | expectedMessage
+        checkDTOList.get(3) || CommonException   | 'error.config.insert.versionDuplicate'
+        checkDTOList.get(4) || CommonException   | 'error.config.insert.nameDuplicate'
 
     }
+
 
     def "saveItem"() {
         given: '创建测试用服务'

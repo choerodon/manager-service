@@ -37,6 +37,10 @@ public class DocumentController {
         this.documentService = documentService;
     }
 
+    public void setDocumentService(DocumentService documentService) {
+        this.documentService = documentService;
+    }
+
     /**
      * 获取服务id对应的版本的swagger json
      *
