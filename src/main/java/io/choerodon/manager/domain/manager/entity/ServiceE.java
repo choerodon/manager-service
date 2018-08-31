@@ -20,48 +20,7 @@ public class ServiceE {
 
     private Long objectVersionNumber;
 
-    @Autowired
-    private ServiceRepository serviceRepository;
-
-    public ServiceE() {
-        //
-    }
-
-    /**
-     * 获取自身对象
-     *
-     * @return ServiceE
-     */
-    public ServiceE getSelf() {
-        return serviceRepository.getService(this.id);
-    }
-
-    /**
-     * 添加一个Service
-     *
-     * @return ServiceE
-     */
-    public ServiceE addService() {
-        return serviceRepository.addService(this);
-    }
-
-    /**
-     * 更新一个Service
-     *
-     * @return ServiceE
-     */
-    public ServiceE updateService() {
-        return serviceRepository.updateService(this);
-    }
-
-    /**
-     * 删除一个service
-     *
-     * @return Boolean
-     */
-    public boolean deleteService() {
-        return serviceRepository.deleteService(this.id);
-    }
+    public ServiceE() {}
 
     public Long getId() {
         return id;
