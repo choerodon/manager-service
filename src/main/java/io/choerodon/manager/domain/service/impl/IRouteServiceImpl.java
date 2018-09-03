@@ -51,10 +51,6 @@ public class IRouteServiceImpl implements IRouteService {
         this.discoveryClient = discoveryClient;
     }
 
-    public void unitTestInit(DiscoveryClient discoveryClient) {
-        this.discoveryClient = discoveryClient;
-    }
-
     @Override
     public Page<RouteE> pageAll(PageRequest pageRequest, RouteDO routeDO, String params) {
         return routeRepository.pageAllRoutes(pageRequest, routeDO, params);
