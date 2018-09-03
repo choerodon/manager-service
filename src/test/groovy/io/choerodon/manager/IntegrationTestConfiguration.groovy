@@ -5,6 +5,7 @@ import com.netflix.appinfo.InstanceInfo
 import io.choerodon.core.oauth.CustomUserDetails
 import io.choerodon.liquibase.LiquibaseConfig
 import io.choerodon.liquibase.LiquibaseExecutor
+import io.choerodon.manager.domain.repository.RouteRepository
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -60,15 +61,14 @@ class IntegrationTestConfiguration {
     DiscoveryClient discoveryClient() {
         DiscoveryClient discoveryClient = Mockito.mock(DiscoveryClient)
         Mockito.doReturn(["manager-service"]).when(discoveryClient).getServices()
-        //Mockito.when(discoveryClient.getServices()).thenReturn(["manager-service"])
         String instanceJson = '{"instanceId":"localhost:manager-service:8963","app":"MANAGER-SERVICE","appGroupName":null,"ipAddr":"172.31.176.1","sid":"na","homePageUrl":"http://172.31.176.1:8963/","statusPageUrl":"http://172.31.176.1:8964/info","healthCheckUrl":"http://172.31.176.1:8964/health","secureHealthCheckUrl":null,"vipAddress":"manager-service","secureVipAddress":"manager-service","countryId":1,"dataCenterInfo":{"@class":"com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo","name":"MyOwn"},"hostName":"172.31.176.1","status":"UP","leaseInfo":{"renewalIntervalInSecs":1,"durationInSecs":3,"registrationTimestamp":1533216528607,"lastRenewalTimestamp":1533216528607,"evictionTimestamp":0,"serviceUpTimestamp":1533216528100},"isCoordinatingDiscoveryServer":false,"metadata":{},"lastUpdatedTimestamp":1533216528607,"lastDirtyTimestamp":1533208711227,"actionType":"ADDED","asgName":null,"overriddenStatus":"UNKNOWN"}'
         InstanceInfo instanceInfo = objectMapper.readValue(instanceJson, InstanceInfo)
         EurekaDiscoveryClient.EurekaServiceInstance eurekaServiceInstance = new EurekaDiscoveryClient.EurekaServiceInstance(instanceInfo)
         ServiceInstance serviceInstance = (ServiceInstance) eurekaServiceInstance
         ArrayList<ServiceInstance> serviceInstances = new ArrayList<ServiceInstance>()
         serviceInstances << serviceInstance
-        //Mockito.when(discoveryClient.getInstances(Mockito.anyString())).thenReturn(serviceInstances)
-        Mockito.doReturn(serviceInstances).when(discoveryClient).getInstances(Mockito.anyString())
+        //Mockito.doReturn(serviceInstances).when(discoveryClient).getInstances(Mockito.anyString())
+        Mockito.doReturn(serviceInstances).when(discoveryClient).getInstances("manager-service")
         return discoveryClient
     }
 

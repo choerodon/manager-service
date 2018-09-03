@@ -1,12 +1,11 @@
 package io.choerodon.manager.api.controller.v1
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.choerodon.core.convertor.ConvertHelper
-import io.choerodon.core.exception.CommonException
 import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.api.dto.RouteDTO
-import io.choerodon.manager.domain.manager.entity.RouteE
-import io.choerodon.manager.infra.repository.impl.RouteRepositoryImpl
+import io.choerodon.manager.app.service.RouteService
+import io.choerodon.manager.infra.dataobject.RouteDO
+import io.choerodon.mybatis.pagehelper.domain.PageRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -24,92 +23,85 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Import(IntegrationTestConfiguration)
 class RouteControllerSpec extends Specification {
 
+    private static final routeDTOJson = '{"id":10,"name":"test","path":"/test/**","serviceId":"test-service"}'
     private ObjectMapper objectMapper = new ObjectMapper()
+    private RouteService mockRouteService = Mock(RouteService)
 
     @Autowired
     private TestRestTemplate restTemplate
 
     @Autowired
-    private RouteRepositoryImpl routeRepository;
+    private RouteController routeController
+
+    def setup() {
+        routeController.setRouteService(mockRouteService)
+    }
 
     def "List"() {
-        when: "发送一个get请求"
-        def entity = restTemplate.getForEntity("/v1/routes", String)
+        given: "构造请求参数"
+        def params = "params"
+        def map = ["name": "test", "path": "/test/**", "serviceId": 1, "builtIn": false, "params": params]
 
-        then: "校验状态码"
-        noExceptionThrown()
+        when: "调用分页查询路由信息接口"
+        def entity = restTemplate.getForEntity("/v1/routes?name={name}&path={path}&serviceId={serviceId}&builtIn={builtIn}&params={params}"
+                , String, map)
+
+        then: "校验状态码和调用次数"
         entity.statusCode.is2xxSuccessful()
+        1 * mockRouteService.list(_ as PageRequest, _ as RouteDO, params)
+        0 * _
     }
 
     def "Create"() {
         given: "构造RouteDTO"
-        String routeDTOJson = '{"id":10,"name":"testdyq","path":"/testdyq/**","serviceId":"testdyq-service"}'
         def routeDTO = objectMapper.readValue(routeDTOJson, RouteDTO)
 
-        when: "发送一个post请求"
+        when: "调用增加一个新路由接口"
         def entity = restTemplate.postForEntity("/v1/routes", routeDTO, String)
 
-        then: "校验状态码并删除routeDTO"
-        noExceptionThrown()
+        then: "校验状态码和调用次数"
         entity.statusCode.is2xxSuccessful()
-        routeRepository.deleteRoute(ConvertHelper.convert(routeDTO, RouteE))
+        1 * mockRouteService.create(_ as RouteDTO)
+        0 * _
     }
 
     def "Update"() {
         given: "构造RouteDTO"
-        //String routeDTOJson = '{"id":1,"name":"testdyq","path":"/testdyq/**","serviceId":"testdyq-service"}'
-        //def routeDTO = objectMapper.readValue(routeDTOJson, RouteDTO)
-        def routeDTO = ConvertHelper.convert(routeRepository.getAllRoute().get(0), RouteDTO)
-        routeDTO.setName("testdyq")
-        routeDTO.setPath("/testdyq/**")
-        routeDTO.setBuiltIn(false)
+        def routeDTO = objectMapper.readValue(routeDTOJson, RouteDTO)
 
-        when: "发送一个post请求"
+        when: "调用更新一个新路由接口"
         def entity = restTemplate.postForEntity("/v1/routes/{route_id}", routeDTO, String, routeDTO.getId())
 
-        then: "校验状态码"
-        noExceptionThrown()
+        then: "校验状态码和调用次数"
         entity.statusCode.is2xxSuccessful()
+        1 * mockRouteService.update(routeDTO.getId(), _ as RouteDTO)
+        0 * _
     }
 
     def "Delete"() {
-        given:
-        def routeDTO = ConvertHelper.convert(routeRepository.getAllRoute().get(0), RouteDTO)
-        def url = "/v1/routes/{route_id}"
-        HttpEntity<Object> httpEntity = new HttpEntity<>()
+        given: "构建参数"
+        def routeId = 1L
+        def httpEntity = new HttpEntity<Object>()
 
-        when: "发送一个delete请求"
-        def entity = restTemplate.exchange(url, HttpMethod.DELETE, httpEntity, String, routeDTO.getId())
+        when: "调用删除一个新路由接口"
+        def entity = restTemplate.exchange("/v1/routes/{route_id}", HttpMethod.DELETE, httpEntity, String, routeId)
 
-        then: "校验状态码"
-        noExceptionThrown()
+        then: "校验状态码和调用次数"
         entity.statusCode.is2xxSuccessful()
-
-        /*when: "发送一个delete请求-异常"
-        entity = restTemplate.exchange(url, HttpMethod.DELETE, httpEntity, String, route_id)
-
-        then: "抛出异常"
-        entity.statusCode.is2xxSuccessful()
-        def error = thrown(expectedException)
-        error.message == expectedMessage
-
-        where: "检查异常"
-        route_id || expectedException | expectedMessage
-        100      || CommonException   | "error.delete.route"*/
-
+        1 * mockRouteService.delete(routeId)
+        0 * _
     }
 
     def "Check"() {
         given: "构造RouteDTO"
-        def routeDTO = ConvertHelper.convert(routeRepository.getAllRoute().get(0), RouteDTO)
-        routeDTO.setName("test1")
-        routeDTO.setPath("/test1/**")
+        def routeDTO = objectMapper.readValue(routeDTOJson, RouteDTO)
 
-        when: "发送一个post请求"
+        when: "调用检查一个新路由接口"
         def entity = restTemplate.postForEntity("/v1/routes/check", routeDTO, String)
 
-        then: "校验状态码"
-        noExceptionThrown()
+        then: "校验状态码和调用次数"
         entity.statusCode.is2xxSuccessful()
+        1 * mockRouteService.checkRoute(_ as RouteDTO)
+        0 * _
     }
 }

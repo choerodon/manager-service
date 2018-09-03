@@ -34,6 +34,14 @@ public class ServiceController {
     private ServiceService serviceService;
     private ConfigService configService;
 
+    public void setServiceService(ServiceService serviceService) {
+        this.serviceService = serviceService;
+    }
+
+    public void setConfigService(ConfigService configService) {
+        this.configService = configService;
+    }
+
     public ServiceController(ServiceService serviceService, ConfigService configService) {
         this.serviceService = serviceService;
         this.configService = configService;
