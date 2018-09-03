@@ -59,7 +59,9 @@ public class ConfigServiceImpl implements ConfigService {
         this.routeRepository = routeRepository;
     }
 
-
+    public void setGetRouteServices(String[] getRouteServices) {
+        this.getRouteServices = getRouteServices;
+    }
     @Override
     public Page<ConfigDTO> listByServiceName(String serviceName, PageRequest pageRequest, ConfigDTO queryInfo, String queryParam) {
         List<Sort.Order> orders = new ArrayList<>();

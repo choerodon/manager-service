@@ -20,50 +20,129 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Import(IntegrationTestConfiguration)
 class ApiServiceImplSpec extends Specification {
     @Autowired
-    ApiService apiService
+    private ApiService apiService
 
-//    @Spy
-//    private IDocumentService iDocumentService
-//    @Autowired
-//    @InjectMocks
-//    private ApiService apiService
+    private IDocumentService mockIDocumentService = Mock(IDocumentService)
 
-//    def setup() {
-//        MockitoAnnotations.initMocks(this)
-//    }
+    def setup() {
+        apiService = new ApiServiceImpl(mockIDocumentService)
+    }
 
     def "GetControllers"() {
-        given: "构造param map"
-        Map<String, Object> map = new HashMap<>()
+        given: "准备参数"
+        def name = "manager"
+        def version = "null_version"
+
+        def map = new HashMap<String, Object>()
         map.put("params", null)
         map.put("name", null)
         map.put("description", null)
+
         and: "构造pageRequest"
         def order = new Sort.Order("id")
         def pageRequest = new PageRequest(0, 20, new Sort(order))
-        and: "注入iDocumentService"
-        def iDocumentService = Spy(IDocumentService)
+
+        and: 'mock getSwaggerJson方法'
         def file = new File(this.class.getResource('/swagger.json').toURI())
-        iDocumentService.getSwaggerJson(_, _) >> { file.getText('UTF-8') }
-        ApiServiceImpl apiServiceImpl = new ApiServiceImpl(iDocumentService)
+        mockIDocumentService.getSwaggerJson(_, _) >> { file.getText('UTF-8') }
 
-        when: "调用请求"
-        def list = apiServiceImpl.getControllers("manager", "null_version", pageRequest, map)
+        when: "方法调用"
+        def list = apiService.getControllers(name, version, pageRequest, map)
 
-        then: "解析集合不为空"
+        then: "结果分析"
         !list.isEmpty()
+    }
 
+    def "GetControllers[Exception]"() {
+        given: "准备参数"
+        def name = "manager"
+        def version = "null_version"
 
+        def map = new HashMap<String, Object>()
+        map.put("params", null)
+        map.put("name", null)
+        map.put("description", null)
+
+        and: "构造pageRequest"
+        def order = new Sort.Order("id")
+        def pageRequest = new PageRequest(0, 20, new Sort(order))
+
+        and: 'mock getSwaggerJson方法'
+        mockIDocumentService.getSwaggerJson(_, _) >> { throw new IOException("") }
+
+        when: "【异常】方法调用"
+        apiService.getControllers(name, version, pageRequest, map)
+
+        then: "检测异常"
+        def IOe = thrown(CommonException)
+        IOe.message == "error.service.not.run"
+    }
+
+    def "GetControllers[IOException]"() {
+        given: "准备参数"
+        def name = "manager"
+        def version = "null_version"
+
+        def map = new HashMap<String, Object>()
+        map.put("params", null)
+        map.put("name", null)
+        map.put("description", null)
+
+        and: "构造pageRequest"
+        def order = new Sort.Order("id")
+        def pageRequest = new PageRequest(0, 20, new Sort(order))
+
+        and: 'mock getSwaggerJson方法'
+        mockIDocumentService.getSwaggerJson(_, _) >> { throw new IOException("") }
+
+        when: "【异常】方法调用"
+        apiService.getControllers(name, version, pageRequest, map)
+
+        then: "检测异常"
+        def IOe = thrown(CommonException)
+        IOe.message == "error.service.not.run"
     }
 
     def "QueryPathDetail"() {
+        given: "准备查询参数"
+        def serviceName = "test"
+        def version = "test"
+        def controllerName_NotFound = "test"
+        def controllerName = 'api-controller'
+        def operationId = "test"
+
+        and: 'mock iDocumentService.getSwaggerJson & objectMapper.readTree'
+        def file = new File(this.class.getResource('/swagger.json').toURI())
+        mockIDocumentService.getSwaggerJson(_, _) >> { file.getText('UTF-8') }
+
         when: '调用方法'
-        apiService.queryPathDetail(serviceName, 'test', controllerName, 'test')
+        apiService.queryPathDetail(serviceName, version, controllerName, operationId)
+
+        then: '结果分析'
+        noExceptionThrown()
+
+        when: '调用方法'
+        apiService.queryPathDetail(serviceName, version, controllerName_NotFound, operationId)
+
         then: '捕获异常'
-        def error = thrown(expectedException)
-        error.message == expectedMessage
-        where: '结果比对'
-        serviceName    | controllerName  || expectedException | expectedMessage
-        'test_service' | 'ApiController' || CommonException   | 'error.service.not.run'
+        def error = thrown(CommonException)
+        error.message == 'error.controller.not.found'
+    }
+
+    def "QueryPathDetail[Service Not Run]"() {
+        given: "准备查询参数"
+        def serviceName = "test"
+        def version = "test"
+        def controllerName = "test"
+        def operationId = "test"
+        and: 'mock iDocumentService.getSwaggerJson'
+        mockIDocumentService.getSwaggerJson(_, _) >> { throw new IOException("") }
+
+        when: '调用方法'
+        apiService.queryPathDetail(serviceName, version, controllerName, operationId)
+
+        then: '捕获异常'
+        def error = thrown(CommonException)
+        error.message == 'error.service.not.run'
     }
 }

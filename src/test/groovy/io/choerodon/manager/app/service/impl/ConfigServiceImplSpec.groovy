@@ -7,16 +7,19 @@ import io.choerodon.manager.api.dto.ConfigDTO
 import io.choerodon.manager.api.dto.CreateConfigDTO
 import io.choerodon.manager.api.dto.ItemDto
 import io.choerodon.manager.app.service.ConfigService
+import io.choerodon.manager.domain.manager.entity.RouteE
 import io.choerodon.manager.domain.manager.entity.ServiceE
 import io.choerodon.manager.domain.repository.ConfigRepository
+import io.choerodon.manager.domain.repository.RouteRepository
 import io.choerodon.manager.domain.repository.ServiceRepository
 import io.choerodon.manager.infra.common.utils.config.ConfigUtil
+import io.choerodon.manager.infra.dataobject.ConfigDO
+import io.choerodon.manager.infra.dataobject.ServiceDO
 import io.choerodon.mybatis.pagehelper.domain.PageRequest
 import io.choerodon.mybatis.pagehelper.domain.Sort
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
-import spock.lang.Shared
 import spock.lang.Specification
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -29,389 +32,504 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 class ConfigServiceImplSpec extends Specification {
     @Autowired
     ConfigService configService
-    @Autowired
-    private ConfigRepository configRepository
-    @Autowired
-    private ServiceRepository serviceRepository
-    @Shared
-    ServiceE serviceE
-    @Shared
-    ServiceE serviceEforDel
-    @Shared
-    CreateConfigDTO testDataCreateConfig
-    @Shared
-    CreateConfigDTO configForDel
-    @Shared
-    List<CreateConfigDTO> testCreateConfigList
-    @Shared
-    ConfigDTO configDTO
-    @Shared
-    ConfigDTO dtofrodel
-    @Shared
-    PageRequest pageRequest
-    @Shared
-    List<ConfigCheckDTO> checkDTOList
-    @Shared
-    ItemDto item
+    private ConfigRepository mockConfigRepository = Mock(ConfigRepository)
 
-    void setupSpec() {
+    private ServiceRepository mockServiceRepository = Mock(ServiceRepository)
 
-        serviceE = new ServiceE()
-        serviceE.setName("test_service")
+    private RouteRepository mockRouteRepository = Mock(RouteRepository)
 
-        serviceEforDel = new ServiceE()
-        serviceEforDel.setName("test2_service")
+    private String[] getRouteServices
 
-        testDataCreateConfig = new CreateConfigDTO()
-        testDataCreateConfig.setName("test1")
-        testDataCreateConfig.setServiceName("test_service")
-        testDataCreateConfig.setVersion("v1")
-        testDataCreateConfig.setYaml("test: test")
-
-        configForDel = new CreateConfigDTO()
-        configForDel.setName("del1")
-        configForDel.setServiceName("test2_service")
-        configForDel.setVersion("verison1")
-        configForDel.setYaml("test: del")
-
-        dtofrodel = new ConfigDTO()
-
-        CreateConfigDTO data1 = new CreateConfigDTO()
-        data1.setName("test2")
-        data1.setServiceName("noExistService")
-        data1.setVersion("v1")
-        data1.setYaml("test: noExistService")
-
-        CreateConfigDTO data2 = new CreateConfigDTO()
-        data2.setName("test3")
-        data2.setServiceName("test_service")
-        data2.setVersion("v1")
-        data2.setYaml("test, noExistService")
-        testCreateConfigList = new ArrayList<>()
-        testCreateConfigList.add(testDataCreateConfig)
-        testCreateConfigList.add(data1)
-        testCreateConfigList.add(data2)
-
-        configDTO = new ConfigDTO()
-
-
-        checkDTOList = new ArrayList<>()
-        ConfigCheckDTO duplicate = new ConfigCheckDTO()
-        duplicate.setName(configDTO.getName())
-        duplicate.setServiceName(testDataCreateConfig.getServiceName())
-        duplicate.setConfigVersion(configDTO.getConfigVersion())
-
-        ConfigCheckDTO nullServiceName = new ConfigCheckDTO()
-        nullServiceName.setName(configDTO.getName())
-        nullServiceName.setServiceName(null)
-        nullServiceName.setConfigVersion(configDTO.getConfigVersion())
-
-        ConfigCheckDTO serviceNotExist = new ConfigCheckDTO()
-        serviceNotExist.setName(configDTO.getName())
-        serviceNotExist.setServiceName("test_notExist_service")
-        serviceNotExist.setConfigVersion(configDTO.getConfigVersion())
-
-        ConfigCheckDTO checkException1 = new ConfigCheckDTO()
-        checkException1.setName(testDataCreateConfig.getName())
-        checkException1.setServiceName(serviceE.getName())
-        checkException1.setConfigVersion(testDataCreateConfig.getVersion())
-
-        ConfigCheckDTO checkException2 = new ConfigCheckDTO()
-        checkException2.setName('update2')
-        checkException2.setServiceName(serviceE.getName())
-        checkException2.setConfigVersion('notExist_version')
-
-        checkDTOList.add(duplicate)
-        checkDTOList.add(nullServiceName)
-        checkDTOList.add(serviceNotExist)
-        checkDTOList.add(checkException1)
-        checkDTOList.add(checkException2)
-
-        pageRequest = new PageRequest()
-        pageRequest.setPage(1)
-        pageRequest.setSize(10)
-        pageRequest.setSort(new Sort('id'))
-
-
-        item = new ItemDto()
-        item.setValue("testValue")
-        item.setProperty("testItem")
+    def setup() {
+        configService = new ConfigServiceImpl(mockConfigRepository, mockServiceRepository, mockRouteRepository)
+        getRouteServices = new String[1]
+        getRouteServices[0] = "api-gateway"
+        configService.setGetRouteServices(getRouteServices)
     }
 
     def "create"() {
-        given: '创建测试用服务'
-        serviceE = serviceRepository.addService(serviceE)
+        given: '创建参数'
+        def serviceName = "test_service"
+        def wrongYaml = "test-test"
+        def yaml = "test: test"
+
+        def createConfigDTO_YamlWrong = new CreateConfigDTO()
+        createConfigDTO_YamlWrong.setName("test1")
+        createConfigDTO_YamlWrong.setServiceName(serviceName)
+        createConfigDTO_YamlWrong.setVersion("v1")
+        createConfigDTO_YamlWrong.setYaml(wrongYaml)
+
+        def createConfigDTO = new CreateConfigDTO()
+        createConfigDTO.setName("test1")
+        createConfigDTO.setServiceName(serviceName)
+        createConfigDTO.setVersion("v1")
+        createConfigDTO.setYaml(yaml)
+
+        def serviceDO = new ServiceDO(name: serviceName)
+
+        and: 'mock serviceRepository.addService'
+        mockServiceRepository.getService(_) >> { return serviceDO }
+
+        when: '为服务创建配置 - yaml文件错误 '
+        configService.create(createConfigDTO_YamlWrong)
+
+        then: '校验'
+        def error = thrown(CommonException)
+        error.message == "error.config.yml"
 
         when: '为服务创建配置 '
-        configDTO = configService.create(testDataCreateConfig)
-        then: '校验 并 删除测试用服务'
+        configService.create(createConfigDTO)
+
+        then: '校验'
         noExceptionThrown()
-        configDTO.getId() != null
-        serviceRepository.deleteService(serviceE.getId())
     }
 
-    def "create[Exception]"() {
-        given: '创建测试用服务'
-        serviceE = serviceRepository.addService(serviceE)
-        when: '为服务创建配置 - 异常 '
-        configService.create(createConfigDTO)
-        then: '校验 并 删除测试用服务'
-        def error = thrown(expectedException)
-        error.message == expectedMessage
-        serviceRepository.deleteService(serviceE.getId())
+    def "create[ServiceNotExist]"() {
+        given: '创建参数'
+        def serviceName = "test_service"
+        def yaml = "test: test"
 
-        where: '结果比对'
-        createConfigDTO             || expectedException | expectedMessage
-        testCreateConfigList.get(1) || CommonException   | 'error.config.serviceName.notExist'
-        testCreateConfigList.get(2) || CommonException   | 'error.config.yml'
+        def createConfigDTO = new CreateConfigDTO()
+        createConfigDTO.setName("test1")
+        createConfigDTO.setServiceName(serviceName)
+        createConfigDTO.setVersion("v1")
+        createConfigDTO.setYaml(yaml)
+
+        when: '为服务创建配置 - 服务不存在 '
+        configService.create(createConfigDTO)
+
+        then: '校验'
+        def serviceNotExist = thrown(CommonException)
+        serviceNotExist.message == 'error.config.serviceName.notExist'
     }
 
     def "queryByServiceNameAndConfigVersion"() {
-        given: '创建测试用服务'
-        serviceE = serviceRepository.addService(serviceE)
+        given: '创建参数'
+        def serviceName = "api-gateway"
+        def configVersion = "test_version"
+
+        def name = "test"
+        def isDefault = false
+        def source = "test"
+
+        def configDTO = new ConfigDTO(name, configVersion, isDefault, source)
+        def value = new HashMap<String, Object>()
+        value.put("test", "test")
+        configDTO.setValue(value)
+
+        def routeE = new RouteE()
+
+        routeE.setPath("/test/**")
+        routeE.setServiceId("test-service")
+        routeE.setUrl("testUrl")
+        routeE.setStripPrefix(false)
+        routeE.setRetryable(false)
+        routeE.setHelperService("testHelperService")
+        routeE.setCustomSensitiveHeaders(false)
+        routeE.setSensitiveHeaders("testSensitiveHeaders")
+        routeE.setName("test")
+        def routeList = new ArrayList<RouteE>()
+        routeList.add(routeE)
+
+        and: 'mock ConfigRepository.queryByServiceNameAndConfigVersion  mockRouteRepository.getAllRoute'
+        mockConfigRepository.queryByServiceNameAndConfigVersion(*_) >> { return configDTO }
+        mockRouteRepository.getAllRoute() >> { return routeList }
 
         when: '根据服务名与版本号查询配置 '
-        def queryConfig = configService.queryByServiceNameAndConfigVersion(testDataCreateConfig.getServiceName(), testDataCreateConfig.getVersion())
+        configService.queryByServiceNameAndConfigVersion(serviceName, configVersion)
+
         then: '分析配置是否正确'
         noExceptionThrown()
-        queryConfig.configVersion.equals(testDataCreateConfig.getVersion())
+    }
 
-        when: '根据服务名与版本号查询配置 - 异常'
-        configService.queryByServiceNameAndConfigVersion(name, version)
+
+    def "queryByServiceNameAndConfigVersion[Exception]"() {
+        given: '创建参数'
+        def serviceName = "api-gateway"
+        def configVersion = ""
+
+        and: 'mock ConfigRepository.queryByServiceNameAndConfigVersion'
+        mockConfigRepository.queryByServiceNameAndConfigVersion(_, _) >> { return null }
+
+        when: '根据服务名与版本号查询配置 '
+        configService.queryByServiceNameAndConfigVersion(serviceName, configVersion)
+
         then: '分析配置是否正确'
-        def error = thrown(expectedException)
-        error.message == expectedMessage
-        serviceRepository.deleteService(serviceE.getId())
-
-        where: '分析异常是否正确'
-        name   | version         || expectedException | expectedMessage
-        'test' | 'testException' || CommonException   | "error.serviceConfigDO.query.serviceNameOrConfigVersionNotFound"
-
+        def error = thrown(CommonException)
+        error.message == "error.serviceConfigDO.query.serviceNameOrConfigVersionNotFound"
     }
 
     def "query"() {
-        given: '创建测试用服务'
-        serviceE = serviceRepository.addService(serviceE)
+        given: '创建参数'
+        def configId = 1L
+        def type = 'properties'
+
+        def configDO = new ConfigDO()
+        configDO.setServiceId(1L)
+
+        def serviceE = new ServiceE()
+        serviceE.setName("test_service")
+
+        and: 'mock configRepository.query &  serviceRepository.getService'
+        mockConfigRepository.query(configId) >> { return configDO }
+        mockServiceRepository.getService(_) >> { return serviceE }
 
         when: '根据配置Id，type查询配置'
-        def query = configService.query(configDTO.getId(), 'properties')
+        configService.query(configId, type)
+
         then: '分析查询所得的配置信息'
         noExceptionThrown()
-        query.txt.equals(ConfigUtil.convertMapToText(configDTO.value, 'properties'))
+    }
 
-        when: '根据配置Id，type查询配置——配置不存在'
-        configService.query(0L, 'properties')
-        then: '分析查询所得的配置信息'
-        def error1 = thrown(CommonException)
-        error1.message == "error.config.not.exist"
-        serviceRepository.deleteService(serviceE.getId())
+    def "query[Exception-configNotExist]"() {
+        given: '创建参数'
+        def configId = 1L
+        def type = 'properties'
 
-        when: '根据配置Id，type查询配置——服务不存在'
-        configService.query(configDTO.getId(), 'properties')
+        def configDO = new ConfigDO()
+        configDO.setServiceId(1L)
+
+        def serviceE = new ServiceE()
+        serviceE.setName("test_service")
+
+        when: '根据配置Id，type查询配置——异常测试'
+        configService.query(configId, type)
         then: '分析查询所得的配置信息'
-        def error2 = thrown(CommonException)
-        error2.message == "error.service.notExist"
+        def error = thrown(CommonException)
+        error.message == "error.config.not.exist"
+    }
+
+    def "query[Exception-serviceNotExist]"() {
+        given: '创建参数'
+        def configId = 1L
+        def type = 'properties'
+
+        def configDO = new ConfigDO()
+        configDO.setServiceId(1L)
+
+        def serviceE = new ServiceE()
+        serviceE.setName("test_service")
+
+        and: 'mock configRepository.query'
+        mockConfigRepository.query(configId) >> { return configDO }
+
+        when: '根据配置Id，type查询配置——异常测试'
+        configService.query(configId, type)
+        then: '分析查询所得的配置信息'
+        def error = thrown(CommonException)
+        error.message == "error.service.notExist"
     }
 
     def "queryYaml"() {
-        given: '创建测试用服务'
-        serviceE = serviceRepository.addService(serviceE)
+        given: '创建参数'
+        def configId = 1L
+        def configDO = new ConfigDO()
+        configDO.setValue('{"item1":"item1","item2":"item2"}')
+        configDO.setObjectVersionNumber(1L)
+        def serviceE = new ServiceE()
+        serviceE.setName("test_service")
+        serviceE.setId(1L)
+
+        when: '根据配置Id，查询yaml-配置不存在'
+        configService.queryYaml(configId)
+        then: '分析异常'
+        def configNotExist = thrown(CommonException)
+        configNotExist.message == "error.config.not.exist"
+
+        when: '根据配置Id，查询yaml-服务不存在'
+        mockConfigRepository.query(configId) >> { return configDO }
+
+        configService.queryYaml(configId)
+        then: '分析异常'
+        def serviceNotExist = thrown(CommonException)
+        serviceNotExist.message == "error.config.service.not.exist"
 
         when: '根据配置Id，查询yaml'
-        def yaml = configService.queryYaml(configDTO.getId())
-        then: '解析yaml文件'
+        mockConfigRepository.query(configId) >> { return configDO }
+        mockServiceRepository.getService(_) >> { return serviceE }
+        configService.queryYaml(configId)
+        then: '结果分析'
         noExceptionThrown()
-        yaml.yaml.equals(ConfigUtil.convertMapToText(configDTO.value, 'yaml'))
 
-        when: '根据配置Id，type查询配置——配置不存在'
-        configService.queryYaml(0L)
-        then: '分析查询所得的配置信息'
-        def error1 = thrown(CommonException)
-        error1.message == "error.config.not.exist"
-        serviceRepository.deleteService(serviceE.getId())
-
-        when: '根据配置Id，type查询配置——服务不存在'
-        configService.queryYaml(configDTO.getId())
-        then: '分析查询所得的配置信息'
-        def error2 = thrown(CommonException)
-        error2.message == "error.config.service.not.exist"
-
-
+        when: '根据配置Id，查询yaml-IOException'
+        configDO.setValue("testWrong")
+        mockConfigRepository.query(configId) >> { return configDO }
+        configService.queryYaml(configId)
+        then: '结果分析'
+        def IOe = thrown(CommonException)
+        IOe.message == "error.config.parser"
     }
 
     def "listByServiceName"() {
-        given: '指定查询所需的服务名'
-        serviceE = serviceRepository.addService(serviceE)
-        def queryServiceName = serviceE.getName()
+        given:
+        def serviceName = "test_service"
         def queryInfo = new ConfigDTO()
+        def queryParam = ""
+
+        and: "构造pageRequest"
+        def order = new Sort.Order("id")
+        def pageRequest = new PageRequest(1, 20, new Sort(order))
+
         when: '列出指定服务下配置'
-        def pagelist = configService.listByServiceName(queryServiceName, pageRequest, queryInfo, null)
+        configService.listByServiceName(serviceName, pageRequest, queryInfo, queryParam)
+
         then: '配置列表不为空'
         noExceptionThrown()
-        pagelist.isEmpty()
-        serviceRepository.deleteService(serviceE.getId())
     }
 
     def "setServiceConfigDefault"() {
         given: '指定需要设置默认的配置Id'
-        def configId = configDTO.getId()
+        def configId = 1L
+        def configDO = new ConfigDO()
+        configDO.setName("test")
+        configDO.setIsDefault(true)
+
+        and: 'mock configRepository.setConfigDefault'
+        mockConfigRepository.setConfigDefault(configId) >> { return configDO }
+
         when: '根据配置Id将配置设为默认'
-        configDTO = configService.setServiceConfigDefault(configId)
+        def configDTO = configService.setServiceConfigDefault(configId)
+
         then: '解析配置是否是默认'
         noExceptionThrown()
         configDTO.isDefault
     }
 
     def "queryDefaultByServiceName"() {
-        given: '创建测试用服务'
+        given: '创建参数'
+        def serviceName = "api-gateway"
+        def configDTO = new ConfigDTO()
+        def value = new HashMap<String, Object>()
+        value.put("test", "test")
+        configDTO.setValue(value)
+        configDTO.setName("test")
 
-        serviceE = serviceRepository.addService(serviceE)
+        def routeE = new RouteE()
+
+        routeE.setPath("/test/**")
+        routeE.setServiceId("test-service")
+        routeE.setUrl("testUrl")
+        routeE.setStripPrefix(false)
+        routeE.setRetryable(false)
+        routeE.setHelperService("testHelperService")
+        routeE.setCustomSensitiveHeaders(false)
+        routeE.setSensitiveHeaders("testSensitiveHeaders")
+        routeE.setName("test")
+        def routeList = new ArrayList<RouteE>()
+        routeList.add(routeE)
+
+        when: '指定查询所需的服务名-服务名不存在'
+        configService.queryDefaultByServiceName(serviceName)
+        then: '异常分析'
+        def error = thrown(CommonException)
+        error.message == 'error.serviceConfigDO.query.serviceNameNotFound'
 
         when: '指定查询所需的服务名'
-        configService.queryDefaultByServiceName(serviceE.getName())
-        then: '测试默认配置不为空'
+        mockConfigRepository.queryDefaultByServiceName(_) >> { return configDTO }
+        mockRouteRepository.getAllRoute() >> { return routeList }
+        configService.queryDefaultByServiceName(serviceName)
+        then: '没有异常'
         noExceptionThrown()
-
-        when: '指定查询所需的服务名'
-        configService.queryDefaultByServiceName(name)
-        then: '测试默认配置不为空-服务名不存在'
-        def error = thrown(expectedException)
-        error.message == expectedMessage
-        serviceRepository.deleteService(serviceE.getId())
-
-        where: '结果比对'
-        name           || expectedException | expectedMessage
-        'testNotExist' || CommonException   | 'error.serviceConfigDO.query.serviceNameNotFound'
     }
 
 
     def "update"() {
-        given: '准备需更新的配置'
-        def versionNum = configDTO.getObjectVersionNumber()
-        configDTO.setName('update1')
+        given: '准备参数'
+        def configId = 1L
+        def configDTO = new ConfigDTO()
+        def configDO = new ConfigDO()
+
+        and: 'mock configRepository.update'
+        mockConfigRepository.update(_, _) >> { return configDO }
+
         when: '更新配置'
-        configDTO = configService.update(configDTO.getId(), configDTO)
+        configService.update(configId, configDTO)
+
         then: '解析更新后的配置'
         noExceptionThrown()
-        configDTO.getName() == 'update1'
-        configDTO.objectVersionNumber == versionNum + 1
-
     }
 
     def "updateConfig"() {
         given: '准备需更新的配置'
+        def configId = 1L
         def type = 'yaml'
+        def configDTO = new ConfigDTO()
+        def value = new HashMap<String, Object>()
+        value.put("test", "test")
         configDTO.setName('update2')
-        configDTO.setTxt(ConfigUtil.convertMapToText(configDTO.getValue(), type))
+        configDTO.setTxt(ConfigUtil.convertMapToText(value, type))
+
         when: '更新配置'
-        def update = configService.updateConfig(configDTO.getId(), configDTO, type)
+        configService.updateConfig(configId, configDTO, type)
+
         then: '解析更新后的配置'
         noExceptionThrown()
-        update.name == 'update2'
-        update.objectVersionNumber == configDTO.objectVersionNumber + 1
+
+        when: '更新配置'
+        configDTO.setTxt("test")
+        configService.updateConfig(configId, configDTO, type)
+
+        then: '解析更新后的配置'
+        def e = thrown(CommonException)
+        e.message == "error.config.txt"
 
     }
 
     def "check"() {
-        given: '创建测试用服务'
-        serviceE = serviceRepository.addService(serviceE)
-
+        given: '创建参数'
+        def configCheckDTO = new ConfigCheckDTO()
+        configCheckDTO.setConfigVersion("test_version")
+        configCheckDTO.setName("test")
+        def serviceDO = new ServiceDO()
+        serviceDO.setId(1L)
+        def configDO = new ConfigDO()
+        configDO.setId(1L)
         when: '配置校验-configDTO为null'
         configService.check(null)
         then: '校验'
         noExceptionThrown()
 
-        when: '配置校验'
-        configService.check(checkDTOList.get(0))
+        when: '配置校验-serviceName为空'
+        configService.check(configCheckDTO)
         then: '校验'
-        noExceptionThrown()
+        def nullServiceName = thrown(CommonException)
+        nullServiceName.message == 'error.config.serviceName.notExist'
 
-        when: '配置校验'
-        configService.check(checkBody)
+        when: '配置校验-service为空'
+        configCheckDTO.setServiceName("test_service")
+        configService.check(configCheckDTO)
         then: '校验'
-        def error = thrown(expectedException)
-        error.message == expectedMessage
-        serviceRepository.deleteService(serviceE.getId())
+        def nullService = thrown(CommonException)
+        nullService.message == 'error.config.serviceName.notExist'
 
-        where: '结果比对'
-        checkBody           || expectedException | expectedMessage
-        checkDTOList.get(1) || CommonException   | 'error.config.serviceName.notExist'
-        checkDTOList.get(2) || CommonException   | 'error.config.serviceName.notExist'
+        when: '配置校验-configVersion重复'
+        configCheckDTO.setServiceName("test_service")
+        mockServiceRepository.getService(_) >> { return serviceDO }
+        mockConfigRepository.queryByServiceIdAndVersion(_, _) >> { return configDO }
+        configService.check(configCheckDTO)
+        then: '校验'
+        def versionDuplicate = thrown(CommonException)
+        versionDuplicate.message == "error.config.insert.versionDuplicate"
     }
 
-    def "check[Exception]"() {
-        given: '准备测试用服务'
-        serviceE = serviceRepository.addService(serviceE)
-        when: '配置校验'
-        configService.check(configBody)
-        then: '结果分析'
-        serviceRepository.deleteService(serviceE.getId())
-        def error = thrown(expectedException)
-        error.message == expectedMessage
-        where: '结果比对'
-        configBody          || expectedException | expectedMessage
-        checkDTOList.get(3) || CommonException   | 'error.config.insert.versionDuplicate'
-        checkDTOList.get(4) || CommonException   | 'error.config.insert.nameDuplicate'
+    def "check[nameDuplicate]"() {
+        given: '创建参数'
+        def configCheckDTO = new ConfigCheckDTO()
+        configCheckDTO.setConfigVersion("test_version")
+        configCheckDTO.setName("test")
+        def serviceDO = new ServiceDO()
+        serviceDO.setId(1L)
+        def configDO = new ConfigDO()
+        configDO.setId(1L)
 
+        when: '配置校验-name重复'
+        configCheckDTO.setServiceName("test_service")
+        mockServiceRepository.getService(_) >> { return serviceDO }
+        mockConfigRepository.queryByServiceIdAndVersion(_, _) >> { return null }
+        mockConfigRepository.queryByServiceIdAndName(_, _) >> { return configDO }
+        configService.check(configCheckDTO)
+        then: '校验'
+        def nameDuplicate = thrown(CommonException)
+        nameDuplicate.message == "error.config.insert.nameDuplicate"
     }
 
 
     def "saveItem"() {
-        given: '创建测试用服务'
-        serviceE = serviceRepository.addService(serviceE)
+        given: '创建参数'
+        def configId = 1L
+
+        def itemDTO = new ItemDto()
+        itemDTO.setProperty('test')
+        itemDTO.setValue("test")
+
+        def value = new HashMap<String, Object>()
+        value.put("testAddItem", "testAddItem")
+
+        def configDTO = new ConfigDTO()
+        configDTO.setValue(value)
+
+        def configDO = new ConfigDO()
+        configDO.setServiceId(1L)
+
+        def serviceE = new ServiceE()
+        serviceE.setName("test_service")
+
         when: '增加配置项'
-        item = configService.saveItem(configDTO.getId(), item)
+        configService.saveItem(configId, null)
+        then: '校验增加配置项——异常'
+        def errorADD = thrown(CommonException)
+        errorADD.message == "error.config.item.add"
+
+        when: '增加配置项'
+        mockConfigRepository.query(configId) >> { return configDO }
+        mockServiceRepository.getService(_) >> { return serviceE }
+        configService.saveItem(configId, itemDTO)
+        then: '校验增加配置项——异常'
+        def errorADD2 = thrown(CommonException)
+        errorADD2.message == "error.config.item.add"
+
+        when: '增加配置项'
+        mockConfigRepository.query(configId) >> { return configDO }
+        mockServiceRepository.getService(_) >> { return serviceE }
+        mockConfigRepository.update(_, _) >> { return configDO }
+        configService.saveItem(configId, itemDTO)
         then: '校验增加配置项'
         noExceptionThrown()
-
-        when: '增加配置项'
-        serviceRepository.deleteService(serviceE.getId())
-        item = configService.saveItem(configDTO.getId(), item)
-        then: '校验增加配置项——异常'
-        def error1 = thrown(CommonException)
-        error1.message == "error.service.notExist"
-
     }
 
     def "deleteItem"() {
-        given: '创建测试用服务'
-        serviceE = serviceRepository.addService(serviceE)
+        given: '创建参数'
+        def configId = 1L
+        def property = "test"
+
+        def configDO = new ConfigDO()
+        configDO.setServiceId(1L)
+        configDO.setValue('{"test":"test"}')
+
+        def serviceE = new ServiceE()
+        serviceE.setName("test_service")
+
         when: '删除配置项'
-        configService.deleteItem(configDTO.getId(), item.getProperty())
+        mockConfigRepository.query(configId) >> { return configDO }
+        mockServiceRepository.getService(_) >> { return serviceE }
+        configService.deleteItem(configId, property)
         then: '结果校验'
         noExceptionThrown()
-        serviceRepository.deleteService(serviceE.getId())
-
     }
 
     def "deleteItem[Exception]"() {
-        given: '创建测试用服务'
-        serviceE = serviceRepository.addService(serviceE)
+        given: '创建参数'
+        def configId = 1L
+        def property = "test"
 
-        when: '删除配置项-异常'
-        configService.deleteItem(configDTO.getId(), property)
+        def configDO = new ConfigDO()
+        configDO.setServiceId(1L)
+
+        def serviceE = new ServiceE()
+        serviceE.setName("test_service")
+
+        when: '删除配置项-配置为空'
+        configService.deleteItem(configId, "")
         then: '结果校验'
-        def error = thrown(expectedException)
-        error.message == expectedMessage
-        serviceRepository.deleteService(serviceE.getId())
+        def error = thrown(CommonException)
+        error.message == "error.config.item.update"
 
-        where: '结果比对'
-        property       || expectedException | expectedMessage
-        ''             || CommonException   | 'error.config.item.update'
-        'testNotExist' || CommonException   | 'error.config.item.not.exist'
-
+        when: '删除配置项-item不存在'
+        mockConfigRepository.query(configId) >> { return configDO }
+        mockServiceRepository.getService(_) >> { return serviceE }
+        configService.deleteItem(configId, property)
+        then: '结果校验'
+        def itemNotExist = thrown(CommonException)
+        itemNotExist.message == "error.config.item.not.exist"
     }
 
     def "delete"() {
-        given: '指定要删除的Config 创建测试用服务'
-        serviceEforDel = serviceRepository.addService(serviceEforDel)
-        dtofrodel = configService.create(configForDel)
-        def deleteId = dtofrodel.getId()
+        given: '指定要删除的Config'
+        def configId = 1L
         when: '根据ConfigId删除配置'
-        def delete = configService.delete(deleteId)
+        configService.delete(configId)
         then: '解析删除结果'
         noExceptionThrown()
-        delete
-        serviceRepository.deleteService(serviceEforDel.getId())
+        1 * mockConfigRepository.delete(configId)
     }
 }
