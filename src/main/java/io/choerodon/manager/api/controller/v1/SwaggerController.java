@@ -28,6 +28,10 @@ public class SwaggerController {
         this.swaggerService = swaggerService;
     }
 
+    public void setSwaggerService(SwaggerService swaggerService) {
+        this.swaggerService = swaggerService;
+    }
+
     @ApiIgnore
     @RequestMapping(value = "/swagger-resources/configuration/security")
     ResponseEntity<SecurityConfiguration> securityConfiguration() {

@@ -9,12 +9,10 @@ import io.choerodon.manager.domain.repository.ServiceRepository;
 import io.choerodon.manager.infra.common.utils.ManualPageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 /**
@@ -29,14 +27,6 @@ public class ServiceServiceImpl implements ServiceService {
 
     public ServiceServiceImpl(ServiceRepository serviceRepository, DiscoveryClient discoveryClient) {
         this.serviceRepository = serviceRepository;
-        this.discoveryClient = discoveryClient;
-    }
-
-    /**
-     * 单元测试使用
-     * @param discoveryClient
-     */
-    public void setDiscoveryClient(DiscoveryClient discoveryClient) {
         this.discoveryClient = discoveryClient;
     }
 

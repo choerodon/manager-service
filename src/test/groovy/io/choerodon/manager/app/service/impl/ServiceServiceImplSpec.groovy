@@ -1,10 +1,12 @@
 package io.choerodon.manager.app.service.impl
 
 import io.choerodon.manager.IntegrationTestConfiguration
+import io.choerodon.manager.app.service.ServiceService
+import io.choerodon.manager.domain.repository.ServiceRepository
 import io.choerodon.mybatis.pagehelper.domain.PageRequest
-import io.choerodon.mybatis.pagehelper.domain.Sort
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.cloud.client.discovery.DiscoveryClient
 import org.springframework.context.annotation.Import
 import spock.lang.Specification
 
@@ -18,31 +20,46 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 class ServiceServiceImplSpec extends Specification {
 
     @Autowired
-    private ServiceServiceImpl serviceService
+    private DiscoveryClient discoveryClient
+
+    private ServiceRepository mockServiceRepository = Mock(ServiceRepository)
+
+    private ServiceService serviceService
+
+    def setup() {
+        serviceService = new ServiceServiceImpl(mockServiceRepository, discoveryClient)
+    }
 
     def "List"() {
-        when: "调用list param为空"
-        def list = serviceService.list("")
+        given: "构造参数"
+        def param = "manager"
 
-        then: "返回List不为空"
-        !list.isEmpty()
+        when: "调用list方法 param为空"
+        serviceService.list("")
 
-        when: "调用list param不为空"
-        list = serviceService.list("manager")
+        then: "校验调用次数"
+        1 * mockServiceRepository.getAllService()
 
-        then: "返回List不为空"
-        !list.isEmpty()
+        when: "调用list方法 param不为空"
+        serviceService.list(param)
+
+        then: "校验调用次数"
+        1 * mockServiceRepository.selectServicesByFilter(param)
     }
 
     def "PageManager"() {
-        given: "构造pageRequest"
-        def order = new Sort.Order("id")
-        def pageRequest = new PageRequest(0, 10, new Sort(order))
+        given: "构造参数"
+        def serviceName = "manager-service"
+        def params = "manager"
+        def pageRequest = new PageRequest(0, 10)
 
-        when: "调用"
-        def list = serviceService.pageManager("manager-service", "manager", pageRequest)
+        when: "调用接口"
+        def list = serviceService.pageManager(serviceName, params, pageRequest)
 
-        then: "返回List不为空"
+        then: "校验调用次数和返回List不为空"
+        //1 * discoveryClient.getServices()
+        //1 * discoveryClient.getInstances(serviceName)
+        0 * _
         !list.isEmpty()
     }
 }
