@@ -91,8 +91,9 @@ class ServiceRepositoryImplSpec extends Specification {
     def "DeleteService"() {
         when: "异常删除，mock,测ServiceConverter"
         def serviceDTO = ConvertHelper.convert(serviceE, ServiceDTO)
+        //提高覆盖率
         ConvertHelper.convert(serviceDTO, ServiceE)
-        ConvertHelper.convert(serviceDTO, ServiceDO)
+        ConvertHelper.convert(ConvertHelper.convert(serviceDTO, ServiceDO), ServiceDTO)
         mockServiceRepository.deleteService(errorServiceE.getId())
 
         then:

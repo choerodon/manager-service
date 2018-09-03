@@ -2,9 +2,12 @@ package io.choerodon.manager.app.service.impl
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.choerodon.core.convertor.ConvertHelper
 import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.app.service.SwaggerService
+import io.choerodon.manager.domain.manager.entity.SwaggerE
 import io.choerodon.manager.domain.service.ISwaggerService
+import io.choerodon.manager.infra.dataobject.SwaggerDO
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import spock.lang.Specification
@@ -56,5 +59,19 @@ class SwaggerServiceImplSpec extends Specification {
         then: "校验状态码和调用次数"
         1 * mockISwaggerService.getSecurityConfiguration()
         0 * _
+    }
+
+    def "测试SwaggerConverter转换器"() {
+        given:
+        def swaggerDO = new SwaggerDO()
+        swaggerDO.setServiceName("test-service")
+
+        when:
+        def convertSwaggerE = ConvertHelper.convert(swaggerDO, SwaggerE)
+        def convertSwaggerDO = ConvertHelper.convert(convertSwaggerE, SwaggerDO)
+
+        then:
+        noExceptionThrown()
+        convertSwaggerDO!=null
     }
 }
