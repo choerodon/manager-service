@@ -8,14 +8,14 @@ import java.util.List;
 
 public interface ConfigMapper extends BaseMapper<ConfigDO> {
 
-    ConfigDO selectOneByServiceDefault(@Param("serviceName") String serviceName);
+    List selectByServiceDefault(@Param("serviceName") String serviceName);
 
-    ConfigDO selectOneByServiceAndConfigVersion(@Param("serviceName") String serviceName,
-                                                @Param("configVersion") String configVersion);
+    List selectByServiceAndConfigVersion(@Param("serviceName") String serviceName,
+                                         @Param("configVersion") String configVersion);
 
     List<ConfigDO> fulltextSearch(@Param("config") ConfigDO configDO,
                                   @Param("serviceName") String serviceName,
                                   @Param("param") String param);
 
-    String selectConfigVersionById(@Param("id") Long id);
+    List<String> selectConfigVersionById(@Param("id") Long id);
 }

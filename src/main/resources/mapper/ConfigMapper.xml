@@ -2,28 +2,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="io.choerodon.manager.infra.mapper.ConfigMapper">
 
-    <select id="selectOneByServiceDefault" resultType="io.choerodon.manager.infra.dataobject.ConfigDO">
+    <select id="selectByServiceDefault" resultType="io.choerodon.manager.infra.dataobject.ConfigDO">
         SELECT
-        mgmt_service_config.*
+          mgmt_service_config.*
         FROM
-        mgmt_service_config
-        INNER JOIN mgmt_service on mgmt_service_config.service_id=mgmt_service.id
+          mgmt_service_config
+        INNER JOIN mgmt_service
+        ON mgmt_service_config.service_id = mgmt_service.id
         WHERE
-        mgmt_service.name=#{serviceName}
+          mgmt_service.name = #{serviceName}
         AND
-        mgmt_service_config.is_default=TRUE
-        LIMIT 1
+          mgmt_service_config.is_default = 1
     </select>
 
-    <select id="selectOneByServiceAndConfigVersion" resultType="io.choerodon.manager.infra.dataobject.ConfigDO">
+    <select id="selectByServiceAndConfigVersion" resultType="io.choerodon.manager.infra.dataobject.ConfigDO">
         SELECT
-        mgmt_service_config.*
+          mgmt_service_config.*
         FROM
-        mgmt_service_config
-        INNER JOIN mgmt_service on mgmt_service_config.service_id=mgmt_service.id
+          mgmt_service_config
+        INNER JOIN mgmt_service
+        ON mgmt_service_config.service_id=mgmt_service.id
         WHERE
-        mgmt_service.name=#{serviceName} AND  mgmt_service_config.config_version=#{configVersion}
-        LIMIT 1
+          mgmt_service.name=#{serviceName}
+        AND
+          mgmt_service_config.config_version=#{configVersion}
     </select>
 
     <select id="listByServiceName" resultType="io.choerodon.manager.infra.dataobject.ConfigDO">
@@ -55,7 +57,6 @@
         mgmt_service_config
         WHERE
         id = #{id}
-        LIMIT 1
     </select>
 
     <select id="fulltextSearch" resultType="io.choerodon.manager.infra.dataobject.ConfigDO">
@@ -78,14 +79,14 @@
         WHERE
         mgmt_service.name=#{serviceName}
         <if test="config.name != null">
-            AND mgmt_service_config.name LIKE concat('%',#{config.name},'%')
+            AND mgmt_service_config.name LIKE concat(concat('%',#{config.name}),'%')
         </if>
         <if test="config.source!= null">
-            AND mgmt_service_config.source LIKE concat('%',#{config.source},'%')
+            AND mgmt_service_config.source LIKE concat(concat('%',#{config.source}),'%')
         </if>
 
         <if test="config.configVersion!= null">
-            AND mgmt_service_config.config_version LIKE concat('%',#{config.configVersion},'%')
+            AND mgmt_service_config.config_version LIKE concat(concat('%',#{config.configVersion}),'%')
         </if>
 
         <if test="config.isDefault!= null">
@@ -93,9 +94,9 @@
         </if>
         <if test="param != null">
             AND(
-            mgmt_service_config.name LIKE concat('%',#{param},'%') OR
-            mgmt_service_config.source LIKE concat('%',#{param},'%') OR
-            mgmt_service_config.config_version LIKE concat('%',#{param},'%')
+            mgmt_service_config.name LIKE concat(concat('%',#{param}),'%') OR
+            mgmt_service_config.source LIKE concat(concat('%',#{param}),'%') OR
+            mgmt_service_config.config_version LIKE concat(concat('%',#{param}),'%')
             )
         </if>
     </select>

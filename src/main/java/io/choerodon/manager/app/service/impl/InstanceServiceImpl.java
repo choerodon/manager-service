@@ -351,7 +351,8 @@ public class InstanceServiceImpl implements InstanceService {
         if (strings.length != 3 || StringUtils.isEmpty(strings[1])) {
             throw new CommonException("error.instance.updateConfig.badParameter");
         }
-        String configVersion = configMapper.selectConfigVersionById(configId);
+        List<String> list = configMapper.selectConfigVersionById(configId);
+        String configVersion = list.isEmpty() ? null : list.get(0);
         if (StringUtils.isEmpty(configVersion)) {
             configVersion = CONFIG_VERSION_DEFAULT;
         }
