@@ -47,11 +47,6 @@
             <version>${choerodon.starters.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>2.6.1</version>
-        </dependency>
-        <dependency>
             <groupId>io.choerodon</groupId>
             <artifactId>choerodon-starter-mybatis-mapper</artifactId>
             <version>${choerodon.starters.version}</version>
@@ -198,15 +193,5 @@
                 </configuration>
             </plugin>
         </plugins>
-        <!-- 用自定义swagger-ui.html和springfox.js覆盖 jar包中的文件-->
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>src/main/resources/swagger-ui</directory>
-                <targetPath>META-INF/resources</targetPath>
-            </resource>
-        </resources>
     </build>
 </project>
