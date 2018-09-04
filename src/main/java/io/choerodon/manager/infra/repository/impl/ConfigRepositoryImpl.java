@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author wuguokai
@@ -103,14 +104,22 @@ public class ConfigRepositoryImpl implements ConfigRepository {
 
     @Override
     public ConfigDTO queryDefaultByServiceName(String serviceName) {
-        return ConvertHelper.convert(configMapper.selectOneByServiceDefault(serviceName),
-                ConfigDTO.class);
+        ConfigDO config = null;
+        List<ConfigDO> configs = configMapper.selectByServiceDefault(serviceName);
+        if (!configs.isEmpty()) {
+            config = configs.get(0);
+        }
+        return ConvertHelper.convert(config, ConfigDTO.class);
     }
 
     @Override
     public ConfigDTO queryByServiceNameAndConfigVersion(String serviceName, String configVersion) {
-        return ConvertHelper.convert(configMapper.selectOneByServiceAndConfigVersion(serviceName, configVersion),
-                ConfigDTO.class);
+        List<ConfigDO> configs = configMapper.selectByServiceAndConfigVersion(serviceName, configVersion);
+        ConfigDO config = null;
+        if (!configs.isEmpty()) {
+            config = configs.get(0);
+        }
+        return ConvertHelper.convert(config, ConfigDTO.class);
     }
 
     @Override

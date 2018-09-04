@@ -2,43 +2,45 @@ package script.db
 
 databaseChangeLog(logicalFilePath: 'script/db/mgmt_service_configonfig.groovy') {
     changeSet(author: 'guokai.wu.work@gmail.com', id: '2018-03-09-service-config') {
-        createTable(tableName: 'mgmt_service_config') {
-            column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '表ID，主键，供其他表做外键，unsigned bigint、单表时自增、步长为 1') {
-                constraints(primaryKey: true)
+        if(helper.dbType().isSupportSequence()){
+            createSequence(sequenceName: 'MGMT_SERVICE_CONFIG_S', startValue:"1")
+        }
+        createTable(tableName: 'MGMT_SERVICE_CONFIG') {
+            column(name: 'ID', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '表ID，主键，供其他表做外键，unsigned bigint、单表时自增、步长为 1') {
+                constraints(primaryKey: true, primaryKeyName: 'PK_MGMT_SERVICE_CONFIG')
             }
-            column(name: "name", type: 'VARCHAR(64)', remarks: '配置名，对应前端的配置id') {
+            column(name: "NAME", type: 'VARCHAR(64)', remarks: '配置名，对应前端的配置id') {
                 constraints(nullable: false)
             }
-            column(name: 'config_version', type: 'VARCHAR(128)', remarks: '配置版本') {
+            column(name: 'CONFIG_VERSION', type: 'VARCHAR(128)', remarks: '配置版本') {
                 constraints(nullable: false)
             }
-            column(name: 'is_default', type: "TINYINT(1)", defaultValue: '0', remarks: '是否为默认版本,0表示不是，1表示是') {
+            column(name: 'IS_DEFAULT', type: "TINYINT(1)", defaultValue: '0', remarks: '是否为默认版本,0表示不是，1表示是') {
                 constraints(nullable: false)
             }
-            column(name: 'service_id', type: 'BIGINT UNSIGNED', remarks: '配置所属服务Id') {
+            column(name: 'SERVICE_ID', type: 'BIGINT UNSIGNED', remarks: '配置所属服务Id') {
                 constraints(nullable: false)
             }
-            column(name: 'value', type: "LONGTEXT", remarks: '配置集合') {
+            column(name: 'VALUE', type: "LONGTEXT", remarks: '配置集合') {
                 constraints(nullable: false)
             }
-            column(name: 'source', type: 'VARCHAR(64)', remarks: '配置来源')
-            column(name: 'public_time', type: 'DATETIME', remarks: '配置发布时间') {
+            column(name: 'SOURCE', type: 'VARCHAR(64)', remarks: '配置来源，工具生成或者页面生成')
+            column(name: 'PUBLIC_TIME', type: 'DATETIME', remarks: '配置发布时间') {
                 constraints(nullable: false)
             }
 
-            column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
-            column(name: "created_by", type: "BIGINT UNSIGNED", defaultValue: "0")
-            column(name: "creation_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
-            column(name: "last_updated_by", type: "BIGINT UNSIGNED", defaultValue: "0")
-            column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
+            column(name: "OBJECT_VERSION_NUMBER", type: "BIGINT UNSIGNED", defaultValue: "1")
+            column(name: "CREATED_BY", type: "BIGINT UNSIGNED", defaultValue: "0")
+            column(name: "CREATION_DATE", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
+            column(name: "LAST_UPDATED_BY", type: "BIGINT UNSIGNED", defaultValue: "0")
+            column(name: "LAST_UPDATE_DATE", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
-        addUniqueConstraint(tableName: 'mgmt_service_config', columnNames: 'service_id,config_version')
+        addUniqueConstraint(tableName: 'MGMT_SERVICE_CONFIG', columnNames: 'SERVICE_ID,CONFIG_VERSION', constraintName: 'UK_MGMT_SERVICE_CONFIG_U1')
     }
 
     changeSet(author: 'jcalaz@163.com', id: '2018-06-11-alter-nullable') {
-        dropNotNullConstraint(tableName: 'mgmt_service_config', columnName: 'config_version', columnDataType: 'VARCHAR(128)')
-        renameColumn(tableName: 'mgmt_service_config', oldColumnName: 'config_version', newColumnName: 'config_version', columnDataType: 'VARCHAR(128)', remarks: '配置版本')
-        renameColumn(tableName: 'mgmt_service_config', oldColumnName: 'source', newColumnName: 'source', columnDataType: 'VARCHAR(64) NOT NULL', remarks: '配置来源，工具生成或者页面生成')
+        dropNotNullConstraint(tableName: 'MGMT_SERVICE_CONFIG', columnName: 'CONFIG_VERSION', columnDataType: 'VARCHAR(128)')
+        addNotNullConstraint(tableName: 'MGMT_SERVICE_CONFIG', columnName: 'SOURCE', columnDataType: 'VARCHAR(64)')
     }
 
 }

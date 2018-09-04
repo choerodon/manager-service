@@ -3,6 +3,8 @@
 
 <mapper namespace="io.choerodon.manager.infra.mapper.GroupLabelMapper">
     <select id="selectLabelGroups" resultType="java.lang.String">
-        select group_code FROM mgmt_group_label where label_value = #{labelValues}
+        SELECT group_code
+        FROM mgmt_group_label
+        WHERE label_value = #{labelValues}
     </select>
 </mapper>
