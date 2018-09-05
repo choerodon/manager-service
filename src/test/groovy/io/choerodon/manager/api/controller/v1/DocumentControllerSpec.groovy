@@ -29,52 +29,6 @@ class DocumentControllerSpec extends Specification {
         documentController.setDocumentService(mockDocumentService)
     }
 
-    def "Get"() {
-        given: '准备参数'
-        def servicePrefix = 'manager_service'
-        def version = 'v1'
-
-        and: 'mock getSwaggerJson方法'
-        mockDocumentService.getSwaggerJson(_, _) >> { return "test" }
-
-        when: '向【获取服务id对应的版本swagger json字符串】接口发送GET请求'
-        def entity = restTemplate.getForEntity('/docs/{service_prefix}?version={version}', String, servicePrefix, version)
-
-        then: '验证状态码成功,验证参数生效'
-        entity.statusCode.is2xxSuccessful()
-        1 * mockDocumentService.getSwaggerJson(servicePrefix, version)
-    }
-
-    def "Get[404]"() {
-        given: '准备参数'
-        def servicePrefix = 'manager_service'
-        def version = 'v1'
-
-        and: 'mock getSwaggerJson方法'
-        mockDocumentService.getSwaggerJson(_, _) >> { return "" }
-
-        when: '向【获取服务id对应的版本swagger json字符串】接口发送请求'
-        def entity = restTemplate.getForEntity('/docs/{service_prefix}?version={version}', String, servicePrefix, version)
-
-        then: '验证状态码成功'
-        entity.statusCode.is4xxClientError()
-    }
-
-    def "Get[Exception]"() {
-        given: '准备参数'
-        def servicePrefix = 'manager_service'
-        def version = 'v1'
-
-        and: 'mock getSwaggerJson方法'
-        mockDocumentService.getSwaggerJson(_, _) >> { throw new IOException("") }
-
-        when: '向【获取服务id对应的版本swagger json字符串】接口发送请求'
-        def entity = restTemplate.getForEntity('/docs/{service_prefix}?version={version}', String, servicePrefix, version)
-
-        then: '验证状态码成功'
-        entity.statusCode.is4xxClientError()
-    }
-
     def "Refresh"() {
         given: '准备参数'
         def serviceName = 'maneger_service'
