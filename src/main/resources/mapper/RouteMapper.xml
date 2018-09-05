@@ -21,22 +21,22 @@
     <select id="selectRoutes" resultMap="routeDo">
         select * FROM mgmt_route WHERE 1 = 1
         <if test="routeDO.name!= null">
-            AND name LIKE concat('%',#{routeDO.name},'%')
+            AND name LIKE concat(concat('%',#{routeDO.name}),'%')
         </if>
         <if test="routeDO.path!= null">
-            AND path LIKE concat('%',#{routeDO.path},'%')
+            AND path LIKE concat(concat('%',#{routeDO.path}),'%')
         </if>
         <if test="routeDO.serviceId!= null">
-            AND service_id LIKE concat('%',#{routeDO.serviceId},'%')
+            AND service_id LIKE concat(concat('%',#{routeDO.serviceId}),'%')
         </if>
         <if test="routeDO.builtIn != null">
             AND is_built_in = #{routeDO.builtIn}
         </if>
         <if test="params != null">
             AND
-            name LIKE concat('%',#{params},'%') OR
-            path LIKE concat('%',#{params},'%') OR
-            service_id LIKE concat('%',#{params},'%')
+            name LIKE concat(concat('%',#{params}),'%') OR
+            path LIKE concat(concat('%',#{params}),'%') OR
+            service_id LIKE concat(concat('%',#{params}),'%')
         </if>
     </select>
 
