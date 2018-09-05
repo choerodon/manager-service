@@ -48,7 +48,7 @@ class ISwaggerRefreshServiceImplSpec extends Specification {
         swaggerDO.setServiceVersion("null_version")
         def swaggerDO1 = new SwaggerDO()
         swaggerDO1.setServiceName("error")
-        swaggerDO1.setServiceVersion("null_version")
+        swaggerDO1.setServiceVersion("0.9")
 
         when: "调用方法"
         iSwaggerRefreshService.updateOrInsertSwagger(registerInstancePayload, json)
