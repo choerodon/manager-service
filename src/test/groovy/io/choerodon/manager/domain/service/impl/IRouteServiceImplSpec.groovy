@@ -98,12 +98,19 @@ class IRouteServiceImplSpec extends Specification {
 
     def "AutoRefreshRoute"() {
         given: "创建swaggerJson"
-        def swaggerJson = '{"extraData":{"data":{"choerodon_route":{"name":"manager","path":"/manager/**","serviceId":"manager-service"}}}}'
+        def swaggerJson = '{"extraData":{"data":{"choerodon_route":{"name":"test","path":"/test/**","serviceId":"manager-service"}}}}'
+        def updateSwaggerJson = '{"extraData":{"data":{"choerodon_route":{"name":"manager","path":"/manager/**","serviceId":"manager-service"}}}}'
+        and: "构建routeE"
+        def routeE = new RouteE()
+        routeE.setName("manager")
+        routeE.setPath("/manager/**")
 
         when: "调用AutoRefreshRoute"
         iRouteService.autoRefreshRoute(swaggerJson)
+        iRouteService.autoRefreshRoute(updateSwaggerJson)
 
         then: "校验"
+        mockRouteRepository.queryRoute({ RouteE r -> "manager".equals(r.getName()) }) >> { routeE }
         noExceptionThrown()
     }
 
