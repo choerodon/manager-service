@@ -77,6 +77,7 @@ public class ServiceController {
      * @param serviceName 服务名
      * @return ConfigDTO
      */
+    @Permission(permissionWithin = true)
     @GetMapping("/{service_name}/configs/default")
     @ApiIgnore
     public ResponseEntity<ConfigDTO> queryDefaultConfigByServiceName(@PathVariable("service_name") String serviceName) {
@@ -91,6 +92,7 @@ public class ServiceController {
      * @param configVersion 配置版本
      * @return ConfigDTO
      */
+    @Permission(permissionWithin = true)
     @ApiIgnore
     @GetMapping("/{service_name}/configs/{config_version:.*}")
     public ResponseEntity<ConfigDTO> queryConfigByServiceNameAndVersion(@PathVariable("service_name") String serviceName,
