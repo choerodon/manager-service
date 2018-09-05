@@ -73,7 +73,8 @@ class InstanceServiceImplSpec extends Specification {
         def instanceId = 'test_server:test_ip:test_port'
         def wrongInstanceId = 'test_server:wrong'
         def configId = 1L
-        def configVersion = "test_version"
+        def configVersion = new ArrayList<String>()
+        configVersion.add("test_version")
 
         when: '更新实例-badParameter'
         instanceService.update(wrongInstanceId, configId)
