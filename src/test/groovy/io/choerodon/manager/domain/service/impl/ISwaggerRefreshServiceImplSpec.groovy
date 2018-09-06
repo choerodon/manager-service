@@ -2,16 +2,16 @@ package io.choerodon.manager.domain.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.choerodon.manager.IntegrationTestConfiguration
-import io.choerodon.manager.MockBeanTestConfiguration
 import io.choerodon.manager.api.dto.RegisterInstancePayload
 import io.choerodon.manager.domain.service.VersionStrategy
 import io.choerodon.manager.infra.dataobject.SwaggerDO
 import io.choerodon.manager.infra.mapper.SwaggerMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.kafka.support.SendResult
+import org.springframework.util.concurrent.SettableListenableFuture
 import spock.lang.Specification
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -20,7 +20,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  * @author dengyouquan
  */
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@Import([IntegrationTestConfiguration, MockBeanTestConfiguration])
+@Import(IntegrationTestConfiguration)
 class ISwaggerRefreshServiceImplSpec extends Specification {
 
     private ObjectMapper objectMapper = new ObjectMapper()
@@ -63,5 +63,18 @@ class ISwaggerRefreshServiceImplSpec extends Specification {
     }
 
     def "ParsePermission"() {
+        given: "构造请求参数"
+        def payloadJson = '{"status":"UP","appName":"manager","version":"1.0","instanceAddress":"127.0.0.1"}'
+        def registerInstancePayload = objectMapper.readValue(payloadJson, RegisterInstancePayload)
+        def json = "{}"
+        SendResult<byte[], byte[]> result = new SendResult<>(null, null)
+        SettableListenableFuture<SendResult<byte[], byte[]>> future = new SettableListenableFuture<>();
+        future.set(result);
+
+        when: "调用ParsePermission方法"
+        iSwaggerRefreshService.parsePermission(registerInstancePayload, json)
+
+        then: "校验结果"
+        1 * kafkaTemplate.send(_, _) >> { future }
     }
 }
