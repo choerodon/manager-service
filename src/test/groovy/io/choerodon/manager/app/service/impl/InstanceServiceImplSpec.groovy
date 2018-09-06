@@ -11,10 +11,14 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest
 import io.choerodon.mybatis.pagehelper.domain.Sort
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.cloud.client.DefaultServiceInstance
 import org.springframework.cloud.client.ServiceInstance
 import org.springframework.cloud.client.discovery.DiscoveryClient
 import org.springframework.cloud.netflix.eureka.EurekaDiscoveryClient
 import org.springframework.context.annotation.Import
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.client.RestTemplate
 import spock.lang.Specification
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -27,6 +31,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 class InstanceServiceImplSpec extends Specification {
     @Autowired
     InstanceService instanceService
+
+    private RestTemplate restTemplate = Mock(RestTemplate)
     private ConfigServerClient mockConfigServerClient = Mock(ConfigServerClient)
 
     private DiscoveryClient mockDiscoveryClient = Mock(DiscoveryClient)
@@ -35,6 +41,7 @@ class InstanceServiceImplSpec extends Specification {
 
     def setup() {
         instanceService = new InstanceServiceImpl(mockConfigServerClient, mockDiscoveryClient, mockConfigMapper)
+        instanceService.setRestTemplate(restTemplate)
     }
 
     def "Query"() {
@@ -42,10 +49,7 @@ class InstanceServiceImplSpec extends Specification {
         def instanceId = 'test_server:test_ip:test_port'
         def wrongInstanceId = 'test_server:wrong'
         def service = 'test_service'
-        def instanceInfo = new InstanceInfo(instanceId: "test_ip:test_server:test_port", healthCheckUrl: "http://111.111.11.111:1111/")
-        def leaseInfo = new LeaseInfo(registrationTimestamp: 1L)
-        instanceInfo.setLeaseInfo(leaseInfo)
-        def serviceInstance = new EurekaDiscoveryClient.EurekaServiceInstance(instanceInfo)
+        def serviceInstance = new DefaultServiceInstance("", "", 1, true)
 
         def serviceList = new ArrayList<String>()
         serviceList.add(service)
@@ -64,8 +68,104 @@ class InstanceServiceImplSpec extends Specification {
         mockDiscoveryClient.getInstances(_) >> { return serviceInstanceList }
         instanceService.query(instanceId)
         then: '分析结果'
+        noExceptionThrown()
+    }
+
+    def "fetchEnvInfo[illegalURL]"() {
+        given: '创建参数'
+        def instanceId = 'test_server:test_ip:test_port'
+        def service = 'test_service'
+        def wrongUrlInstanceInfo = new InstanceInfo(instanceId: "test_ip:test_server:test_port", healthCheckUrl: "wrong://111.111.11.111:1111/")
+        def leaseInfo = new LeaseInfo(registrationTimestamp: 1L)
+        wrongUrlInstanceInfo.setLeaseInfo(leaseInfo)
+        def serviceInstance = new EurekaDiscoveryClient.EurekaServiceInstance(wrongUrlInstanceInfo)
+        def serviceList = new ArrayList<String>()
+        serviceList.add(service)
+        def serviceInstanceList = new ArrayList<ServiceInstance>()
+        serviceInstanceList.add(serviceInstance)
+        when: '根据instanceId查询Instance-urlIllegal'
+        mockDiscoveryClient.getServices() >> { return serviceList }
+        mockDiscoveryClient.getInstances(_) >> { return serviceInstanceList }
+        instanceService.query(instanceId)
+        then: '分析结果'
+        def fetchEnv = thrown(CommonException)
+        fetchEnv.message == "error.illegal.management.url"
+    }
+
+    def "fetchEnvInfo[can not fetch env info]"() {
+        given: '创建参数'
+        def instanceId = 'test_server:test_ip:test_port'
+        def service = 'test_service'
+        def instanceInfo = new InstanceInfo(instanceId: "test_ip:test_server:test_port", healthCheckUrl: "http://111.111.11.111:1111/")
+        def leaseInfo = new LeaseInfo(registrationTimestamp: 1L)
+        instanceInfo.setLeaseInfo(leaseInfo)
+        def serviceInstance = new EurekaDiscoveryClient.EurekaServiceInstance(instanceInfo)
+
+        def serviceList = new ArrayList<String>()
+        serviceList.add(service)
+        def serviceInstanceList = new ArrayList<ServiceInstance>()
+        serviceInstanceList.add(serviceInstance)
+
+        when: '根据instanceId查询Instance'
+        mockDiscoveryClient.getServices() >> { return serviceList }
+        mockDiscoveryClient.getInstances(_) >> { return serviceInstanceList }
+        instanceService.query(instanceId)
+        then: '分析结果'
         def fetchEnv = thrown(CommonException)
         fetchEnv.message == "error.config.fetchEnv"
+    }
+
+    def "fetchEnvInfo[HttpStatus.NOT_FOUND]"() {
+        given: '创建参数'
+        def instanceId = 'test_server:test_ip:test_port'
+        def service = 'test_service'
+        def instanceInfo = new InstanceInfo(instanceId: "test_ip:test_server:test_port", healthCheckUrl: "http://111.111.11.111:1111/")
+        def leaseInfo = new LeaseInfo(registrationTimestamp: 1L)
+        instanceInfo.setLeaseInfo(leaseInfo)
+        def serviceInstance = new EurekaDiscoveryClient.EurekaServiceInstance(instanceInfo)
+
+        def serviceList = new ArrayList<String>()
+        serviceList.add(service)
+        def serviceInstanceList = new ArrayList<ServiceInstance>()
+        serviceInstanceList.add(serviceInstance)
+
+        and: 'mock'
+        def response = new ResponseEntity<String>(HttpStatus.NOT_FOUND)
+        restTemplate.getForEntity(_, _) >> { return response }
+
+        when: '根据instanceId查询Instance'
+        mockDiscoveryClient.getServices() >> { return serviceList }
+        mockDiscoveryClient.getInstances(_) >> { return serviceInstanceList }
+        instanceService.query(instanceId)
+        then: '分析结果'
+        def fetchEnv = thrown(CommonException)
+        fetchEnv.message == "error.config.fetchEnv"
+    }
+
+    def "processEnvJson"() {
+        given: '创建参数'
+        def instanceId = 'test_server:test_ip:test_port'
+        def service = 'test_service'
+        def instanceInfo = new InstanceInfo(instanceId: "test_ip:test_server:test_port", healthCheckUrl: "http://111.111.11.111:1111/")
+        def leaseInfo = new LeaseInfo(registrationTimestamp: 1L)
+        instanceInfo.setLeaseInfo(leaseInfo)
+        def serviceInstance = new EurekaDiscoveryClient.EurekaServiceInstance(instanceInfo)
+
+        def serviceList = new ArrayList<String>()
+        serviceList.add(service)
+        def serviceInstanceList = new ArrayList<ServiceInstance>()
+        serviceInstanceList.add(serviceInstance)
+        def response = new ResponseEntity<String>('{"testBody":"body"}', HttpStatus.OK)
+
+        and: 'mock'
+        restTemplate.getForEntity(_, _) >> { return response }
+
+        when: '根据instanceId查询Instance'
+        mockDiscoveryClient.getServices() >> { return serviceList }
+        mockDiscoveryClient.getInstances(_) >> { return serviceInstanceList }
+        instanceService.query(instanceId)
+        then: '分析结果'
+        noExceptionThrown()
     }
 
     def "Update"() {
@@ -74,7 +174,7 @@ class InstanceServiceImplSpec extends Specification {
         def wrongInstanceId = 'test_server:wrong'
         def configId = 1L
         def configVersion = new ArrayList<String>()
-        configVersion.add("test_version")
+        configVersion.add("")
 
         when: '更新实例-badParameter'
         instanceService.update(wrongInstanceId, configId)
@@ -98,7 +198,7 @@ class InstanceServiceImplSpec extends Specification {
         def serviceList = new ArrayList<String>()
         serviceList.add(service)
 
-        def instanceInfo = new InstanceInfo(appName: "test_app", instanceId: "test_ip:test_server:test_port", healthCheckUrl: "http://111.111.11.111:1111/")
+        def instanceInfo = new InstanceInfo(appName: "go-register-server", instanceId: "test_ip:test_server:test_port", healthCheckUrl: "http://111.111.11.111:1111/")
         def leaseInfo = new LeaseInfo(registrationTimestamp: 1L)
         instanceInfo.setLeaseInfo(leaseInfo)
         def serviceInstance = new EurekaDiscoveryClient.EurekaServiceInstance(instanceInfo)

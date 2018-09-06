@@ -125,7 +125,7 @@ class ConfigServiceImplSpec extends Specification {
         routeE.setStripPrefix(false)
         routeE.setRetryable(false)
         routeE.setHelperService("testHelperService")
-        routeE.setCustomSensitiveHeaders(false)
+        routeE.setCustomSensitiveHeaders(true)
         routeE.setSensitiveHeaders("testSensitiveHeaders")
         routeE.setName("test")
         def routeList = new ArrayList<RouteE>()
@@ -417,20 +417,29 @@ class ConfigServiceImplSpec extends Specification {
         def configCheckDTO = new ConfigCheckDTO()
         configCheckDTO.setConfigVersion("test_version")
         configCheckDTO.setName("test")
+        configCheckDTO.setServiceName("test_service")
         def serviceDO = new ServiceDO()
         serviceDO.setId(1L)
         def configDO = new ConfigDO()
         configDO.setId(1L)
 
-        when: '配置校验-name重复'
-        configCheckDTO.setServiceName("test_service")
+        and: 'mock'
         mockServiceRepository.getService(_) >> { return serviceDO }
         mockConfigRepository.queryByServiceIdAndVersion(_, _) >> { return null }
         mockConfigRepository.queryByServiceIdAndName(_, _) >> { return configDO }
+
+        when: '配置校验-name重复'
         configService.check(configCheckDTO)
         then: '校验'
         def nameDuplicate = thrown(CommonException)
         nameDuplicate.message == "error.config.insert.nameDuplicate"
+
+        when: '配置校验'
+        configCheckDTO.setName(null)
+        configService.check(configCheckDTO)
+        then: '校验'
+        noExceptionThrown()
+
     }
 
 

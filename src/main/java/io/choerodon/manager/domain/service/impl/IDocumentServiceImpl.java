@@ -71,6 +71,22 @@ public class IDocumentServiceImpl implements IDocumentService, IDocumentService.
         this.swaggerRefreshService = swaggerRefreshService;
     }
 
+    public void setProfiles(String profiles) {
+        this.profiles = profiles;
+    }
+
+    public void setClient(String client) {
+        this.client = client;
+    }
+
+    public void setOauthUrl(String oauthUrl) {
+        this.oauthUrl = oauthUrl;
+    }
+
+    public void setRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
     @Override
     public ObjectNode getSwaggerJsonByIdAndVersion(String service, String version) throws IOException {
         String json = fetchSwaggerJsonByService(service, version);
