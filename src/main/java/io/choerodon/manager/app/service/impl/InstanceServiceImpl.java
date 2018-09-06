@@ -1,5 +1,14 @@
 package io.choerodon.manager.app.service.impl;
 
+import static io.choerodon.manager.infra.common.utils.VersionUtil.METADATA_VERSION;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.appinfo.InstanceInfo;
@@ -26,14 +35,6 @@ import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
 import io.choerodon.manager.infra.feign.ConfigServerClient;
 import io.choerodon.manager.infra.mapper.ConfigMapper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static io.choerodon.manager.infra.common.utils.VersionUtil.METADATA_VERSION;
 
 /**
  * @author flyleft
@@ -53,9 +54,13 @@ public class InstanceServiceImpl implements InstanceService {
 
     private ConfigMapper configMapper;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private RestTemplate restTemplate = new RestTemplate();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public void setRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     public InstanceServiceImpl(ConfigServerClient configServerClient,
                                DiscoveryClient discoveryClient,

@@ -34,6 +34,10 @@ public class DocumentController {
         this.documentService = documentService;
     }
 
+    public void setDocumentService(DocumentService documentService) {
+        this.documentService = documentService;
+    }
+
     /**
      * 手动刷新表中swagger和刷新权限
      *

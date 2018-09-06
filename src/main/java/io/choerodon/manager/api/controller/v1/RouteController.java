@@ -37,6 +37,10 @@ public class RouteController {
         this.routeService = routeService;
     }
 
+    public void setRouteService(RouteService routeService) {
+        this.routeService = routeService;
+    }
+
     /**
      * 分页查询路由信息
      *

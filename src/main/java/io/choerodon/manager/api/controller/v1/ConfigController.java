@@ -31,6 +31,10 @@ public class ConfigController {
         this.configService = configService;
     }
 
+    public void setConfigService(ConfigService configService) {
+        this.configService = configService;
+    }
+
     @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("创建配置")
     @PostMapping

@@ -40,6 +40,14 @@ public class ApiController {
         this.apiService = apiService;
     }
 
+    public void setSwaggerService(SwaggerService swaggerService) {
+        this.swaggerService = swaggerService;
+    }
+
+    public void setApiService(ApiService apiService) {
+        this.apiService = apiService;
+    }
+
     @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询不包含跳过的服务的路由列表")
     @GetMapping("/resources")
