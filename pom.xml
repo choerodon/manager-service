@@ -51,11 +51,6 @@
             <artifactId>choerodon-starter-mybatis-mapper</artifactId>
             <version>${choerodon.starters.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>ojdbc7</artifactId>
-            <version>12.1.0.1.0</version>
-        </dependency>
 
         <dependency>
             <groupId>io.choerodon</groupId>
@@ -70,10 +65,6 @@
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
         </dependency>
         <!-- config server -->
         <dependency>
