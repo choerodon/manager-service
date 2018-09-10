@@ -352,22 +352,32 @@ class ConfigServiceImplSpec extends Specification {
     def "updateConfig"() {
         given: '准备需更新的配置'
         def configId = 1L
-        def type = 'yaml'
+        def typeYaml = 'yaml'
+        def typeProp='properties'
         def configDTO = new ConfigDTO()
-        def value = new HashMap<String, Object>()
-        value.put("test", "test")
+        def value = new LinkedHashMap<String, Object>()
+        def map = new HashMap<String, Object>()
+        map.put("testmap", "testMap")
+        value.put("test", map)
         configDTO.setName('update2')
-        configDTO.setTxt(ConfigUtil.convertMapToText(value, type))
+        configDTO.setTxt(ConfigUtil.convertMapToText(value, typeYaml))
 
         when: '更新配置'
-        configService.updateConfig(configId, configDTO, type)
+        configService.updateConfig(configId, configDTO, typeYaml)
+
+        then: '解析更新后的配置'
+        noExceptionThrown()
+
+        when: '更新配置'
+        configDTO.setTxt(ConfigUtil.convertMapToText(value,typeProp))
+        configService.updateConfig(configId, configDTO, typeProp)
 
         then: '解析更新后的配置'
         noExceptionThrown()
 
         when: '更新配置'
         configDTO.setTxt("test")
-        configService.updateConfig(configId, configDTO, type)
+        configService.updateConfig(configId, configDTO, typeYaml)
 
         then: '解析更新后的配置'
         def e = thrown(CommonException)
