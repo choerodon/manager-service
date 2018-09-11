@@ -155,7 +155,8 @@ class InstanceServiceImplSpec extends Specification {
         serviceList.add(service)
         def serviceInstanceList = new ArrayList<ServiceInstance>()
         serviceInstanceList.add(serviceInstance)
-        def response = new ResponseEntity<String>('{"testBody":"body"}', HttpStatus.OK)
+        def response = new ResponseEntity<String>('{"testBody":{"testWithin":"testWithin"},"server.ports":"11111","local.server.port":"11111","local.management.port":"1111","random": {"profilesWithin":"profilesWithin"}}', HttpStatus.OK)
+
 
         and: 'mock'
         restTemplate.getForEntity(_, _) >> { return response }
@@ -164,6 +165,7 @@ class InstanceServiceImplSpec extends Specification {
         mockDiscoveryClient.getServices() >> { return serviceList }
         mockDiscoveryClient.getInstances(_) >> { return serviceInstanceList }
         instanceService.query(instanceId)
+
         then: '分析结果'
         noExceptionThrown()
     }

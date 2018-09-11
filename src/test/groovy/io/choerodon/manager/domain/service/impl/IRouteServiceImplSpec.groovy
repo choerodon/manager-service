@@ -1,12 +1,12 @@
 package io.choerodon.manager.domain.service.impl
 
 import io.choerodon.manager.IntegrationTestConfiguration
-import io.choerodon.manager.MockBeanTestConfiguration
 import io.choerodon.manager.domain.manager.entity.RouteE
 import io.choerodon.manager.domain.repository.RouteRepository
 import io.choerodon.manager.domain.service.IRouteService
 import io.choerodon.manager.infra.dataobject.RouteDO
 import io.choerodon.mybatis.pagehelper.domain.PageRequest
+import org.apache.commons.collections.map.MultiKeyMap
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.client.discovery.DiscoveryClient
@@ -20,11 +20,10 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  * @author superlee
  */
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@Import([IntegrationTestConfiguration, MockBeanTestConfiguration])
+@Import(IntegrationTestConfiguration)
 class IRouteServiceImplSpec extends Specification {
 
-    @Autowired
-    private RouteRepository mockRouteRepository
+    private RouteRepository mockRouteRepository = Mock(RouteRepository)
 
     @Autowired
     private DiscoveryClient mockDiscoveryClient
@@ -94,6 +93,19 @@ class IRouteServiceImplSpec extends Specification {
     }
 
     def "GetRouteFromRunningInstancesMap"() {
+        given: "构造请求参数"
+        def runningMap = new MultiKeyMap()
+        def routeE = new RouteE()
+        routeE.setName("manager")
+        runningMap.put("key1", "key2", routeE)
+        def name = "manager"
+        def version = "1.0"
+
+        when: "调用GetRouteFromRunningInstancesMap函数"
+        def returnRouteE = iRouteService.getRouteFromRunningInstancesMap(runningMap, name, version)
+
+        then: "校验结果"
+        returnRouteE.getName().equals(name)
     }
 
     def "AutoRefreshRoute"() {
