@@ -87,9 +87,9 @@ public class EurekaInstanceRegisteredListener {
                             (t, retryCount) -> {
                                 if (retryCount >= fetchSwaggerJsonTime) {
                                     if (t instanceof RemoteAccessException) {
-                                        LOGGER.warn("error.registerConsumer.fetchDataError, payload {}", payload);
+                                        LOGGER.warn("error.registerConsumer.fetchDataError, payload {} exception {}", payload, t);
                                     } else {
-                                        LOGGER.warn("error.registerConsumer.msgConsumerError, payload {}", payload);
+                                        LOGGER.warn("error.registerConsumer.msgConsumerError, payload {} exception {}", payload, t);
                                     }
                                 }
                                 return retryCount;
