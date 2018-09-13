@@ -18,6 +18,7 @@ import io.choerodon.manager.domain.manager.entity.MyLinkedList;
 import io.choerodon.manager.domain.service.IDocumentService;
 import io.choerodon.manager.infra.common.utils.ManualPageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -114,7 +115,7 @@ public class ApiServiceImpl implements ApiService {
                 sb.append("{\n");
                 Map<String, FieldDTO> fileds = entry.getValue();
                 //两个空格为缩进单位
-                if(fileds != null) {
+                if (fileds != null) {
                     for (Map.Entry<String, FieldDTO> entry1 : fileds.entrySet()) {
                         String field = entry1.getKey();
                         FieldDTO dto = entry1.getValue();
@@ -327,13 +328,6 @@ public class ApiServiceImpl implements ApiService {
             });
         }
         path.setRemark(Optional.ofNullable(jsonNode.get("summary")).map(JsonNode::asText).orElse(null));
-        JsonNode descriptionNode = jsonNode.get(DESCRIPTION);
-        if (descriptionNode != null) {
-            path.setDescription(descriptionNode.asText());
-            path.setInnerInterface(false);
-        } else {
-            path.setInnerInterface(true);
-        }
         path.setDescription(Optional.ofNullable(jsonNode.get(DESCRIPTION)).map(JsonNode::asText).orElse(null));
         path.setOperationId(Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
         processConsumes(path, jsonNode);
@@ -418,6 +412,7 @@ public class ApiServiceImpl implements ApiService {
                 extraData = new ObjectMapper().readValue(extraDataNode.asText(), SwaggerExtraData.class);
                 PermissionData permission = extraData.getPermission();
                 String action = permission.getAction();
+                path.setInnerInterface(permission.isPermissionWithin());
                 path.setCode(String.format("%s-service.%s.%s", serviceName, resourceCode, action));
             } catch (IOException e) {
                 logger.info("extraData read failed.", e);
