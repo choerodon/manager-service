@@ -2,6 +2,8 @@ package io.choerodon.manager.app.service.impl
 
 import io.choerodon.core.exception.CommonException
 import io.choerodon.manager.IntegrationTestConfiguration
+import io.choerodon.manager.api.dto.swagger.ParameterDTO
+import io.choerodon.manager.api.dto.swagger.PathDTO
 import io.choerodon.manager.app.service.ApiService
 import io.choerodon.manager.domain.service.IDocumentService
 import io.choerodon.mybatis.pagehelper.domain.PageRequest
@@ -111,6 +113,16 @@ class ApiServiceImplSpec extends Specification {
         def controllerName = 'api-controller'
         def operationId = "test"
 
+        and: "构造parameterDTO和pathDTO"
+        def parameterDTO = new ParameterDTO()
+        parameterDTO.setBody("test")
+        def parameterDTO1 = new ParameterDTO()
+        parameterDTO1.setBody("test1")
+        def pathDTO = new PathDTO()
+        pathDTO.setDescription("test")
+        def pathDTO1 = new PathDTO()
+        pathDTO1.setDescription("test1")
+
         and: 'mock iDocumentService.getSwaggerJson & objectMapper.readTree'
         def file = new File(this.class.getResource('/swagger.json').toURI())
         mockIDocumentService.getSwaggerJson(_, _) >> { file.getText('UTF-8') }
@@ -119,6 +131,10 @@ class ApiServiceImplSpec extends Specification {
         apiService.queryPathDetail(serviceName, version, controllerName, operationId)
 
         then: '结果分析'
+        !parameterDTO.equals(parameterDTO1)
+        !pathDTO.equals(pathDTO1)
+        parameterDTO.hashCode()
+        pathDTO.hashCode()
         noExceptionThrown()
 
         when: '调用方法'
