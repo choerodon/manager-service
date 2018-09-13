@@ -18,6 +18,7 @@ import io.choerodon.manager.domain.manager.entity.MyLinkedList;
 import io.choerodon.manager.domain.service.IDocumentService;
 import io.choerodon.manager.infra.common.utils.ManualPageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -114,7 +115,7 @@ public class ApiServiceImpl implements ApiService {
                 sb.append("{\n");
                 Map<String, FieldDTO> fileds = entry.getValue();
                 //两个空格为缩进单位
-                if(fileds != null) {
+                if (fileds != null) {
                     for (Map.Entry<String, FieldDTO> entry1 : fileds.entrySet()) {
                         String field = entry1.getKey();
                         FieldDTO dto = entry1.getValue();
@@ -330,9 +331,15 @@ public class ApiServiceImpl implements ApiService {
         JsonNode descriptionNode = jsonNode.get(DESCRIPTION);
         if (descriptionNode != null) {
             path.setDescription(descriptionNode.asText());
-            path.setInnerInterface(false);
-        } else {
-            path.setInnerInterface(true);
+            ObjectMapper objectMapper = new ObjectMapper();
+            String permissionJson = descriptionNode.asText();
+            SwaggerExtraData swaggerExtraData = null;
+            try {
+                swaggerExtraData = objectMapper.readValue(permissionJson, SwaggerExtraData.class);
+            } catch (IOException e) {
+                throw new CommonException("error.parseJson");
+            }
+            path.setInnerInterface(Optional.ofNullable(swaggerExtraData).map(s -> s.getPermission().isPermissionWithin()).orElse(false));
         }
         path.setDescription(Optional.ofNullable(jsonNode.get(DESCRIPTION)).map(JsonNode::asText).orElse(null));
         path.setOperationId(Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
