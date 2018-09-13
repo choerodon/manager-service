@@ -328,19 +328,6 @@ public class ApiServiceImpl implements ApiService {
             });
         }
         path.setRemark(Optional.ofNullable(jsonNode.get("summary")).map(JsonNode::asText).orElse(null));
-        JsonNode descriptionNode = jsonNode.get(DESCRIPTION);
-        if (descriptionNode != null) {
-            path.setDescription(descriptionNode.asText());
-            ObjectMapper objectMapper = new ObjectMapper();
-            String permissionJson = descriptionNode.asText();
-            SwaggerExtraData swaggerExtraData = null;
-            try {
-                swaggerExtraData = objectMapper.readValue(permissionJson, SwaggerExtraData.class);
-            } catch (IOException e) {
-                throw new CommonException("error.parseJson");
-            }
-            path.setInnerInterface(Optional.ofNullable(swaggerExtraData).map(s -> s.getPermission().isPermissionWithin()).orElse(false));
-        }
         path.setDescription(Optional.ofNullable(jsonNode.get(DESCRIPTION)).map(JsonNode::asText).orElse(null));
         path.setOperationId(Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
         processConsumes(path, jsonNode);
@@ -425,6 +412,7 @@ public class ApiServiceImpl implements ApiService {
                 extraData = new ObjectMapper().readValue(extraDataNode.asText(), SwaggerExtraData.class);
                 PermissionData permission = extraData.getPermission();
                 String action = permission.getAction();
+                path.setInnerInterface(permission.isPermissionWithin());
                 path.setCode(String.format("%s-service.%s.%s", serviceName, resourceCode, action));
             } catch (IOException e) {
                 logger.info("extraData read failed.", e);
