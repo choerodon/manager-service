@@ -315,6 +315,7 @@ public class ApiServiceImpl implements ApiService {
         JsonNode jsonNode = methodNode.findValue(method);
         JsonNode tagNode = jsonNode.get("tags");
 
+        path.setInnerInterface(false);
         setCodeOfPathIfExists(serviceName, path, jsonNode.get("description"), tagNode);
 
         for (int i = 0; i < tagNode.size(); i++) {
