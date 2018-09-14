@@ -4,6 +4,7 @@ import com.netflix.appinfo.InstanceInfo
 import com.netflix.appinfo.LeaseInfo
 import io.choerodon.core.exception.CommonException
 import io.choerodon.manager.IntegrationTestConfiguration
+import io.choerodon.manager.api.dto.InstanceDTO
 import io.choerodon.manager.app.service.InstanceService
 import io.choerodon.manager.infra.feign.ConfigServerClient
 import io.choerodon.manager.infra.mapper.ConfigMapper
@@ -46,7 +47,8 @@ class InstanceServiceImplSpec extends Specification {
 
     def "Query"() {
         given: '创建参数'
-        def instanceId = 'test_server:test_ip:test_port'
+        def instanceDTO = new InstanceDTO("test_server:test_ip:test_port",null,null,null,null,null)
+        def instanceId = instanceDTO.getInstanceId()
         def wrongInstanceId = 'test_server:wrong'
         def service = 'test_service'
         def serviceInstance = new DefaultServiceInstance("", "", 1, true)
@@ -73,7 +75,8 @@ class InstanceServiceImplSpec extends Specification {
 
     def "fetchEnvInfo[illegalURL]"() {
         given: '创建参数'
-        def instanceId = 'test_server:test_ip:test_port'
+        def instanceDTO = new InstanceDTO("test_server:test_ip:test_port",null,null,null,null,null,null)
+        def instanceId = instanceDTO.getInstanceId()
         def service = 'test_service'
         def wrongUrlInstanceInfo = new InstanceInfo(instanceId: "test_ip:test_server:test_port", healthCheckUrl: "wrong://111.111.11.111:1111/")
         def leaseInfo = new LeaseInfo(registrationTimestamp: 1L)
@@ -201,11 +204,15 @@ class InstanceServiceImplSpec extends Specification {
         serviceList.add(service)
 
         def instanceInfo = new InstanceInfo(appName: "go-register-server", instanceId: "test_ip:test_server:test_port", healthCheckUrl: "http://111.111.11.111:1111/")
+        def instanceInfo1 = new InstanceInfo(appName: "manager-server", instanceId: "test_ip:test_server:test_port", healthCheckUrl: "http://111.111.11.111:1111/")
         def leaseInfo = new LeaseInfo(registrationTimestamp: 1L)
         instanceInfo.setLeaseInfo(leaseInfo)
+        instanceInfo1.setLeaseInfo(leaseInfo)
         def serviceInstance = new EurekaDiscoveryClient.EurekaServiceInstance(instanceInfo)
+        def serviceInstance1 = new EurekaDiscoveryClient.EurekaServiceInstance(instanceInfo1)
         def serviceInstanceList = new ArrayList<ServiceInstance>()
         serviceInstanceList.add(serviceInstance)
+        serviceInstanceList.add(serviceInstance1)
 
         and: "构造pageRequest"
         def order = new Sort.Order("id")
