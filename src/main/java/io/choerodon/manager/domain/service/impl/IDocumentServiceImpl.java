@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import io.choerodon.manager.api.dto.RegisterInstancePayload;
 import io.choerodon.manager.domain.manager.entity.RouteE;
 import io.choerodon.manager.domain.service.IDocumentService;
@@ -12,6 +13,7 @@ import io.choerodon.manager.domain.service.SwaggerRefreshService;
 import io.choerodon.manager.infra.common.utils.VersionUtil;
 import io.choerodon.manager.infra.dataobject.SwaggerDO;
 import io.choerodon.manager.infra.mapper.SwaggerMapper;
+
 import io.swagger.models.auth.OAuth2Definition;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.lang.StringUtils;
@@ -190,7 +192,8 @@ public class IDocumentServiceImpl implements IDocumentService, IDocumentService.
                     instance.getUri() + contextPath + "/v2/choerodon/api-docs",
                     String.class);
         } catch (RestClientException e) {
-            throw new RemoteAccessException("fetch failed, instance:" + instance.getServiceId());
+            String msg = "fetch failed, instance:" + instance.getServiceId() + ", uri: " + instance.getUri() + ", contextPath: " + contextPath;
+            throw new RemoteAccessException(msg);
         }
         if (response.getStatusCode() != HttpStatus.OK) {
             throw new RemoteAccessException("fetch failed : " + response);
