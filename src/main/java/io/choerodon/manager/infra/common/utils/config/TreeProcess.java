@@ -2,7 +2,6 @@ package io.choerodon.manager.infra.common.utils.config;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 递归解析map数据
@@ -16,20 +15,22 @@ class TreeProcess {
 
     /**
      * 递归解析map形式集合
-     *
-     * @param map map
-     * @return map
      */
-    @SuppressWarnings("unchecked")
-    static Object mapParseRecursive(Map<String, Object> map) {
-        Map<String, Object> res = new LinkedHashMap<>();
-        Set<String> keySet = map.keySet();
-        for (String key : keySet) {
-            Object o = map.get(key);
-            Object value = o;
-            res.put(key, value);
+    static Map<String, Object> mapParseRecursive(final Map<String, Object> parse) {
+        final Map<String, Object> returnMap = new LinkedHashMap<>();
+        parse(returnMap, parse);
+        return returnMap;
+    }
 
-        }
-        return res;
+
+    @SuppressWarnings("unchecked")
+    static void parse(final Map<String, Object> returnMap, final Map<String, Object> parse) {
+        parse.forEach((k, v) -> {
+            if (v instanceof Map) {
+                parse(returnMap, (Map<String, Object>) v);
+            } else {
+                returnMap.put(k, v);
+            }
+        });
     }
 }
