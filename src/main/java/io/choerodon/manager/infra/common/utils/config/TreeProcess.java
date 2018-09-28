@@ -18,18 +18,26 @@ class TreeProcess {
      */
     static Map<String, Object> mapParseRecursive(final Map<String, Object> parse) {
         final Map<String, Object> returnMap = new LinkedHashMap<>();
-        parse(returnMap, parse);
+        parse(returnMap, parse, null);
         return returnMap;
     }
 
 
     @SuppressWarnings("unchecked")
-    static void parse(final Map<String, Object> returnMap, final Map<String, Object> parse) {
+    static void parse(final Map<String, Object> returnMap, final Map<String, Object> parse, String prefix) {
         parse.forEach((k, v) -> {
             if (v instanceof Map) {
-                parse(returnMap, (Map<String, Object>) v);
+                if (prefix == null) {
+                    parse(returnMap, (Map<String, Object>) v, k + ".");
+                } else {
+                    parse(returnMap, (Map<String, Object>) v, prefix + k + ".");
+                }
             } else {
-                returnMap.put(k, v);
+                if (prefix == null) {
+                    returnMap.put(k, v);
+                } else {
+                    returnMap.put(prefix + k, v);
+                }
             }
         });
     }
