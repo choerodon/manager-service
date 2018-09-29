@@ -74,7 +74,7 @@ public class ConfigUtil {
     @SuppressWarnings("unchecked")
     private static Map<String, Object> parseYaml(String content) throws IOException {
         LinkedHashMap<String, Object> root = YAM_MAPPER.readValue(content, LinkedHashMap.class);
-        return (LinkedHashMap) TreeProcess.mapParseRecursive(root);
+        return TreeProcess.mapParseRecursive(root);
     }
 
     public static int appearNumber(String srcText, String findText) {
