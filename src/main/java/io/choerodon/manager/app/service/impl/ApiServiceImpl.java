@@ -234,42 +234,45 @@ public class ApiServiceImpl implements ApiService {
 
     private Map<String, Map<String, FieldDTO>> processDefinitions(JsonNode node) {
         Map<String, Map<String, FieldDTO>> map = new HashMap<>();
+        //definitions节点是controller里面的对象json集合
         JsonNode definitionNodes = node.get("definitions");
-        Iterator<String> classNameIterator = definitionNodes.fieldNames();
-        while (classNameIterator.hasNext()) {
-            String className = classNameIterator.next();
-            JsonNode jsonNode = definitionNodes.get(className);
-            JsonNode propertyNode = jsonNode.get("properties");
-            if (propertyNode == null) {
-                String type = jsonNode.get("type").asText();
-                if ("object".equals(type)) {
-                    map.put(className, null);
+        if (definitionNodes != null) {
+            Iterator<String> classNameIterator = definitionNodes.fieldNames();
+            while (classNameIterator.hasNext()) {
+                String className = classNameIterator.next();
+                JsonNode jsonNode = definitionNodes.get(className);
+                JsonNode propertyNode = jsonNode.get("properties");
+                if (propertyNode == null) {
+                    String type = jsonNode.get("type").asText();
+                    if ("object".equals(type)) {
+                        map.put(className, null);
+                    }
+                    continue;
                 }
-                continue;
+                Iterator<String> filedNameIterator = propertyNode.fieldNames();
+                Map<String, FieldDTO> fieldMap = new HashMap<>();
+                while (filedNameIterator.hasNext()) {
+                    FieldDTO field = new FieldDTO();
+                    String filedName = filedNameIterator.next();
+                    JsonNode fieldNode = propertyNode.get(filedName);
+                    String type = Optional.ofNullable(fieldNode.get("type")).map(JsonNode::asText).orElse(null);
+                    field.setType(type);
+                    String description = Optional.ofNullable(fieldNode.get(DESCRIPTION)).map(JsonNode::asText).orElse(null);
+                    field.setComment(description);
+                    field.setRef(Optional.ofNullable(fieldNode.get("$ref")).map(JsonNode::asText).orElse(null));
+                    JsonNode itemNode = fieldNode.get("items");
+                    Optional.ofNullable(itemNode).ifPresent(i -> {
+                        if (i.get("type") != null) {
+                            field.setItemType(i.get("type").asText());
+                        }
+                        if (i.get("$ref") != null) {
+                            field.setRef(i.get("$ref").asText());
+                        }
+                    });
+                    fieldMap.put(filedName, field);
+                }
+                map.put(className, fieldMap);
             }
-            Iterator<String> filedNameIterator = propertyNode.fieldNames();
-            Map<String, FieldDTO> fieldMap = new HashMap<>();
-            while (filedNameIterator.hasNext()) {
-                FieldDTO field = new FieldDTO();
-                String filedName = filedNameIterator.next();
-                JsonNode fieldNode = propertyNode.get(filedName);
-                String type = Optional.ofNullable(fieldNode.get("type")).map(JsonNode::asText).orElse(null);
-                field.setType(type);
-                String description = Optional.ofNullable(fieldNode.get(DESCRIPTION)).map(JsonNode::asText).orElse(null);
-                field.setComment(description);
-                field.setRef(Optional.ofNullable(fieldNode.get("$ref")).map(JsonNode::asText).orElse(null));
-                JsonNode itemNode = fieldNode.get("items");
-                Optional.ofNullable(itemNode).ifPresent(i -> {
-                    if (i.get("type") != null) {
-                        field.setItemType(i.get("type").asText());
-                    }
-                    if (i.get("$ref") != null) {
-                        field.setRef(i.get("$ref").asText());
-                    }
-                });
-                fieldMap.put(filedName, field);
-            }
-            map.put(className, fieldMap);
         }
         return map;
     }
