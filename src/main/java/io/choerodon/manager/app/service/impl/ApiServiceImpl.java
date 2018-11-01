@@ -53,8 +53,11 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public Page<ControllerDTO> getControllers(String name, String version, PageRequest pageRequest, Map<String, Object> map) {
+        long start = System.currentTimeMillis();
         String serviceName = getRouteName(name);
         String json = getSwaggerJson(name, version, serviceName);
+        long end = System.currentTimeMillis();
+        logger.info("***service: {} fetch json spending {} ms", name, end - start);
         return Optional.ofNullable(json)
                 .map(j -> ManualPageHelper.postPage(processJson2ControllerDTO(name, j), pageRequest, map))
                 .orElseThrow(() -> new CommonException("error.service.swaggerJson.empty"));
@@ -131,6 +134,7 @@ public class ApiServiceImpl implements ApiService {
     }
 
     private List<ControllerDTO> processJson2ControllerDTO(String serviceName, String json) {
+        long start = System.currentTimeMillis();
         List<ControllerDTO> controllers;
         try {
             JsonNode node = objectMapper.readTree(json);
@@ -144,6 +148,8 @@ public class ApiServiceImpl implements ApiService {
         } catch (IOException e) {
             throw new CommonException("error.parseJson");
         }
+        long end = System.currentTimeMillis();
+        logger.info("***service: {}, process json spend {} ms", serviceName, end - start);
         return controllers;
     }
 
