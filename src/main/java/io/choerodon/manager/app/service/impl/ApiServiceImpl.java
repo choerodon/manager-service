@@ -3,6 +3,10 @@ package io.choerodon.manager.app.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.manager.infra.dataobject.RouteDO;
+import io.choerodon.manager.infra.dataobject.SwaggerDO;
+import io.choerodon.manager.infra.mapper.RouteMapper;
+import io.choerodon.manager.infra.mapper.SwaggerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -35,24 +39,73 @@ public class ApiServiceImpl implements ApiService {
 
     private IDocumentService iDocumentService;
 
+    private SwaggerMapper swaggerMapper;
+
+    private RouteMapper routeMapper;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ApiServiceImpl(IDocumentService iDocumentService) {
+    public ApiServiceImpl(IDocumentService iDocumentService, SwaggerMapper swaggerMapper, RouteMapper routeMapper) {
+        this.swaggerMapper = swaggerMapper;
         this.iDocumentService = iDocumentService;
+        this.routeMapper = routeMapper;
     }
 
     @Override
     public Page<ControllerDTO> getControllers(String name, String version, PageRequest pageRequest, Map<String, Object> map) {
-        String json;
-        try {
-            json = iDocumentService.getSwaggerJson(name, version);
-        } catch (IOException e) {
-            logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", name, version, e.getMessage());
-            throw new CommonException("error.service.not.run", name, version);
-        }
+        String serviceName = getRouteName(name);
+        String json = getSwaggerJson(name, version, serviceName);
         return Optional.ofNullable(json)
                 .map(j -> ManualPageHelper.postPage(processJson2ControllerDTO(name, j), pageRequest, map))
                 .orElseThrow(() -> new CommonException("error.service.swaggerJson.empty"));
+    }
+
+    private String getSwaggerJson(String name, String version, String serviceName) {
+        String json;
+        SwaggerDO swaggerDO = new SwaggerDO();
+        swaggerDO.setServiceName(serviceName);
+        swaggerDO.setServiceVersion(version);
+        SwaggerDO swagger = swaggerMapper.selectOne(swaggerDO);
+        if (swagger != null && !StringUtils.isEmpty(swagger.getValue())) {
+            json = swagger.getValue();
+        } else {
+            try {
+                json = iDocumentService.getSwaggerJson(name, version);
+            } catch (IOException e) {
+                logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", name, version, e.getMessage());
+                throw new CommonException("error.service.not.run", name, version);
+            }
+            if (swagger == null) {
+                SwaggerDO insertSwagger = new SwaggerDO();
+                insertSwagger.setServiceName(serviceName);
+                insertSwagger.setServiceVersion(version);
+                insertSwagger.setDefault(false);
+                insertSwagger.setValue(json);
+                if (swaggerMapper.insertSelective(insertSwagger) != 1) {
+                    logger.warn("insert swagger error, swagger : {}", insertSwagger.toString());
+                }
+            } else {
+                swagger.setValue(json);
+                if (swaggerMapper.updateByPrimaryKeySelective(swagger) != 1) {
+                    logger.warn("update swagger error, swagger : {}", swagger.toString());
+                }
+            }
+
+        }
+        return json;
+    }
+
+    private String getRouteName(String name) {
+        String serviceName;
+        RouteDO routeDO = new RouteDO();
+        routeDO.setName(name);
+        RouteDO route = routeMapper.selectOne(routeDO);
+        if (route == null) {
+            throw new CommonException("error.route.not.found.routeName{" + name + "}");
+        } else {
+            serviceName = route.getServiceId();
+        }
+        return serviceName;
     }
 
     @Override
