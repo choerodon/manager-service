@@ -53,11 +53,8 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public Page<ControllerDTO> getControllers(String name, String version, PageRequest pageRequest, Map<String, Object> map) {
-        long start = System.currentTimeMillis();
         String serviceName = getRouteName(name);
         String json = getSwaggerJson(name, version, serviceName);
-        long end = System.currentTimeMillis();
-        logger.info("***service: {} fetch json spending {} ms", name, end - start);
         return Optional.ofNullable(json)
                 .map(j -> ManualPageHelper.postPage(processJson2ControllerDTO(name, j), pageRequest, map))
                 .orElseThrow(() -> new CommonException("error.service.swaggerJson.empty"));
@@ -112,9 +109,10 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public ControllerDTO queryPathDetail(String serviceName, String version, String controllerName, String operationId) {
+    public ControllerDTO queryPathDetail(String name, String version, String controllerName, String operationId) {
         try {
-            String json = iDocumentService.getSwaggerJson(serviceName, version);
+            String serviceName = getRouteName(name);
+            String json = getSwaggerJson(name, version, serviceName);
             JsonNode node = objectMapper.readTree(json);
             List<ControllerDTO> controllers = processControllers(node);
             List<ControllerDTO> targetControllers =
@@ -126,15 +124,14 @@ public class ApiServiceImpl implements ApiService {
             Map<String, String> dtoMap = convertMap2JsonWithComments(map);
             JsonNode pathNode = node.get("paths");
             String basePath = node.get("basePath").asText();
-            return queryPathDetailByOptions(serviceName, pathNode, targetControllers, operationId, dtoMap, basePath).get(0);
+            return queryPathDetailByOptions(name, pathNode, targetControllers, operationId, dtoMap, basePath).get(0);
         } catch (IOException e) {
-            logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", serviceName, version, e.getMessage());
-            throw new CommonException("error.service.not.run", serviceName, version);
+            logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", name, version, e.getMessage());
+            throw new CommonException("error.service.not.run", name, version);
         }
     }
 
     private List<ControllerDTO> processJson2ControllerDTO(String serviceName, String json) {
-        long start = System.currentTimeMillis();
         List<ControllerDTO> controllers;
         try {
             JsonNode node = objectMapper.readTree(json);
@@ -148,8 +145,6 @@ public class ApiServiceImpl implements ApiService {
         } catch (IOException e) {
             throw new CommonException("error.parseJson");
         }
-        long end = System.currentTimeMillis();
-        logger.info("***service: {}, process json spend {} ms", serviceName, end - start);
         return controllers;
     }
 
