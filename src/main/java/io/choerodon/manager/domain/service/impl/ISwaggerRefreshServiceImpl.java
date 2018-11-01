@@ -46,37 +46,37 @@ public class ISwaggerRefreshServiceImpl implements SwaggerRefreshService {
 
     @Override
     public void updateOrInsertSwagger(RegisterInstancePayload registerInstancePayload, String json) {
-        SwaggerDO querySelf = new SwaggerDO();
-        querySelf.setServiceVersion(registerInstancePayload.getVersion());
-        querySelf.setServiceName(registerInstancePayload.getAppName());
-        SwaggerDO self = swaggerMapper.selectOne(querySelf);
-        if (self != null) {
-            self.setValue(json);
-            if (swaggerMapper.updateByPrimaryKey(self) != 1) {
+        SwaggerDO example = new SwaggerDO();
+        example.setServiceVersion(registerInstancePayload.getVersion());
+        example.setServiceName(registerInstancePayload.getAppName());
+        SwaggerDO swagger = swaggerMapper.selectOne(example);
+        if (swagger != null) {
+            swagger.setValue(json);
+            if (swaggerMapper.updateByPrimaryKey(swagger) != 1) {
                 throw new CommonException("error.swagger.update");
             }
         } else {
-            SwaggerDO inert = new SwaggerDO();
-            inert.setServiceName(registerInstancePayload.getAppName());
-            inert.setServiceVersion(registerInstancePayload.getVersion());
-            inert.setValue(json);
+            SwaggerDO swaggerDO = new SwaggerDO();
+            swaggerDO.setServiceName(registerInstancePayload.getAppName());
+            swaggerDO.setServiceVersion(registerInstancePayload.getVersion());
+            swaggerDO.setValue(json);
             SwaggerDO queryDefault = new SwaggerDO();
             queryDefault.setServiceName(registerInstancePayload.getAppName());
             queryDefault.setDefault(true);
             SwaggerDO defaultVersion = swaggerMapper.selectOne(queryDefault);
             if (defaultVersion == null) {
-                inert.setDefault(true);
+                swaggerDO.setDefault(true);
             } else if (versionStrategy
                     .compareVersion(registerInstancePayload.getVersion(), defaultVersion.getServiceVersion()) > 0) {
-                inert.setDefault(true);
+                swaggerDO.setDefault(true);
                 defaultVersion.setDefault(false);
                 if (swaggerMapper.updateByPrimaryKeySelective(defaultVersion) != 1) {
                     throw new CommonException("error.swagger.update");
                 }
             } else {
-                inert.setDefault(false);
+                swaggerDO.setDefault(false);
             }
-            if (swaggerMapper.insert(inert) != 1) {
+            if (swaggerMapper.insert(swaggerDO) != 1) {
                 throw new CommonException("error.swagger.insert");
             }
         }

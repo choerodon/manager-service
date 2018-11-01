@@ -70,4 +70,15 @@ public class SwaggerDO extends AuditDomain {
     public void setValue(String value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return "SwaggerDO{" +
+                "id=" + id +
+                ", serviceName='" + serviceName + '\'' +
+                ", serviceVersion='" + serviceVersion + '\'' +
+                ", isDefault=" + isDefault +
+                ", value='" + value + '\'' +
+                '}';
+    }
 }
