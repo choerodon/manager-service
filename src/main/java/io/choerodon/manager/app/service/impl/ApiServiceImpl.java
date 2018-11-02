@@ -65,16 +65,23 @@ public class ApiServiceImpl implements ApiService {
         SwaggerDO swaggerDO = new SwaggerDO();
         swaggerDO.setServiceName(serviceName);
         swaggerDO.setServiceVersion(version);
+        long start = System.currentTimeMillis();
         SwaggerDO swagger = swaggerMapper.selectOne(swaggerDO);
+        long end = System.currentTimeMillis();
+        logger.info("%%% select swagger spending {} ms", end - start);
         if (swagger != null && !StringUtils.isEmpty(swagger.getValue())) {
             json = swagger.getValue();
         } else {
             try {
+                long start1 = System.currentTimeMillis();
                 json = iDocumentService.getSwaggerJson(name, version);
+                long end1 = System.currentTimeMillis();
+                logger.info("%%% fetch swagger json spending {} ms", end1 - start1);
             } catch (IOException e) {
                 logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", name, version, e.getMessage());
                 throw new CommonException("error.service.not.run", name, version);
             }
+            long start1 = System.currentTimeMillis();
             if (swagger == null) {
                 SwaggerDO insertSwagger = new SwaggerDO();
                 insertSwagger.setServiceName(serviceName);
@@ -90,12 +97,15 @@ public class ApiServiceImpl implements ApiService {
                     logger.warn("update swagger error, swagger : {}", swagger.toString());
                 }
             }
+            long end1 = System.currentTimeMillis();
+            logger.info("insert or update json spending {} ms", end1 - start1);
 
         }
         return json;
     }
 
     private String getRouteName(String name) {
+        long start = System.currentTimeMillis();
         String serviceName;
         RouteDO routeDO = new RouteDO();
         routeDO.setName(name);
@@ -105,6 +115,8 @@ public class ApiServiceImpl implements ApiService {
         } else {
             serviceName = route.getServiceId();
         }
+        long end = System.currentTimeMillis();
+        logger.info("%%% get route spending {} ms", end - start);
         return serviceName;
     }
 
@@ -132,6 +144,7 @@ public class ApiServiceImpl implements ApiService {
     }
 
     private List<ControllerDTO> processJson2ControllerDTO(String serviceName, String json) {
+        long start = System.currentTimeMillis();
         List<ControllerDTO> controllers;
         try {
             JsonNode node = objectMapper.readTree(json);
@@ -145,6 +158,8 @@ public class ApiServiceImpl implements ApiService {
         } catch (IOException e) {
             throw new CommonException("error.parseJson");
         }
+        long end = System.currentTimeMillis();
+        logger.info("%%% process json spending {} ms", end - start);
         return controllers;
     }
 
