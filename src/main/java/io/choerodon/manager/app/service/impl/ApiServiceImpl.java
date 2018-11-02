@@ -68,7 +68,7 @@ public class ApiServiceImpl implements ApiService {
         long start = System.currentTimeMillis();
         SwaggerDO swagger = swaggerMapper.selectOne(swaggerDO);
         long end = System.currentTimeMillis();
-        logger.info("%%% select swagger spending {} ms", end - start);
+        logger.info("%%%service {} select swagger spending {} ms", name, end - start);
         if (swagger != null && !StringUtils.isEmpty(swagger.getValue())) {
             json = swagger.getValue();
         } else {
@@ -76,7 +76,7 @@ public class ApiServiceImpl implements ApiService {
                 long start1 = System.currentTimeMillis();
                 json = iDocumentService.getSwaggerJson(name, version);
                 long end1 = System.currentTimeMillis();
-                logger.info("%%% fetch swagger json spending {} ms", end1 - start1);
+                logger.info("%%%service {} fetch swagger json spending {} ms",name, end1 - start1);
             } catch (IOException e) {
                 logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", name, version, e.getMessage());
                 throw new CommonException("error.service.not.run", name, version);
@@ -116,7 +116,7 @@ public class ApiServiceImpl implements ApiService {
             serviceName = route.getServiceId();
         }
         long end = System.currentTimeMillis();
-        logger.info("%%% get route spending {} ms", end - start);
+        logger.info("%%%service {} get route spending {} ms", name, end - start);
         return serviceName;
     }
 
@@ -159,7 +159,7 @@ public class ApiServiceImpl implements ApiService {
             throw new CommonException("error.parseJson");
         }
         long end = System.currentTimeMillis();
-        logger.info("%%% process json spending {} ms", end - start);
+        logger.info("%%%service {} process json spending {} ms",serviceName, end - start);
         return controllers;
     }
 
