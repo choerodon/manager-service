@@ -45,7 +45,7 @@ public class DocumentController {
      * @param version     服务版本
      * @return null
      */
-    @Permission()
+    @Permission(permissionLogin = true)
     @ApiOperation("手动刷新表中swagger json和权限")
     @PutMapping(value = "/permission/refresh/{service_name}")
     public ResponseEntity refresh(@PathVariable("service_name") String serviceName,
