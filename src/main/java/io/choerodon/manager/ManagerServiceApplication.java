@@ -1,5 +1,6 @@
 package io.choerodon.manager;
 
+import io.choerodon.eureka.event.EurekaEventHandler;
 import io.choerodon.manager.infra.common.utils.GatewayProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,6 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class ManagerServiceApplication {
 
     public static void main(String[] args) {
+        EurekaEventHandler.getInstance().init();
         SpringApplication.run(ManagerServiceApplication.class, args);
     }
 

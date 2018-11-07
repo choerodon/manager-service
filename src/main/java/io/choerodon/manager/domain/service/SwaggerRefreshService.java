@@ -1,7 +1,6 @@
 package io.choerodon.manager.domain.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.choerodon.manager.api.dto.RegisterInstancePayload;
+import io.choerodon.eureka.event.EurekaEventPayload;
 
 /**
  * 更新swagger业务service
@@ -17,14 +16,6 @@ public interface SwaggerRefreshService {
      * @param registerInstancePayload 存储service信息的实体
      * @param json                    swagger json
      */
-    void updateOrInsertSwagger(RegisterInstancePayload registerInstancePayload, String json);
-
-    /**
-     * 通过iam-service刷新权限
-     *
-     * @param registerInstancePayload 存储service信息的实体
-     * @param json                    swagger json
-     */
-    void parsePermission(RegisterInstancePayload registerInstancePayload, String json) throws JsonProcessingException;
+    void updateOrInsertSwagger(EurekaEventPayload registerInstancePayload, String json);
 
 }

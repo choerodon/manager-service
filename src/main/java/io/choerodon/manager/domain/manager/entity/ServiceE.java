@@ -1,10 +1,7 @@
 package io.choerodon.manager.domain.manager.entity;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import io.choerodon.manager.domain.repository.ServiceRepository;
 
 /**
  * @author superleader8@gmail.com

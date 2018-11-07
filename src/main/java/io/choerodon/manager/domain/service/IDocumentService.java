@@ -1,9 +1,9 @@
 package io.choerodon.manager.domain.service;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.choerodon.manager.api.dto.RegisterInstancePayload;
+import io.choerodon.eureka.event.EurekaEventPayload;
+
+import java.io.IOException;
 
 /**
  * swagger json的业务service
@@ -36,19 +36,6 @@ public interface IDocumentService {
 
     String getSwaggerJson(String name, String version) throws IOException;
 
-    void manualRefresh(String serviceName, String version);
+    String fetchSwaggerJsonByIp(EurekaEventPayload payload);
 
-    String fetchSwaggerJsonByIp(RegisterInstancePayload payload);
-
-    interface RefreshSwaggerListener {
-
-        /**
-         * 刷新swagger json的回调
-         *
-         * @param service 服务名
-         * @param json    该服务的swagger json
-         */
-        void refresh(String service, String json);
-
-    }
 }

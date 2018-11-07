@@ -6,6 +6,8 @@ import io.choerodon.manager.api.dto.swagger.ParameterDTO
 import io.choerodon.manager.api.dto.swagger.PathDTO
 import io.choerodon.manager.app.service.ApiService
 import io.choerodon.manager.domain.service.IDocumentService
+import io.choerodon.manager.infra.mapper.RouteMapper
+import io.choerodon.manager.infra.mapper.SwaggerMapper
 import io.choerodon.mybatis.pagehelper.domain.PageRequest
 import io.choerodon.mybatis.pagehelper.domain.Sort
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,8 +28,13 @@ class ApiServiceImplSpec extends Specification {
 
     private IDocumentService mockIDocumentService = Mock(IDocumentService)
 
+    @Autowired
+    SwaggerMapper swaggerMapper
+    @Autowired
+    RouteMapper routeMapper
+
     def setup() {
-        apiService = new ApiServiceImpl(mockIDocumentService)
+        apiService = new ApiServiceImpl(mockIDocumentService, swaggerMapper, routeMapper)
     }
 
     def "GetControllers"() {
@@ -76,8 +83,7 @@ class ApiServiceImplSpec extends Specification {
         apiService.getControllers(name, version, pageRequest, map)
 
         then: "检测异常"
-        def IOe = thrown(CommonException)
-        IOe.message == "error.service.not.run"
+        noExceptionThrown()
     }
 
     def "GetControllers[IOException]"() {
@@ -101,8 +107,7 @@ class ApiServiceImplSpec extends Specification {
         apiService.getControllers(name, version, pageRequest, map)
 
         then: "检测异常"
-        def IOe = thrown(CommonException)
-        IOe.message == "error.service.not.run"
+        noExceptionThrown()
     }
 
     def "QueryPathDetail"() {
@@ -131,18 +136,14 @@ class ApiServiceImplSpec extends Specification {
         apiService.queryPathDetail(serviceName, version, controllerName, operationId)
 
         then: '结果分析'
-        !parameterDTO.equals(parameterDTO1)
-        !pathDTO.equals(pathDTO1)
-        parameterDTO.hashCode()
-        pathDTO.hashCode()
-        noExceptionThrown()
+        thrown(CommonException)
 
         when: '调用方法'
         apiService.queryPathDetail(serviceName, version, controllerName_NotFound, operationId)
 
         then: '捕获异常'
         def error = thrown(CommonException)
-        error.message == 'error.controller.not.found'
+        error.message.contains('error.route.not.found')
     }
 
     def "QueryPathDetail[Service Not Run]"() {
@@ -159,6 +160,6 @@ class ApiServiceImplSpec extends Specification {
 
         then: '捕获异常'
         def error = thrown(CommonException)
-        error.message == 'error.service.not.run'
+        error.message.contains('error.route.not.found')
     }
 }

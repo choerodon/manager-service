@@ -38,17 +38,4 @@ class DocumentServiceImplSpec extends Specification {
         1 * mockIDocumentService.getSwaggerJson(name, version)
     }
 
-    def "ManualRefresh"() {
-        given: '准备参数'
-        def serviceName = "test_service"
-        def version = "test_version"
-
-        when: '测试方法'
-        documentService.manualRefresh(serviceName, version)
-
-        then: '结果分析'
-        noExceptionThrown()
-        1 * mockIDocumentService.manualRefresh(serviceName, version)
-
-    }
 }

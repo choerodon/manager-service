@@ -1,6 +1,6 @@
 package io.choerodon.manager
 
-import io.choerodon.manager.api.dto.RegisterInstancePayload
+import io.choerodon.eureka.event.EurekaEventPayload
 import io.choerodon.manager.domain.repository.RouteRepository
 import io.choerodon.manager.domain.service.IDocumentService
 import io.choerodon.manager.domain.service.IRouteService
@@ -37,10 +37,10 @@ class MockBeanTestConfiguration {
         IDocumentService mockIDocumentService = Mockito.mock(IDocumentService)
         def file = new File(this.class.getResource('/swagger.json').toURI())
         //Mockito.doReturn(file.getText("UTF-8")).when(mockIDocumentService).fetchSwaggerJsonByIp(Mockito.any(RegisterInstancePayload))
-        Mockito.doReturn(file.getText("UTF-8")).when(mockIDocumentService).fetchSwaggerJsonByIp(Mockito.argThat(new ArgumentMatcher<RegisterInstancePayload>() {
+        Mockito.doReturn(file.getText("UTF-8")).when(mockIDocumentService).fetchSwaggerJsonByIp(Mockito.argThat(new ArgumentMatcher<EurekaEventPayload>() {
             @Override
             boolean matches(Object argument) {
-                return !"test".equals(((RegisterInstancePayload) argument).getAppName())
+                return !"test".equals(((EurekaEventPayload) argument).getAppName())
             }
         }))
         return mockIDocumentService
