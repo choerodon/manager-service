@@ -9,7 +9,6 @@ import springfox.documentation.swagger.web.UiConfiguration;
 
 /**
  * @author superleader8@gmail.com
- * @data 2018/3/11
  */
 @Component
 @Scope("prototype")
@@ -27,9 +26,6 @@ public class SwaggerE {
 
     @Value("${choerodon.swagger.client:client}")
     private String client;
-
-    @Value("${choerodon.swagger.skip.service}")
-    private String[] skipService;
 
     public SecurityConfiguration getSecurityConfiguration() {
         return new SecurityConfiguration(
