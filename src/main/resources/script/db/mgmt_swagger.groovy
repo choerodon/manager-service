@@ -30,4 +30,11 @@ databaseChangeLog(logicalFilePath: 'script/db/mgmt_swaggeragger.groovy') {
             column(name: "LAST_UPDATE_DATE", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
     }
+
+    changeSet(author: 'superleader8@gmail.com', id: '2018-11-07-add-index'){
+        createIndex(indexName: 'IDX_MGMT_SWAGGER_I1', tableName:'MGMT_SWAGGER'){
+            column(name: 'SERVICE_NAME', type: 'VARCHAR(128)')
+            column(name: 'SERVICE_VERSION', type: 'VARCHAR(64)')
+        }
+    }
 }
