@@ -3,7 +3,6 @@ package io.choerodon.manager.domain.service.impl
 import com.netflix.appinfo.InstanceInfo
 import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.domain.service.IRouteService
-import io.choerodon.manager.domain.service.SwaggerRefreshService
 import io.choerodon.manager.infra.dataobject.SwaggerDO
 import io.choerodon.manager.infra.mapper.SwaggerMapper
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,10 +38,8 @@ class IDocumentServiceImplSpec extends Specification {
 
     private IRouteService mockIRouteService = Mock(IRouteService)
 
-    private SwaggerRefreshService mockSwaggerRefreshService = Mock(SwaggerRefreshService)
-
     def setup() {
-        iDocumentService = new IDocumentServiceImpl(mockSwaggerMapper, mockDiscoveryClient, mockIRouteService, mockSwaggerRefreshService)
+        iDocumentService = new IDocumentServiceImpl(mockSwaggerMapper, mockDiscoveryClient, mockIRouteService)
         iDocumentService.setRestTemplate(restTemplate)
         iDocumentService.setProfiles("default")
         iDocumentService.setClient("client")
@@ -79,8 +76,7 @@ class IDocumentServiceImplSpec extends Specification {
         iDocumentService.getSwaggerJsonByIdAndVersion(service, nullVersion)
 
         then: '结果分析'
-        def error = thrown(RemoteAccessException)
-        error.message == 'fetch failed, instance:null'
+        thrown(RemoteAccessException)
     }
 
     def "fetch[HttpStatus.NOT_FOUND]"() {
@@ -171,33 +167,4 @@ class IDocumentServiceImplSpec extends Specification {
         noExceptionThrown()
     }
 
-    def "ManualRefresh"() {
-        given: '创建mock参数'
-        def swaggerDO = new SwaggerDO()
-        swaggerDO.setId(1L)
-        swaggerDO.setValue('{"paths":"test"}')
-        def nullVersion = "null_version"
-
-        def instanceInfo = new InstanceInfo()
-        def serviceInstance = new EurekaDiscoveryClient.EurekaServiceInstance(instanceInfo)
-
-        def serviceInstanceList = new ArrayList<ServiceInstance>()
-        serviceInstanceList.add(serviceInstance)
-
-        def response = new ResponseEntity<String>(HttpStatus.OK)
-
-        and: 'mock'
-        iDocumentService.setProfiles("sit")
-        restTemplate.getForEntity(_, _) >> { return response }
-        //        kafkaTemplate.send(_, _) >> new SettableListenableFuture<SendResult<byte[], byte[]>>()
-        mockSwaggerMapper.selectOne(_) >> { return swaggerDO }
-        mockDiscoveryClient.getInstances(_) >> { return serviceInstanceList }
-
-        when: '调用方法'
-        iDocumentService.manualRefresh(service, nullVersion)
-
-        then: '结果分析'
-
-        noExceptionThrown()
-    }
 }

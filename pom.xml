@@ -13,7 +13,7 @@
         <version>0.8.0.RELEASE</version>
     </parent>
     <properties>
-        <choerodon.starters.version>0.6.3.RELEASE</choerodon.starters.version>
+        <choerodon.starters.version>0.7.0.RELEASE</choerodon.starters.version>
     </properties>
 
     <dependencies>
@@ -65,6 +65,11 @@
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.choerodon</groupId>
+            <artifactId>choerodon-starter-eureka-event</artifactId>
+            <version>${choerodon.starters.version}</version>
         </dependency>
         <!-- config server -->
         <dependency>

@@ -1,19 +1,16 @@
 package io.choerodon.manager.domain.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import io.choerodon.manager.api.dto.RegisterInstancePayload;
+import io.choerodon.core.exception.CommonException;
+import io.choerodon.eureka.event.EurekaEventPayload;
 import io.choerodon.manager.domain.manager.entity.RouteE;
 import io.choerodon.manager.domain.service.IDocumentService;
 import io.choerodon.manager.domain.service.IRouteService;
-import io.choerodon.manager.domain.service.SwaggerRefreshService;
 import io.choerodon.manager.infra.common.utils.VersionUtil;
 import io.choerodon.manager.infra.dataobject.SwaggerDO;
 import io.choerodon.manager.infra.mapper.SwaggerMapper;
-
 import io.swagger.models.auth.OAuth2Definition;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.lang.StringUtils;
@@ -38,7 +35,7 @@ import java.util.*;
  * @author wuguokai
  */
 @org.springframework.stereotype.Service
-public class IDocumentServiceImpl implements IDocumentService, IDocumentService.RefreshSwaggerListener {
+public class IDocumentServiceImpl implements IDocumentService {
 
 
     @Value("${choerodon.profiles.active:sit}")
@@ -59,18 +56,15 @@ public class IDocumentServiceImpl implements IDocumentService, IDocumentService.
     private SwaggerMapper swaggerMapper;
     private DiscoveryClient discoveryClient;
     private IRouteService iRouteService;
-    private SwaggerRefreshService swaggerRefreshService;
 
     /**
      * 构造器
      */
     public IDocumentServiceImpl(SwaggerMapper swaggerMapper,
-                                DiscoveryClient discoveryClient, IRouteService iRouteService,
-                                SwaggerRefreshService swaggerRefreshService) {
+                                DiscoveryClient discoveryClient, IRouteService iRouteService) {
         this.swaggerMapper = swaggerMapper;
         this.discoveryClient = discoveryClient;
         this.iRouteService = iRouteService;
-        this.swaggerRefreshService = swaggerRefreshService;
     }
 
     public void setProfiles(String profiles) {
@@ -166,20 +160,6 @@ public class IDocumentServiceImpl implements IDocumentService, IDocumentService.
         return MAPPER.writeValueAsString(root);
     }
 
-    @Override
-    public void manualRefresh(String serviceName, String version) {
-        String json = fetchSwaggerJsonByService(serviceName, version);
-        RegisterInstancePayload registerInstancePayload = new RegisterInstancePayload();
-        registerInstancePayload.setAppName(serviceName);
-        registerInstancePayload.setVersion(version);
-        swaggerRefreshService.updateOrInsertSwagger(registerInstancePayload, json);
-        try {
-            swaggerRefreshService.parsePermission(registerInstancePayload, json);
-        } catch (JsonProcessingException e) {
-            LOGGER.info("error parsePermission {}", e.getMessage());
-        }
-    }
-
     private String fetch(ServiceInstance instance) {
         ResponseEntity<String> response;
         String contextPath = instance.getMetadata().get(METADATA_CONTEXT);
@@ -202,40 +182,15 @@ public class IDocumentServiceImpl implements IDocumentService, IDocumentService.
     }
 
     @Override
-    public void refresh(String service, String json) {
-        // Do nothing only for override
-    }
-
-
-    @Override
-    public String fetchSwaggerJsonByIp(final RegisterInstancePayload payload) {
-        return fetchByIp(payload);
-//        List<ServiceInstance> serviceInstances = discoveryClient.getInstances(payload.getAppName());
-//        for (ServiceInstance serviceInstance : serviceInstances) {
-//            String instanceAddress = serviceInstance.getHost() + ":" + serviceInstance.getPort();
-//            if (instanceAddress.equals(payload.getInstanceAddress())) {
-//                return fetchByIp(payload, serviceInstance);
-//            }
-//        }
-//        return null;
-    }
-
-    private String fetchByIp(final RegisterInstancePayload payload/*, ServiceInstance instance*/) {
-        ResponseEntity<String> response;
-//        String contextPath = instance.getMetadata().get(METADATA_CONTEXT);
-//        if (contextPath == null) {
-//            contextPath = "";
-//        }
-//        LOGGER.info("service: {} metadata : {}" + instance.getMetadata());
-        try {
-            response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() /*+ contextPath*/ + "/v2/choerodon/api-docs",
-                    String.class);
-            if (response.getStatusCode() == HttpStatus.OK) {
-                return response.getBody();
-            }
-        } catch (Exception e) {
-            LOGGER.info("error.IDocumentService.fetchSwaggerJsonByIp {}", e.getMessage());
+    public String fetchSwaggerJsonByIp(final EurekaEventPayload payload) {
+        ResponseEntity<String> response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + "/v2/choerodon/api-docs",
+                String.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            return response.getBody();
+        } else {
+            throw new CommonException("fetch swagger error, statusCode is not 2XX, serviceId: " + payload.getId());
         }
-        return null;
+
     }
+
 }

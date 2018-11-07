@@ -3,6 +3,7 @@ package io.choerodon.manager.domain.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.swagger.ChoerodonRouteData;
 import io.choerodon.manager.api.dto.RouteDTO;
 import io.choerodon.manager.domain.manager.entity.RouteE;
@@ -117,25 +118,22 @@ public class IRouteServiceImpl implements IRouteService {
     @Override
     @Transactional
     public void autoRefreshRoute(String swaggerJson) {
-        ExtraData extraData;
-        Map swaggerMap = null;
-        ChoerodonRouteData data;
         try {
-            swaggerMap = objectMapper.readValue(swaggerJson, Map.class);
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage());
-        }
-        if (swaggerMap != null) {
-            Object object = swaggerMap.get(ExtraData.EXTRA_DATA_KEY);
-            if (object != null) {
-                extraData = objectMapper.convertValue(object, ExtraData.class);
-                if (extraData != null) {
-                    data = objectMapper.convertValue(extraData.getData().get(ExtraData.ZUUL_ROUTE_DATA), ChoerodonRouteData.class);
-                    if (data != null) {
-                        executeRefreshRoute(data);
+            Map swaggerMap = objectMapper.readValue(swaggerJson, Map.class);
+            if (swaggerMap != null) {
+                Object object = swaggerMap.get(ExtraData.EXTRA_DATA_KEY);
+                if (object != null) {
+                    ExtraData extraData = objectMapper.convertValue(object, ExtraData.class);
+                    if (extraData != null) {
+                        ChoerodonRouteData data = objectMapper.convertValue(extraData.getData().get(ExtraData.ZUUL_ROUTE_DATA), ChoerodonRouteData.class);
+                        if (data != null) {
+                            executeRefreshRoute(data);
+                        }
                     }
                 }
             }
+        } catch (IOException e) {
+            throw new CommonException("error.refreshRoute.IOException", e);
         }
     }
 

@@ -1,16 +1,9 @@
 package io.choerodon.manager.domain.manager.entity;
 
 import io.choerodon.manager.domain.repository.RouteRepository;
-import io.choerodon.manager.infra.common.utils.VersionUtil;
-import org.apache.commons.collections.map.MultiKeyMap;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import java.util.List;
 
 /**
  * 路由领域对象
