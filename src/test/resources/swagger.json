@@ -11,20 +11,16 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     }
   },
-  "host": "127.0.0.1:8080",
-  "basePath": "/manager",
+  "host": "10.211.108.214:8963",
+  "basePath": "/",
   "tags": [
     {
-      "name": "group-label-controller",
-      "description": "Group Label Controller"
+      "name": "eureka-event-endpoint",
+      "description": "Eureka Event Endpoint"
     },
     {
       "name": "api-controller",
       "description": "Api Controller"
-    },
-    {
-      "name": "document-controller",
-      "description": "Document Controller"
     },
     {
       "name": "service-controller",
@@ -44,129 +40,13 @@
     }
   ],
   "paths": {
-    "/docs/permission/refresh/{service_name}": {
-      "put": {
-        "tags": [
-          "document-controller"
-        ],
-        "summary": "手动刷新表中swagger json和权限",
-        "operationId": "refreshUsingPUT",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "*/*"
-        ],
-        "parameters": [
-          {
-            "name": "service_name",
-            "in": "path",
-            "description": "service_name",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "version",
-            "in": "query",
-            "description": "version",
-            "required": false,
-            "type": "string",
-            "default": "null_version"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/ResponseEntity"
-            }
-          },
-          "201": {
-            "description": "Created"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
-      }
-    },
-    "/docs/{service_prefix}": {
-      "get": {
-        "tags": [
-          "document-controller"
-        ],
-        "summary": "获取服务id对应的版本swagger json字符串",
-        "description": "{\"permission\":{\"action\":\"get\",\"menuLevel\":null,\"permissionLevel\":\"project\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":true},\"label\":null}",
-        "operationId": "getUsingGET",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "*/*"
-        ],
-        "parameters": [
-          {
-            "name": "service_prefix",
-            "in": "path",
-            "description": "service_prefix",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "version",
-            "in": "query",
-            "description": "version",
-            "required": false,
-            "type": "string",
-            "default": "null_version"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
-      }
-    },
     "/v1/configs": {
       "post": {
         "tags": [
           "config-controller"
         ],
         "summary": "创建配置",
-        "description": "{\"permission\":{\"action\":\"create\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"create\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "createUsingPOST",
         "consumes": [
           "application/json"
@@ -204,14 +84,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/configs/check": {
@@ -220,7 +93,7 @@
           "config-controller"
         ],
         "summary": "配置校验接口",
-        "description": "{\"permission\":{\"action\":\"check\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"check\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "checkUsingPOST",
         "consumes": [
           "application/json"
@@ -258,14 +131,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/configs/{config_id}": {
@@ -274,7 +140,7 @@
           "config-controller"
         ],
         "summary": "查询配置",
-        "description": "{\"permission\":{\"action\":\"query\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"query\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "queryUsingGET",
         "consumes": [
           "application/json"
@@ -315,21 +181,14 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       },
       "put": {
         "tags": [
           "config-controller"
         ],
         "summary": "修改配置",
-        "description": "{\"permission\":{\"action\":\"updateConfig\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"updateConfig\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "updateConfigUsingPUT",
         "consumes": [
           "application/json"
@@ -382,21 +241,14 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       },
       "delete": {
         "tags": [
           "config-controller"
         ],
         "summary": "删除配置，默认配置不可删除",
-        "description": "{\"permission\":{\"action\":\"delete\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"delete\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "deleteUsingDELETE",
         "consumes": [
           "application/json"
@@ -430,14 +282,7 @@
           "403": {
             "description": "Forbidden"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/configs/{config_id}/default": {
@@ -446,7 +291,7 @@
           "config-controller"
         ],
         "summary": "设置配置为默认配置",
-        "description": "{\"permission\":{\"action\":\"updateConfigDefault\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"updateConfigDefault\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "updateConfigDefaultUsingPUT",
         "consumes": [
           "application/json"
@@ -483,14 +328,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/configs/{config_id}/items": {
@@ -499,7 +337,7 @@
           "config-controller"
         ],
         "summary": "增加或修改配置项",
-        "description": "{\"permission\":{\"action\":\"addItem\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"addItem\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "addItemUsingPOST",
         "consumes": [
           "application/json"
@@ -545,21 +383,14 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       },
       "delete": {
         "tags": [
           "config-controller"
         ],
         "summary": "删除配置项",
-        "description": "{\"permission\":{\"action\":\"deleteItem\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"deleteItem\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "deleteItemUsingDELETE",
         "consumes": [
           "application/json"
@@ -600,14 +431,7 @@
           "403": {
             "description": "Forbidden"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/configs/{config_id}/yaml": {
@@ -616,7 +440,7 @@
           "config-controller"
         ],
         "summary": "查询配置的yaml形式",
-        "description": "{\"permission\":{\"action\":\"queryYaml\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"queryYaml\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "queryYamlUsingGET",
         "consumes": [
           "application/json"
@@ -650,24 +474,62 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
-    "/v1/groupLabels": {
+    "/v1/eureka/events": {
       "get": {
         "tags": [
-          "group-label-controller"
+          "eureka-event-endpoint"
         ],
-        "summary": "可以查询对应labelValue的用户组id列表",
-        "description": "{\"permission\":{\"action\":\"query\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":true},\"label\":null}",
-        "operationId": "queryUsingGET_1",
+        "summary": "获取未消费的事件列表",
+        "description": "{\"permission\":{\"action\":\"list\",\"menuLevel\":null,\"permissionLevel\":\"project\",\"roles\":[],\"permissionLogin\":true,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
+        "operationId": "listUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "service",
+            "in": "query",
+            "description": "service",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/EurekaEventPayload"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/eureka/events/retry": {
+      "post": {
+        "tags": [
+          "eureka-event-endpoint"
+        ],
+        "summary": "手动重试未消费成功的事件",
+        "description": "{\"permission\":{\"action\":\"retry\",\"menuLevel\":null,\"permissionLevel\":\"project\",\"roles\":[],\"permissionLogin\":true,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
+        "operationId": "retryUsingPOST",
         "consumes": [
           "application/json"
         ],
@@ -678,28 +540,16 @@
           {
             "name": "id",
             "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int64"
-          },
-          {
-            "name": "labelValue",
-            "in": "query",
+            "description": "id",
             "required": false,
             "type": "string"
           },
           {
-            "name": "groupCode",
+            "name": "service",
             "in": "query",
+            "description": "service",
             "required": false,
             "type": "string"
-          },
-          {
-            "name": "objectVersionNumber",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int64"
           }
         ],
         "responses": {
@@ -708,114 +558,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/GroupLabelDTO"
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
-      },
-      "post": {
-        "tags": [
-          "group-label-controller"
-        ],
-        "summary": "插入对应用户组标签",
-        "description": "{\"permission\":{\"action\":\"creat\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":true},\"label\":null}",
-        "operationId": "creatUsingPOST",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "*/*"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "groupLabelDTO",
-            "description": "groupLabelDTO",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/GroupLabelDTO"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/GroupLabelDTO"
-            }
-          },
-          "201": {
-            "description": "Created"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
-      },
-      "put": {
-        "tags": [
-          "group-label-controller"
-        ],
-        "summary": "更新对应用户组",
-        "description": "{\"permission\":{\"action\":\"update\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":true},\"label\":null}",
-        "operationId": "updateUsingPUT",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "*/*"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "groupLabelDTOList",
-            "description": "groupLabelDTOList",
-            "required": true,
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/GroupLabelDTO"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/GroupLabelDTO"
+                "$ref": "#/definitions/EurekaEventPayload"
               }
             }
           },
@@ -831,61 +574,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "group-label-controller"
-        ],
-        "summary": "删除对应用户组",
-        "description": "{\"permission\":{\"action\":\"delete\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":true},\"label\":null}",
-        "operationId": "deleteUsingDELETE_1",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "*/*"
-        ],
-        "parameters": [
-          {
-            "name": "labelValue",
-            "in": "query",
-            "description": "labelValue",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/ResponseEntity"
-            }
-          },
-          "204": {
-            "description": "No Content"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/instances": {
@@ -894,8 +583,8 @@
           "instance-controller"
         ],
         "summary": "查询实例列表",
-        "description": "{\"permission\":{\"action\":\"list\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
-        "operationId": "listUsingGET",
+        "description": "{\"permission\":{\"action\":\"list\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
+        "operationId": "listUsingGET_1",
         "consumes": [
           "application/json"
         ],
@@ -985,14 +674,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/instances/{instance_id}": {
@@ -1001,8 +683,8 @@
           "instance-controller"
         ],
         "summary": "查询实例详情",
-        "description": "{\"permission\":{\"action\":\"query\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
-        "operationId": "queryUsingGET_2",
+        "description": "{\"permission\":{\"action\":\"query\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
+        "operationId": "queryUsingGET_1",
         "consumes": [
           "application/json"
         ],
@@ -1034,14 +716,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/instances/{instance_id}/configs/{config_id}": {
@@ -1050,8 +725,8 @@
           "instance-controller"
         ],
         "summary": "修改实例的配置",
-        "description": "{\"permission\":{\"action\":\"update\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
-        "operationId": "updateUsingPUT_1",
+        "description": "{\"permission\":{\"action\":\"update\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
+        "operationId": "updateUsingPUT",
         "consumes": [
           "application/json"
         ],
@@ -1091,14 +766,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/routes": {
@@ -1107,8 +775,8 @@
           "route-controller"
         ],
         "summary": "分页查询路由信息",
-        "description": "{\"permission\":{\"action\":\"list\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
-        "operationId": "listUsingGET_1",
+        "description": "{\"permission\":{\"action\":\"list\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
+        "operationId": "listUsingGET_2",
         "consumes": [
           "application/json"
         ],
@@ -1198,21 +866,14 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       },
       "post": {
         "tags": [
           "route-controller"
         ],
         "summary": "增加一个新路由",
-        "description": "{\"permission\":{\"action\":\"create\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"create\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "createUsingPOST_1",
         "consumes": [
           "application/json"
@@ -1250,14 +911,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/routes/check": {
@@ -1266,7 +920,7 @@
           "route-controller"
         ],
         "summary": "route 校验接口",
-        "description": "{\"permission\":{\"action\":\"check\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"check\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "checkUsingPOST_1",
         "consumes": [
           "application/json"
@@ -1304,14 +958,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/routes/{route_id}": {
@@ -1320,7 +967,7 @@
           "route-controller"
         ],
         "summary": "更新一个路由",
-        "description": "{\"permission\":{\"action\":\"update\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"update\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "updateUsingPOST",
         "consumes": [
           "application/json"
@@ -1366,22 +1013,15 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       },
       "delete": {
         "tags": [
           "route-controller"
         ],
         "summary": "根据routeId删除一个路由",
-        "description": "{\"permission\":{\"action\":\"delete\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
-        "operationId": "deleteUsingDELETE_2",
+        "description": "{\"permission\":{\"action\":\"delete\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
+        "operationId": "deleteUsingDELETE_1",
         "consumes": [
           "application/json"
         ],
@@ -1414,14 +1054,7 @@
           "403": {
             "description": "Forbidden"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/services": {
@@ -1430,7 +1063,7 @@
           "service-controller"
         ],
         "summary": "查询服务列表",
-        "description": "{\"permission\":{\"action\":\"pageAll\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"pageAll\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "pageAllUsingGET",
         "consumes": [
           "application/json"
@@ -1466,14 +1099,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/services/manager": {
@@ -1482,7 +1108,7 @@
           "service-controller"
         ],
         "summary": "微服务管理列表",
-        "description": "{\"permission\":{\"action\":\"pageManager\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"pageManager\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "pageManagerUsingGET",
         "consumes": [
           "application/json"
@@ -1552,14 +1178,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/services/{service_name}/configs": {
@@ -1568,8 +1187,8 @@
           "service-controller"
         ],
         "summary": "分页模糊查询服务的配置",
-        "description": "{\"permission\":{\"action\":\"list\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
-        "operationId": "listUsingGET_2",
+        "description": "{\"permission\":{\"action\":\"list\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
+        "operationId": "listUsingGET_3",
         "consumes": [
           "application/json"
         ],
@@ -1666,14 +1285,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/swaggers/resources": {
@@ -1682,7 +1294,7 @@
           "api-controller"
         ],
         "summary": "查询不包含跳过的服务的路由列表",
-        "description": "{\"permission\":{\"action\":\"resources\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"resources\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "resourcesUsingGET",
         "consumes": [
           "application/json"
@@ -1709,14 +1321,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/swaggers/{service_prefix}/controllers": {
@@ -1725,7 +1330,7 @@
           "api-controller"
         ],
         "summary": "查询服务controller和接口",
-        "description": "{\"permission\":{\"action\":\"queryByNameAndVersion\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"queryByNameAndVersion\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "queryByNameAndVersionUsingGET",
         "consumes": [
           "application/json"
@@ -1817,14 +1422,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     },
     "/v1/swaggers/{service_prefix}/controllers/{name}/paths": {
@@ -1833,7 +1431,7 @@
           "api-controller"
         ],
         "summary": "根据path的url和method查询单个path",
-        "description": "{\"permission\":{\"action\":\"queryPathDetail\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[],\"permissionLogin\":false,\"permissionPublic\":false},\"label\":null}",
+        "description": "{\"permission\":{\"action\":\"queryPathDetail\",\"menuLevel\":null,\"permissionLevel\":\"site\",\"roles\":[\"role/site/default/developer\"],\"permissionLogin\":false,\"permissionPublic\":false,\"permissionWithin\":false},\"label\":null}",
         "operationId": "queryPathDetailUsingGET",
         "consumes": [
           "application/json"
@@ -1888,14 +1486,7 @@
           "404": {
             "description": "Not Found"
           }
-        },
-        "security": [
-          {
-            "client": [
-              "default"
-            ]
-          }
-        ]
+        }
       }
     }
   },
@@ -1919,10 +1510,12 @@
       "properties": {
         "instanceNum": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "description": "实例数量"
         },
         "serviceName": {
-          "type": "string"
+          "type": "string",
+          "description": "服务名"
         }
       }
     },
@@ -1935,13 +1528,22 @@
         },
         "id": {
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "description": "主键ID"
         },
         "isDefault": {
-          "type": "boolean"
+          "type": "boolean",
+          "example": false,
+          "description": "是否是默认配置"
+        },
+        "lastUpdateDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "修改时间"
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "配置名"
         },
         "objectVersionNumber": {
           "type": "integer",
@@ -1950,39 +1552,25 @@
         },
         "publicTime": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "description": "发布时间"
         },
         "serviceId": {
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "description": "对应微服务ID"
         },
         "source": {
-          "type": "string"
+          "type": "string",
+          "description": "来源（自定义/预定义）"
         },
         "txt": {
-          "type": "string"
+          "type": "string",
+          "description": "文本格式"
         },
         "value": {
-          "type": "object"
-        }
-      }
-    },
-    "GroupLabelDTO": {
-      "type": "object",
-      "properties": {
-        "groupCode": {
-          "type": "string"
-        },
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "labelValue": {
-          "type": "string"
-        },
-        "objectVersionNumber": {
-          "type": "integer",
-          "format": "int64"
+          "type": "object",
+          "description": "配置值列表"
         }
       }
     },
@@ -1991,10 +1579,12 @@
       "properties": {
         "id": {
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "description": "主键ID"
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "服务名"
         }
       }
     },
@@ -2039,53 +1629,29 @@
         }
       }
     },
-    "SchemaDTO": {
-      "type": "object",
-      "properties": {
-        "$ref": {
-          "type": "string"
-        },
-        "items": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "type": {
-          "type": "string"
-        }
-      }
-    },
     "ParameterDTO": {
       "type": "object",
       "properties": {
-        "body": {
-          "type": "string"
-        },
-        "collectionFormat": {
-          "type": "string"
-        },
         "description": {
           "type": "string",
           "description": "参数描述"
         },
         "format": {
-          "type": "string"
+          "type": "string",
+          "description": "格式"
         },
         "in": {
           "type": "string",
           "description": "参数位置"
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "参数名称"
         },
         "required": {
           "type": "boolean",
           "example": false,
           "description": "是否必填"
-        },
-        "schema": {
-          "$ref": "#/definitions/SchemaDTO"
         },
         "type": {
           "type": "string",
@@ -2097,38 +1663,48 @@
       "type": "object",
       "properties": {
         "app": {
-          "type": "string"
+          "type": "string",
+          "description": "实例应用名"
         },
         "configInfoYml": {
+          "description": "配置文件",
           "$ref": "#/definitions/YamlDTO"
         },
         "envInfoYml": {
+          "description": "环境配置",
           "$ref": "#/definitions/YamlDTO"
         },
         "hostName": {
-          "type": "string"
+          "type": "string",
+          "description": "实例HOST"
         },
         "instanceId": {
-          "type": "string"
+          "type": "string",
+          "description": "实例ID"
         },
         "ipAddr": {
-          "type": "string"
+          "type": "string",
+          "description": "实例IP"
         },
         "metadata": {
           "type": "object",
+          "description": "实例元数据列表",
           "additionalProperties": {
             "type": "string"
           }
         },
         "port": {
-          "type": "string"
+          "type": "string",
+          "description": "实例端口"
         },
         "registrationTime": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "description": "实例注册时间"
         },
         "version": {
-          "type": "string"
+          "type": "string",
+          "description": "实例版本"
         }
       }
     },
@@ -2139,8 +1715,13 @@
           "type": "string",
           "description": "请求的basePath"
         },
+        "code": {
+          "type": "string",
+          "description": "权限code"
+        },
         "consumes": {
           "type": "array",
+          "description": "请求接受类型",
           "items": {
             "type": "string"
           }
@@ -2158,17 +1739,16 @@
           "type": "string",
           "description": "请求方法"
         },
-        "operationId": {
-          "type": "string"
-        },
         "parameters": {
           "type": "array",
+          "description": "参数集合",
           "items": {
             "$ref": "#/definitions/ParameterDTO"
           }
         },
         "produces": {
           "type": "array",
+          "description": "请求响应类型",
           "items": {
             "type": "string"
           }
@@ -2191,6 +1771,33 @@
         "url": {
           "type": "string",
           "description": "请求url"
+        }
+      }
+    },
+    "EurekaEventPayload": {
+      "type": "object",
+      "properties": {
+        "apiData": {
+          "type": "string"
+        },
+        "appName": {
+          "type": "string"
+        },
+        "createTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "id": {
+          "type": "string"
+        },
+        "instanceAddress": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
         }
       }
     },
@@ -2279,13 +1886,16 @@
       "type": "object",
       "properties": {
         "configVersion": {
-          "type": "string"
+          "type": "string",
+          "description": "配置版本"
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "配置名"
         },
         "serviceName": {
-          "type": "string"
+          "type": "string",
+          "description": "服务名"
         }
       }
     },
@@ -2293,23 +1903,29 @@
       "type": "object",
       "properties": {
         "instanceId": {
-          "type": "string"
+          "type": "string",
+          "description": "实例ID"
         },
         "pod": {
-          "type": "string"
+          "type": "string",
+          "description": "端口号"
         },
         "registrationTime": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "description": "实例注册时间"
         },
         "service": {
-          "type": "string"
+          "type": "string",
+          "description": "所属微服务"
         },
         "status": {
-          "type": "string"
+          "type": "string",
+          "description": "实例状态"
         },
         "version": {
-          "type": "string"
+          "type": "string",
+          "description": "实例版本"
         }
       }
     },
@@ -2346,20 +1962,24 @@
       "properties": {
         "highlightMarkers": {
           "type": "array",
+          "description": "yaml 高量显示",
           "items": {
             "$ref": "#/definitions/HighlightMarker"
           }
         },
         "objectVersionNumber": {
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "description": "乐观锁版本号"
         },
         "totalLine": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "description": "总行数"
         },
         "yaml": {
-          "type": "string"
+          "type": "string",
+          "description": "yaml 内容体"
         }
       }
     },
@@ -2367,42 +1987,54 @@
       "type": "object",
       "properties": {
         "builtIn": {
-          "type": "boolean"
+          "type": "boolean",
+          "example": false,
+          "description": "是否内置"
         },
         "customSensitiveHeaders": {
-          "type": "boolean"
+          "type": "boolean",
+          "example": false,
+          "description": "敏感头信息/非必填"
         },
         "helperService": {
-          "type": "string"
+          "type": "string",
+          "description": "Helper服务名"
         },
         "id": {
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "description": "主键ID"
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "名称/必填"
         },
         "objectVersionNumber": {
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "description": "乐观锁版本号"
         },
         "path": {
-          "type": "string"
+          "type": "string",
+          "description": "路径/必填"
         },
         "retryable": {
-          "type": "boolean"
+          "type": "boolean",
+          "example": false,
+          "description": "是否重试/非必填"
         },
         "sensitiveHeaders": {
-          "type": "string"
+          "type": "string",
+          "description": "是否过滤敏感头信息/非必填"
         },
         "serviceId": {
-          "type": "string"
+          "type": "string",
+          "description": "服务ID/必填"
         },
         "stripPrefix": {
-          "type": "boolean"
-        },
-        "url": {
-          "type": "string"
+          "type": "boolean",
+          "example": false,
+          "description": "是否去除前缀/非必填"
         }
       }
     },
@@ -2411,36 +2043,29 @@
       "properties": {
         "endColumn": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "description": "结束列"
         },
         "endIndex": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "description": "结束坐标"
         },
         "line": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "description": "行"
         },
         "startColumn": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "description": "开始列"
         },
         "startIndex": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "description": "开始坐标"
         }
-      }
-    }
-  },
-  "securityDefinitions": {
-    "client": {
-      "description": null,
-      "type": "oauth2",
-      "authorizationUrl": "http://localhost:8080/oauth/oauth/authorize",
-      "tokenUrl": null,
-      "flow": "implicit",
-      "scopes": {
-        "default": "default scope"
       }
     }
   }
