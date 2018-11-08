@@ -53,7 +53,7 @@ class ApiServiceImplSpec extends Specification {
 
         and: 'mock getSwaggerJson方法'
         def file = new File(this.class.getResource('/swagger.json').toURI())
-        mockIDocumentService.getSwaggerJson(_, _) >> { file.getText('UTF-8') }
+        mockIDocumentService.getSwaggerJson(_, _, _) >> { file.getText('UTF-8') }
 
         when: "方法调用"
         def list = apiService.getControllers(name, version, pageRequest, map)
@@ -77,13 +77,14 @@ class ApiServiceImplSpec extends Specification {
         def pageRequest = new PageRequest(0, 20, new Sort(order))
 
         and: 'mock getSwaggerJson方法'
-        mockIDocumentService.getSwaggerJson(_, _) >> { throw new IOException("") }
+        mockIDocumentService.getSwaggerJson(_, _, _) >> { throw new IOException("") }
 
         when: "【异常】方法调用"
         apiService.getControllers(name, version, pageRequest, map)
 
         then: "检测异常"
-        noExceptionThrown()
+        def IOe = thrown(CommonException)
+        IOe.message == "java.io.IOException: "
     }
 
     def "GetControllers[IOException]"() {
@@ -101,13 +102,14 @@ class ApiServiceImplSpec extends Specification {
         def pageRequest = new PageRequest(0, 20, new Sort(order))
 
         and: 'mock getSwaggerJson方法'
-        mockIDocumentService.getSwaggerJson(_, _) >> { throw new IOException("") }
+        mockIDocumentService.getSwaggerJson(_, _, _) >> { throw new IOException("") }
 
         when: "【异常】方法调用"
         apiService.getControllers(name, version, pageRequest, map)
 
         then: "检测异常"
-        noExceptionThrown()
+        def IOe = thrown(CommonException)
+        IOe.message == "java.io.IOException: "
     }
 
     def "QueryPathDetail"() {
@@ -130,7 +132,7 @@ class ApiServiceImplSpec extends Specification {
 
         and: 'mock iDocumentService.getSwaggerJson & objectMapper.readTree'
         def file = new File(this.class.getResource('/swagger.json').toURI())
-        mockIDocumentService.getSwaggerJson(_, _) >> { file.getText('UTF-8') }
+        mockIDocumentService.getSwaggerJson(_, _, _) >> { file.getText('UTF-8') }
 
         when: '调用方法'
         apiService.queryPathDetail(serviceName, version, controllerName, operationId)
@@ -153,7 +155,7 @@ class ApiServiceImplSpec extends Specification {
         def controllerName = "test"
         def operationId = "test"
         and: 'mock iDocumentService.getSwaggerJson'
-        mockIDocumentService.getSwaggerJson(_, _) >> { throw new IOException("") }
+        mockIDocumentService.getSwaggerJson(_, _, _) >> { throw new IOException("") }
 
         when: '调用方法'
         apiService.queryPathDetail(serviceName, version, controllerName, operationId)

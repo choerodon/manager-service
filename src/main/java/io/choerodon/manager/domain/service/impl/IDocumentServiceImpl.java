@@ -84,8 +84,7 @@ public class IDocumentServiceImpl implements IDocumentService {
     }
 
     @Override
-    public ObjectNode getSwaggerJsonByIdAndVersion(String service, String version) throws IOException {
-        String json = fetchSwaggerJsonByService(service, version);
+    public ObjectNode buildSwaggerJson(String json) throws IOException {
         if (StringUtils.isEmpty(json)) {
             throw new RemoteAccessException("fetch swagger json failed");
         }
@@ -141,7 +140,7 @@ public class IDocumentServiceImpl implements IDocumentService {
     }
 
     @Override
-    public String getSwaggerJson(String name, String version) throws IOException {
+    public String getSwaggerJson(String name, String version, String json) throws IOException {
         MultiKeyMap multiKeyMap = iRouteService.getAllRunningInstances();
         RouteE routeE = iRouteService
                 .getRouteFromRunningInstancesMap(multiKeyMap, name, version);
@@ -153,7 +152,7 @@ public class IDocumentServiceImpl implements IDocumentService {
             basePath = "/";
             gatewayDomain = "localhost:8963";
         }
-        ObjectNode root = getSwaggerJsonByIdAndVersion(routeE.getServiceId(), version);
+        ObjectNode root = buildSwaggerJson(json);
         root.put("basePath", basePath);
         root.put("host", gatewayDomain);
         LOGGER.debug("put basePath:{}, host:{}", basePath, root.get("host"));

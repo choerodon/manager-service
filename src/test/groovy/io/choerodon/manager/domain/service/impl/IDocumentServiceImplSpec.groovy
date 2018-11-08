@@ -73,7 +73,8 @@ class IDocumentServiceImplSpec extends Specification {
         when: '调用方法'
         mockSwaggerMapper.selectOne(_) >> { return swaggerDO }
         mockDiscoveryClient.getInstances(_) >> { return serviceInstanceList }
-        iDocumentService.getSwaggerJsonByIdAndVersion(service, nullVersion)
+        String json = iDocumentService.fetchSwaggerJsonByService(service, nullVersion)
+        iDocumentService.buildSwaggerJson(json)
 
         then: '结果分析'
         thrown(RemoteAccessException)
@@ -100,7 +101,8 @@ class IDocumentServiceImplSpec extends Specification {
         when: '调用方法'
         mockSwaggerMapper.selectOne(_) >> { return swaggerDO }
         mockDiscoveryClient.getInstances(_) >> { return serviceInstanceList }
-        iDocumentService.getSwaggerJsonByIdAndVersion(service, nullVersion)
+        String json = iDocumentService.fetchSwaggerJsonByService(service, nullVersion)
+        iDocumentService.buildSwaggerJson(json)
         then: '结果分析'
         def error = thrown(RemoteAccessException)
         error.message == 'fetch failed : ' + response
@@ -127,7 +129,8 @@ class IDocumentServiceImplSpec extends Specification {
         when: '调用方法'
         mockSwaggerMapper.selectOne(_) >> { return swaggerDO }
         mockDiscoveryClient.getInstances(_) >> { return serviceInstanceList }
-        iDocumentService.getSwaggerJsonByIdAndVersion(service, nullVersion)
+        String json = iDocumentService.fetchSwaggerJsonByService(service, nullVersion)
+        iDocumentService.buildSwaggerJson(json)
         then: '结果分析'
         def error = thrown(RemoteAccessException)
         error.message == 'fetch swagger json failed'
@@ -155,14 +158,17 @@ class IDocumentServiceImplSpec extends Specification {
         when: '调用方法'
         mockSwaggerMapper.selectOne(_) >> { return swaggerDO }
         mockDiscoveryClient.getInstances(_) >> { return serviceInstanceList }
-        iDocumentService.getSwaggerJsonByIdAndVersion(service, nullVersion)
+        String json = iDocumentService.fetchSwaggerJsonByService(service, nullVersion)
+        iDocumentService.buildSwaggerJson(json)
         then: '结果分析'
         noExceptionThrown()
     }
 
     def "GetSwaggerJson"() {
         when: '调用方法'
-        iDocumentService.getSwaggerJson(service, version)
+        def file = new File(this.class.getResource('/swagger.json').toURI())
+        String json = file.getText('UTF-8')
+        iDocumentService.getSwaggerJson(service, version, json)
         then: '结果分析'
         noExceptionThrown()
     }

@@ -72,16 +72,10 @@ public class ApiServiceImpl implements ApiService {
         if (swagger != null && !StringUtils.isEmpty(swagger.getValue())) {
             json = swagger.getValue();
         } else {
-            try {
-                long start1 = System.currentTimeMillis();
-                json = iDocumentService.getSwaggerJson(name, version);
-                long end1 = System.currentTimeMillis();
-                logger.info("%%%service {} fetch swagger json spending {} ms",name, end1 - start1);
-            } catch (IOException e) {
-                logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", name, version, e.getMessage());
-                throw new CommonException("error.service.not.run", name, version);
-            }
             long start1 = System.currentTimeMillis();
+            json = iDocumentService.fetchSwaggerJsonByService(serviceName, version);
+            long end1 = System.currentTimeMillis();
+            logger.info("%%%service {} fetch swagger json spending {} ms", name, end1 - start1);
             if (swagger == null) {
                 SwaggerDO insertSwagger = new SwaggerDO();
                 insertSwagger.setServiceName(serviceName);
@@ -97,9 +91,12 @@ public class ApiServiceImpl implements ApiService {
                     logger.warn("update swagger error, swagger : {}", swagger.toString());
                 }
             }
-            long end1 = System.currentTimeMillis();
-            logger.info("insert or update json spending {} ms", end1 - start1);
-
+        }
+        try {
+            json = iDocumentService.getSwaggerJson(name, version, json);
+        } catch (IOException e) {
+            logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", name, version, e.getMessage());
+            throw new CommonException(e, "error.service.not.run", name, version);
         }
         return json;
     }
@@ -159,7 +156,7 @@ public class ApiServiceImpl implements ApiService {
             throw new CommonException("error.parseJson");
         }
         long end = System.currentTimeMillis();
-        logger.info("%%%service {} process json spending {} ms",serviceName, end - start);
+        logger.info("%%%service {} process json spending {} ms", serviceName, end - start);
         return controllers;
     }
 

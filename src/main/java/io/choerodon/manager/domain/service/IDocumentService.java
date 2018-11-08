@@ -14,15 +14,14 @@ import java.io.IOException;
 public interface IDocumentService {
 
     /**
-     * 根据服务id和版本获取swagger json node
+     * 根据swagger json
      * 加上security等json node
      *
-     * @param service 服务名，形如hap-user-service
-     * @param version 版本，可为空，为空时从默认版本中获取swagger json
+     * @param json swagger json
      * @return swagger json node
      * @throws IOException json解析异常
      */
-    ObjectNode getSwaggerJsonByIdAndVersion(String service, String version) throws IOException;
+    ObjectNode buildSwaggerJson(String json) throws IOException;
 
     /**
      * 根据服务id和版本获取swagger json
@@ -34,7 +33,7 @@ public interface IDocumentService {
      */
     String fetchSwaggerJsonByService(String service, String version);
 
-    String getSwaggerJson(String name, String version) throws IOException;
+    String getSwaggerJson(String name, String version, String json) throws IOException;
 
     String fetchSwaggerJsonByIp(EurekaEventPayload payload);
 
