@@ -41,7 +41,7 @@ choerodon:
       max-cache-size: 300
       retry-time: 5
       retry-interval: 3
-      skip-services: register-server, api-gateway, gateway-helper, oauth-server, config-server, event-store-service
+      skip-services: config**, **register-server, **gateway**, zipkin**, hystrix**, oauth**
   swagger:
     client: client
     oauth-url: http://localhost:8080/oauth/oauth/authorize
