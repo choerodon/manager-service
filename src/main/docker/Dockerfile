@@ -1,4 +1,5 @@
 FROM registry.cn-hangzhou.aliyuncs.com/choerodon-tools/javabase:0.6.0
 COPY app.jar /manager-service.jar
 COPY agent /agent
-ENTRYPOINT exec java $JAVA_OPTS  -jar /manager-service.jar
+COPY entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
