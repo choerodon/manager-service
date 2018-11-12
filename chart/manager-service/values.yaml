@@ -36,7 +36,7 @@ env:
     #skywalking代理jar包，添加则开启skywalking，删除则关闭
     SKYWALKING_JAVAAGENT: /agent/skywalking-agent.jar
     #skywalking ui显示的应用名称，默认为服务名
-    SKYWALKING_AGENTCOLLECTOR_BACKEND_SERVICE_APPLICATION_CODE: {{ .Chart.name }}
+    SKYWALKING_AGENTCOLLECTOR_BACKEND_SERVICE_APPLICATION_CODE: manager-service
     #oap服务地址和端口
     SKYWALKING_COLLECTOR_BACKEND_SERVICE: oap.skywalking:11800
     #采样率，每三秒采样次数，-1表示100%采样率
