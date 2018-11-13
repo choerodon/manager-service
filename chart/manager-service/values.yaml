@@ -32,6 +32,8 @@ env:
     CHOERODON_SWAGGER_OAUTH_URL: http://localhost:8080/oauth/oauth/authorize
     CHOERODON_GATEWAY_DOMAIN: 127.0.0.1:8080
 
+    JAVA_OPTS: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+
 metrics:
   path: /prometheus
   label: spring-boot
