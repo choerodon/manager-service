@@ -12,10 +12,6 @@ spring:
           zkNodes: 127.0.0.1:2181
     bus:
       enabled: true
-hystrix:
-  stream:
-    queue:
-      enabled: true
 mybatis:
   mapperLocations: classpath*:/mapper/*.xml
   configuration:
