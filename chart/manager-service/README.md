@@ -83,3 +83,4 @@ env.open.SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES | zookeeper地址
 env.open.SPRING_KAFKA_BOOTSTRAP_SERVERS | spring kafka地址
 env.open.CHOERODON_SWAGGER_OAUTH_URL | 认证服务地址，应该为网关服务地址/oauth/oauth/authorize
 env.open.CHOERODON_GATEWAY_DOMAIN | 网关服务地址
+env.open.SKYWALKING_OPTS | skywalking 代理端配置
