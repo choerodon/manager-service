@@ -12,9 +12,6 @@ spring:
           zkNodes: 127.0.0.1:2181
     bus:
       enabled: true
-  sleuth:
-    stream:
-      enabled: true
 hystrix:
   stream:
     queue:
