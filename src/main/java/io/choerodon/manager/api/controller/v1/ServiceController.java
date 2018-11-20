@@ -70,7 +70,7 @@ public class ServiceController {
      *
      * @return page
      */
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER}, permissionLogin = true)
     @ApiOperation("查询服务列表")
     @GetMapping
     public ResponseEntity<List<ServiceDTO>> pageAll(@RequestParam(required = false) String param) {
