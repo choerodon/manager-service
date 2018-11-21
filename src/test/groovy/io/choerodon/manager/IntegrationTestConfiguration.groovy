@@ -5,7 +5,6 @@ import com.netflix.appinfo.InstanceInfo
 import io.choerodon.core.oauth.CustomUserDetails
 import io.choerodon.liquibase.LiquibaseConfig
 import io.choerodon.liquibase.LiquibaseExecutor
-import io.choerodon.manager.domain.repository.RouteRepository
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -22,11 +21,9 @@ import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.ClientHttpResponse
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.security.jwt.JwtHelper
 import org.springframework.security.jwt.crypto.sign.MacSigner
 import org.springframework.security.jwt.crypto.sign.Signer
-import spock.mock.DetachedMockFactory
 
 import javax.annotation.PostConstruct
 
@@ -40,8 +37,6 @@ class IntegrationTestConfiguration {
 
     final ObjectMapper objectMapper = new ObjectMapper()
 
-    private final detachedMockFactory = new DetachedMockFactory()
-
     @Value('${choerodon.oauth.jwt.key:choerodon}')
     String key
 
@@ -50,11 +45,6 @@ class IntegrationTestConfiguration {
 
     @Autowired
     LiquibaseExecutor liquibaseExecutor
-
-    @Bean
-    KafkaTemplate<byte[], byte[]> kafkaTemplate() {
-        detachedMockFactory.Mock(KafkaTemplate)
-    }
 
     @Bean("mockDiscoveryClient")
     @Primary
