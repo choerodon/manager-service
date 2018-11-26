@@ -8,6 +8,7 @@ import io.choerodon.manager.domain.service.ISwaggerService;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.springframework.stereotype.Service;
+import org.springframework.util.AntPathMatcher;
 import springfox.documentation.swagger.web.SecurityConfiguration;
 import springfox.documentation.swagger.web.SwaggerResource;
 import springfox.documentation.swagger.web.UiConfiguration;
@@ -27,6 +28,8 @@ public class ISwaggerServiceImpl implements ISwaggerService {
     private IRouteService iRouteService;
 
     private EurekaEventProperties properties;
+
+    private final AntPathMatcher matcher = new AntPathMatcher();
 
     public ISwaggerServiceImpl(IRouteService iRouteService, EurekaEventProperties properties) {
         this.iRouteService = iRouteService;
@@ -50,7 +53,7 @@ public class ISwaggerServiceImpl implements ISwaggerService {
             MultiKey multiKey = (MultiKey) iterator.next();
             RouteE localRouteE = (RouteE) multiKeyMap.get(multiKey);
             if (localRouteE.getServiceId() != null) {
-                boolean isSkipService = Arrays.stream(properties.getSkipServices()).anyMatch(t -> t.equals(localRouteE.getServiceId()));
+                boolean isSkipService = Arrays.stream(properties.getSkipServices()).anyMatch(t -> matcher.match(t, localRouteE.getServiceId()));
                 if (!isSkipService) {
                     SwaggerResource resource = new SwaggerResource();
                     resource.setName(localRouteE.getName() + ":" + localRouteE.getServiceId());
