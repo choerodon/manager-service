@@ -33,6 +33,8 @@ public interface IDocumentService {
      */
     String fetchSwaggerJsonByService(String service, String version);
 
+    String getSwaggerJson(String name, String version) throws IOException;
+
     String getSwaggerJson(String name, String version, String json) throws IOException;
 
     String fetchSwaggerJsonByIp(EurekaEventPayload payload);
