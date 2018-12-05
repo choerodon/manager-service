@@ -2,6 +2,7 @@ package io.choerodon.manager.api.controller.v1;
 
 import java.util.List;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,7 @@ import io.choerodon.swagger.annotation.Permission;
  */
 @RestController
 @RequestMapping(value = "/v1/services")
+@Api(description = "服务")
 public class ServiceController {
 
     private ServiceService serviceService;

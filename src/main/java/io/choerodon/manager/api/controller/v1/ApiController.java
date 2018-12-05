@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,7 @@ import io.choerodon.swagger.annotation.Permission;
  */
 @RestController
 @RequestMapping(value = "/v1/swaggers")
+@Api(description="api测试")
 public class ApiController {
 
     private SwaggerService swaggerService;
@@ -82,6 +84,13 @@ public class ApiController {
                                                          @RequestParam(value = "version", required = false, defaultValue = VersionUtil.NULL_VERSION) String version,
                                                          @RequestParam("operation_id") String operationId) {
         return new ResponseEntity<>(apiService.queryPathDetail(serviceName, version, controllerName, operationId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("查询运行的服务实例的api接口数量")
+    @GetMapping("/api/count")
+    public ResponseEntity<Map> queryInstancesAndApiCount() {
+        return new ResponseEntity<>(apiService.queryInstancesAndApiCount(), HttpStatus.OK);
     }
 
 

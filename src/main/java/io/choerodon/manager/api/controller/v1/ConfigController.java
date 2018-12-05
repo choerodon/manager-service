@@ -3,6 +3,7 @@ package io.choerodon.manager.api.controller.v1;
 import java.util.Optional;
 import javax.validation.Valid;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import io.choerodon.swagger.annotation.Permission;
  */
 @RestController
 @RequestMapping(value = "/v1/configs")
+@Api(description = "配置")
 public class ConfigController {
 
     private ConfigService configService;

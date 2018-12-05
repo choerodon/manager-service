@@ -119,16 +119,36 @@ public class IDocumentServiceImpl implements IDocumentService {
         query.setServiceVersion(version);
         SwaggerDO data = swaggerMapper.selectOne(query);
         if (profiles.equals(DEFAULT) || data == null || StringUtils.isEmpty(data.getValue())) {
-            return getJsonByNameAndVersion(service, version);
+            String json = fetchFromDiscoveryClient(service, version);
+            if (json != null && data == null) {
+                //insert
+                SwaggerDO insertSwagger = new SwaggerDO();
+                insertSwagger.setServiceName(service);
+                insertSwagger.setServiceVersion(version);
+                insertSwagger.setDefault(false);
+                insertSwagger.setValue(json);
+                if (swaggerMapper.insertSelective(insertSwagger) != 1) {
+                    LOGGER.warn("insert swagger error, swagger : {}", insertSwagger);
+                }
+            } else if (json != null && StringUtils.isEmpty(data.getValue())) {
+                //update
+                query.setValue(json);
+                if (swaggerMapper.updateByPrimaryKeySelective(query) != 1) {
+                    LOGGER.warn("update swagger error, swagger : {}", query);
+                }
+            }
+            return json;
         } else {
             return data.getValue();
         }
     }
 
-    private String getJsonByNameAndVersion(String service, String version) {
+    private String fetchFromDiscoveryClient(String service, String version) {
         List<ServiceInstance> instances = discoveryClient.getInstances(service);
+        List<String> mdVersions = new ArrayList<>();
         for (ServiceInstance instance : instances) {
             String mdVersion = instance.getMetadata().get(VersionUtil.METADATA_VERSION);
+            mdVersions.add(mdVersion);
             if (StringUtils.isEmpty(mdVersion)) {
                 mdVersion = VersionUtil.NULL_VERSION;
             }
@@ -136,61 +156,12 @@ public class IDocumentServiceImpl implements IDocumentService {
                 return fetch(instance);
             }
         }
+        LOGGER.warn("service {} running instances {} do not contain the version {} ", service, mdVersions, version);
         return null;
     }
 
     @Override
-    public String getSwaggerJson(String name, String version) throws IOException {
-        MultiKeyMap multiKeyMap = iRouteService.getAllRunningInstances();
-        RouteE routeE = iRouteService
-                .getRouteFromRunningInstancesMap(multiKeyMap, name, version);
-        if (routeE == null) {
-            return "";
-        }
-        String basePath = routeE.getPath().replace("/**", "");
-        if (swaggerLocal) {
-            basePath = "/";
-            gatewayDomain = "localhost:8963";
-        }
-        ObjectNode root = getSwaggerJsonByIdAndVersion(routeE.getServiceId(), version);
-        root.put("basePath", basePath);
-        root.put("host", gatewayDomain);
-        LOGGER.debug("put basePath:{}, host:{}", basePath, root.get("host"));
-        return MAPPER.writeValueAsString(root);
-    }
-
-    private ObjectNode getSwaggerJsonByIdAndVersion(String service, String version) throws IOException {
-        String json = fetchSwaggerJsonByService(service, version);
-        if (StringUtils.isEmpty(json)) {
-            throw new RemoteAccessException("fetch swagger json failed");
-        }
-        ObjectNode node = (ObjectNode) MAPPER.readTree(json);
-        List<Map<String, List<String>>> security = new LinkedList<>();
-        Map<String, List<String>> clients = new TreeMap<>();
-        clients.put(client, Collections.singletonList(DEFAULT));
-        security.add(clients);
-        OAuth2Definition definition = new OAuth2Definition();
-        definition.setAuthorizationUrl(oauthUrl);
-        definition.setType("oauth2");
-        definition.setFlow("implicit");
-        definition.setScopes(Collections.singletonMap(DEFAULT, "default scope"));
-        LOGGER.info("{}", definition.getScopes());
-        node.putPOJO("securityDefinitions", Collections.singletonMap(client, definition));
-        Iterator<Map.Entry<String, JsonNode>> pathIterator = node.get("paths").fields();
-        while (pathIterator.hasNext()) {
-            Map.Entry<String, JsonNode> pathNode = pathIterator.next();
-            Iterator<Map.Entry<String, JsonNode>> methodIterator = pathNode.getValue().fields();
-            while (methodIterator.hasNext()) {
-                Map.Entry<String, JsonNode> methodNode = methodIterator.next();
-                ((ObjectNode) methodNode.getValue()).putPOJO("security", security);
-            }
-        }
-        return node;
-    }
-
-
-    @Override
-    public String getSwaggerJson(String name, String version, String json) throws IOException {
+    public String expandSwaggerJson(String name, String version, String json) throws IOException {
         MultiKeyMap multiKeyMap = iRouteService.getAllRunningInstances();
         RouteE routeE = iRouteService
                 .getRouteFromRunningInstancesMap(multiKeyMap, name, version);

@@ -3,10 +3,9 @@ package io.choerodon.manager.app.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.manager.domain.service.ISwaggerService;
 import io.choerodon.manager.infra.dataobject.RouteDO;
-import io.choerodon.manager.infra.dataobject.SwaggerDO;
 import io.choerodon.manager.infra.mapper.RouteMapper;
-import io.choerodon.manager.infra.mapper.SwaggerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,6 +21,7 @@ import io.choerodon.manager.domain.manager.entity.MyLinkedList;
 import io.choerodon.manager.domain.service.IDocumentService;
 import io.choerodon.manager.infra.common.utils.ManualPageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import springfox.documentation.swagger.web.SwaggerResource;
 
 import java.io.IOException;
 import java.util.*;
@@ -39,61 +39,35 @@ public class ApiServiceImpl implements ApiService {
 
     private IDocumentService iDocumentService;
 
-    private SwaggerMapper swaggerMapper;
-
     private RouteMapper routeMapper;
+
+    private ISwaggerService iSwaggerService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ApiServiceImpl(IDocumentService iDocumentService, SwaggerMapper swaggerMapper, RouteMapper routeMapper) {
-        this.swaggerMapper = swaggerMapper;
+    public ApiServiceImpl(IDocumentService iDocumentService, RouteMapper routeMapper, ISwaggerService iSwaggerService) {
         this.iDocumentService = iDocumentService;
         this.routeMapper = routeMapper;
+        this.iSwaggerService = iSwaggerService;
     }
 
     @Override
     public Page<ControllerDTO> getControllers(String name, String version, PageRequest pageRequest, Map<String, Object> map) {
-        String serviceName = getRouteName(name);
-        String json = getSwaggerJson(name, version, serviceName);
+        String json = getSwaggerJson(name, version);
         return Optional.ofNullable(json)
                 .map(j -> ManualPageHelper.postPage(processJson2ControllerDTO(name, j), pageRequest, map))
                 .orElseThrow(() -> new CommonException("error.service.swaggerJson.empty"));
     }
 
-    private String getSwaggerJson(String name, String version, String serviceName) {
-        String json;
-        SwaggerDO swaggerDO = new SwaggerDO();
-        swaggerDO.setServiceName(serviceName);
-        swaggerDO.setServiceVersion(version);
-        long start = System.currentTimeMillis();
-        SwaggerDO swagger = swaggerMapper.selectOne(swaggerDO);
-        long end = System.currentTimeMillis();
-        logger.info("%%%service {} select swagger spending {} ms", name, end - start);
-        if (swagger != null && !StringUtils.isEmpty(swagger.getValue())) {
-            json = swagger.getValue();
-        } else {
-            long start1 = System.currentTimeMillis();
-            json = iDocumentService.fetchSwaggerJsonByService(serviceName, version);
-            long end1 = System.currentTimeMillis();
-            logger.info("%%%service {} fetch swagger json spending {} ms", name, end1 - start1);
-            if (swagger == null) {
-                SwaggerDO insertSwagger = new SwaggerDO();
-                insertSwagger.setServiceName(serviceName);
-                insertSwagger.setServiceVersion(version);
-                insertSwagger.setDefault(false);
-                insertSwagger.setValue(json);
-                if (swaggerMapper.insertSelective(insertSwagger) != 1) {
-                    logger.warn("insert swagger error, swagger : {}", insertSwagger.toString());
-                }
-            } else {
-                swagger.setValue(json);
-                if (swaggerMapper.updateByPrimaryKeySelective(swagger) != 1) {
-                    logger.warn("update swagger error, swagger : {}", swagger.toString());
-                }
-            }
-        }
+    @Override
+    public String getSwaggerJson(String name, String version) {
+        String serviceName = getRouteName(name);
+        String json = iDocumentService.fetchSwaggerJsonByService(serviceName, version);
         try {
-            json = iDocumentService.getSwaggerJson(name, version, json);
+            if (json != null) {
+                //自定义扩展swaggerJson
+                json = iDocumentService.expandSwaggerJson(name, version, json);
+            }
         } catch (IOException e) {
             logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", name, version, e.getMessage());
             throw new CommonException(e, "error.service.not.run", name, version);
@@ -102,7 +76,6 @@ public class ApiServiceImpl implements ApiService {
     }
 
     private String getRouteName(String name) {
-        long start = System.currentTimeMillis();
         String serviceName;
         RouteDO routeDO = new RouteDO();
         routeDO.setName(name);
@@ -112,16 +85,13 @@ public class ApiServiceImpl implements ApiService {
         } else {
             serviceName = route.getServiceId();
         }
-        long end = System.currentTimeMillis();
-        logger.info("%%%service {} get route spending {} ms", name, end - start);
         return serviceName;
     }
 
     @Override
     public ControllerDTO queryPathDetail(String name, String version, String controllerName, String operationId) {
         try {
-            String serviceName = getRouteName(name);
-            String json = getSwaggerJson(name, version, serviceName);
+            String json = getSwaggerJson(name, version);
             JsonNode node = objectMapper.readTree(json);
             List<ControllerDTO> controllers = processControllers(node);
             List<ControllerDTO> targetControllers =
@@ -138,6 +108,55 @@ public class ApiServiceImpl implements ApiService {
             logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", name, version, e.getMessage());
             throw new CommonException("error.service.not.run", name, version);
         }
+    }
+
+    @Override
+    public Map queryInstancesAndApiCount() {
+        List<SwaggerResource> swaggerResources = iSwaggerService.getSwaggerResource();
+        Map<String, List<String>> apiCountMap = new HashMap<>(2);
+        List<String> services = new ArrayList<>();
+        List<String> apiCounts = new ArrayList<>();
+        apiCountMap.put("services", services);
+        apiCountMap.put("apiCounts", apiCounts);
+        swaggerResources.forEach(resource -> {
+            int count = 0;
+            String name = resource.getName();
+            String[] nameArray = name.split(":");
+            if (nameArray.length != 2) {
+                logger.warn("the resource name is not match xx:xx , name : {}", name);
+                return;
+            }
+            String routeName = nameArray[0];
+            String serviceName = nameArray[1];
+            String location = resource.getLocation();
+            String[] locationArray = location.split("\\?version=");
+            if (locationArray.length != 2) {
+                logger.warn("the location is not match xx?version=xx , location : {}", location);
+                return;
+            }
+            String version = locationArray[1];
+            String json = getSwaggerJson(routeName, version);
+            if (json == null) {
+                logger.warn("service {}, version {} has been abandoned because of the swagger json is null", serviceName, version);
+                return;
+            }
+            try {
+                JsonNode node = objectMapper.readTree(json);
+                JsonNode pathNode = node.get("paths");
+                Iterator<String> urlIterator = pathNode.fieldNames();
+                while (urlIterator.hasNext()) {
+                    String url = urlIterator.next();
+                    JsonNode methodNode = pathNode.get(url);
+                    count = count + methodNode.size();
+                }
+            } catch (IOException e) {
+                logger.error("objectMapper parse json exception, service {}, version {} has been abandoned, exception : {}", serviceName, version, e);
+                return;
+            }
+            services.add(serviceName);
+            apiCounts.add(count + "");
+        });
+        return apiCountMap;
     }
 
     private List<ControllerDTO> processJson2ControllerDTO(String serviceName, String json) {
@@ -385,7 +404,7 @@ public class ApiServiceImpl implements ApiService {
         JsonNode tagNode = jsonNode.get("tags");
 
         path.setInnerInterface(false);
-        setCodeOfPathIfExists(serviceName, path, jsonNode.get("description"), tagNode);
+        setCodeOfPathIfExists(serviceName, path, jsonNode.get(DESCRIPTION), tagNode);
 
         for (int i = 0; i < tagNode.size(); i++) {
             String tag = tagNode.get(i).asText();
