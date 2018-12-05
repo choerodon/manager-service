@@ -1,16 +1,15 @@
 package io.choerodon.manager.api.controller.v1;
 
-import java.io.IOException;
 
+import io.choerodon.manager.app.service.ApiService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import io.choerodon.core.iam.InitRoleCode;
-import io.choerodon.manager.app.service.DocumentService;
 import io.choerodon.manager.infra.common.utils.VersionUtil;
 import io.choerodon.swagger.annotation.Permission;
 
@@ -23,17 +22,16 @@ import io.choerodon.swagger.annotation.Permission;
  */
 @RestController
 @RequestMapping(value = "/docs")
+@Api(description = "文档")
 public class DocumentController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DocumentController.class);
-
-    private DocumentService documentService;
+    private ApiService apiService;
 
     /**
      * 构造器
      */
-    public DocumentController(DocumentService documentService) {
-        this.documentService = documentService;
+    public DocumentController(ApiService apiService) {
+        this.apiService = apiService;
     }
 
     /**
@@ -49,15 +47,8 @@ public class DocumentController {
     public ResponseEntity<String> get(@PathVariable("service_prefix") String name,
                                       @RequestParam(value = "version", required = false,
                                               defaultValue = VersionUtil.NULL_VERSION) String version) {
-        String swaggerJson;
-        try {
-            swaggerJson = documentService.getSwaggerJson(name, version);
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage());
-            String log = "服务" + name + " version " + version + "没有在运行";
-            return new ResponseEntity<>(log, HttpStatus.NOT_FOUND);
-        }
-        if ("".equals(swaggerJson)) {
+        String swaggerJson = apiService.getSwaggerJson(name, version);
+        if (StringUtils.isEmpty(swaggerJson)) {
             return new ResponseEntity<>(swaggerJson, HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(swaggerJson, HttpStatus.OK);

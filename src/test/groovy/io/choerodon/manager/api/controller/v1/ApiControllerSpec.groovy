@@ -3,12 +3,18 @@ package io.choerodon.manager.api.controller.v1
 import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.app.service.ApiService
 import io.choerodon.manager.app.service.SwaggerService
+import io.choerodon.manager.app.service.impl.ApiServiceImpl
+import io.choerodon.manager.domain.service.IDocumentService
+import io.choerodon.manager.domain.service.ISwaggerService
+import io.choerodon.manager.infra.dataobject.RouteDO
+import io.choerodon.manager.infra.mapper.RouteMapper
 import io.choerodon.mybatis.pagehelper.domain.PageRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.context.annotation.Import
 import spock.lang.Specification
+import springfox.documentation.swagger.web.SwaggerResource
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 
@@ -75,5 +81,34 @@ class ApiControllerSpec extends Specification {
         entity.statusCode.is2xxSuccessful()
         1 * mockApiService.queryPathDetail(serviceName, version, name, operationId)
         0 * _
+    }
+
+    def "QueryInstancesAndApiCount"() {
+        given:
+        IDocumentService iDocumentService = Mock(IDocumentService)
+        ISwaggerService iSwaggerService = Mock(ISwaggerService)
+        RouteMapper routeMapper = Mock(RouteMapper)
+        ApiServiceImpl impl = new ApiServiceImpl(iDocumentService, routeMapper, iSwaggerService)
+        ApiController controller = new ApiController(null, impl)
+
+        SwaggerResource swaggerResource = new SwaggerResource()
+        swaggerResource.setName("manager:manager-service")
+        swaggerResource.setLocation("/docs/manager?version=null_version")
+        swaggerResource.setSwaggerVersion("2.0")
+        List<SwaggerResource> resources = new ArrayList<>()
+        resources << swaggerResource
+        iSwaggerService.getSwaggerResource() >> resources
+        def file = new File(this.class.getResource('/swagger.json').toURI())
+        iDocumentService.fetchSwaggerJsonByService(_, _) >> { file.getText('UTF-8') }
+        iDocumentService.expandSwaggerJson(_, _, _) >> { file.getText('UTF-8') }
+        RouteDO routeDO = new RouteDO()
+        routeDO.setName("mamager")
+        routeDO.setServiceId("manager-service")
+        routeMapper.selectOne(_) >> routeDO
+
+        when:
+        def entity = controller.queryInstancesAndApiCount()
+        then:
+        Integer.valueOf(entity.getBody().get("apiCounts").getAt(0)) == 25
     }
 }

@@ -164,11 +164,11 @@ class IDocumentServiceImplSpec extends Specification {
         noExceptionThrown()
     }
 
-    def "GetSwaggerJson"() {
+    def "expandSwaggerJson"() {
         when: '调用方法'
         def file = new File(this.class.getResource('/swagger.json').toURI())
         String json = file.getText('UTF-8')
-        iDocumentService.getSwaggerJson(service, version, json)
+        iDocumentService.expandSwaggerJson(service, version, json)
         then: '结果分析'
         noExceptionThrown()
     }

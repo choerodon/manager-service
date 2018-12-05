@@ -3,6 +3,7 @@ package io.choerodon.manager.api.controller.v1;
 import java.util.Optional;
 import javax.validation.Valid;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,7 @@ import io.choerodon.swagger.annotation.Permission;
  */
 @RestController
 @RequestMapping(value = "/v1/routes")
+@Api(description = "路由")
 public class RouteController {
 
     private RouteService routeService;

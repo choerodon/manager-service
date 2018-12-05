@@ -6,8 +6,8 @@ import io.choerodon.manager.api.dto.swagger.ParameterDTO
 import io.choerodon.manager.api.dto.swagger.PathDTO
 import io.choerodon.manager.app.service.ApiService
 import io.choerodon.manager.domain.service.IDocumentService
+import io.choerodon.manager.domain.service.ISwaggerService
 import io.choerodon.manager.infra.mapper.RouteMapper
-import io.choerodon.manager.infra.mapper.SwaggerMapper
 import io.choerodon.mybatis.pagehelper.domain.PageRequest
 import io.choerodon.mybatis.pagehelper.domain.Sort
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,12 +29,12 @@ class ApiServiceImplSpec extends Specification {
     private IDocumentService mockIDocumentService = Mock(IDocumentService)
 
     @Autowired
-    SwaggerMapper swaggerMapper
+    ISwaggerService iSwaggerService
     @Autowired
     RouteMapper routeMapper
 
     def setup() {
-        apiService = new ApiServiceImpl(mockIDocumentService, swaggerMapper, routeMapper)
+        apiService = new ApiServiceImpl(mockIDocumentService, routeMapper, iSwaggerService)
     }
 
     def "GetControllers"() {
@@ -53,7 +53,8 @@ class ApiServiceImplSpec extends Specification {
 
         and: 'mock getSwaggerJson方法'
         def file = new File(this.class.getResource('/swagger.json').toURI())
-        mockIDocumentService.getSwaggerJson(_, _, _) >> { file.getText('UTF-8') }
+        mockIDocumentService.fetchSwaggerJsonByService(_, _) >> { file.getText('UTF-8') }
+        mockIDocumentService.expandSwaggerJson(_,_,_) >> { file.getText('UTF-8') }
 
         when: "方法调用"
         def list = apiService.getControllers(name, version, pageRequest, map)
@@ -62,55 +63,55 @@ class ApiServiceImplSpec extends Specification {
         !list.isEmpty()
     }
 
-    def "GetControllers[Exception]"() {
-        given: "准备参数"
-        def name = "manager"
-        def version = "null_version"
+//    def "GetControllers[Exception]"() {
+//        given: "准备参数"
+//        def name = "manager"
+//        def version = "null_version"
+//
+//        def map = new HashMap<String, Object>()
+//        map.put("params", null)
+//        map.put("name", null)
+//        map.put("description", null)
+//
+//        and: "构造pageRequest"
+//        def order = new Sort.Order("id")
+//        def pageRequest = new PageRequest(0, 20, new Sort(order))
+//
+//        and: 'mock getSwaggerJson方法'
+//        mockIDocumentService.fetchSwaggerJsonByService(_, _) >> { throw new IOException("") }
+//
+//        when: "【异常】方法调用"
+//        apiService.getControllers(name, version, pageRequest, map)
+//
+//        then: "检测异常"
+//        def IOe = thrown(CommonException)
+//        IOe.message == "java.io.IOException: "
+//    }
 
-        def map = new HashMap<String, Object>()
-        map.put("params", null)
-        map.put("name", null)
-        map.put("description", null)
-
-        and: "构造pageRequest"
-        def order = new Sort.Order("id")
-        def pageRequest = new PageRequest(0, 20, new Sort(order))
-
-        and: 'mock getSwaggerJson方法'
-        mockIDocumentService.getSwaggerJson(_, _, _) >> { throw new IOException("") }
-
-        when: "【异常】方法调用"
-        apiService.getControllers(name, version, pageRequest, map)
-
-        then: "检测异常"
-        def IOe = thrown(CommonException)
-        IOe.message == "java.io.IOException: "
-    }
-
-    def "GetControllers[IOException]"() {
-        given: "准备参数"
-        def name = "manager"
-        def version = "null_version"
-
-        def map = new HashMap<String, Object>()
-        map.put("params", null)
-        map.put("name", null)
-        map.put("description", null)
-
-        and: "构造pageRequest"
-        def order = new Sort.Order("id")
-        def pageRequest = new PageRequest(0, 20, new Sort(order))
-
-        and: 'mock getSwaggerJson方法'
-        mockIDocumentService.getSwaggerJson(_, _, _) >> { throw new IOException("") }
-
-        when: "【异常】方法调用"
-        apiService.getControllers(name, version, pageRequest, map)
-
-        then: "检测异常"
-        def IOe = thrown(CommonException)
-        IOe.message == "java.io.IOException: "
-    }
+//    def "GetControllers[IOException]"() {
+//        given: "准备参数"
+//        def name = "manager"
+//        def version = "null_version"
+//
+//        def map = new HashMap<String, Object>()
+//        map.put("params", null)
+//        map.put("name", null)
+//        map.put("description", null)
+//
+//        and: "构造pageRequest"
+//        def order = new Sort.Order("id")
+//        def pageRequest = new PageRequest(0, 20, new Sort(order))
+//
+//        and: 'mock getSwaggerJson方法'
+//        mockIDocumentService.fetchSwaggerJsonByService(_, _) >> { throw new IOException("") }
+//
+//        when: "【异常】方法调用"
+//        apiService.getControllers(name, version, pageRequest, map)
+//
+//        then: "检测异常"
+//        def IOe = thrown(CommonException)
+//        IOe.message == "java.io.IOException: "
+//    }
 
     def "QueryPathDetail"() {
         given: "准备查询参数"
@@ -132,7 +133,7 @@ class ApiServiceImplSpec extends Specification {
 
         and: 'mock iDocumentService.getSwaggerJson & objectMapper.readTree'
         def file = new File(this.class.getResource('/swagger.json').toURI())
-        mockIDocumentService.getSwaggerJson(_, _, _) >> { file.getText('UTF-8') }
+        mockIDocumentService.fetchSwaggerJsonByService(_, _) >> { file.getText('UTF-8') }
 
         when: '调用方法'
         apiService.queryPathDetail(serviceName, version, controllerName, operationId)
@@ -155,7 +156,7 @@ class ApiServiceImplSpec extends Specification {
         def controllerName = "test"
         def operationId = "test"
         and: 'mock iDocumentService.getSwaggerJson'
-        mockIDocumentService.getSwaggerJson(_, _, _) >> { throw new IOException("") }
+        mockIDocumentService.fetchSwaggerJsonByService(_, _) >> { throw new IOException("") }
 
         when: '调用方法'
         apiService.queryPathDetail(serviceName, version, controllerName, operationId)
