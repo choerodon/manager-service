@@ -135,7 +135,12 @@ public class ApiServiceImpl implements ApiService {
                 return;
             }
             String version = locationArray[1];
-            String json = getSwaggerJson(routeName, version);
+            String json = null;
+            try {
+                json = getSwaggerJson(routeName, version);
+            } catch (Exception e) {
+                logger.error("can not fetch service {} version {} swagger json, exception : {} ", serviceName, version, e);
+            }
             if (json == null) {
                 logger.warn("service {}, version {} has been abandoned because of the swagger json is null", serviceName, version);
                 return;
