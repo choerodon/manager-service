@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.context.annotation.Import
+import org.springframework.data.redis.core.StringRedisTemplate
+import org.springframework.data.redis.core.ValueOperations
 import spock.lang.Specification
 import springfox.documentation.swagger.web.SwaggerResource
 
@@ -88,7 +90,7 @@ class ApiControllerSpec extends Specification {
         IDocumentService iDocumentService = Mock(IDocumentService)
         ISwaggerService iSwaggerService = Mock(ISwaggerService)
         RouteMapper routeMapper = Mock(RouteMapper)
-        ApiServiceImpl impl = new ApiServiceImpl(iDocumentService, routeMapper, iSwaggerService)
+        ApiServiceImpl impl = new ApiServiceImpl(iDocumentService, routeMapper, iSwaggerService, Mock(StringRedisTemplate))
         ApiController controller = new ApiController(null, impl)
 
         SwaggerResource swaggerResource = new SwaggerResource()
@@ -110,5 +112,42 @@ class ApiControllerSpec extends Specification {
         def entity = controller.queryInstancesAndApiCount()
         then:
         Integer.valueOf(entity.getBody().get("apiCounts").getAt(0)) == 25
+    }
+
+    def "QueryServiceInvoke"() {
+        given:
+        StringRedisTemplate redisTemplate = Mock(StringRedisTemplate)
+        ISwaggerService iSwaggerService = Mock(ISwaggerService)
+        ApiServiceImpl apiService = new ApiServiceImpl(null, null, iSwaggerService, redisTemplate)
+        ApiController controller = new ApiController(null, apiService)
+        List swaggerList = new ArrayList()
+        SwaggerResource swaggerResource = Mock(SwaggerResource)
+        swaggerList << swaggerResource
+        iSwaggerService.getSwaggerResource() >> swaggerList
+        swaggerResource.getName() >> "manager:manager-service"
+        redisTemplate.opsForValue() >> Mock(ValueOperations)
+
+        when:
+        def result = controller.queryServiceInvoke("2018-11-02", "2018-11-05")
+        def list = (Set) result.getBody().get("date")
+        then:
+        list.contains("2018-11-02") && list.contains("2018-11-05")
+    }
+
+    def "QueryApiInvoke"() {
+        given:
+        StringRedisTemplate redisTemplate = Mock(StringRedisTemplate)
+        ApiServiceImpl apiService = new ApiServiceImpl(null, null, null, redisTemplate)
+        ApiController controller = new ApiController(null, apiService)
+        redisTemplate.keys(_) >> ["2018-11-02:manager-service:/v1/swaggers/resource:get"]
+        redisTemplate.opsForValue() >> Mock(ValueOperations)
+
+        when:
+        def result = controller.queryApiInvoke("2018-11-02", "2018-11-05", "manager-service")
+        def date = (Set)result.getBody().get("date")
+        def apis = (Set)result.getBody().get("apis")
+        then:
+        date.contains("2018-11-02") && date.contains("2018-11-05")
+        apis.contains("/v1/swaggers/resource:get")
     }
 }

@@ -8,6 +8,7 @@ import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.manager.infra.mapper.RouteMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -24,7 +25,10 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import springfox.documentation.swagger.web.SwaggerResource;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -45,10 +49,13 @@ public class ApiServiceImpl implements ApiService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ApiServiceImpl(IDocumentService iDocumentService, RouteMapper routeMapper, ISwaggerService iSwaggerService) {
+    private StringRedisTemplate redisTemplate;
+
+    public ApiServiceImpl(IDocumentService iDocumentService, RouteMapper routeMapper, ISwaggerService iSwaggerService, StringRedisTemplate redisTemplate) {
         this.iDocumentService = iDocumentService;
         this.routeMapper = routeMapper;
         this.iSwaggerService = iSwaggerService;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -73,6 +80,150 @@ public class ApiServiceImpl implements ApiService {
             throw new CommonException(e, "error.service.not.run", name, version);
         }
         return json;
+    }
+
+    @Override
+    public Map<String, Object> queryServiceInvoke(String beginDate, String endDate) {
+        Set<String> keySet = getServiceSet();
+        Map<String, Object> map = new HashMap<>();
+        Set<String> date = new LinkedHashSet<>();
+        List<Object> details = new ArrayList<>();
+        map.put("date", date);
+        map.put("details", details);
+        try {
+            validateDate(beginDate);
+            validateDate(endDate);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date begin = dateFormat.parse(beginDate);
+            Date end = dateFormat.parse(endDate);
+            if (begin.after(end)) {
+                throw new CommonException("error.date.order");
+            }
+            map.put("services", keySet);
+            for (String service : keySet) {
+                Map serviceDetailMap = new HashMap();
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(begin);
+                List<String> data = new ArrayList<>();
+                serviceDetailMap.put("service", service);
+                serviceDetailMap.put("data", data);
+                staticDailyInvoking(end, dateFormat, date, calendar, data, service);
+                details.add(serviceDetailMap);
+            }
+        } catch (ParseException e) {
+            throw new CommonException("error.date.parse", beginDate, endDate);
+        }
+        return map;
+    }
+
+    @Override
+    public Map<String, Object> queryApiInvoke(String beginDate, String endDate, String service) {
+        validateDate(beginDate);
+        validateDate(endDate);
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date begin = dateFormat.parse(beginDate);
+            Date end = dateFormat.parse(endDate);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(begin);
+            if (begin.after(end)) {
+                throw new CommonException("error.date.order");
+            }
+            //api的key格式为2018-12-09:iam-service:/v1/users/self:get
+            Set<String> apiSet = getAllApiSet(begin, end, service, dateFormat);
+            return getApiInvoke(begin, end, service, dateFormat, apiSet);
+        } catch (ParseException e) {
+            throw new CommonException("error.date.parse", beginDate, endDate);
+        }
+    }
+
+    private Map<String, Object> getApiInvoke(Date begin, Date end, String service, SimpleDateFormat dateFormat, Set<String> apiSet) {
+        Map<String, Object> map = new HashMap<>();
+        Set<String> date = new LinkedHashSet<>();
+        List<Object> details = new ArrayList<>();
+        map.put("date", date);
+        map.put("details", details);
+        map.put("apis", apiSet);
+        for (String api : apiSet) {
+            Map apiDetailMap = new HashMap();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(begin);
+            List<String> data = new ArrayList<>();
+            apiDetailMap.put("api", api);
+            apiDetailMap.put("data", data);
+            String suffixKey = service + ":" + api;
+            staticDailyInvoking(end, dateFormat, date, calendar, data, suffixKey);
+            details.add(apiDetailMap);
+        }
+        return map;
+    }
+
+    private void staticDailyInvoking(Date end, SimpleDateFormat dateFormat, Set<String> date, Calendar calendar, List<String> data, String suffixKey) {
+        while (true) {
+            if (calendar.getTime().after(end)) {
+                break;
+            }
+            String dateStr = dateFormat.format(calendar.getTime());
+            date.add(dateStr);
+            StringBuilder builder = new StringBuilder(dateStr);
+            builder.append(":");
+            builder.append(suffixKey);
+            String key = builder.toString();
+            String value = redisTemplate.opsForValue().get(key);
+            data.add(value == null ? "0" : value);
+            calendar.add(Calendar.DATE, 1);
+        }
+    }
+
+    private Set<String> getAllApiSet(Date begin, Date end, String service, SimpleDateFormat dateFormat) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(begin);
+        Set<String> apisWithDateAndService = new HashSet<>();
+        while (true) {
+            if (calendar.getTime().after(end)) {
+                break;
+            }
+            String dateStr = dateFormat.format(calendar.getTime());
+            StringBuilder builder = new StringBuilder(dateStr);
+            builder.append(":");
+            builder.append(service);
+            builder.append(":*");
+            Set<String> set = redisTemplate.keys(builder.toString());
+            apisWithDateAndService.addAll(set);
+            calendar.add(Calendar.DATE, 1);
+        }
+        Set<String> apis = new HashSet<>();
+        for (String api : apisWithDateAndService) {
+            String[] str = api.split(":");
+            if (str.length != 4) {
+                logger.warn("illegal api : {}, skip", api);
+                continue;
+            }
+            apis.add(str[2] + ":" + str[3]);
+        }
+        return apis;
+    }
+
+    private Set<String> getServiceSet() {
+        Set<String> serviceSet = new HashSet<>();
+        List<SwaggerResource> resources = iSwaggerService.getSwaggerResource();
+        for (SwaggerResource resource : resources) {
+            String name = resource.getName();
+            String[] nameArray = name.split(":");
+            if (nameArray.length != 2) {
+                logger.warn("the resource name is not match xx:xx , name : {}", name);
+                continue;
+            }
+            serviceSet.add(nameArray[1]);
+        }
+        return serviceSet;
+    }
+
+    private void validateDate(String date) {
+        String dateRegex = "\\d{4}-\\d{2}-\\d{2}";
+        if (!Pattern.matches(dateRegex, date)) {
+            throw new CommonException("error.date.format");
+        }
     }
 
     private String getRouteName(String name) {
@@ -111,9 +262,9 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public Map queryInstancesAndApiCount() {
+    public Map<String, Object> queryInstancesAndApiCount() {
         List<SwaggerResource> swaggerResources = iSwaggerService.getSwaggerResource();
-        Map<String, List<String>> apiCountMap = new HashMap<>(2);
+        Map<String, Object> apiCountMap = new HashMap<>(2);
         List<String> services = new ArrayList<>();
         List<String> apiCounts = new ArrayList<>();
         apiCountMap.put("services", services);
@@ -513,54 +664,6 @@ public class ApiServiceImpl implements ApiService {
             }
         }
     }
-
-//    private String addIndent2Comments(String str) {
-//        String regex = "\\n//\\S+\\n";
-//        Pattern pattern = Pattern.compile(regex);
-//        Matcher matcher = pattern.matcher(str);
-//        if (matcher.find()) {
-//            String targetStr = matcher.group();
-//            int start = matcher.start();
-//            int end = matcher.end();
-//            StringBuilder sb = new StringBuilder();
-//            String prefix = str.substring(0, start);
-//            sb.append(prefix);
-//            sb.append("\n");
-//            sb.append(appendIndent(targetStr, prefix));
-//            String suffix = str.substring(end, str.length());
-//            sb.append(suffix);
-//            str = addIndent2Comments(sb.toString());
-//        }
-//        return str;
-//    }
-
-//    private String appendIndent(String targetStr, String prefix) {
-//        String comment = targetStr.substring(3, targetStr.length()-1);
-//        //计算有几个缩进
-//        int a = count(prefix,"\\[");
-//        int b = count(prefix,"\\{");
-//        int c = count(prefix,"\\]");
-//        int d = count(prefix,"\\}");
-//        int num = a + b - c - d;
-//        StringBuilder sb = new StringBuilder();
-//        for(int i = 0; i< num; i++) {
-//            sb.append("  ");
-//        }
-//        sb.append("//");
-//        sb.append(comment);
-//        sb.append("\n");
-//        return sb.toString();
-//    }
-
-//    private int count(String prefix, String regex) {
-//        Pattern pattern = Pattern.compile(regex);
-//        Matcher matcher = pattern.matcher(prefix);
-//        int count = 0;
-//        while (matcher.find()) {
-//            count ++;
-//        }
-//        return count;
-//    }
 
     private void processConsumes(PathDTO path, JsonNode jsonNode) {
         JsonNode consumeNode = jsonNode.get("consumes");
