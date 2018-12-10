@@ -6,6 +6,7 @@ import java.util.Map;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +31,7 @@ import io.choerodon.swagger.annotation.Permission;
  */
 @RestController
 @RequestMapping(value = "/v1/swaggers")
-@Api(description="api测试")
+@Api(description = "api测试")
 public class ApiController {
 
     private SwaggerService swaggerService;
@@ -89,8 +90,29 @@ public class ApiController {
     @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询运行的服务实例的api接口数量")
     @GetMapping("/api/count")
-    public ResponseEntity<Map> queryInstancesAndApiCount() {
+    public ResponseEntity<Map<String, Object>> queryInstancesAndApiCount() {
         return new ResponseEntity<>(apiService.queryInstancesAndApiCount(), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("根据日期查询服务的调用次数")
+    @GetMapping("/service_invoke/count")
+    public ResponseEntity<Map<String, Object>> queryServiceInvoke(@RequestParam("begin_date")
+                                                  @ApiParam(value = "日期格式yyyy-MM-dd") String beginDate,
+                                                  @RequestParam("end_date")
+                                                  @ApiParam(value = "日期格式yyyy-MM-dd") String endDate) {
+        return new ResponseEntity<>(apiService.queryServiceInvoke(beginDate, endDate), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("查询日期或者服务名或path路径查询api的调用次数")
+    @GetMapping("/api_invoke/count")
+    public ResponseEntity<Map<String, Object>> queryApiInvoke(@RequestParam("begin_date")
+                                              @ApiParam(value = "日期格式yyyy-MM-dd") String beginDate,
+                                              @RequestParam("end_date")
+                                              @ApiParam(value = "日期格式yyyy-MM-dd") String endDate,
+                                              @RequestParam String service) {
+        return new ResponseEntity<>(apiService.queryApiInvoke(beginDate, endDate, service), HttpStatus.OK);
     }
 
 

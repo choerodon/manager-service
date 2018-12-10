@@ -13,6 +13,7 @@ import io.choerodon.mybatis.pagehelper.domain.Sort
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.data.redis.core.StringRedisTemplate
 import spock.lang.Specification
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -34,7 +35,7 @@ class ApiServiceImplSpec extends Specification {
     RouteMapper routeMapper
 
     def setup() {
-        apiService = new ApiServiceImpl(mockIDocumentService, routeMapper, iSwaggerService)
+        apiService = new ApiServiceImpl(mockIDocumentService, routeMapper, iSwaggerService, Mock(StringRedisTemplate))
     }
 
     def "GetControllers"() {
