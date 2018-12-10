@@ -29,6 +29,9 @@ env:
     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://localhost:8000/eureka/
     CHOERODON_SWAGGER_OAUTH_URL: http://localhost:8080/oauth/oauth/authorize
     CHOERODON_GATEWAY_DOMAIN: 127.0.0.1:8080
+    SPRING_REDIS_HOST: localhost
+    SPRING_REDIS_PORT: 6379
+    SPRING_REDIS_DATABASE: 4
 
     # skywalking 代理端配置
     SKYWALKING_OPTS: >-
