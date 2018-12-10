@@ -139,15 +139,16 @@ class ApiControllerSpec extends Specification {
         StringRedisTemplate redisTemplate = Mock(StringRedisTemplate)
         ApiServiceImpl apiService = new ApiServiceImpl(null, null, null, redisTemplate)
         ApiController controller = new ApiController(null, apiService)
-        redisTemplate.keys(_) >> ["2018-11-02:manager-service:/v1/swaggers/resource:get"]
-        redisTemplate.opsForValue() >> Mock(ValueOperations)
+        ValueOperations valueOperations = Mock(ValueOperations)
+        redisTemplate.opsForValue() >> valueOperations
+        valueOperations.get(_) >> "{\"/v1/swaggers/api/count:get\":1,\"/v1/swaggers/service_invoke/count:get\":18,\"/v1/swaggers/api_invoke/count:get\":14}"
 
         when:
         def result = controller.queryApiInvoke("2018-11-02", "2018-11-05", "manager-service")
-        def date = (Set)result.getBody().get("date")
-        def apis = (Set)result.getBody().get("apis")
+        def date = (Set) result.getBody().get("date")
+        def apis = (Set) result.getBody().get("apis")
         then:
         date.contains("2018-11-02") && date.contains("2018-11-05")
-        apis.contains("/v1/swaggers/resource:get")
+        apis.contains("/v1/swaggers/api_invoke/count:get")
     }
 }
