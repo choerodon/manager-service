@@ -1,6 +1,7 @@
 package io.choerodon.manager.app.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.manager.domain.service.ISwaggerService;
@@ -85,41 +86,96 @@ public class ApiServiceImpl implements ApiService {
     @Override
     public Map<String, Object> queryServiceInvoke(String beginDate, String endDate) {
         Set<String> keySet = getServiceSet();
+        List<Map<String, Object>> details = new ArrayList<>();
+        for (String service : keySet) {
+            Map<String, Object> detailMap = new HashMap<>(2);
+            detailMap.put("service", service);
+            detailMap.put("data", new ArrayList<>());
+            details.add(detailMap);
+        }
         Map<String, Object> map = new HashMap<>();
         Set<String> date = new LinkedHashSet<>();
-        List<Object> details = new ArrayList<>();
         map.put("date", date);
         map.put("details", details);
+        map.put("services", keySet);
+        validateDate(beginDate);
+        validateDate(endDate);
+        setDetails(beginDate, endDate, details, date);
+        return map;
+    }
+
+    private void setDetails(String beginDate, String endDate, List<Map<String, Object>> details, Set<String> date) {
         try {
-            validateDate(beginDate);
-            validateDate(endDate);
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date begin = dateFormat.parse(beginDate);
             Date end = dateFormat.parse(endDate);
             if (begin.after(end)) {
                 throw new CommonException("error.date.order");
             }
-            map.put("services", keySet);
-            for (String service : keySet) {
-                Map serviceDetailMap = new HashMap();
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(begin);
-                List<String> data = new ArrayList<>();
-                serviceDetailMap.put("service", service);
-                serviceDetailMap.put("data", data);
-                staticDailyInvoking(end, dateFormat, date, calendar, data, service);
-                details.add(serviceDetailMap);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(begin);
+            while (true) {
+                if (calendar.getTime().after(end)) {
+                    break;
+                }
+                String dateStr = dateFormat.format(calendar.getTime());
+                date.add(dateStr);
+                String value = redisTemplate.opsForValue().get(dateStr);
+                if (StringUtils.isEmpty(value)) {
+                    details.forEach(m -> ((List<Integer>) m.get("data")).add(0));
+                } else {
+                    try {
+                        Map<String, Integer> serviceMap = objectMapper.readValue(value, new TypeReference<Map<String, Integer>>() {
+                        });
+                        details.forEach(m -> {
+                            String service = (String) m.get("service");
+                            List<Integer> list = (List<Integer>) m.get("data");
+                            list.add(serviceMap.get(service) == null ? 0 : serviceMap.get(service));
+                        });
+                    } catch (IOException e) {
+                        logger.error("object mapper read value to map error, redis key {}, value {}, exception :: {}", dateStr, value, e);
+                    }
+                }
+                calendar.add(Calendar.DATE, 1);
             }
         } catch (ParseException e) {
             throw new CommonException("error.date.parse", beginDate, endDate);
         }
-        return map;
     }
 
     @Override
     public Map<String, Object> queryApiInvoke(String beginDate, String endDate, String service) {
+        Map<String, Object> map = new HashMap<>();
+        Set<String> date = new LinkedHashSet<>();
+        List<Map<String, Object>> details = new ArrayList<>();
+        Set<String> keySet = new HashSet<>();
+        map.put("date", date);
+        map.put("details", details);
+        map.put("apis", keySet);
         validateDate(beginDate);
         validateDate(endDate);
+        Map<String, Map<String, Integer>> dateMap = new HashMap<>();
+        setDataMapAndKeySet(beginDate, endDate, service, date, keySet, dateMap);
+        for (String api : keySet) {
+            Map<String, Object> detailMap = new HashMap<>(2);
+            detailMap.put("api", api);
+            List<Integer> data = new ArrayList<>();
+            detailMap.put("data", data);
+            for (String dateStr : date) {
+                Map<String, Integer> apiMap = dateMap.get(dateStr);
+                if (apiMap == null) {
+                    data.add(0);
+                } else {
+                    data.add(apiMap.get(api) == null ? 0 : apiMap.get(api));
+                }
+            }
+            details.add(detailMap);
+        }
+        return map;
+
+    }
+
+    private void setDataMapAndKeySet(String beginDate, String endDate, String service, Set<String> date, Set<String> keySet, Map<String, Map<String, Integer>> dateMap) {
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date begin = dateFormat.parse(beginDate);
@@ -129,9 +185,28 @@ public class ApiServiceImpl implements ApiService {
             if (begin.after(end)) {
                 throw new CommonException("error.date.order");
             }
-            //api的key格式为2018-12-09:iam-service:/v1/users/self:get
-            Set<String> apiSet = getAllApiSet(begin, end, service, dateFormat);
-            return getApiInvoke(begin, end, service, dateFormat, apiSet);
+            while (true) {
+                if (calendar.getTime().after(end)) {
+                    break;
+                }
+                String dateStr = dateFormat.format(calendar.getTime());
+                date.add(dateStr);
+                String value = redisTemplate.opsForValue().get(dateStr + ":" + service);
+                if (StringUtils.isEmpty(value)) {
+                    dateMap.put(dateStr, null);
+                } else {
+                    try {
+                        Map<String, Integer> apiMap =
+                                objectMapper.readValue(value, new TypeReference<Map<String, Integer>>() {
+                                });
+                        keySet.addAll(apiMap.keySet());
+                        dateMap.put(dateStr, apiMap);
+                    } catch (IOException e) {
+                        logger.error("object mapper read value to map error, redis key {}, value {}, exception :: {}", dateStr, value, e);
+                    }
+                }
+                calendar.add(Calendar.DATE, 1);
+            }
         } catch (ParseException e) {
             throw new CommonException("error.date.parse", beginDate, endDate);
         }
