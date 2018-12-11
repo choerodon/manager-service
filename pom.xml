@@ -13,7 +13,7 @@
         <version>0.8.0.RELEASE</version>
     </parent>
     <properties>
-        <choerodon.starters.version>0.7.0.RELEASE</choerodon.starters.version>
+        <choerodon.starters.version>0.8.1.RELEASE</choerodon.starters.version>
     </properties>
 
     <dependencies>
