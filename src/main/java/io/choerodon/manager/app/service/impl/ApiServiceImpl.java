@@ -218,7 +218,7 @@ public class ApiServiceImpl implements ApiService {
             } else {
                 try {
                     JsonNode node = objectMapper.readTree(json);
-                    processTreeOnControllerNode(node, versionChildren, versionKey);
+                    processTreeOnControllerNode(service, version, node, versionChildren, versionKey);
                 } catch (IOException e) {
                     logger.error("object mapper read tree error, service: {}, version: {}", service, version);
                 }
@@ -227,7 +227,7 @@ public class ApiServiceImpl implements ApiService {
         }
     }
 
-    private void processTreeOnControllerNode(JsonNode node, List<Map<String, Object>> children, String parentKey) {
+    private void processTreeOnControllerNode(String service, String version, JsonNode node, List<Map<String, Object>> children, String parentKey) {
         JsonNode tagNodes = node.get("tags");
         Iterator<JsonNode> iterator = tagNodes.iterator();
         int controllerCount = 0;
@@ -241,12 +241,12 @@ public class ApiServiceImpl implements ApiService {
             controllerMap.put(KEY, controllerKey);
             List<Map<String, Object>> controllerChildren = new ArrayList<>();
             controllerMap.put(CHILDREN, controllerChildren);
-            processTreeOnPathNode(name, node, controllerChildren, controllerKey);
+            processTreeOnPathNode(service, version, name, node, controllerChildren, controllerKey);
             controllerCount++;
         }
     }
 
-    private void processTreeOnPathNode(String controllerName, JsonNode node, List<Map<String, Object>> children, String parentKey) {
+    private void processTreeOnPathNode(String service, String version, String controllerName, JsonNode node, List<Map<String, Object>> children, String parentKey) {
         JsonNode pathNode = node.get("paths");
         Iterator<String> urlIterator = pathNode.fieldNames();
         int patchCount = 0;
@@ -274,6 +274,8 @@ public class ApiServiceImpl implements ApiService {
                     pathMap.put("method", method);
                     pathMap.put("operationId", Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
                     pathMap.put("refController", controllerName);
+                    pathMap.put("service", service);
+                    pathMap.put("version", version);
                     patchCount++;
                 }
             }
