@@ -49,4 +49,10 @@ public interface ApiService {
      * @return map
      */
     Map<String, Object> queryApiInvoke(String beginDate, String endDate, String service);
+
+    /**
+     * 查询所有运行实例的api树形接口
+     * @return map
+     */
+    Map queryTreeMenu();
 }

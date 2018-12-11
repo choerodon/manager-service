@@ -97,9 +97,9 @@ public class ApiController {
     @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("根据日期查询服务的调用次数")
     @GetMapping("/service_invoke/count")
-    public ResponseEntity<Map<String, Object>> queryServiceInvoke(@RequestParam("begin_date")
+    public ResponseEntity<Map<String, Object>> queryServiceInvoke(@RequestParam(value = "begin_date")
                                                   @ApiParam(value = "日期格式yyyy-MM-dd") String beginDate,
-                                                  @RequestParam("end_date")
+                                                  @RequestParam(value = "end_date")
                                                   @ApiParam(value = "日期格式yyyy-MM-dd") String endDate) {
         return new ResponseEntity<>(apiService.queryServiceInvoke(beginDate, endDate), HttpStatus.OK);
     }
@@ -107,12 +107,19 @@ public class ApiController {
     @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询日期或者服务名或path路径查询api的调用次数")
     @GetMapping("/api_invoke/count")
-    public ResponseEntity<Map<String, Object>> queryApiInvoke(@RequestParam("begin_date")
+    public ResponseEntity<Map<String, Object>> queryApiInvoke(@RequestParam(value = "begin_date")
                                               @ApiParam(value = "日期格式yyyy-MM-dd") String beginDate,
-                                              @RequestParam("end_date")
+                                              @RequestParam(value = "end_date")
                                               @ApiParam(value = "日期格式yyyy-MM-dd") String endDate,
                                               @RequestParam String service) {
         return new ResponseEntity<>(apiService.queryApiInvoke(beginDate, endDate, service), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("查询树形接口目录")
+    @GetMapping("/tree")
+    public ResponseEntity<Map> queryTreeMenu() {
+        return new ResponseEntity<>(apiService.queryTreeMenu(), HttpStatus.OK);
     }
 
 

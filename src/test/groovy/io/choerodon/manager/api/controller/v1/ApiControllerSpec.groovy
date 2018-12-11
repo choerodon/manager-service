@@ -125,6 +125,7 @@ class ApiControllerSpec extends Specification {
         swaggerList << swaggerResource
         iSwaggerService.getSwaggerResource() >> swaggerList
         swaggerResource.getName() >> "manager:manager-service"
+        swaggerResource.getLocation() >> "/docs/manager?version=null_version"
         redisTemplate.opsForValue() >> Mock(ValueOperations)
 
         when:
@@ -150,5 +151,26 @@ class ApiControllerSpec extends Specification {
         then:
         date.contains("2018-11-02") && date.contains("2018-11-05")
         apis.contains("/v1/swaggers/api_invoke/count:get")
+    }
+
+    def "QueryTreeMenu"() {
+        given:
+        ISwaggerService iSwaggerService = Mock(ISwaggerService)
+        IDocumentService iDocumentService = Mock(IDocumentService)
+        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, null, iSwaggerService, null)
+        ApiController controller = new ApiController(null, apiService)
+        List<SwaggerResource> resources = new ArrayList<>()
+        SwaggerResource resource = new SwaggerResource()
+        resource.setName("manager:manager-service")
+        resource.setLocation("/docs/manager?version=null_version")
+        resources << resource
+        iSwaggerService.getSwaggerResource() >> resources
+        def file = new File(this.class.getResource('/swagger.json').toURI())
+        iDocumentService.fetchSwaggerJsonByService(_, _) >> { file.getText('UTF-8') }
+
+        when:
+        controller.queryTreeMenu()
+        then:
+        true
     }
 }
