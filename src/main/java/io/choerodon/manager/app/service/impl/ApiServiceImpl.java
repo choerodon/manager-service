@@ -42,6 +42,10 @@ public class ApiServiceImpl implements ApiService {
 
     private static final String DESCRIPTION = "description";
 
+    private static final String TITLE = "title";
+    private static final String KEY = "key";
+    private static final String CHILDREN = "children";
+
     private IDocumentService iDocumentService;
 
     private RouteMapper routeMapper;
@@ -85,7 +89,7 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public Map<String, Object> queryServiceInvoke(String beginDate, String endDate) {
-        Set<String> keySet = getServiceSet();
+        Set<String> keySet = getServiceMap().keySet();
         List<Map<String, Object>> details = new ArrayList<>();
         for (String service : keySet) {
             Map<String, Object> detailMap = new HashMap<>(2);
@@ -175,6 +179,107 @@ public class ApiServiceImpl implements ApiService {
 
     }
 
+    @Override
+    public Map queryTreeMenu() {
+        Map<String, Set<String>> services = getServiceMap();
+        Map<String, Object> map = new HashMap<>();
+        List<Map<String, Object>> list = new ArrayList<>();
+        map.put("service", list);
+        int serviceCount = 0;
+        for (Map.Entry<String, Set<String>> entry : services.entrySet()) {
+            Map<String, Object> serviceMap = new HashMap<>();
+            list.add(serviceMap);
+            String service = entry.getKey();
+            Set<String> versions = entry.getValue();
+            serviceMap.put(TITLE, service);
+            String serviceKey = serviceCount + "";
+            serviceMap.put(KEY, serviceKey);
+            List<Map<String, Object>> children = new ArrayList<>();
+            serviceMap.put(CHILDREN, children);
+            processTreeOnVersionNode(service, versions, children, serviceKey);
+            serviceCount++;
+        }
+        return map;
+    }
+
+    private void processTreeOnVersionNode(String service, Set<String> versions, List<Map<String, Object>> children, String parentKey) {
+        int versionCount = 0;
+        for (String version : versions) {
+            Map<String, Object> versionMap = new HashMap<>();
+            children.add(versionMap);
+            versionMap.put(TITLE, version);
+            String versionKey = parentKey + "-" + versionCount;
+            versionMap.put(KEY, versionKey);
+            List<Map<String, Object>> versionChildren = new ArrayList<>();
+            versionMap.put(CHILDREN, versionChildren);
+            String json = iDocumentService.fetchSwaggerJsonByService(service, version);
+            if (StringUtils.isEmpty(json)) {
+                logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
+            } else {
+                try {
+                    JsonNode node = objectMapper.readTree(json);
+                    processTreeOnControllerNode(node, versionChildren, versionKey);
+                } catch (IOException e) {
+                    logger.error("object mapper read tree error, service: {}, version: {}", service, version);
+                }
+            }
+            versionCount++;
+        }
+    }
+
+    private void processTreeOnControllerNode(JsonNode node, List<Map<String, Object>> children, String parentKey) {
+        JsonNode tagNodes = node.get("tags");
+        Iterator<JsonNode> iterator = tagNodes.iterator();
+        int controllerCount = 0;
+        while (iterator.hasNext()) {
+            Map<String, Object> controllerMap = new HashMap<>();
+            children.add(controllerMap);
+            JsonNode jsonNode = iterator.next();
+            String name = jsonNode.findValue("name").asText();
+            controllerMap.put(TITLE, name);
+            String controllerKey = parentKey + "-" + controllerCount;
+            controllerMap.put(KEY, controllerKey);
+            List<Map<String, Object>> controllerChildren = new ArrayList<>();
+            controllerMap.put(CHILDREN, controllerChildren);
+            processTreeOnPathNode(name, node, controllerChildren, controllerKey);
+            controllerCount++;
+        }
+    }
+
+    private void processTreeOnPathNode(String controllerName, JsonNode node, List<Map<String, Object>> children, String parentKey) {
+        JsonNode pathNode = node.get("paths");
+        Iterator<String> urlIterator = pathNode.fieldNames();
+        int patchCount = 0;
+        while (urlIterator.hasNext()) {
+            String url = urlIterator.next();
+            JsonNode methodNode = pathNode.get(url);
+            Iterator<String> methodIterator = methodNode.fieldNames();
+            while (methodIterator.hasNext()) {
+                String method = methodIterator.next();
+                JsonNode jsonNode = methodNode.findValue(method);
+                JsonNode tagNode = jsonNode.get("tags");
+                boolean match = false;
+                for (int i = 0; i < tagNode.size(); i++) {
+                    String tag = tagNode.get(i).asText();
+                    if (controllerName.equals(tag)) {
+                        match = true;
+                    }
+                }
+                if (match) {
+                    Map<String, Object> pathMap = new HashMap<>();
+                    children.add(pathMap);
+                    pathMap.put(TITLE, url);
+                    String pathKey = parentKey + "-" + patchCount;
+                    pathMap.put(KEY, pathKey);
+                    pathMap.put("method", method);
+                    pathMap.put("operationId", Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
+                    pathMap.put("refController", controllerName);
+                    patchCount++;
+                }
+            }
+        }
+    }
+
     private void setDataMapAndKeySet(String beginDate, String endDate, String service, Set<String> date, Set<String> keySet, Map<String, Map<String, Integer>> dateMap) {
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -212,86 +317,30 @@ public class ApiServiceImpl implements ApiService {
         }
     }
 
-    private Map<String, Object> getApiInvoke(Date begin, Date end, String service, SimpleDateFormat dateFormat, Set<String> apiSet) {
-        Map<String, Object> map = new HashMap<>();
-        Set<String> date = new LinkedHashSet<>();
-        List<Object> details = new ArrayList<>();
-        map.put("date", date);
-        map.put("details", details);
-        map.put("apis", apiSet);
-        for (String api : apiSet) {
-            Map apiDetailMap = new HashMap();
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(begin);
-            List<String> data = new ArrayList<>();
-            apiDetailMap.put("api", api);
-            apiDetailMap.put("data", data);
-            String suffixKey = service + ":" + api;
-            staticDailyInvoking(end, dateFormat, date, calendar, data, suffixKey);
-            details.add(apiDetailMap);
-        }
-        return map;
-    }
-
-    private void staticDailyInvoking(Date end, SimpleDateFormat dateFormat, Set<String> date, Calendar calendar, List<String> data, String suffixKey) {
-        while (true) {
-            if (calendar.getTime().after(end)) {
-                break;
-            }
-            String dateStr = dateFormat.format(calendar.getTime());
-            date.add(dateStr);
-            StringBuilder builder = new StringBuilder(dateStr);
-            builder.append(":");
-            builder.append(suffixKey);
-            String key = builder.toString();
-            String value = redisTemplate.opsForValue().get(key);
-            data.add(value == null ? "0" : value);
-            calendar.add(Calendar.DATE, 1);
-        }
-    }
-
-    private Set<String> getAllApiSet(Date begin, Date end, String service, SimpleDateFormat dateFormat) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(begin);
-        Set<String> apisWithDateAndService = new HashSet<>();
-        while (true) {
-            if (calendar.getTime().after(end)) {
-                break;
-            }
-            String dateStr = dateFormat.format(calendar.getTime());
-            StringBuilder builder = new StringBuilder(dateStr);
-            builder.append(":");
-            builder.append(service);
-            builder.append(":*");
-            Set<String> set = redisTemplate.keys(builder.toString());
-            apisWithDateAndService.addAll(set);
-            calendar.add(Calendar.DATE, 1);
-        }
-        Set<String> apis = new HashSet<>();
-        for (String api : apisWithDateAndService) {
-            String[] str = api.split(":");
-            if (str.length != 4) {
-                logger.warn("illegal api : {}, skip", api);
-                continue;
-            }
-            apis.add(str[2] + ":" + str[3]);
-        }
-        return apis;
-    }
-
-    private Set<String> getServiceSet() {
-        Set<String> serviceSet = new HashSet<>();
+    private Map<String, Set<String>> getServiceMap() {
+        Map<String, Set<String>> map = new HashMap<>();
         List<SwaggerResource> resources = iSwaggerService.getSwaggerResource();
         for (SwaggerResource resource : resources) {
             String name = resource.getName();
             String[] nameArray = name.split(":");
-            if (nameArray.length != 2) {
-                logger.warn("the resource name is not match xx:xx , name : {}", name);
+            String location = resource.getLocation();
+            String[] locationArray = location.split("\\?version=");
+            if (nameArray.length != 2 || locationArray.length != 2) {
+                logger.warn("the resource name is not match xx:xx or location is not match /doc/xx?version=xxx , name : {}, location: {}", name, location);
                 continue;
             }
-            serviceSet.add(nameArray[1]);
+            String service = nameArray[1];
+            String version = locationArray[1];
+            if (map.get(service) == null) {
+                Set<String> versionSet = new HashSet<>();
+                versionSet.add(version);
+                map.put(service, versionSet);
+            } else {
+                Set<String> versionSet = map.get(service);
+                versionSet.add(version);
+            }
         }
-        return serviceSet;
+        return map;
     }
 
     private void validateDate(String date) {
@@ -391,7 +440,6 @@ public class ApiServiceImpl implements ApiService {
     }
 
     private List<ControllerDTO> processJson2ControllerDTO(String serviceName, String json) {
-        long start = System.currentTimeMillis();
         List<ControllerDTO> controllers;
         try {
             JsonNode node = objectMapper.readTree(json);
@@ -405,8 +453,6 @@ public class ApiServiceImpl implements ApiService {
         } catch (IOException e) {
             throw new CommonException("error.parseJson");
         }
-        long end = System.currentTimeMillis();
-        logger.info("%%%service {} process json spending {} ms", serviceName, end - start);
         return controllers;
     }
 
