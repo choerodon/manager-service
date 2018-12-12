@@ -389,55 +389,45 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public Map<String, Object> queryInstancesAndApiCount() {
-        List<SwaggerResource> swaggerResources = iSwaggerService.getSwaggerResource();
         Map<String, Object> apiCountMap = new HashMap<>(2);
         List<String> services = new ArrayList<>();
-        List<String> apiCounts = new ArrayList<>();
+        List<Integer> apiCounts = new ArrayList<>();
         apiCountMap.put("services", services);
         apiCountMap.put("apiCounts", apiCounts);
-        swaggerResources.forEach(resource -> {
+        Map<String, Set<String>> serviceMap = getServiceMap();
+        for (Map.Entry<String, Set<String>> entry : serviceMap.entrySet()) {
             int count = 0;
-            String name = resource.getName();
-            String[] nameArray = name.split(":");
-            if (nameArray.length != 2) {
-                logger.warn("the resource name is not match xx:xx , name : {}", name);
-                return;
+            String service = entry.getKey();
+            Set<String> versions = entry.getValue();
+            //目前只有一个版本，所以取第一个，如果后续支持多版本，此处遍历版本即可
+            Iterator<String> iterator = versions.iterator();
+            String version = null;
+            while (iterator.hasNext()) {
+                version = iterator.next();
+                break;
             }
-            String routeName = nameArray[0];
-            String serviceName = nameArray[1];
-            String location = resource.getLocation();
-            String[] locationArray = location.split("\\?version=");
-            if (locationArray.length != 2) {
-                logger.warn("the location is not match xx?version=xx , location : {}", location);
-                return;
-            }
-            String version = locationArray[1];
-            String json = null;
-            try {
-                json = getSwaggerJson(routeName, version);
-            } catch (Exception e) {
-                logger.error("can not fetch service {} version {} swagger json, exception : {} ", serviceName, version, e);
-            }
-            if (json == null) {
-                logger.warn("service {}, version {} has been abandoned because of the swagger json is null", serviceName, version);
-                return;
-            }
-            try {
-                JsonNode node = objectMapper.readTree(json);
-                JsonNode pathNode = node.get("paths");
-                Iterator<String> urlIterator = pathNode.fieldNames();
-                while (urlIterator.hasNext()) {
-                    String url = urlIterator.next();
-                    JsonNode methodNode = pathNode.get(url);
-                    count = count + methodNode.size();
+            if (version != null) {
+                String json = iDocumentService.fetchSwaggerJsonByService(service, version);
+                if (StringUtils.isEmpty(json)) {
+                    logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
+                } else {
+                    try {
+                        JsonNode node = objectMapper.readTree(json);
+                        JsonNode pathNode = node.get("paths");
+                        Iterator<String> urlIterator = pathNode.fieldNames();
+                        while (urlIterator.hasNext()) {
+                            String url = urlIterator.next();
+                            JsonNode methodNode = pathNode.get(url);
+                            count = count + methodNode.size();
+                        }
+                    } catch (IOException e) {
+                        logger.error("object mapper read tree error, service: {}, version: {}", service, version);
+                    }
                 }
-            } catch (IOException e) {
-                logger.error("objectMapper parse json exception, service {}, version {} has been abandoned, exception : {}", serviceName, version, e);
-                return;
             }
-            services.add(serviceName);
-            apiCounts.add(count + "");
-        });
+            services.add(service);
+            apiCounts.add(count);
+        }
         return apiCountMap;
     }
 
