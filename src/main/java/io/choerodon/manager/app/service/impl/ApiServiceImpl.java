@@ -228,28 +228,28 @@ public class ApiServiceImpl implements ApiService {
     }
 
     private void processTreeOnControllerNode(String service, String version, JsonNode node, List<Map<String, Object>> children, String parentKey) {
-        JsonNode tagNodes = node.get("tags");
-        Iterator<JsonNode> iterator = tagNodes.iterator();
-        int controllerCount = 0;
-        while (iterator.hasNext()) {
-            Map<String, Object> controllerMap = new HashMap<>();
-            children.add(controllerMap);
-            JsonNode jsonNode = iterator.next();
-            String name = jsonNode.findValue("name").asText();
-            controllerMap.put(TITLE, name);
-            String controllerKey = parentKey + "-" + controllerCount;
-            controllerMap.put(KEY, controllerKey);
-            List<Map<String, Object>> controllerChildren = new ArrayList<>();
-            controllerMap.put(CHILDREN, controllerChildren);
-            processTreeOnPathNode(service, version, name, node, controllerChildren, controllerKey);
-            controllerCount++;
+        Map<String, Map> controllerMap = processControllerMap(node, children, parentKey);
+        Map<String, List> pathMap = processPathMap(service, version, node);
+        for (Map.Entry<String, Map> entry : controllerMap.entrySet()) {
+            int pathCount = 0;
+            String controllerName = entry.getKey();
+            Map<String, Object> controller = entry.getValue();
+            String key = (String) controller.get(KEY);
+            List<Map<String, Object>> controllerChildren = (List<Map<String, Object>>) controller.get(CHILDREN);
+            List<Map<String, Object>> list = pathMap.get(controllerName);
+            for (Map<String, Object> path : list) {
+                path.put(KEY, key + "-" + pathCount);
+                path.put("refController", controllerName);
+                controllerChildren.add(path);
+                pathCount++;
+            }
         }
     }
 
-    private void processTreeOnPathNode(String service, String version, String controllerName, JsonNode node, List<Map<String, Object>> children, String parentKey) {
+    private Map<String, List> processPathMap(String service, String version, JsonNode node) {
+        Map<String, List> pathMap = new HashMap<>();
         JsonNode pathNode = node.get("paths");
         Iterator<String> urlIterator = pathNode.fieldNames();
-        int patchCount = 0;
         while (urlIterator.hasNext()) {
             String url = urlIterator.next();
             JsonNode methodNode = pathNode.get(url);
@@ -257,29 +257,47 @@ public class ApiServiceImpl implements ApiService {
             while (methodIterator.hasNext()) {
                 String method = methodIterator.next();
                 JsonNode jsonNode = methodNode.findValue(method);
+                Map<String, Object> path = new HashMap<>();
+                path.put(TITLE, url);
+                path.put("method", method);
+                path.put("operationId", Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
+                path.put("service", service);
+                path.put("version", version);
                 JsonNode tagNode = jsonNode.get("tags");
-                boolean match = false;
                 for (int i = 0; i < tagNode.size(); i++) {
                     String tag = tagNode.get(i).asText();
-                    if (controllerName.equals(tag)) {
-                        match = true;
+                    if (pathMap.get(tag) == null) {
+                        List<Map<String, Object>> list = new ArrayList<>();
+                        list.add(path);
+                        pathMap.put(tag, list);
+                    } else {
+                        pathMap.get(tag).add(path);
                     }
-                }
-                if (match) {
-                    Map<String, Object> pathMap = new HashMap<>();
-                    children.add(pathMap);
-                    pathMap.put(TITLE, url);
-                    String pathKey = parentKey + "-" + patchCount;
-                    pathMap.put(KEY, pathKey);
-                    pathMap.put("method", method);
-                    pathMap.put("operationId", Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
-                    pathMap.put("refController", controllerName);
-                    pathMap.put("service", service);
-                    pathMap.put("version", version);
-                    patchCount++;
                 }
             }
         }
+        return pathMap;
+    }
+
+    private Map<String, Map> processControllerMap(JsonNode node, List<Map<String, Object>> children, String parentKey) {
+        Map<String, Map> controllerMap = new HashMap<>();
+        JsonNode tagNodes = node.get("tags");
+        Iterator<JsonNode> iterator = tagNodes.iterator();
+        int controllerCount = 0;
+        while (iterator.hasNext()) {
+            Map<String, Object> controller = new HashMap<>();
+            children.add(controller);
+            JsonNode jsonNode = iterator.next();
+            String name = jsonNode.findValue("name").asText();
+            controllerMap.put(name, controller);
+            controller.put(TITLE, name);
+            String controllerKey = parentKey + "-" + controllerCount;
+            controller.put(KEY, controllerKey);
+            List<Map<String, Object>> controllerChildren = new ArrayList<>();
+            controller.put(CHILDREN, controllerChildren);
+            controllerCount++;
+        }
+        return controllerMap;
     }
 
     private void setDataMapAndKeySet(String beginDate, String endDate, String service, Set<String> date, Set<String> keySet, Map<String, Map<String, Integer>> dateMap) {
