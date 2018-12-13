@@ -101,15 +101,22 @@ public class ApiServiceImpl implements ApiService {
         Set<String> date = new LinkedHashSet<>();
         map.put("date", date);
         map.put("details", details);
-        map.put("services", keySet);
         validateDate(beginDate);
         validateDate(endDate);
-        setDetails(beginDate, endDate, details, date);
+        Map<String, Integer> lastDayServiceCount = setDetails(beginDate, endDate, details, date);
+        List<String> sortedKey =
+                lastDayServiceCount.entrySet()
+                        .stream()
+                        .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toList());
+        map.put("services", sortedKey);
         return map;
     }
 
-    private void setDetails(String beginDate, String endDate, List<Map<String, Object>> details, Set<String> date) {
+    private Map<String, Integer> setDetails(String beginDate, String endDate, List<Map<String, Object>> details, Set<String> date) {
         try {
+            Map<String, Integer> lastDayServiceCount = new HashMap<>();
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date begin = dateFormat.parse(beginDate);
             Date end = dateFormat.parse(endDate);
@@ -126,7 +133,10 @@ public class ApiServiceImpl implements ApiService {
                 date.add(dateStr);
                 String value = redisTemplate.opsForValue().get(dateStr);
                 if (StringUtils.isEmpty(value)) {
-                    details.forEach(m -> ((List<Integer>) m.get("data")).add(0));
+                    details.forEach(m -> {
+                        ((List<Integer>) m.get("data")).add(0);
+                        lastDayServiceCount.put((String) m.get("service"), 0);
+                    });
                 } else {
                     try {
                         Map<String, Integer> serviceMap = objectMapper.readValue(value, new TypeReference<Map<String, Integer>>() {
@@ -134,7 +144,9 @@ public class ApiServiceImpl implements ApiService {
                         details.forEach(m -> {
                             String service = (String) m.get("service");
                             List<Integer> list = (List<Integer>) m.get("data");
-                            list.add(serviceMap.get(service) == null ? 0 : serviceMap.get(service));
+                            int count = serviceMap.get(service) == null ? 0 : serviceMap.get(service);
+                            list.add(count);
+                            lastDayServiceCount.put(service, count);
                         });
                     } catch (IOException e) {
                         logger.error("object mapper read value to map error, redis key {}, value {}, exception :: {}", dateStr, value, e);
@@ -142,6 +154,7 @@ public class ApiServiceImpl implements ApiService {
                 }
                 calendar.add(Calendar.DATE, 1);
             }
+            return lastDayServiceCount;
         } catch (ParseException e) {
             throw new CommonException("error.date.parse", beginDate, endDate);
         }
@@ -155,11 +168,11 @@ public class ApiServiceImpl implements ApiService {
         Set<String> keySet = new HashSet<>();
         map.put("date", date);
         map.put("details", details);
-        map.put("apis", keySet);
         validateDate(beginDate);
         validateDate(endDate);
         Map<String, Map<String, Integer>> dateMap = new HashMap<>();
         setDataMapAndKeySet(beginDate, endDate, service, date, keySet, dateMap);
+        Map<String, Integer> lastDayApiCount = new HashMap<>();
         for (String api : keySet) {
             Map<String, Object> detailMap = new HashMap<>(2);
             detailMap.put("api", api);
@@ -169,12 +182,22 @@ public class ApiServiceImpl implements ApiService {
                 Map<String, Integer> apiMap = dateMap.get(dateStr);
                 if (apiMap == null) {
                     data.add(0);
+                    lastDayApiCount.put(api, 0);
                 } else {
-                    data.add(apiMap.get(api) == null ? 0 : apiMap.get(api));
+                    int count = apiMap.get(api) == null ? 0 : apiMap.get(api);
+                    data.add(count);
+                    lastDayApiCount.put(api, count);
                 }
             }
             details.add(detailMap);
         }
+        List<String> sortedKey =
+                lastDayApiCount.entrySet()
+                        .stream()
+                        .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toList());
+        map.put("apis", sortedKey);
         return map;
 
     }
