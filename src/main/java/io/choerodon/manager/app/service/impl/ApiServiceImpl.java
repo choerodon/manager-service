@@ -228,20 +228,26 @@ public class ApiServiceImpl implements ApiService {
     }
 
     private void processTreeOnControllerNode(String service, String version, JsonNode node, List<Map<String, Object>> children, String parentKey) {
-        Map<String, Map> controllerMap = processControllerMap(node, children, parentKey);
+        Map<String, Map> controllerMap = processControllerMap(node);
         Map<String, List> pathMap = processPathMap(service, version, node);
+        int controllerCount = 0;
         for (Map.Entry<String, Map> entry : controllerMap.entrySet()) {
             int pathCount = 0;
             String controllerName = entry.getKey();
             Map<String, Object> controller = entry.getValue();
-            String key = (String) controller.get(KEY);
             List<Map<String, Object>> controllerChildren = (List<Map<String, Object>>) controller.get(CHILDREN);
             List<Map<String, Object>> list = pathMap.get(controllerName);
-            for (Map<String, Object> path : list) {
-                path.put(KEY, key + "-" + pathCount);
-                path.put("refController", controllerName);
-                controllerChildren.add(path);
-                pathCount++;
+            if (list != null) {
+                String controllerKey = parentKey + "-" + controllerCount;
+                controller.put(KEY, controllerKey);
+                children.add(controller);
+                for (Map<String, Object> path : list) {
+                    path.put(KEY, controllerKey + "-" + pathCount);
+                    path.put("refController", controllerName);
+                    controllerChildren.add(path);
+                    pathCount++;
+                }
+                controllerCount++;
             }
         }
     }
@@ -257,6 +263,9 @@ public class ApiServiceImpl implements ApiService {
             while (methodIterator.hasNext()) {
                 String method = methodIterator.next();
                 JsonNode jsonNode = methodNode.findValue(method);
+                if (jsonNode.get("description") == null) {
+                    continue;
+                }
                 Map<String, Object> path = new HashMap<>();
                 path.put(TITLE, url);
                 path.put("method", method);
@@ -279,23 +288,21 @@ public class ApiServiceImpl implements ApiService {
         return pathMap;
     }
 
-    private Map<String, Map> processControllerMap(JsonNode node, List<Map<String, Object>> children, String parentKey) {
+    private Map<String, Map> processControllerMap(JsonNode node) {
         Map<String, Map> controllerMap = new HashMap<>();
         JsonNode tagNodes = node.get("tags");
         Iterator<JsonNode> iterator = tagNodes.iterator();
-        int controllerCount = 0;
         while (iterator.hasNext()) {
-            Map<String, Object> controller = new HashMap<>();
-            children.add(controller);
             JsonNode jsonNode = iterator.next();
             String name = jsonNode.findValue("name").asText();
+            if (!name.contains("-controller") && !name.contains("-endpoint")) {
+                continue;
+            }
+            Map<String, Object> controller = new HashMap<>();
             controllerMap.put(name, controller);
             controller.put(TITLE, name);
-            String controllerKey = parentKey + "-" + controllerCount;
-            controller.put(KEY, controllerKey);
             List<Map<String, Object>> controllerChildren = new ArrayList<>();
             controller.put(CHILDREN, controllerChildren);
-            controllerCount++;
         }
         return controllerMap;
     }
