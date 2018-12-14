@@ -5,6 +5,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -100,8 +101,19 @@ public class ManualPageHelper {
 
     private static <T> boolean throughFilter(final T obj, final Map<String, Object> filters) {
         Class<?> objClass = obj.getClass();
+        boolean allIsNullExcludeParams = true;
+        for (Map.Entry<String, Object> entry : filters.entrySet()) {
+            String key = entry.getKey();
+            if (PARAMS_KEY.equals(key)) {
+                continue;
+            }
+            if (!StringUtils.isEmpty(entry.getValue())) {
+                allIsNullExcludeParams = false;
+                break;
+            }
+        }
         final Object params = filters.get(PARAMS_KEY);
-        if (params != null) {
+        if (params != null && allIsNullExcludeParams) {
             return filters.entrySet().stream()
                     .filter(t -> !t.getKey().equals(PARAMS_KEY))
                     .anyMatch(i -> paramThrough(objClass, obj, i.getKey(), params));
@@ -117,7 +129,7 @@ public class ManualPageHelper {
             field.setAccessible(true);
             if (field.getType().equals(String.class) && params instanceof String) {
                 final Object value = field.get(obj);
-                if (value !=null && ((String)value).contains((String)params)) {
+                if (value != null && ((String) value).contains((String) params)) {
                     return true;
                 }
             } else {
@@ -137,7 +149,7 @@ public class ManualPageHelper {
             field.setAccessible(true);
             if (field.getType().equals(String.class) && i.getValue() instanceof String) {
                 final Object value = field.get(obj);
-                if (value ==null || !((String)value).toLowerCase().contains((String)i.getValue())) {
+                if (value == null || !((String) value).toLowerCase().contains((String) i.getValue())) {
                     return true;
                 }
             } else {

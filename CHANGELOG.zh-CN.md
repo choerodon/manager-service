@@ -7,7 +7,16 @@
 ### 新增
 
 - 添加api调用统计
+- 添加swagger-ui界面和接口
+- 添加skywalking代理端相关配置
 
+### 修改
+
+- 升级`choerodon-starter`依赖版本为`0.8.1.RELEASE`。
+
+### 移除
+
+- 移除kafka与zipkin的依赖与相关配置
 
 ## [0.11.0] - 2018-11-23
 

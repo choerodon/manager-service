@@ -101,15 +101,22 @@ public class ApiServiceImpl implements ApiService {
         Set<String> date = new LinkedHashSet<>();
         map.put("date", date);
         map.put("details", details);
-        map.put("services", keySet);
         validateDate(beginDate);
         validateDate(endDate);
-        setDetails(beginDate, endDate, details, date);
+        Map<String, Integer> lastDayServiceCount = setDetails(beginDate, endDate, details, date);
+        List<String> sortedKey =
+                lastDayServiceCount.entrySet()
+                        .stream()
+                        .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toList());
+        map.put("services", sortedKey);
         return map;
     }
 
-    private void setDetails(String beginDate, String endDate, List<Map<String, Object>> details, Set<String> date) {
+    private Map<String, Integer> setDetails(String beginDate, String endDate, List<Map<String, Object>> details, Set<String> date) {
         try {
+            Map<String, Integer> lastDayServiceCount = new HashMap<>();
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date begin = dateFormat.parse(beginDate);
             Date end = dateFormat.parse(endDate);
@@ -126,7 +133,10 @@ public class ApiServiceImpl implements ApiService {
                 date.add(dateStr);
                 String value = redisTemplate.opsForValue().get(dateStr);
                 if (StringUtils.isEmpty(value)) {
-                    details.forEach(m -> ((List<Integer>) m.get("data")).add(0));
+                    details.forEach(m -> {
+                        ((List<Integer>) m.get("data")).add(0);
+                        lastDayServiceCount.put((String) m.get("service"), 0);
+                    });
                 } else {
                     try {
                         Map<String, Integer> serviceMap = objectMapper.readValue(value, new TypeReference<Map<String, Integer>>() {
@@ -134,7 +144,9 @@ public class ApiServiceImpl implements ApiService {
                         details.forEach(m -> {
                             String service = (String) m.get("service");
                             List<Integer> list = (List<Integer>) m.get("data");
-                            list.add(serviceMap.get(service) == null ? 0 : serviceMap.get(service));
+                            int count = serviceMap.get(service) == null ? 0 : serviceMap.get(service);
+                            list.add(count);
+                            lastDayServiceCount.put(service, count);
                         });
                     } catch (IOException e) {
                         logger.error("object mapper read value to map error, redis key {}, value {}, exception :: {}", dateStr, value, e);
@@ -142,6 +154,7 @@ public class ApiServiceImpl implements ApiService {
                 }
                 calendar.add(Calendar.DATE, 1);
             }
+            return lastDayServiceCount;
         } catch (ParseException e) {
             throw new CommonException("error.date.parse", beginDate, endDate);
         }
@@ -155,11 +168,11 @@ public class ApiServiceImpl implements ApiService {
         Set<String> keySet = new HashSet<>();
         map.put("date", date);
         map.put("details", details);
-        map.put("apis", keySet);
         validateDate(beginDate);
         validateDate(endDate);
         Map<String, Map<String, Integer>> dateMap = new HashMap<>();
         setDataMapAndKeySet(beginDate, endDate, service, date, keySet, dateMap);
+        Map<String, Integer> lastDayApiCount = new HashMap<>();
         for (String api : keySet) {
             Map<String, Object> detailMap = new HashMap<>(2);
             detailMap.put("api", api);
@@ -169,12 +182,22 @@ public class ApiServiceImpl implements ApiService {
                 Map<String, Integer> apiMap = dateMap.get(dateStr);
                 if (apiMap == null) {
                     data.add(0);
+                    lastDayApiCount.put(api, 0);
                 } else {
-                    data.add(apiMap.get(api) == null ? 0 : apiMap.get(api));
+                    int count = apiMap.get(api) == null ? 0 : apiMap.get(api);
+                    data.add(count);
+                    lastDayApiCount.put(api, count);
                 }
             }
             details.add(detailMap);
         }
+        List<String> sortedKey =
+                lastDayApiCount.entrySet()
+                        .stream()
+                        .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toList());
+        map.put("apis", sortedKey);
         return map;
 
     }
@@ -218,7 +241,7 @@ public class ApiServiceImpl implements ApiService {
             } else {
                 try {
                     JsonNode node = objectMapper.readTree(json);
-                    processTreeOnControllerNode(node, versionChildren, versionKey);
+                    processTreeOnControllerNode(service, version, node, versionChildren, versionKey);
                 } catch (IOException e) {
                     logger.error("object mapper read tree error, service: {}, version: {}", service, version);
                 }
@@ -227,29 +250,35 @@ public class ApiServiceImpl implements ApiService {
         }
     }
 
-    private void processTreeOnControllerNode(JsonNode node, List<Map<String, Object>> children, String parentKey) {
-        JsonNode tagNodes = node.get("tags");
-        Iterator<JsonNode> iterator = tagNodes.iterator();
+    private void processTreeOnControllerNode(String service, String version, JsonNode node, List<Map<String, Object>> children, String parentKey) {
+        Map<String, Map> controllerMap = processControllerMap(node);
+        Map<String, List> pathMap = processPathMap(service, version, node);
         int controllerCount = 0;
-        while (iterator.hasNext()) {
-            Map<String, Object> controllerMap = new HashMap<>();
-            children.add(controllerMap);
-            JsonNode jsonNode = iterator.next();
-            String name = jsonNode.findValue("name").asText();
-            controllerMap.put(TITLE, name);
-            String controllerKey = parentKey + "-" + controllerCount;
-            controllerMap.put(KEY, controllerKey);
-            List<Map<String, Object>> controllerChildren = new ArrayList<>();
-            controllerMap.put(CHILDREN, controllerChildren);
-            processTreeOnPathNode(name, node, controllerChildren, controllerKey);
-            controllerCount++;
+        for (Map.Entry<String, Map> entry : controllerMap.entrySet()) {
+            int pathCount = 0;
+            String controllerName = entry.getKey();
+            Map<String, Object> controller = entry.getValue();
+            List<Map<String, Object>> controllerChildren = (List<Map<String, Object>>) controller.get(CHILDREN);
+            List<Map<String, Object>> list = pathMap.get(controllerName);
+            if (list != null) {
+                String controllerKey = parentKey + "-" + controllerCount;
+                controller.put(KEY, controllerKey);
+                children.add(controller);
+                for (Map<String, Object> path : list) {
+                    path.put(KEY, controllerKey + "-" + pathCount);
+                    path.put("refController", controllerName);
+                    controllerChildren.add(path);
+                    pathCount++;
+                }
+                controllerCount++;
+            }
         }
     }
 
-    private void processTreeOnPathNode(String controllerName, JsonNode node, List<Map<String, Object>> children, String parentKey) {
+    private Map<String, List> processPathMap(String service, String version, JsonNode node) {
+        Map<String, List> pathMap = new HashMap<>();
         JsonNode pathNode = node.get("paths");
         Iterator<String> urlIterator = pathNode.fieldNames();
-        int patchCount = 0;
         while (urlIterator.hasNext()) {
             String url = urlIterator.next();
             JsonNode methodNode = pathNode.get(url);
@@ -257,27 +286,48 @@ public class ApiServiceImpl implements ApiService {
             while (methodIterator.hasNext()) {
                 String method = methodIterator.next();
                 JsonNode jsonNode = methodNode.findValue(method);
+                if (jsonNode.get("description") == null) {
+                    continue;
+                }
+                Map<String, Object> path = new HashMap<>();
+                path.put(TITLE, url);
+                path.put("method", method);
+                path.put("operationId", Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
+                path.put("service", service);
+                path.put("version", version);
                 JsonNode tagNode = jsonNode.get("tags");
-                boolean match = false;
                 for (int i = 0; i < tagNode.size(); i++) {
                     String tag = tagNode.get(i).asText();
-                    if (controllerName.equals(tag)) {
-                        match = true;
+                    if (pathMap.get(tag) == null) {
+                        List<Map<String, Object>> list = new ArrayList<>();
+                        list.add(path);
+                        pathMap.put(tag, list);
+                    } else {
+                        pathMap.get(tag).add(path);
                     }
-                }
-                if (match) {
-                    Map<String, Object> pathMap = new HashMap<>();
-                    children.add(pathMap);
-                    pathMap.put(TITLE, url);
-                    String pathKey = parentKey + "-" + patchCount;
-                    pathMap.put(KEY, pathKey);
-                    pathMap.put("method", method);
-                    pathMap.put("operationId", Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
-                    pathMap.put("refController", controllerName);
-                    patchCount++;
                 }
             }
         }
+        return pathMap;
+    }
+
+    private Map<String, Map> processControllerMap(JsonNode node) {
+        Map<String, Map> controllerMap = new HashMap<>();
+        JsonNode tagNodes = node.get("tags");
+        Iterator<JsonNode> iterator = tagNodes.iterator();
+        while (iterator.hasNext()) {
+            JsonNode jsonNode = iterator.next();
+            String name = jsonNode.findValue("name").asText();
+            if (!name.contains("-controller") && !name.contains("-endpoint")) {
+                continue;
+            }
+            Map<String, Object> controller = new HashMap<>();
+            controllerMap.put(name, controller);
+            controller.put(TITLE, name);
+            List<Map<String, Object>> controllerChildren = new ArrayList<>();
+            controller.put(CHILDREN, controllerChildren);
+        }
+        return controllerMap;
     }
 
     private void setDataMapAndKeySet(String beginDate, String endDate, String service, Set<String> date, Set<String> keySet, Map<String, Map<String, Integer>> dateMap) {
@@ -387,55 +437,45 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public Map<String, Object> queryInstancesAndApiCount() {
-        List<SwaggerResource> swaggerResources = iSwaggerService.getSwaggerResource();
         Map<String, Object> apiCountMap = new HashMap<>(2);
         List<String> services = new ArrayList<>();
-        List<String> apiCounts = new ArrayList<>();
+        List<Integer> apiCounts = new ArrayList<>();
         apiCountMap.put("services", services);
         apiCountMap.put("apiCounts", apiCounts);
-        swaggerResources.forEach(resource -> {
+        Map<String, Set<String>> serviceMap = getServiceMap();
+        for (Map.Entry<String, Set<String>> entry : serviceMap.entrySet()) {
             int count = 0;
-            String name = resource.getName();
-            String[] nameArray = name.split(":");
-            if (nameArray.length != 2) {
-                logger.warn("the resource name is not match xx:xx , name : {}", name);
-                return;
+            String service = entry.getKey();
+            Set<String> versions = entry.getValue();
+            //目前只有一个版本，所以取第一个，如果后续支持多版本，此处遍历版本即可
+            Iterator<String> iterator = versions.iterator();
+            String version = null;
+            while (iterator.hasNext()) {
+                version = iterator.next();
+                break;
             }
-            String routeName = nameArray[0];
-            String serviceName = nameArray[1];
-            String location = resource.getLocation();
-            String[] locationArray = location.split("\\?version=");
-            if (locationArray.length != 2) {
-                logger.warn("the location is not match xx?version=xx , location : {}", location);
-                return;
-            }
-            String version = locationArray[1];
-            String json = null;
-            try {
-                json = getSwaggerJson(routeName, version);
-            } catch (Exception e) {
-                logger.error("can not fetch service {} version {} swagger json, exception : {} ", serviceName, version, e);
-            }
-            if (json == null) {
-                logger.warn("service {}, version {} has been abandoned because of the swagger json is null", serviceName, version);
-                return;
-            }
-            try {
-                JsonNode node = objectMapper.readTree(json);
-                JsonNode pathNode = node.get("paths");
-                Iterator<String> urlIterator = pathNode.fieldNames();
-                while (urlIterator.hasNext()) {
-                    String url = urlIterator.next();
-                    JsonNode methodNode = pathNode.get(url);
-                    count = count + methodNode.size();
+            if (version != null) {
+                String json = iDocumentService.fetchSwaggerJsonByService(service, version);
+                if (StringUtils.isEmpty(json)) {
+                    logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
+                } else {
+                    try {
+                        JsonNode node = objectMapper.readTree(json);
+                        JsonNode pathNode = node.get("paths");
+                        Iterator<String> urlIterator = pathNode.fieldNames();
+                        while (urlIterator.hasNext()) {
+                            String url = urlIterator.next();
+                            JsonNode methodNode = pathNode.get(url);
+                            count = count + methodNode.size();
+                        }
+                    } catch (IOException e) {
+                        logger.error("object mapper read tree error, service: {}, version: {}", service, version);
+                    }
                 }
-            } catch (IOException e) {
-                logger.error("objectMapper parse json exception, service {}, version {} has been abandoned, exception : {}", serviceName, version, e);
-                return;
             }
-            services.add(serviceName);
-            apiCounts.add(count + "");
-        });
+            services.add(service);
+            apiCounts.add(count);
+        }
         return apiCountMap;
     }
 

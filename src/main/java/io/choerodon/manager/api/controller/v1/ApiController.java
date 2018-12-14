@@ -98,9 +98,9 @@ public class ApiController {
     @ApiOperation("根据日期查询服务的调用次数")
     @GetMapping("/service_invoke/count")
     public ResponseEntity<Map<String, Object>> queryServiceInvoke(@RequestParam(value = "begin_date")
-                                                  @ApiParam(value = "日期格式yyyy-MM-dd") String beginDate,
-                                                  @RequestParam(value = "end_date")
-                                                  @ApiParam(value = "日期格式yyyy-MM-dd") String endDate) {
+                                                                  @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String beginDate,
+                                                                  @RequestParam(value = "end_date")
+                                                                  @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String endDate) {
         return new ResponseEntity<>(apiService.queryServiceInvoke(beginDate, endDate), HttpStatus.OK);
     }
 
@@ -108,10 +108,10 @@ public class ApiController {
     @ApiOperation("查询日期或者服务名或path路径查询api的调用次数")
     @GetMapping("/api_invoke/count")
     public ResponseEntity<Map<String, Object>> queryApiInvoke(@RequestParam(value = "begin_date")
-                                              @ApiParam(value = "日期格式yyyy-MM-dd") String beginDate,
-                                              @RequestParam(value = "end_date")
-                                              @ApiParam(value = "日期格式yyyy-MM-dd") String endDate,
-                                              @RequestParam String service) {
+                                                              @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String beginDate,
+                                                              @RequestParam(value = "end_date")
+                                                              @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String endDate,
+                                                              @RequestParam String service) {
         return new ResponseEntity<>(apiService.queryApiInvoke(beginDate, endDate, service), HttpStatus.OK);
     }
 
