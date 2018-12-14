@@ -100,8 +100,19 @@ public class ManualPageHelper {
 
     private static <T> boolean throughFilter(final T obj, final Map<String, Object> filters) {
         Class<?> objClass = obj.getClass();
+        boolean allIsNullExcludeParams = true;
+        for (Map.Entry<String, Object> entry : filters.entrySet()) {
+            String key = entry.getKey();
+            if (PARAMS_KEY.equals(key)) {
+                continue;
+            }
+            if (entry.getValue() != null) {
+                allIsNullExcludeParams = false;
+                break;
+            }
+        }
         final Object params = filters.get(PARAMS_KEY);
-        if (params != null) {
+        if (params != null && allIsNullExcludeParams) {
             return filters.entrySet().stream()
                     .filter(t -> !t.getKey().equals(PARAMS_KEY))
                     .anyMatch(i -> paramThrough(objClass, obj, i.getKey(), params));
@@ -117,7 +128,7 @@ public class ManualPageHelper {
             field.setAccessible(true);
             if (field.getType().equals(String.class) && params instanceof String) {
                 final Object value = field.get(obj);
-                if (value !=null && ((String)value).contains((String)params)) {
+                if (value != null && ((String) value).contains((String) params)) {
                     return true;
                 }
             } else {
@@ -137,7 +148,7 @@ public class ManualPageHelper {
             field.setAccessible(true);
             if (field.getType().equals(String.class) && i.getValue() instanceof String) {
                 final Object value = field.get(obj);
-                if (value ==null || !((String)value).toLowerCase().contains((String)i.getValue())) {
+                if (value == null || !((String) value).toLowerCase().contains((String) i.getValue())) {
                     return true;
                 }
             } else {
