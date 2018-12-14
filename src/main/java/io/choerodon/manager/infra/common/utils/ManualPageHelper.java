@@ -5,6 +5,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -106,12 +107,11 @@ public class ManualPageHelper {
             if (PARAMS_KEY.equals(key)) {
                 continue;
             }
-            if (entry.getValue() != null) {
+            if (!StringUtils.isEmpty(entry.getValue())) {
                 allIsNullExcludeParams = false;
                 break;
             }
         }
-        logger.info("@@@ allIsNullExcludeParams {}", allIsNullExcludeParams);
         final Object params = filters.get(PARAMS_KEY);
         if (params != null && allIsNullExcludeParams) {
             return filters.entrySet().stream()
