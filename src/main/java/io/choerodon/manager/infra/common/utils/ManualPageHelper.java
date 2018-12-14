@@ -111,6 +111,7 @@ public class ManualPageHelper {
                 break;
             }
         }
+        logger.info("@@@ allIsNullExcludeParams {}", allIsNullExcludeParams);
         final Object params = filters.get(PARAMS_KEY);
         if (params != null && allIsNullExcludeParams) {
             return filters.entrySet().stream()
