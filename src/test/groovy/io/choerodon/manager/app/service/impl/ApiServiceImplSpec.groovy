@@ -1,12 +1,11 @@
 package io.choerodon.manager.app.service.impl
 
-import io.choerodon.core.exception.CommonException
 import io.choerodon.manager.IntegrationTestConfiguration
-import io.choerodon.manager.api.dto.swagger.ParameterDTO
-import io.choerodon.manager.api.dto.swagger.PathDTO
+import io.choerodon.manager.api.dto.swagger.ControllerDTO
 import io.choerodon.manager.app.service.ApiService
 import io.choerodon.manager.domain.service.IDocumentService
 import io.choerodon.manager.domain.service.ISwaggerService
+import io.choerodon.manager.infra.dataobject.RouteDO
 import io.choerodon.manager.infra.mapper.RouteMapper
 import io.choerodon.mybatis.pagehelper.domain.PageRequest
 import io.choerodon.mybatis.pagehelper.domain.Sort
@@ -14,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.data.redis.core.StringRedisTemplate
+import org.springframework.data.redis.core.ValueOperations
 import spock.lang.Specification
+import springfox.documentation.swagger.web.SwaggerResource
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 
@@ -55,7 +56,7 @@ class ApiServiceImplSpec extends Specification {
         and: 'mock getSwaggerJson方法'
         def file = new File(this.class.getResource('/swagger.json').toURI())
         mockIDocumentService.fetchSwaggerJsonByService(_, _) >> { file.getText('UTF-8') }
-        mockIDocumentService.expandSwaggerJson(_,_,_) >> { file.getText('UTF-8') }
+        mockIDocumentService.expandSwaggerJson(_, _, _) >> { file.getText('UTF-8') }
 
         when: "方法调用"
         def list = apiService.getControllers(name, version, pageRequest, map)
@@ -115,55 +116,62 @@ class ApiServiceImplSpec extends Specification {
 //    }
 
     def "QueryPathDetail"() {
-        given: "准备查询参数"
-        def serviceName = "test"
-        def version = "test"
-        def controllerName_NotFound = "test"
-        def controllerName = 'api-controller'
-        def operationId = "test"
-
-        and: "构造parameterDTO和pathDTO"
-        def parameterDTO = new ParameterDTO()
-        parameterDTO.setBody("test")
-        def parameterDTO1 = new ParameterDTO()
-        parameterDTO1.setBody("test1")
-        def pathDTO = new PathDTO()
-        pathDTO.setDescription("test")
-        def pathDTO1 = new PathDTO()
-        pathDTO1.setDescription("test1")
-
-        and: 'mock iDocumentService.getSwaggerJson & objectMapper.readTree'
+        given:
+        ISwaggerService iSwaggerService = Mock(ISwaggerService)
+        IDocumentService iDocumentService = Mock(IDocumentService)
+        StringRedisTemplate stringRedisTemplate = Mock(StringRedisTemplate)
+        RouteMapper routeMapper1 = Mock(RouteMapper)
+        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, routeMapper1, iSwaggerService, stringRedisTemplate)
+        List<SwaggerResource> resources = new ArrayList<>()
+        SwaggerResource resource = new SwaggerResource()
+        resource.setName("manager:manager-service")
+        resource.setLocation("/docs/manager?version=null_version")
+        resources << resource
+        iSwaggerService.getSwaggerResource() >> resources
         def file = new File(this.class.getResource('/swagger.json').toURI())
-        mockIDocumentService.fetchSwaggerJsonByService(_, _) >> { file.getText('UTF-8') }
+        iDocumentService.fetchSwaggerJsonByService(_, _) >> { file.getText('UTF-8') }
+        iDocumentService.expandSwaggerJson(_, _, _) >> { file.getText('UTF-8') }
+        RouteDO routeDO = Mock(RouteDO)
+        routeMapper1.selectOne(_) >> routeDO
+        routeDO.getServiceId() >> "manager-service"
 
-        when: '调用方法'
-        apiService.queryPathDetail(serviceName, version, controllerName, operationId)
+        when:
+        ControllerDTO value = apiService.queryPathDetail("manager", "null_version", "api-controller", "resourcesUsingGET")
 
-        then: '结果分析'
-        thrown(CommonException)
-
-        when: '调用方法'
-        apiService.queryPathDetail(serviceName, version, controllerName_NotFound, operationId)
-
-        then: '捕获异常'
-        def error = thrown(CommonException)
-        error.message.contains('error.route.not.found')
+        then:
+        1 * stringRedisTemplate.hasKey(_) >> false
+        1 * stringRedisTemplate.opsForValue() >> Mock(ValueOperations)
+        value.getName() == "api-controller"
     }
 
-    def "QueryPathDetail[Service Not Run]"() {
-        given: "准备查询参数"
-        def serviceName = "test"
-        def version = "test"
-        def controllerName = "test"
-        def operationId = "test"
-        and: 'mock iDocumentService.getSwaggerJson'
-        mockIDocumentService.fetchSwaggerJsonByService(_, _) >> { throw new IOException("") }
+    def "QueryPathDetail[from redis]"() {
+        given:
+        ISwaggerService iSwaggerService = Mock(ISwaggerService)
+        IDocumentService iDocumentService = Mock(IDocumentService)
+        StringRedisTemplate stringRedisTemplate = Mock(StringRedisTemplate)
+        RouteMapper routeMapper1 = Mock(RouteMapper)
+        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, routeMapper1, iSwaggerService, stringRedisTemplate)
+        List<SwaggerResource> resources = new ArrayList<>()
+        SwaggerResource resource = new SwaggerResource()
+        resource.setName("manager:manager-service")
+        resource.setLocation("/docs/manager?version=null_version")
+        resources << resource
+        iSwaggerService.getSwaggerResource() >> resources
+        def file = new File(this.class.getResource('/swagger.json').toURI())
+        iDocumentService.fetchSwaggerJsonByService(_, _) >> { file.getText('UTF-8') }
+        iDocumentService.expandSwaggerJson(_, _, _) >> { file.getText('UTF-8') }
+        RouteDO routeDO = Mock(RouteDO)
+        routeMapper1.selectOne(_) >> routeDO
+        routeDO.getServiceId() >> "manager-service"
+        ValueOperations valueOperations = Mock(ValueOperations)
 
-        when: '调用方法'
-        apiService.queryPathDetail(serviceName, version, controllerName, operationId)
+        when:
+        ControllerDTO value = apiService.queryPathDetail("manager", "null_version", "api-controller", "resourcesUsingGET")
 
-        then: '捕获异常'
-        def error = thrown(CommonException)
-        error.message.contains('error.route.not.found')
+        then:
+        1 * stringRedisTemplate.hasKey(_) >> true
+        1 * stringRedisTemplate.opsForValue() >> valueOperations
+        1*valueOperations.get(_)>>"{\"name\":\"api-controller\",\"description\":\"api测试\",\"paths\":[{\"url\":\"/v1/swaggers/resources\",\"method\":\"get\",\"consumes\":[\"application/json\"],\"produces\":[\"*/*\"],\"operationId\":\"resourcesUsingGET\",\"parameters\":[],\"responses\":[{\"httpStatus\":\"200\",\"description\":\"OK\",\"body\":\"[\\n{\\n\\\"swaggerVersion\\\":\\\"string\\\"\\n\\\"name\\\":\\\"string\\\"\\n\\\"location\\\":\\\"string\\\"\\n}\\n]\"},{\"httpStatus\":\"401\",\"description\":\"Unauthorized\",\"body\":null},{\"httpStatus\":\"403\",\"description\":\"Forbidden\",\"body\":null},{\"httpStatus\":\"404\",\"description\":\"Not Found\",\"body\":null}],\"remark\":\"查询不包含跳过的服务的路由列表\",\"description\":\"{\\\"permission\\\":{\\\"action\\\":\\\"resources\\\",\\\"menuLevel\\\":null,\\\"permissionLevel\\\":\\\"site\\\",\\\"roles\\\":[\\\"role/site/default/developer\\\"],\\\"permissionLogin\\\":false,\\\"permissionPublic\\\":false,\\\"permissionWithin\\\":false},\\\"label\\\":null}\",\"refController\":\"api-controller\",\"innerInterface\":false,\"basePath\":\"/manager\",\"code\":\"manager-service.api.resources\"}]}"
+        value.getName() == "api-controller"
     }
 }

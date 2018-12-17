@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,9 @@ public class ApiServiceImpl implements ApiService {
     private static final String TITLE = "title";
     private static final String KEY = "key";
     private static final String CHILDREN = "children";
+    private static final String API_TREE_DOC = "api-tree-doc";
+    private static final String PATH_DETAIL = "path-detail";
+    private static final String COLON = ":";
 
     private IDocumentService iDocumentService;
 
@@ -235,18 +239,36 @@ public class ApiServiceImpl implements ApiService {
             versionMap.put(KEY, versionKey);
             List<Map<String, Object>> versionChildren = new ArrayList<>();
             versionMap.put(CHILDREN, versionChildren);
-            String json = iDocumentService.fetchSwaggerJsonByService(service, version);
-            if (StringUtils.isEmpty(json)) {
-                logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
-            } else {
+            String apiTreeDocKey = getApiTreeDocKey(service, version);
+            if (redisTemplate.hasKey(apiTreeDocKey)) {
+                String childrenStr = redisTemplate.opsForValue().get(apiTreeDocKey);
                 try {
-                    JsonNode node = objectMapper.readTree(json);
-                    processTreeOnControllerNode(service, version, node, versionChildren, versionKey);
+                    List<Map<String, Object>> list =
+                            objectMapper.readValue(childrenStr, new TypeReference<List<Map<String, Object>>>() {
+                            });
+                    versionChildren.addAll(list);
                 } catch (IOException e) {
-                    logger.error("object mapper read tree error, service: {}, version: {}", service, version);
+                    logger.error("object mapper read redis cache value {} to List<Map<String, Object>> error, so process children version from db or swagger, exception: {} ", childrenStr, e);
+                    processChildrenFromSwaggerJson(service, version, versionKey, versionChildren);
                 }
+            } else {
+                processChildrenFromSwaggerJson(service, version, versionKey, versionChildren);
             }
             versionCount++;
+        }
+    }
+
+    private void processChildrenFromSwaggerJson(String service, String version, String versionKey, List<Map<String, Object>> versionChildren) {
+        String json = iDocumentService.fetchSwaggerJsonByService(service, version);
+        if (StringUtils.isEmpty(json)) {
+            logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
+        } else {
+            try {
+                JsonNode node = objectMapper.readTree(json);
+                processTreeOnControllerNode(service, version, node, versionChildren, versionKey);
+            } catch (IOException e) {
+                logger.error("object mapper read tree error, service: {}, version: {}", service, version);
+            }
         }
     }
 
@@ -273,6 +295,22 @@ public class ApiServiceImpl implements ApiService {
                 controllerCount++;
             }
         }
+        cache2Redis(getApiTreeDocKey(service, version), children);
+    }
+
+    private void cache2Redis(String key, Object value) {
+        try {
+            //缓存10天
+            redisTemplate.opsForValue().set(key, objectMapper.writeValueAsString(value), 10, TimeUnit.DAYS);
+        } catch (JsonProcessingException e) {
+            logger.warn("read object to string error while caching to redis, exception: {}", e);
+        }
+    }
+
+    private String getApiTreeDocKey(String service, String version) {
+        StringBuilder stringBuilder = new StringBuilder(API_TREE_DOC);
+        stringBuilder.append(COLON).append(service).append(COLON).append(version);
+        return stringBuilder.toString();
     }
 
     private Map<String, List> processPathMap(String service, String version, JsonNode node) {
@@ -346,7 +384,7 @@ public class ApiServiceImpl implements ApiService {
                 }
                 String dateStr = dateFormat.format(calendar.getTime());
                 date.add(dateStr);
-                String value = redisTemplate.opsForValue().get(dateStr + ":" + service);
+                String value = redisTemplate.opsForValue().get(dateStr + COLON + service);
                 if (StringUtils.isEmpty(value)) {
                     dateMap.put(dateStr, null);
                 } else {
@@ -372,7 +410,7 @@ public class ApiServiceImpl implements ApiService {
         List<SwaggerResource> resources = iSwaggerService.getSwaggerResource();
         for (SwaggerResource resource : resources) {
             String name = resource.getName();
-            String[] nameArray = name.split(":");
+            String[] nameArray = name.split(COLON);
             String location = resource.getLocation();
             String[] locationArray = location.split("\\?version=");
             if (nameArray.length != 2 || locationArray.length != 2) {
@@ -414,25 +452,55 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public ControllerDTO queryPathDetail(String name, String version, String controllerName, String operationId) {
-        try {
-            String json = getSwaggerJson(name, version);
-            JsonNode node = objectMapper.readTree(json);
-            List<ControllerDTO> controllers = processControllers(node);
-            List<ControllerDTO> targetControllers =
-                    controllers.stream().filter(c -> controllerName.equals(c.getName())).collect(Collectors.toList());
-            if (targetControllers.isEmpty()) {
-                throw new CommonException("error.controller.not.found", controllerName);
+    public ControllerDTO queryPathDetail(String serviceName, String version, String controllerName, String operationId) {
+        String key = getPathDetailRedisKey(serviceName, version, controllerName, operationId);
+        if (redisTemplate.hasKey(key)) {
+            String value = redisTemplate.opsForValue().get(key);
+            try {
+                return objectMapper.readValue(value, ControllerDTO.class);
+            } catch (IOException e) {
+                logger.error("object mapper read redis cache value {} to ControllerDTO error, so process from db or swagger, exception: {} ", value, e);
             }
-            Map<String, Map<String, FieldDTO>> map = processDefinitions(node);
-            Map<String, String> dtoMap = convertMap2JsonWithComments(map);
-            JsonNode pathNode = node.get("paths");
-            String basePath = node.get("basePath").asText();
-            return queryPathDetailByOptions(name, pathNode, targetControllers, operationId, dtoMap, basePath).get(0);
-        } catch (IOException e) {
-            logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", name, version, e.getMessage());
-            throw new CommonException("error.service.not.run", name, version);
         }
+        try {
+            return processPathDetailFromSwagger(serviceName, version, controllerName, operationId, key);
+        } catch (IOException e) {
+            logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", serviceName, version, e.getMessage());
+            throw new CommonException("error.service.not.run", serviceName, version);
+        }
+
+    }
+
+    private ControllerDTO processPathDetailFromSwagger(String name, String version, String controllerName, String operationId, String key) throws IOException {
+        String json = getSwaggerJson(name, version);
+        JsonNode node = objectMapper.readTree(json);
+        List<ControllerDTO> controllers = processControllers(node);
+        List<ControllerDTO> targetControllers =
+                controllers.stream().filter(c -> controllerName.equals(c.getName())).collect(Collectors.toList());
+        if (targetControllers.isEmpty()) {
+            throw new CommonException("error.controller.not.found", controllerName);
+        }
+        Map<String, Map<String, FieldDTO>> map = processDefinitions(node);
+        Map<String, String> dtoMap = convertMap2JsonWithComments(map);
+        JsonNode pathNode = node.get("paths");
+        String basePath = node.get("basePath").asText();
+        ControllerDTO controller = queryPathDetailByOptions(name, pathNode, targetControllers, operationId, dtoMap, basePath);
+        cache2Redis(key, controller);
+        return controller;
+    }
+
+    private String getPathDetailRedisKey(String name, String version, String controllerName, String operationId) {
+        StringBuilder builder = new StringBuilder(PATH_DETAIL);
+        builder
+                .append(COLON)
+                .append(name)
+                .append(COLON)
+                .append(version)
+                .append(COLON)
+                .append(controllerName)
+                .append(COLON)
+                .append(operationId);
+        return builder.toString();
     }
 
     @Override
@@ -607,7 +675,7 @@ public class ApiServiceImpl implements ApiService {
         sb.append("\"");
         sb.append(field);
         sb.append("\"");
-        sb.append(":");
+        sb.append(COLON);
     }
 
     private void appendComment(StringBuilder sb, FieldDTO dto) {
@@ -679,8 +747,8 @@ public class ApiServiceImpl implements ApiService {
         return map;
     }
 
-    private List<ControllerDTO> queryPathDetailByOptions(String serviceName, JsonNode pathNode, List<ControllerDTO> targetControllers, String operationId,
-                                                         Map<String, String> dtoMap, String basePath) {
+    private ControllerDTO queryPathDetailByOptions(String serviceName, JsonNode pathNode, List<ControllerDTO> targetControllers, String operationId,
+                                                   Map<String, String> dtoMap, String basePath) {
         Iterator<String> urlIterator = pathNode.fieldNames();
         while (urlIterator.hasNext()) {
             String url = urlIterator.next();
@@ -695,7 +763,7 @@ public class ApiServiceImpl implements ApiService {
                 }
             }
         }
-        return targetControllers;
+        return targetControllers.get(0);
     }
 
     private void processPaths(String serviceName, JsonNode pathNode, List<ControllerDTO> controllers, Map<String, String> dtoMap, String basePath) {
