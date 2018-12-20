@@ -263,23 +263,23 @@ public class ApiServiceImpl implements ApiService {
                     versionChildren.addAll(list);
                 } catch (IOException e) {
                     logger.error("object mapper read redis cache value {} to List<Map<String, Object>> error, so process children version from db or swagger, exception: {} ", childrenStr, e);
-                    processChildrenFromSwaggerJson(service, version, versionKey, versionChildren);
+                    processChildrenFromSwaggerJson(routeName, service, version, versionKey, versionChildren);
                 }
             } else {
-                processChildrenFromSwaggerJson(service, version, versionKey, versionChildren);
+                processChildrenFromSwaggerJson(routeName, service, version, versionKey, versionChildren);
             }
             versionCount++;
         }
     }
 
-    private void processChildrenFromSwaggerJson(String service, String version, String versionKey, List<Map<String, Object>> versionChildren) {
+    private void processChildrenFromSwaggerJson(String routeName, String service, String version, String versionKey, List<Map<String, Object>> versionChildren) {
         String json = iDocumentService.fetchSwaggerJsonByService(service, version);
         if (StringUtils.isEmpty(json)) {
             logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
         } else {
             try {
                 JsonNode node = objectMapper.readTree(json);
-                processTreeOnControllerNode(service, version, node, versionChildren, versionKey);
+                processTreeOnControllerNode(routeName, service, version, node, versionChildren, versionKey);
             } catch (IOException e) {
                 logger.error("object mapper read tree error, service: {}, version: {}", service, version);
             }
