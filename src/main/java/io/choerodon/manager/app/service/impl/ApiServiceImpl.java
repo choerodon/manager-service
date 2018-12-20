@@ -7,6 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.manager.domain.service.ISwaggerService;
 import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.manager.infra.mapper.RouteMapper;
+import org.apache.commons.collections.MapIterator;
+import org.apache.commons.collections.keyvalue.MultiKey;
+import org.apache.commons.collections.map.MultiKeyMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -93,9 +96,16 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public Map<String, Object> queryServiceInvoke(String beginDate, String endDate) {
-        Set<String> keySet = getServiceMap().keySet();
+        MultiKeyMap multiKeyMap = getServiceMap();
+        MapIterator mapIterator = multiKeyMap.mapIterator();
+        Set<String> serviceKeySet = new HashSet<>();
+        while (mapIterator.hasNext()) {
+            MultiKey multiKey = (MultiKey) mapIterator.next();
+            Object[] keys = multiKey.getKeys();
+            serviceKeySet.add((String) keys[1]);
+        }
         List<Map<String, Object>> details = new ArrayList<>();
-        for (String service : keySet) {
+        for (String service : serviceKeySet) {
             Map<String, Object> detailMap = new HashMap<>(2);
             detailMap.put("service", service);
             detailMap.put("data", new ArrayList<>());
@@ -208,28 +218,32 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public Map queryTreeMenu() {
-        Map<String, Set<String>> services = getServiceMap();
+        MultiKeyMap multiKeyMap = getServiceMap();
         Map<String, Object> map = new HashMap<>();
         List<Map<String, Object>> list = new ArrayList<>();
         map.put("service", list);
         int serviceCount = 0;
-        for (Map.Entry<String, Set<String>> entry : services.entrySet()) {
+        MapIterator mapIterator = multiKeyMap.mapIterator();
+        while (mapIterator.hasNext()) {
+            MultiKey multiKey = (MultiKey) mapIterator.next();
+            Object[] keys = multiKey.getKeys();
+            String routeName = (String) keys[0];
+            String service = (String) keys[1];
             Map<String, Object> serviceMap = new HashMap<>();
             list.add(serviceMap);
-            String service = entry.getKey();
-            Set<String> versions = entry.getValue();
+            Set<String> versions = (Set<String>) multiKeyMap.get(routeName, service);
             serviceMap.put(TITLE, service);
             String serviceKey = serviceCount + "";
             serviceMap.put(KEY, serviceKey);
             List<Map<String, Object>> children = new ArrayList<>();
             serviceMap.put(CHILDREN, children);
-            processTreeOnVersionNode(service, versions, children, serviceKey);
+            processTreeOnVersionNode(routeName, service, versions, children, serviceKey);
             serviceCount++;
         }
         return map;
     }
 
-    private void processTreeOnVersionNode(String service, Set<String> versions, List<Map<String, Object>> children, String parentKey) {
+    private void processTreeOnVersionNode(String routeName, String service, Set<String> versions, List<Map<String, Object>> children, String parentKey) {
         int versionCount = 0;
         for (String version : versions) {
             Map<String, Object> versionMap = new HashMap<>();
@@ -249,32 +263,32 @@ public class ApiServiceImpl implements ApiService {
                     versionChildren.addAll(list);
                 } catch (IOException e) {
                     logger.error("object mapper read redis cache value {} to List<Map<String, Object>> error, so process children version from db or swagger, exception: {} ", childrenStr, e);
-                    processChildrenFromSwaggerJson(service, version, versionKey, versionChildren);
+                    processChildrenFromSwaggerJson(routeName, service, version, versionKey, versionChildren);
                 }
             } else {
-                processChildrenFromSwaggerJson(service, version, versionKey, versionChildren);
+                processChildrenFromSwaggerJson(routeName, service, version, versionKey, versionChildren);
             }
             versionCount++;
         }
     }
 
-    private void processChildrenFromSwaggerJson(String service, String version, String versionKey, List<Map<String, Object>> versionChildren) {
+    private void processChildrenFromSwaggerJson(String routeName, String service, String version, String versionKey, List<Map<String, Object>> versionChildren) {
         String json = iDocumentService.fetchSwaggerJsonByService(service, version);
         if (StringUtils.isEmpty(json)) {
             logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
         } else {
             try {
                 JsonNode node = objectMapper.readTree(json);
-                processTreeOnControllerNode(service, version, node, versionChildren, versionKey);
+                processTreeOnControllerNode(routeName, service, version, node, versionChildren, versionKey);
             } catch (IOException e) {
                 logger.error("object mapper read tree error, service: {}, version: {}", service, version);
             }
         }
     }
 
-    private void processTreeOnControllerNode(String service, String version, JsonNode node, List<Map<String, Object>> children, String parentKey) {
+    private void processTreeOnControllerNode(String routeName, String service, String version, JsonNode node, List<Map<String, Object>> children, String parentKey) {
         Map<String, Map> controllerMap = processControllerMap(node);
-        Map<String, List> pathMap = processPathMap(service, version, node);
+        Map<String, List> pathMap = processPathMap(routeName, service, version, node);
         int controllerCount = 0;
         for (Map.Entry<String, Map> entry : controllerMap.entrySet()) {
             int pathCount = 0;
@@ -313,7 +327,7 @@ public class ApiServiceImpl implements ApiService {
         return stringBuilder.toString();
     }
 
-    private Map<String, List> processPathMap(String service, String version, JsonNode node) {
+    private Map<String, List> processPathMap(String routeName, String service, String version, JsonNode node) {
         Map<String, List> pathMap = new HashMap<>();
         JsonNode pathNode = node.get("paths");
         Iterator<String> urlIterator = pathNode.fieldNames();
@@ -333,6 +347,7 @@ public class ApiServiceImpl implements ApiService {
                 path.put("operationId", Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
                 path.put("service", service);
                 path.put("version", version);
+                path.put("servicePrefix", routeName);
                 JsonNode tagNode = jsonNode.get("tags");
                 for (int i = 0; i < tagNode.size(); i++) {
                     String tag = tagNode.get(i).asText();
@@ -405,8 +420,11 @@ public class ApiServiceImpl implements ApiService {
         }
     }
 
-    private Map<String, Set<String>> getServiceMap() {
-        Map<String, Set<String>> map = new HashMap<>();
+    /**
+     * @return MultiKeyMap, key1 is route name, key2 is service id, value is version set
+     */
+    private MultiKeyMap getServiceMap() {
+        MultiKeyMap multiKeyMap = new MultiKeyMap();
         List<SwaggerResource> resources = iSwaggerService.getSwaggerResource();
         for (SwaggerResource resource : resources) {
             String name = resource.getName();
@@ -417,18 +435,19 @@ public class ApiServiceImpl implements ApiService {
                 logger.warn("the resource name is not match xx:xx or location is not match /doc/xx?version=xxx , name : {}, location: {}", name, location);
                 continue;
             }
+            String routeName = nameArray[0];
             String service = nameArray[1];
             String version = locationArray[1];
-            if (map.get(service) == null) {
+            if (multiKeyMap.get(routeName, service) == null) {
                 Set<String> versionSet = new HashSet<>();
                 versionSet.add(version);
-                map.put(service, versionSet);
+                multiKeyMap.put(routeName, service, versionSet);
             } else {
-                Set<String> versionSet = map.get(service);
+                Set<String> versionSet = (Set<String>) multiKeyMap.get(routeName, service);
                 versionSet.add(version);
             }
         }
-        return map;
+        return multiKeyMap;
     }
 
     private void validateDate(String date) {
@@ -510,11 +529,15 @@ public class ApiServiceImpl implements ApiService {
         List<Integer> apiCounts = new ArrayList<>();
         apiCountMap.put("services", services);
         apiCountMap.put("apiCounts", apiCounts);
-        Map<String, Set<String>> serviceMap = getServiceMap();
-        for (Map.Entry<String, Set<String>> entry : serviceMap.entrySet()) {
+        MultiKeyMap multiKeyMap = getServiceMap();
+        MapIterator mapIterator = multiKeyMap.mapIterator();
+        while (mapIterator.hasNext()) {
+            MultiKey multiKey = (MultiKey) mapIterator.next();
+            Object[] keys = multiKey.getKeys();
+            String routeName = (String) keys[0];
+            String service = (String) keys[1];
+            Set<String> versions = (Set<String>) multiKeyMap.get(routeName, service);
             int count = 0;
-            String service = entry.getKey();
-            Set<String> versions = entry.getValue();
             //目前只有一个版本，所以取第一个，如果后续支持多版本，此处遍历版本即可
             Iterator<String> iterator = versions.iterator();
             String version = null;
