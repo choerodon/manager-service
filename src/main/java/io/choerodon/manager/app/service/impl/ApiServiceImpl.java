@@ -52,6 +52,7 @@ public class ApiServiceImpl implements ApiService {
     private static final String API_TREE_DOC = "api-tree-doc";
     private static final String PATH_DETAIL = "path-detail";
     private static final String COLON = ":";
+    private static final String UNDERLINE = "-";
 
     private IDocumentService iDocumentService;
 
@@ -249,7 +250,7 @@ public class ApiServiceImpl implements ApiService {
             Map<String, Object> versionMap = new HashMap<>();
             children.add(versionMap);
             versionMap.put(TITLE, version);
-            String versionKey = parentKey + "-" + versionCount;
+            String versionKey = parentKey + UNDERLINE + versionCount;
             versionMap.put(KEY, versionKey);
             List<Map<String, Object>> versionChildren = new ArrayList<>();
             versionMap.put(CHILDREN, versionChildren);
@@ -263,50 +264,63 @@ public class ApiServiceImpl implements ApiService {
                     versionChildren.addAll(list);
                 } catch (IOException e) {
                     logger.error("object mapper read redis cache value {} to List<Map<String, Object>> error, so process children version from db or swagger, exception: {} ", childrenStr, e);
-                    processChildrenFromSwaggerJson(routeName, service, version, versionKey, versionChildren);
+                    processChildrenFromSwaggerJson(routeName, service, version, versionChildren);
                 }
             } else {
-                processChildrenFromSwaggerJson(routeName, service, version, versionKey, versionChildren);
+                processChildrenFromSwaggerJson(routeName, service, version, versionChildren);
             }
+            processKey(versionKey, versionChildren);
             versionCount++;
         }
     }
 
-    private void processChildrenFromSwaggerJson(String routeName, String service, String version, String versionKey, List<Map<String, Object>> versionChildren) {
+    private void processKey(String versionKey, List<Map<String, Object>> versionChildren) {
+        int controllerCount = 0;
+        for (Map<String, Object> map : versionChildren) {
+            StringBuilder builder = new StringBuilder(versionKey);
+            builder.append(UNDERLINE).append(controllerCount);
+            String controllerKey = builder.toString();
+            map.put(KEY, controllerKey);
+            List<Map<String, Object>> controllerChildren = (List<Map<String, Object>>) map.get(CHILDREN);
+            int pathCount = 0;
+            for (Map<String, Object> child : controllerChildren) {
+                StringBuilder stringBuilder = new StringBuilder(controllerKey);
+                stringBuilder.append(UNDERLINE).append(pathCount);
+                child.put(KEY, stringBuilder.toString());
+                pathCount++;
+            }
+            controllerCount++;
+        }
+    }
+
+    private void processChildrenFromSwaggerJson(String routeName, String service, String version, List<Map<String, Object>> versionChildren) {
         String json = iDocumentService.fetchSwaggerJsonByService(service, version);
         if (StringUtils.isEmpty(json)) {
             logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
         } else {
             try {
                 JsonNode node = objectMapper.readTree(json);
-                processTreeOnControllerNode(routeName, service, version, node, versionChildren, versionKey);
+                processTreeOnControllerNode(routeName, service, version, node, versionChildren);
             } catch (IOException e) {
                 logger.error("object mapper read tree error, service: {}, version: {}", service, version);
             }
         }
     }
 
-    private void processTreeOnControllerNode(String routeName, String service, String version, JsonNode node, List<Map<String, Object>> children, String parentKey) {
+    private void processTreeOnControllerNode(String routeName, String service, String version, JsonNode node, List<Map<String, Object>> children) {
         Map<String, Map> controllerMap = processControllerMap(node);
         Map<String, List> pathMap = processPathMap(routeName, service, version, node);
-        int controllerCount = 0;
         for (Map.Entry<String, Map> entry : controllerMap.entrySet()) {
-            int pathCount = 0;
             String controllerName = entry.getKey();
             Map<String, Object> controller = entry.getValue();
             List<Map<String, Object>> controllerChildren = (List<Map<String, Object>>) controller.get(CHILDREN);
             List<Map<String, Object>> list = pathMap.get(controllerName);
             if (list != null) {
-                String controllerKey = parentKey + "-" + controllerCount;
-                controller.put(KEY, controllerKey);
                 children.add(controller);
                 for (Map<String, Object> path : list) {
-                    path.put(KEY, controllerKey + "-" + pathCount);
                     path.put("refController", controllerName);
                     controllerChildren.add(path);
-                    pathCount++;
                 }
-                controllerCount++;
             }
         }
         cache2Redis(getApiTreeDocKey(service, version), children);
