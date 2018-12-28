@@ -30,7 +30,6 @@ import io.choerodon.swagger.annotation.Permission;
  */
 @RestController
 @RequestMapping(value = "/v1/routes")
-@Api(description = "路由")
 public class RouteController {
 
     private RouteService routeService;

@@ -15,6 +15,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.context.annotation.Import
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.core.ValueOperations
+import org.springframework.data.redis.core.ZSetOperations
 import spock.lang.Specification
 import springfox.documentation.swagger.web.SwaggerResource
 
@@ -120,13 +121,14 @@ class ApiControllerSpec extends Specification {
         ISwaggerService iSwaggerService = Mock(ISwaggerService)
         ApiServiceImpl apiService = new ApiServiceImpl(null, null, iSwaggerService, redisTemplate)
         ApiController controller = new ApiController(null, apiService)
-        List swaggerList = new ArrayList()
-        SwaggerResource swaggerResource = Mock(SwaggerResource)
-        swaggerList << swaggerResource
-        iSwaggerService.getSwaggerResource() >> swaggerList
-        swaggerResource.getName() >> "manager:manager-service"
-        swaggerResource.getLocation() >> "/docs/manager?version=null_version"
-        redisTemplate.opsForValue() >> Mock(ValueOperations)
+        ZSetOperations zSetOperations = Mock(ZSetOperations)
+        redisTemplate.opsForZSet() >> zSetOperations
+        Set<ZSetOperations.TypedTuple<String>> tuples = new LinkedHashSet<>()
+        ZSetOperations.TypedTuple<String> tuple = Mock(ZSetOperations.TypedTuple)
+        zSetOperations.rangeWithScores(_, _, _) >> tuples
+        tuples << tuple
+        tuple.getValue() >> "manager-service"
+        tuple.getScore() >> 1
 
         when:
         def result = controller.queryServiceInvoke("2018-11-02", "2018-11-05")
@@ -138,19 +140,23 @@ class ApiControllerSpec extends Specification {
     def "QueryApiInvoke"() {
         given:
         StringRedisTemplate redisTemplate = Mock(StringRedisTemplate)
-        ApiServiceImpl apiService = new ApiServiceImpl(null, null, null, redisTemplate)
+        ISwaggerService iSwaggerService = Mock(ISwaggerService)
+        ApiServiceImpl apiService = new ApiServiceImpl(null, null, iSwaggerService, redisTemplate)
         ApiController controller = new ApiController(null, apiService)
-        ValueOperations valueOperations = Mock(ValueOperations)
-        redisTemplate.opsForValue() >> valueOperations
-        valueOperations.get(_) >> "{\"/v1/swaggers/api/count:get\":1,\"/v1/swaggers/service_invoke/count:get\":18,\"/v1/swaggers/api_invoke/count:get\":14}"
+        ZSetOperations zSetOperations = Mock(ZSetOperations)
+        redisTemplate.opsForZSet() >> zSetOperations
+        Set<ZSetOperations.TypedTuple<String>> tuples = new LinkedHashSet<>()
+        ZSetOperations.TypedTuple<String> tuple = Mock(ZSetOperations.TypedTuple)
+        zSetOperations.rangeWithScores(_, _, _) >> tuples
+        tuples << tuple
+        tuple.getValue() >> "manager-service"
+        tuple.getScore() >> 1
 
         when:
-        def result = controller.queryApiInvoke("2018-11-02", "2018-11-05", "manager-service")
-        def date = (Set) result.getBody().get("date")
-        def apis = (Set) result.getBody().get("apis")
+        def result = controller.queryServiceInvoke("2018-11-02", "2018-11-05")
+        def list = (Set) result.getBody().get("date")
         then:
-        date.contains("2018-11-02") && date.contains("2018-11-05")
-        apis.contains("/v1/swaggers/api_invoke/count:get")
+        list.contains("2018-11-02") && list.contains("2018-11-05")
     }
 
     def "QueryTreeMenu"() {

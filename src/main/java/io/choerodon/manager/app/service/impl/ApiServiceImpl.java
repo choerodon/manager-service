@@ -13,6 +13,7 @@ import org.apache.commons.collections.map.MultiKeyMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -29,11 +30,9 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import springfox.documentation.swagger.web.SwaggerResource;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -95,124 +94,67 @@ public class ApiServiceImpl implements ApiService {
         return json;
     }
 
-    @Override
-    public Map<String, Object> queryServiceInvoke(String beginDate, String endDate) {
-        MultiKeyMap multiKeyMap = getServiceMap();
-        MapIterator mapIterator = multiKeyMap.mapIterator();
-        Set<String> serviceKeySet = new HashSet<>();
-        while (mapIterator.hasNext()) {
-            MultiKey multiKey = (MultiKey) mapIterator.next();
-            Object[] keys = multiKey.getKeys();
-            serviceKeySet.add((String) keys[1]);
+    private MultiKeyMap getInvokeCount(Set<String> paramValues, Set<String> date, LocalDate begin, LocalDate end, String additionKey) {
+        MultiKeyMap multiKeyMap = new MultiKeyMap();
+        if (begin.isAfter(end)) {
+            throw new CommonException("error.date.order");
         }
-        List<Map<String, Object>> details = new ArrayList<>();
-        for (String service : serviceKeySet) {
-            Map<String, Object> detailMap = new HashMap<>(2);
-            detailMap.put("service", service);
-            detailMap.put("data", new ArrayList<>());
-            details.add(detailMap);
+        while (!begin.isAfter(end)) {
+            String currentDate = begin.toString();
+            date.add(currentDate);
+            String key = getKeyByDateAndAdditionKey(additionKey, currentDate);
+            Set<ZSetOperations.TypedTuple<String>> serviceSet = redisTemplate.opsForZSet().rangeWithScores(key, 0, -1);
+            serviceSet.forEach(tuple -> {
+                paramValues.add(tuple.getValue());
+                multiKeyMap.put(key, tuple.getValue(), tuple.getScore());
+            });
+            begin = begin.plusDays(1);
         }
-        Map<String, Object> map = new HashMap<>();
-        Set<String> date = new LinkedHashSet<>();
-        map.put("date", date);
-        map.put("details", details);
-        validateDate(beginDate);
-        validateDate(endDate);
-        Map<String, Integer> lastDayServiceCount = setDetails(beginDate, endDate, details, date);
-        List<String> sortedKey =
-                lastDayServiceCount.entrySet()
-                        .stream()
-                        .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                        .map(Map.Entry::getKey)
-                        .collect(Collectors.toList());
-        map.put("services", sortedKey);
-        return map;
+        return multiKeyMap;
     }
 
-    private Map<String, Integer> setDetails(String beginDate, String endDate, List<Map<String, Object>> details, Set<String> date) {
-        try {
-            Map<String, Integer> lastDayServiceCount = new HashMap<>();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date begin = dateFormat.parse(beginDate);
-            Date end = dateFormat.parse(endDate);
-            if (begin.after(end)) {
-                throw new CommonException("error.date.order");
-            }
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(begin);
-            while (true) {
-                if (calendar.getTime().after(end)) {
-                    break;
-                }
-                String dateStr = dateFormat.format(calendar.getTime());
-                date.add(dateStr);
-                String value = redisTemplate.opsForValue().get(dateStr);
-                if (StringUtils.isEmpty(value)) {
-                    details.forEach(m -> {
-                        ((List<Integer>) m.get("data")).add(0);
-                        lastDayServiceCount.put((String) m.get("service"), 0);
-                    });
-                } else {
-                    try {
-                        Map<String, Integer> serviceMap = objectMapper.readValue(value, new TypeReference<Map<String, Integer>>() {
-                        });
-                        details.forEach(m -> {
-                            String service = (String) m.get("service");
-                            List<Integer> list = (List<Integer>) m.get("data");
-                            int count = serviceMap.get(service) == null ? 0 : serviceMap.get(service);
-                            list.add(count);
-                            lastDayServiceCount.put(service, count);
-                        });
-                    } catch (IOException e) {
-                        logger.error("object mapper read value to map error, redis key {}, value {}, exception :: {}", dateStr, value, e);
-                    }
-                }
-                calendar.add(Calendar.DATE, 1);
-            }
-            return lastDayServiceCount;
-        } catch (ParseException e) {
-            throw new CommonException("error.date.parse", beginDate, endDate);
+    private String getKeyByDateAndAdditionKey(String additionalKey, String currentDate) {
+        StringBuilder builder = new StringBuilder(currentDate).append(COLON).append("zSet");
+        if (!StringUtils.isEmpty(additionalKey)) {
+            builder.append(COLON).append(additionalKey);
         }
+        return builder.toString();
     }
 
     @Override
-    public Map<String, Object> queryApiInvoke(String beginDate, String endDate, String service) {
+    public Map<String, Object> queryInvokeCount(String beginDate, String endDate, String additionalKey, String paramKey) {
         Map<String, Object> map = new HashMap<>();
         Set<String> date = new LinkedHashSet<>();
         List<Map<String, Object>> details = new ArrayList<>();
-        Set<String> keySet = new HashSet<>();
         map.put("date", date);
         map.put("details", details);
-        validateDate(beginDate);
-        validateDate(endDate);
-        Map<String, Map<String, Integer>> dateMap = new HashMap<>();
-        setDataMapAndKeySet(beginDate, endDate, service, date, keySet, dateMap);
-        Map<String, Integer> lastDayApiCount = new HashMap<>();
-        for (String api : keySet) {
-            Map<String, Object> detailMap = new HashMap<>(2);
-            detailMap.put("api", api);
-            List<Integer> data = new ArrayList<>();
-            detailMap.put("data", data);
-            for (String dateStr : date) {
-                Map<String, Integer> apiMap = dateMap.get(dateStr);
-                if (apiMap == null) {
-                    data.add(0);
-                    lastDayApiCount.put(api, 0);
-                } else {
-                    int count = apiMap.get(api) == null ? 0 : apiMap.get(api);
-                    data.add(count);
-                    lastDayApiCount.put(api, count);
-                }
-            }
-            details.add(detailMap);
-        }
+        LocalDate begin = LocalDate.parse(beginDate);
+        LocalDate end = LocalDate.parse(endDate);
+        Set<String> paramValues = new HashSet<>();
+        MultiKeyMap multiKeyMap = getInvokeCount(paramValues, date, begin, end, additionalKey);
+        Map<String, Double> lastDayCount = new HashMap<>();
+        paramValues.forEach(paramValue -> {
+            Map<String, Object> apiMap = new HashMap<>(2);
+            List<Double> data = new ArrayList<>();
+            apiMap.put(paramKey, paramValue);
+            apiMap.put("data", data);
+            date.forEach(currentDate -> {
+                String key = getKeyByDateAndAdditionKey(additionalKey, currentDate);
+                Object value = multiKeyMap.get(key, paramValue);
+                Double count = (value == null ? 0D : (Double) value);
+                lastDayCount.put(paramValue, count);
+                data.add(count);
+            });
+
+            details.add(apiMap);
+        });
         List<String> sortedKey =
-                lastDayApiCount.entrySet()
+                lastDayCount.entrySet()
                         .stream()
-                        .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                        .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
                         .map(Map.Entry::getKey)
                         .collect(Collectors.toList());
-        map.put("apis", sortedKey);
+        map.put(paramKey, sortedKey);
         return map;
 
     }
@@ -397,43 +339,6 @@ public class ApiServiceImpl implements ApiService {
         return controllerMap;
     }
 
-    private void setDataMapAndKeySet(String beginDate, String endDate, String service, Set<String> date, Set<String> keySet, Map<String, Map<String, Integer>> dateMap) {
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date begin = dateFormat.parse(beginDate);
-            Date end = dateFormat.parse(endDate);
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(begin);
-            if (begin.after(end)) {
-                throw new CommonException("error.date.order");
-            }
-            while (true) {
-                if (calendar.getTime().after(end)) {
-                    break;
-                }
-                String dateStr = dateFormat.format(calendar.getTime());
-                date.add(dateStr);
-                String value = redisTemplate.opsForValue().get(dateStr + COLON + service);
-                if (StringUtils.isEmpty(value)) {
-                    dateMap.put(dateStr, null);
-                } else {
-                    try {
-                        Map<String, Integer> apiMap =
-                                objectMapper.readValue(value, new TypeReference<Map<String, Integer>>() {
-                                });
-                        keySet.addAll(apiMap.keySet());
-                        dateMap.put(dateStr, apiMap);
-                    } catch (IOException e) {
-                        logger.error("object mapper read value to map error, redis key {}, value {}, exception :: {}", dateStr, value, e);
-                    }
-                }
-                calendar.add(Calendar.DATE, 1);
-            }
-        } catch (ParseException e) {
-            throw new CommonException("error.date.parse", beginDate, endDate);
-        }
-    }
-
     /**
      * @return MultiKeyMap, key1 is route name, key2 is service id, value is version set
      */
@@ -462,13 +367,6 @@ public class ApiServiceImpl implements ApiService {
             }
         }
         return multiKeyMap;
-    }
-
-    private void validateDate(String date) {
-        String dateRegex = "\\d{4}-\\d{2}-\\d{2}";
-        if (!Pattern.matches(dateRegex, date)) {
-            throw new CommonException("error.date.format");
-        }
     }
 
     private String getRouteName(String name) {

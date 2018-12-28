@@ -32,26 +32,19 @@ public interface ApiService {
     String getSwaggerJson(String name, String version);
 
     /**
-     * 根据日期范围在redis中查询服务调用次数
-     *
-     * @param beginDate 开始日期
-     * @param endDate   结束日期
-     * @return map
-     */
-    Map<String, Object> queryServiceInvoke(String beginDate, String endDate);
-
-    /**
      * 根据日期范围和服务名在redis中查询api调用次数
      *
-     * @param beginDate 开始日期
-     * @param endDate   结束日期
-     * @param service   服务名
+     * @param beginDate     开始日期
+     * @param endDate       结束日期
+     * @param additionalKey 和日期拼接的额外的key
+     * @param paramKey      api或者service集合的参数名
      * @return map
      */
-    Map<String, Object> queryApiInvoke(String beginDate, String endDate, String service);
+    Map<String, Object> queryInvokeCount(String beginDate, String endDate, String additionalKey, String paramKey);
 
     /**
      * 查询所有运行实例的api树形接口
+     *
      * @return map
      */
     Map queryTreeMenu();

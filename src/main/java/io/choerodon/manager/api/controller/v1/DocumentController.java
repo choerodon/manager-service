@@ -22,7 +22,6 @@ import io.choerodon.swagger.annotation.Permission;
  */
 @RestController
 @RequestMapping(value = "/docs")
-@Api(description = "文档")
 public class DocumentController {
 
     private ApiService apiService;
