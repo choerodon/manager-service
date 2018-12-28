@@ -114,7 +114,7 @@ public class ApiServiceImpl implements ApiService {
     }
 
     private String getKeyByDateAndAdditionKey(String additionalKey, String currentDate) {
-        StringBuilder builder = new StringBuilder(currentDate);
+        StringBuilder builder = new StringBuilder(currentDate).append(COLON).append("zSet");
         if (!StringUtils.isEmpty(additionalKey)) {
             builder.append(COLON).append(additionalKey);
         }
