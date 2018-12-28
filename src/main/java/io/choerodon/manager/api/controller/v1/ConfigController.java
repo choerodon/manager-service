@@ -24,7 +24,6 @@ import io.choerodon.swagger.annotation.Permission;
  */
 @RestController
 @RequestMapping(value = "/v1/configs")
-@Api(description = "配置")
 public class ConfigController {
 
     private ConfigService configService;

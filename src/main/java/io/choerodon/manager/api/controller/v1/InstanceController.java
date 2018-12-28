@@ -28,7 +28,6 @@ import io.choerodon.swagger.annotation.Permission;
  */
 @RestController
 @RequestMapping(value = "/v1/instances")
-@Api(description = "实例")
 public class InstanceController {
 
     private InstanceService instanceService;

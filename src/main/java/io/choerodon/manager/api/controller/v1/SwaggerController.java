@@ -21,7 +21,6 @@ import io.choerodon.manager.app.service.SwaggerService;
  * @author wuguokai
  */
 @RestController
-@Api(description = "swagger")
 public class SwaggerController {
 
     private SwaggerService swaggerService;

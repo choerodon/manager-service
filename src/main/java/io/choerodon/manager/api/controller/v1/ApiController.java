@@ -31,7 +31,6 @@ import io.choerodon.swagger.annotation.Permission;
  */
 @RestController
 @RequestMapping(value = "/v1/swaggers")
-@Api(description = "api测试")
 public class ApiController {
 
     private SwaggerService swaggerService;
@@ -101,7 +100,7 @@ public class ApiController {
                                                                   @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String beginDate,
                                                                   @RequestParam(value = "end_date")
                                                                   @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String endDate) {
-        return new ResponseEntity<>(apiService.queryServiceInvoke(beginDate, endDate), HttpStatus.OK);
+        return new ResponseEntity<>(apiService.queryInvokeCount(beginDate, endDate, "", "service"), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
@@ -112,7 +111,7 @@ public class ApiController {
                                                               @RequestParam(value = "end_date")
                                                               @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String endDate,
                                                               @RequestParam String service) {
-        return new ResponseEntity<>(apiService.queryApiInvoke(beginDate, endDate, service), HttpStatus.OK);
+        return new ResponseEntity<>(apiService.queryInvokeCount(beginDate, endDate, service, "api"), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
