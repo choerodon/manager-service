@@ -1,10 +1,10 @@
 package io.choerodon.manager.api.controller.v1;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
@@ -100,7 +100,7 @@ public class ApiController {
                                                                   @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String beginDate,
                                                                   @RequestParam(value = "end_date")
                                                                   @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String endDate) {
-        return new ResponseEntity<>(apiService.queryInvokeCount(beginDate, endDate, "", "service"), HttpStatus.OK);
+        return new ResponseEntity<>(apiService.queryServiceInvoke(beginDate, endDate), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
@@ -111,7 +111,7 @@ public class ApiController {
                                                               @RequestParam(value = "end_date")
                                                               @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String endDate,
                                                               @RequestParam String service) {
-        return new ResponseEntity<>(apiService.queryInvokeCount(beginDate, endDate, service, "api"), HttpStatus.OK);
+        return new ResponseEntity<>(apiService.queryInvokeCount(beginDate, endDate, service, "api", Collections.emptySet()), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})

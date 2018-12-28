@@ -5,6 +5,7 @@ import io.choerodon.manager.api.dto.swagger.ControllerDTO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author superlee
@@ -32,6 +33,14 @@ public interface ApiService {
     String getSwaggerJson(String name, String version);
 
     /**
+     * 根据起始日期和结束日期查询服务的调用次数，显示的服务为正在运行的服务以及日期范围内被调用过的服务
+     * @param beginDate
+     * @param endDate
+     * @return
+     */
+    Map<String, Object> queryServiceInvoke(String beginDate, String endDate);
+
+    /**
      * 根据日期范围和服务名在redis中查询api调用次数
      *
      * @param beginDate     开始日期
@@ -40,7 +49,7 @@ public interface ApiService {
      * @param paramKey      api或者service集合的参数名
      * @return map
      */
-    Map<String, Object> queryInvokeCount(String beginDate, String endDate, String additionalKey, String paramKey);
+    Map<String, Object> queryInvokeCount(String beginDate, String endDate, String additionalKey, String paramKey, Set<String> additionalParamValues);
 
     /**
      * 查询所有运行实例的api树形接口

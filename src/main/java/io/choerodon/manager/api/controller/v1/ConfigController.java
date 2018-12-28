@@ -3,7 +3,6 @@ package io.choerodon.manager.api.controller.v1;
 import java.util.Optional;
 import javax.validation.Valid;
 
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;

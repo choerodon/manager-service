@@ -121,6 +121,12 @@ class ApiControllerSpec extends Specification {
         ISwaggerService iSwaggerService = Mock(ISwaggerService)
         ApiServiceImpl apiService = new ApiServiceImpl(null, null, iSwaggerService, redisTemplate)
         ApiController controller = new ApiController(null, apiService)
+        List swaggerList = new ArrayList()
+        SwaggerResource swaggerResource = Mock(SwaggerResource)
+        swaggerList << swaggerResource
+        iSwaggerService.getSwaggerResource() >> swaggerList
+        swaggerResource.getName() >> "manager:manager-service"
+        swaggerResource.getLocation() >> "/docs/manager?version=null_version"
         ZSetOperations zSetOperations = Mock(ZSetOperations)
         redisTemplate.opsForZSet() >> zSetOperations
         Set<ZSetOperations.TypedTuple<String>> tuples = new LinkedHashSet<>()
@@ -153,7 +159,7 @@ class ApiControllerSpec extends Specification {
         tuple.getScore() >> 1
 
         when:
-        def result = controller.queryServiceInvoke("2018-11-02", "2018-11-05")
+        def result = controller.queryApiInvoke("2018-11-02", "2018-11-05", "manager-service")
         def list = (Set) result.getBody().get("date")
         then:
         list.contains("2018-11-02") && list.contains("2018-11-05")
