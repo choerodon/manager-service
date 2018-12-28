@@ -2,7 +2,6 @@ package io.choerodon.manager.api.controller.v1;
 
 import java.util.List;
 
-import io.swagger.annotations.Api;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;

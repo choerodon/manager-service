@@ -122,7 +122,20 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public Map<String, Object> queryInvokeCount(String beginDate, String endDate, String additionalKey, String paramKey) {
+    public Map<String, Object> queryServiceInvoke(String beginDate, String endDate) {
+        MultiKeyMap multiKeyMap = getServiceMap();
+        MapIterator mapIterator = multiKeyMap.mapIterator();
+        Set<String> serviceKeySet = new HashSet<>();
+        while (mapIterator.hasNext()) {
+            MultiKey multiKey = (MultiKey) mapIterator.next();
+            Object[] keys = multiKey.getKeys();
+            serviceKeySet.add((String) keys[1]);
+        }
+        return queryInvokeCount(beginDate, endDate, "", "service", serviceKeySet);
+    }
+
+    @Override
+    public Map<String, Object> queryInvokeCount(String beginDate, String endDate, String additionalKey, String paramKey, Set<String> additionalParamValues) {
         Map<String, Object> map = new HashMap<>();
         Set<String> date = new LinkedHashSet<>();
         List<Map<String, Object>> details = new ArrayList<>();
@@ -131,6 +144,7 @@ public class ApiServiceImpl implements ApiService {
         LocalDate begin = LocalDate.parse(beginDate);
         LocalDate end = LocalDate.parse(endDate);
         Set<String> paramValues = new HashSet<>();
+        paramValues.addAll(additionalParamValues);
         MultiKeyMap multiKeyMap = getInvokeCount(paramValues, date, begin, end, additionalKey);
         Map<String, Double> lastDayCount = new HashMap<>();
         paramValues.forEach(paramValue -> {
