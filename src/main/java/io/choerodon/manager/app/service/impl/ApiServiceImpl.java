@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.choerodon.manager.domain.service.ISwaggerService;
 import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.manager.infra.mapper.RouteMapper;
@@ -60,6 +62,8 @@ public class ApiServiceImpl implements ApiService {
     private ISwaggerService iSwaggerService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private Cache<String, String> cache = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.DAYS).maximumSize(1000).build();
 
     private StringRedisTemplate redisTemplate;
 
@@ -211,8 +215,8 @@ public class ApiServiceImpl implements ApiService {
             List<Map<String, Object>> versionChildren = new ArrayList<>();
             versionMap.put(CHILDREN, versionChildren);
             String apiTreeDocKey = getApiTreeDocKey(service, version);
-            if (redisTemplate.hasKey(apiTreeDocKey)) {
-                String childrenStr = redisTemplate.opsForValue().get(apiTreeDocKey);
+            if (cache.getIfPresent(apiTreeDocKey) != null) {
+                String childrenStr = cache.getIfPresent(apiTreeDocKey);
                 try {
                     List<Map<String, Object>> list =
                             objectMapper.readValue(childrenStr, new TypeReference<List<Map<String, Object>>>() {
@@ -279,7 +283,13 @@ public class ApiServiceImpl implements ApiService {
                 }
             }
         }
-        cache2Redis(getApiTreeDocKey(service, version), children);
+        try {
+            String key = getApiTreeDocKey(service, version);
+            String value = objectMapper.writeValueAsString(children);
+            cache.put(key, value);
+        } catch (JsonProcessingException e) {
+            logger.warn("read object to string error while caching to redis, exception: {}", e);
+        }
     }
 
     private void cache2Redis(String key, Object value) {
@@ -308,7 +318,7 @@ public class ApiServiceImpl implements ApiService {
             while (methodIterator.hasNext()) {
                 String method = methodIterator.next();
                 JsonNode jsonNode = methodNode.findValue(method);
-                if (jsonNode.get("description") == null) {
+                if (jsonNode.get(DESCRIPTION) == null) {
                     continue;
                 }
                 Map<String, Object> path = new HashMap<>();
@@ -317,6 +327,7 @@ public class ApiServiceImpl implements ApiService {
                 path.put("operationId", Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
                 path.put("service", service);
                 path.put("version", version);
+                path.put(DESCRIPTION, Optional.ofNullable(jsonNode.get("summary")).map(JsonNode::asText).orElse(null));
                 path.put("servicePrefix", routeName);
                 JsonNode tagNode = jsonNode.get("tags");
                 for (int i = 0; i < tagNode.size(); i++) {
