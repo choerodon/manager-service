@@ -76,6 +76,11 @@
             <version>3.2.2</version>
         </dependency>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>27.0.1-jre</version>
+        </dependency>
+        <dependency>
             <groupId>io.choerodon</groupId>
             <artifactId>choerodon-starter-eureka-event</artifactId>
             <version>${choerodon.starters.version}</version>
