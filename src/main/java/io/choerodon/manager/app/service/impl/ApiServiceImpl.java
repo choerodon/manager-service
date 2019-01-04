@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.remoting.RemoteAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -54,6 +55,7 @@ public class ApiServiceImpl implements ApiService {
     private static final String PATH_DETAIL = "path-detail";
     private static final String COLON = ":";
     private static final String UNDERLINE = "-";
+    private static final String SERVICE = "service";
 
     private IDocumentService iDocumentService;
 
@@ -63,7 +65,7 @@ public class ApiServiceImpl implements ApiService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private Cache<String, String> cache = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.DAYS).maximumSize(1000).build();
+    private Cache<String, String> cache = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.DAYS).maximumSize(500).build();
 
     private StringRedisTemplate redisTemplate;
 
@@ -135,7 +137,7 @@ public class ApiServiceImpl implements ApiService {
             Object[] keys = multiKey.getKeys();
             serviceKeySet.add((String) keys[1]);
         }
-        return queryInvokeCount(beginDate, endDate, "", "service", serviceKeySet);
+        return queryInvokeCount(beginDate, endDate, "", SERVICE, serviceKeySet);
     }
 
     @Override
@@ -182,8 +184,7 @@ public class ApiServiceImpl implements ApiService {
         MultiKeyMap multiKeyMap = getServiceMap();
         Map<String, Object> map = new HashMap<>();
         List<Map<String, Object>> list = new ArrayList<>();
-        map.put("service", list);
-        int serviceCount = 0;
+        map.put(SERVICE, list);
         MapIterator mapIterator = multiKeyMap.mapIterator();
         while (mapIterator.hasNext()) {
             MultiKey multiKey = (MultiKey) mapIterator.next();
@@ -191,27 +192,50 @@ public class ApiServiceImpl implements ApiService {
             String routeName = (String) keys[0];
             String service = (String) keys[1];
             Map<String, Object> serviceMap = new HashMap<>();
-            list.add(serviceMap);
             Set<String> versions = (Set<String>) multiKeyMap.get(routeName, service);
             serviceMap.put(TITLE, service);
-            String serviceKey = serviceCount + "";
-            serviceMap.put(KEY, serviceKey);
             List<Map<String, Object>> children = new ArrayList<>();
             serviceMap.put(CHILDREN, children);
-            processTreeOnVersionNode(routeName, service, versions, children, serviceKey);
-            serviceCount++;
+            int versionNum = processTreeOnVersionNode(routeName, service, versions, children);
+            if (versionNum > 0) {
+                list.add(serviceMap);
+            }
         }
+        processKey(map);
         return map;
     }
 
-    private void processTreeOnVersionNode(String routeName, String service, Set<String> versions, List<Map<String, Object>> children, String parentKey) {
-        int versionCount = 0;
+    private void processKey(Map<String, Object> map) {
+        List<Map<String, Object>> serviceList = (List<Map<String, Object>>) map.get(SERVICE);
+        int serviceCount = 0;
+        for (Map<String, Object> service : serviceList) {
+            String serviceKey = serviceCount + "";
+            service.put(KEY, serviceKey);
+            List<Map<String, Object>> versions = (List<Map<String, Object>>) service.get(CHILDREN);
+            recursion(serviceKey, versions);
+            serviceCount++;
+        }
+    }
+
+    private void recursion(String key, List<Map<String, Object>> list) {
+        int count = 0;
+        for (Map<String, Object> map : list) {
+            String mapKey = new StringBuilder(key).append(UNDERLINE).append(count).toString();
+            map.put(KEY, mapKey);
+            if (map.get(CHILDREN) != null) {
+                List<Map<String, Object>> children = (List<Map<String, Object>>) map.get(CHILDREN);
+                recursion(mapKey, children);
+            }
+            count++;
+        }
+    }
+
+    private int processTreeOnVersionNode(String routeName, String service, Set<String> versions, List<Map<String, Object>> children) {
+        int versionNum = versions.size();
         for (String version : versions) {
+            boolean legalVersion = false;
             Map<String, Object> versionMap = new HashMap<>();
-            children.add(versionMap);
             versionMap.put(TITLE, version);
-            String versionKey = parentKey + UNDERLINE + versionCount;
-            versionMap.put(KEY, versionKey);
             List<Map<String, Object>> versionChildren = new ArrayList<>();
             versionMap.put(CHILDREN, versionChildren);
             String apiTreeDocKey = getApiTreeDocKey(service, version);
@@ -222,49 +246,40 @@ public class ApiServiceImpl implements ApiService {
                             objectMapper.readValue(childrenStr, new TypeReference<List<Map<String, Object>>>() {
                             });
                     versionChildren.addAll(list);
+                    legalVersion = true;
                 } catch (IOException e) {
                     logger.error("object mapper read redis cache value {} to List<Map<String, Object>> error, so process children version from db or swagger, exception: {} ", childrenStr, e);
-                    processChildrenFromSwaggerJson(routeName, service, version, versionChildren);
+                    legalVersion = processChildrenFromSwaggerJson(routeName, service, version, versionChildren);
                 }
             } else {
-                processChildrenFromSwaggerJson(routeName, service, version, versionChildren);
+                legalVersion = processChildrenFromSwaggerJson(routeName, service, version, versionChildren);
             }
-            processKey(versionKey, versionChildren);
-            versionCount++;
+            if (legalVersion) {
+                children.add(versionMap);
+            } else {
+                versionNum--;
+            }
         }
+        return versionNum;
     }
 
-    private void processKey(String versionKey, List<Map<String, Object>> versionChildren) {
-        int controllerCount = 0;
-        for (Map<String, Object> map : versionChildren) {
-            StringBuilder builder = new StringBuilder(versionKey);
-            builder.append(UNDERLINE).append(controllerCount);
-            String controllerKey = builder.toString();
-            map.put(KEY, controllerKey);
-            List<Map<String, Object>> controllerChildren = (List<Map<String, Object>>) map.get(CHILDREN);
-            int pathCount = 0;
-            for (Map<String, Object> child : controllerChildren) {
-                StringBuilder stringBuilder = new StringBuilder(controllerKey);
-                stringBuilder.append(UNDERLINE).append(pathCount);
-                child.put(KEY, stringBuilder.toString());
-                pathCount++;
-            }
-            controllerCount++;
-        }
-    }
-
-    private void processChildrenFromSwaggerJson(String routeName, String service, String version, List<Map<String, Object>> versionChildren) {
-        String json = iDocumentService.fetchSwaggerJsonByService(service, version);
-        if (StringUtils.isEmpty(json)) {
-            logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
-        } else {
-            try {
+    private boolean processChildrenFromSwaggerJson(String routeName, String service, String version, List<Map<String, Object>> versionChildren) {
+        boolean done = false;
+        try {
+            String json = iDocumentService.fetchSwaggerJsonByService(service, version);
+            if (StringUtils.isEmpty(json)) {
+                logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
+            } else {
                 JsonNode node = objectMapper.readTree(json);
                 processTreeOnControllerNode(routeName, service, version, node, versionChildren);
-            } catch (IOException e) {
-                logger.error("object mapper read tree error, service: {}, version: {}", service, version);
             }
+            done = true;
+        } catch (IOException e) {
+            logger.error("object mapper read tree error, service: {}, version: {}", service, version);
+        } catch (RemoteAccessException e) {
+            logger.error(e.getMessage());
         }
+        return done;
     }
 
     private void processTreeOnControllerNode(String routeName, String service, String version, JsonNode node, List<Map<String, Object>> children) {
@@ -325,7 +340,7 @@ public class ApiServiceImpl implements ApiService {
                 path.put(TITLE, url);
                 path.put("method", method);
                 path.put("operationId", Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
-                path.put("service", service);
+                path.put(SERVICE, service);
                 path.put("version", version);
                 path.put(DESCRIPTION, Optional.ofNullable(jsonNode.get("summary")).map(JsonNode::asText).orElse(null));
                 path.put("servicePrefix", routeName);
@@ -482,12 +497,13 @@ public class ApiServiceImpl implements ApiService {
                 version = iterator.next();
                 break;
             }
+            boolean done = false;
             if (version != null) {
-                String json = iDocumentService.fetchSwaggerJsonByService(service, version);
-                if (StringUtils.isEmpty(json)) {
-                    logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
-                } else {
-                    try {
+                try {
+                    String json = iDocumentService.fetchSwaggerJsonByService(service, version);
+                    if (StringUtils.isEmpty(json)) {
+                        logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
+                    } else {
                         JsonNode node = objectMapper.readTree(json);
                         JsonNode pathNode = node.get("paths");
                         Iterator<String> urlIterator = pathNode.fieldNames();
@@ -496,13 +512,18 @@ public class ApiServiceImpl implements ApiService {
                             JsonNode methodNode = pathNode.get(url);
                             count = count + methodNode.size();
                         }
-                    } catch (IOException e) {
-                        logger.error("object mapper read tree error, service: {}, version: {}", service, version);
+                        done = true;
                     }
+                } catch (IOException e) {
+                    logger.error("object mapper read tree error, service: {}, version: {}", service, version);
+                } catch (RemoteAccessException e) {
+                    logger.error(e.getMessage());
                 }
             }
-            services.add(service);
-            apiCounts.add(count);
+            if (done) {
+                services.add(service);
+                apiCounts.add(count);
+            }
         }
         return apiCountMap;
     }
