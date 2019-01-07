@@ -47,6 +47,7 @@ public interface ApiService {
      * @param endDate       结束日期
      * @param additionalKey 和日期拼接的额外的key
      * @param paramKey      api或者service集合的参数名
+     * @param additionalParamValues 额外的paramValues
      * @return map
      */
     Map<String, Object> queryInvokeCount(String beginDate, String endDate, String additionalKey, String paramKey, Set<String> additionalParamValues);
