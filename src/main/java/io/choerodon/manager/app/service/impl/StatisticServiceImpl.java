@@ -3,53 +3,61 @@ package io.choerodon.manager.app.service.impl;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.MenuClickDTO;
-import io.choerodon.manager.app.service.StaticService;
+import io.choerodon.manager.app.service.ApiService;
+import io.choerodon.manager.app.service.StatisticService;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author superlee
  */
 @Service
-public class StaticServiceImpl implements StaticService {
+public class StatisticServiceImpl implements StatisticService {
 
     private StringRedisTemplate redisTemplate;
 
+    private ApiService apiService;
+
     private static final String COLON = ":";
 
-    public StaticServiceImpl(StringRedisTemplate redisTemplate) {
+    public StatisticServiceImpl(StringRedisTemplate redisTemplate, ApiService apiService) {
         this.redisTemplate = redisTemplate;
+        this.apiService = apiService;
     }
 
     @Override
     public void saveMenuClick(List<MenuClickDTO> menuClickList) {
-        assertLevel(menuClickList);
+        menuClickList.forEach(menuClickDTO -> assertLevel(menuClickDTO.getLevel()));
         LocalDate localDate = LocalDate.now();
         menuClickList.forEach(menuClickDTO -> {
             String level = menuClickDTO.getLevel();
             List<MenuClickDTO.Menu> menus = menuClickDTO.getMenus();
             StringBuilder builder = new StringBuilder();
-            builder.append(localDate.toString()).append(COLON).append(level);
+            builder.append(localDate.toString()).append(COLON).append("zSet").append(COLON).append(level);
             String key = builder.toString();
 
             cache2Redis(menus, key);
         });
     }
 
+    @Override
+    public Map<String, Object> queryMenuClick(String beginDate, String endDate, String level) {
+        assertLevel(level);
+        return apiService.queryInvokeCount(beginDate, endDate, level, "menu", Collections.emptySet());
+    }
+
     private void cache2Redis(List<MenuClickDTO.Menu> menus, String key) {
         if (redisTemplate.hasKey(key)) {
-             menus.forEach(menu -> {
-                 int count = menu.getCount() == null ? 0 : menu.getCount();
-                 String value = getMenuValue(menu);
-                 redisTemplate.opsForZSet().incrementScore(key, value, count);
-             });
+            menus.forEach(menu -> {
+                int count = menu.getCount() == null ? 0 : menu.getCount();
+                String value = getMenuValue(menu);
+                redisTemplate.opsForZSet().incrementScore(key, value, count);
+            });
         } else {
             menus.forEach(menu -> {
                 int count = menu.getCount() == null ? 0 : menu.getCount();
@@ -68,15 +76,11 @@ public class StaticServiceImpl implements StaticService {
         return builder.toString();
     }
 
-    private void assertLevel(List<MenuClickDTO> menuClickList) {
-        menuClickList.forEach(menuClickDTO -> {
-            String level = menuClickDTO.getLevel();
-            if (StringUtils.isEmpty(level)) {
-                throw new CommonException("error.menuClick.level.empty");
-            }
-            validateLevel(level);
-        });
-
+    private void assertLevel(String level) {
+        if (StringUtils.isEmpty(level)) {
+            throw new CommonException("error.menuClick.level.empty");
+        }
+        validateLevel(level);
     }
 
     private void validateLevel(String level) {
