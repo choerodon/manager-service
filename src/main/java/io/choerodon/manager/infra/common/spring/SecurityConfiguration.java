@@ -11,7 +11,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/choerodon/**","/v2/choerodon/**", "/actuator/**");
+        web.ignoring().antMatchers("/choerodon/**", "/v2/choerodon/**", "/actuator/**");
     }
 
 }
