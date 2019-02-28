@@ -12,7 +12,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.cloud.netflix.zuul.filters.Route
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DuplicateKeyException
 import spock.lang.Shared
