@@ -20,10 +20,6 @@ eureka:
   client:
     serviceUrl:
       defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8000/eureka/}
-security:
-  basic:
-    enabled: false
-  ignored: /swagger-ui.html,/swagger-resources/**, /webjars/** , /docs/**
 choerodon:
   eureka:
     event:
