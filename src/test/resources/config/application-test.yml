@@ -10,7 +10,7 @@ spring:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=Mysql;TRACE_LEVEL_SYSTEM_OUT=2;
     username: sa
   autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration,org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+    exclude: org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration,org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration,org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration,org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientAutoConfiguration
   h2:
     console:
       enabled: true
@@ -24,7 +24,8 @@ eureka:
   client:
     enabled: false
 management:
-  port: 0 #设置管理端口为随机端口
+  server:
+    port: 0 #设置管理端口为随机端口
 choerodon:
   swagger:
     skip:

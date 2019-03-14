@@ -39,7 +39,7 @@ class MockBeanTestConfiguration {
         //Mockito.doReturn(file.getText("UTF-8")).when(mockIDocumentService).fetchSwaggerJsonByIp(Mockito.any(RegisterInstancePayload))
         Mockito.doReturn(file.getText("UTF-8")).when(mockIDocumentService).fetchSwaggerJsonByIp(Mockito.argThat(new ArgumentMatcher<EurekaEventPayload>() {
             @Override
-            boolean matches(Object argument) {
+            boolean matches(EurekaEventPayload eurekaEventPayload) {
                 return !"test".equals(((EurekaEventPayload) argument).getAppName())
             }
         }))

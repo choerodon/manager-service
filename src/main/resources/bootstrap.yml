@@ -4,6 +4,5 @@ spring:
   application:
     name: manager-service
 management:
-  port: 8964
-  security:
-    enabled: false
+  server:
+    port: 8964
