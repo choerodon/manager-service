@@ -48,6 +48,16 @@ public class InstanceServiceImpl implements InstanceService {
 
     private static final String CONFIG_VERSION_DEFAULT = "default";
 
+    /**
+     * spring boot 2.0 endpoint
+     */
+    private static final String ACTUATOR_ENV = "actuator/env";
+
+    /**
+     * spring boot 1.5.x endpoint
+     */
+    private static final String ACTUATOR_ENV_V1 = "env";
+
     private ConfigServerClient configServerClient;
 
     private DiscoveryClient discoveryClient;
@@ -119,18 +129,33 @@ public class InstanceServiceImpl implements InstanceService {
         } else {
             throw new CommonException("error.illegal.management.url");
         }
-        String envUrl = url + "env";
+        String envUrl = url + ACTUATOR_ENV_V1;
         ResponseEntity<String> response;
         try {
+            //todo 这个地方暂时性措施，由于框架和其他服务升级springboot 2.0进度差异，导致框架的actuator端口endpoint为/actuator/**,
+            //spring boot 1.5.x的endpoint为/** 等升级完成后将1.5的情况移除
             response = restTemplate.getForEntity(envUrl, String.class);
+            //do v1.5.x
             if (response.getStatusCode() == HttpStatus.OK) {
                 processEnvJson(instanceDetail, response.getBody());
             } else {
                 throw new CommonException("error.config.fetchEnv");
             }
         } catch (Exception e) {
-            LOGGER.warn("can not fetch env info, request url : {}, exception message : {}", envUrl, e.getMessage());
-            throw new CommonException("error.config.fetchEnv");
+            //try do v2.0.x
+            LOGGER.warn("can not fetch env info for spring boot 1.5.x, request url : {}", envUrl);
+            try{
+                envUrl = url + ACTUATOR_ENV;
+                response = restTemplate.getForEntity(envUrl, String.class);
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    processEnvJson(instanceDetail, response.getBody());
+                } else {
+                    throw new CommonException("error.config.fetchEnv");
+                }
+            } catch (Exception ex) {
+                LOGGER.warn("can not fetch env info, request url for spring boot 2.0.x : {}, exception message : {}", envUrl, ex.getMessage());
+                throw new CommonException("error.config.fetchEnv");
+            }
         }
     }
 
