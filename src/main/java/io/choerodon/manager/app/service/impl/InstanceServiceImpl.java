@@ -131,24 +131,26 @@ public class InstanceServiceImpl implements InstanceService {
         }
         String envUrl = url + ACTUATOR_ENV_V1;
         ResponseEntity<String> response;
+        boolean isSpringBoot2 = false;
         try {
             //todo 这个地方暂时性措施，由于框架和其他服务升级springboot 2.0进度差异，导致框架的actuator端口endpoint为/actuator/**,
             //spring boot 1.5.x的endpoint为/** 等升级完成后将1.5的情况移除
             response = restTemplate.getForEntity(envUrl, String.class);
             //do v1.5.x
             if (response.getStatusCode() == HttpStatus.OK) {
-                processEnvJson(instanceDetail, response.getBody());
+                processEnvJson(instanceDetail, response.getBody(), isSpringBoot2);
             } else {
                 throw new CommonException("error.config.fetchEnv");
             }
         } catch (Exception e) {
             //try do v2.0.x
             LOGGER.warn("can not fetch env info for spring boot 1.5.x, request url : {}", envUrl);
-            try{
+            try {
+                isSpringBoot2 = true;
                 envUrl = url + ACTUATOR_ENV;
                 response = restTemplate.getForEntity(envUrl, String.class);
                 if (response.getStatusCode() == HttpStatus.OK) {
-                    processEnvJson(instanceDetail, response.getBody());
+                    processEnvJson(instanceDetail, response.getBody(), isSpringBoot2);
                 } else {
                     throw new CommonException("error.config.fetchEnv");
                 }
@@ -159,10 +161,10 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private void processEnvJson(InstanceDetailDTO instanceDetail, String json) {
+    private void processEnvJson(InstanceDetailDTO instanceDetail, String json, boolean isSpringBoot2) {
         try {
             JsonNode node = objectMapper.readTree(json);
-            String allConfigYaml = getAllConfigYaml(node);
+            String allConfigYaml = getAllConfigYaml(node, isSpringBoot2);
             instanceDetail.setEnvInfoYml(new YamlDTO(allConfigYaml, ConfigUtil.appearNumber(allConfigYaml, "\n") + 1));
             String activeConfigYaml = getActiveConfigYaml(node);
             instanceDetail.setConfigInfoYml(new YamlDTO(activeConfigYaml, ConfigUtil.appearNumber(activeConfigYaml, "\n") + 1));
@@ -172,9 +174,41 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private String getAllConfigYaml(final JsonNode root) {
+    private String getAllConfigYaml(final JsonNode root, boolean isSpringBoot2) {
         Map<String, Object> map = new HashMap<>();
         Iterator<Map.Entry<String, JsonNode>> it = root.fields();
+        if(isSpringBoot2) {
+            while (it.hasNext()){
+                Map.Entry<String, JsonNode> entry = it.next();
+                Iterator<JsonNode> subIterator = entry.getValue().iterator();
+                while (subIterator.hasNext()){
+                    JsonNode node = subIterator.next();
+                    String key = node.get("name").asText();
+                    JsonNode jsonNode =  node.get("properties");
+                    if (key.startsWith("applicationConfig: [classpath:/")) {
+                        key = key.replace("applicationConfig: [classpath:/", "").replace(".properties]", "")
+                                .replace(".yml]", "");
+                    }
+                    if (key.startsWith("configService:")) {
+                        key = "config-server";
+                    }
+                    Iterator<Map.Entry<String, JsonNode>> vit = jsonNode.fields();
+                    while (vit.hasNext()) {
+                        Map.Entry<String, JsonNode> value = vit.next();
+                            String jsonValue = value.getValue().get("value").asText();
+                            if (!StringUtils.isEmpty(jsonValue) && !value.getKey().startsWith("java")) {
+                                map.put(key + "." + value.getKey(), jsonValue);
+                        }
+                    }
+                }
+            }
+        } else {
+            processConfigYaml(map, it);
+        }
+        return ConfigUtil.convertMapToText(map, "yaml");
+    }
+
+    private void processConfigYaml(Map<String, Object> map, Iterator<Map.Entry<String, JsonNode>> it) {
         while (it.hasNext()) {
             Map.Entry<String, JsonNode> entry = it.next();
             String key = entry.getKey();
@@ -196,7 +230,6 @@ public class InstanceServiceImpl implements InstanceService {
                 }
             }
         }
-        return ConfigUtil.convertMapToText(map, "yaml");
     }
 
     private String getActiveConfigYaml(final JsonNode root) {
