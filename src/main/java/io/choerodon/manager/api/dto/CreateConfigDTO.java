@@ -1,8 +1,8 @@
 package io.choerodon.manager.api.dto;
 
 import io.swagger.annotations.ApiModelProperty;
-import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class CreateConfigDTO {
