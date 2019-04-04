@@ -862,6 +862,10 @@ public class ApiServiceImpl implements ApiService {
                     String tag = tagNode.get(i).asText();
                     if (tag.endsWith("-controller")) {
                         resourceCode = tag.substring(0, tag.length() - "-controller".length());
+                    } else if (tag.endsWith("-endpoint")) {
+                        resourceCode = tag.substring(0, tag.length() - "-endpoint".length());
+                    } else {
+                        throw new CommonException("error.illegal.tags");
                     }
                 }
                 extraData = new ObjectMapper().readValue(extraDataNode.asText(), SwaggerExtraData.class);
