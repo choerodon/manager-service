@@ -136,7 +136,6 @@ public class InstanceServiceImpl implements InstanceService {
             //todo 这个地方暂时性措施，由于框架和其他服务升级springboot 2.0进度差异，导致框架的actuator端口endpoint为/actuator/**,
             //spring boot 1.5.x的endpoint为/** 等升级完成后将1.5的情况移除
             response = restTemplate.getForEntity(envUrl, String.class);
-            //do v1.5.x
             if (response.getStatusCode() == HttpStatus.OK) {
                 processEnvJson(instanceDetail, response.getBody(), isSpringBoot2);
             } else {
@@ -166,7 +165,12 @@ public class InstanceServiceImpl implements InstanceService {
             JsonNode node = objectMapper.readTree(json);
             String allConfigYaml = getAllConfigYaml(node, isSpringBoot2);
             instanceDetail.setEnvInfoYml(new YamlDTO(allConfigYaml, ConfigUtil.appearNumber(allConfigYaml, "\n") + 1));
-            String activeConfigYaml = getActiveConfigYaml(node);
+            String activeConfigYaml;
+            if (isSpringBoot2) {
+                activeConfigYaml = getActiveConfigYaml4Spring2(node);
+            } else {
+                activeConfigYaml = getActiveConfigYaml(node);
+            }
             instanceDetail.setConfigInfoYml(new YamlDTO(activeConfigYaml, ConfigUtil.appearNumber(activeConfigYaml, "\n") + 1));
         } catch (IOException e) {
             LOGGER.info("error.restTemplate.fetchEnvInfo {}", e.getMessage());
@@ -176,34 +180,31 @@ public class InstanceServiceImpl implements InstanceService {
 
     private String getAllConfigYaml(final JsonNode root, boolean isSpringBoot2) {
         Map<String, Object> map = new HashMap<>();
-        Iterator<Map.Entry<String, JsonNode>> it = root.fields();
-        if(isSpringBoot2) {
-            while (it.hasNext()){
-                Map.Entry<String, JsonNode> entry = it.next();
-                Iterator<JsonNode> subIterator = entry.getValue().iterator();
-                while (subIterator.hasNext()){
-                    JsonNode node = subIterator.next();
-                    String key = node.get("name").asText();
-                    JsonNode jsonNode =  node.get("properties");
-                    if (key.startsWith("applicationConfig: [classpath:/")) {
-                        key = key.replace("applicationConfig: [classpath:/", "").replace(".properties]", "")
-                                .replace(".yml]", "");
-                    }
-                    if (key.startsWith("configService:")) {
-                        key = "config-server";
-                    }
-                    Iterator<Map.Entry<String, JsonNode>> vit = jsonNode.fields();
-                    while (vit.hasNext()) {
-                        Map.Entry<String, JsonNode> value = vit.next();
-                            String jsonValue = value.getValue().get("value").asText();
-                            if (!StringUtils.isEmpty(jsonValue) && !value.getKey().startsWith("java")) {
-                                map.put(key + "." + value.getKey(), jsonValue);
-                        }
+        if (isSpringBoot2) {
+            JsonNode propertySources = root.findValue("propertySources");
+            Iterator<JsonNode> subIterator = propertySources.iterator();
+            while (subIterator.hasNext()) {
+                JsonNode node = subIterator.next();
+                String key = node.get("name").asText();
+                JsonNode jsonNode = node.get("properties");
+                if (key.startsWith("applicationConfig: [classpath:/")) {
+                    key = key.replace("applicationConfig: [classpath:/", "").replace(".properties]", "")
+                            .replace(".yml]", "");
+                }
+                if (key.startsWith("configService:")) {
+                    key = "config-server";
+                }
+                Iterator<Map.Entry<String, JsonNode>> vit = jsonNode.fields();
+                while (vit.hasNext()) {
+                    Map.Entry<String, JsonNode> value = vit.next();
+                    String jsonValue = value.getValue().get("value").asText();
+                    if (!StringUtils.isEmpty(jsonValue) && !value.getKey().startsWith("java")) {
+                        map.put(key + "." + value.getKey(), jsonValue);
                     }
                 }
             }
         } else {
-            processConfigYaml(map, it);
+            processConfigYaml(map, root.fields());
         }
         return ConfigUtil.convertMapToText(map, "yaml");
     }
@@ -260,6 +261,46 @@ public class InstanceServiceImpl implements InstanceService {
         return ConfigUtil.convertDataMapToYaml(map);
     }
 
+    private String getActiveConfigYaml4Spring2(JsonNode root) {
+        JsonNode propertySources = root.findValue("propertySources");
+        Iterator<JsonNode> iterator = propertySources.iterator();
+        String config = null;
+        while (iterator.hasNext()) {
+            JsonNode node = iterator.next();
+            String name = node.findValue("name").asText();
+            if (name.startsWith("configService:")) {
+                config = name;
+                break;
+            }
+        }
+        String activeProfile = "default";
+        JsonNode profileNode = root.findValue("activeProfiles");
+        if (profileNode.get(0) != null && !StringUtils.isEmpty(profileNode.get(0).asText())) {
+            activeProfile = profileNode.get(0).asText();
+        }
+        activeProfile = "applicationConfig: [classpath:/application-" + activeProfile;
+        Map<String, Data> map =
+                PropertySourceBuilder.newInstance(propertySources)
+                        .appendApplySpringBoot2("defaultProperties")
+                        .appendApplySpringBoot2("applicationConfig: [classpath:/bootstrap.properties]")
+                        .appendApplySpringBoot2("applicationConfig: [classpath:/bootstrap.yml]")
+                        .appendApplySpringBoot2("kafkaBinderDefaultProperties")
+                        .appendApplySpringBoot2("applicationConfig: [classpath:/application.properties]")
+                        .appendApplySpringBoot2("applicationConfig: [classpath:/application.yml]")
+                        .appendApplySpringBoot2(activeProfile + ".properties]")
+                        .appendApplySpringBoot2(activeProfile + ".yml]")
+                        .appendApplySpringBoot2("random")
+                        .appendApplySpringBoot2(config)
+                        .coverApplySpringBoot2("systemEnvironment")
+                        .coverApplySpringBoot2("systemProperties")
+                        .appendApplySpringBoot2("servletConfigInitParams")
+                        .appendApplySpringBoot2("commandLineArgs")
+                        .coverApplyServerPortSpringBoot2()
+                        .data();
+        return ConfigUtil.convertDataMapToYaml(map);
+
+    }
+
     private static class PropertySourceBuilder {
 
         private final JsonNode root;
@@ -296,6 +337,40 @@ public class InstanceServiceImpl implements InstanceService {
             return this;
         }
 
+        public PropertySourceBuilder appendApplySpringBoot2(final String property) {
+            if (property == null) {
+                return this;
+            }
+            JsonNode propertySourceNode = getPropertySourceNode(property);
+            if (propertySourceNode == null) {
+                return this;
+            }
+            JsonNode properties = propertySourceNode.findValue("properties");
+            Iterator<Map.Entry<String, JsonNode>> propertiesIterator = properties.fields();
+            while (propertiesIterator.hasNext()){
+                Map.Entry<String, JsonNode> entry = propertiesIterator.next();
+                Data data = getDataByRelaxedNames(entry.getKey());
+                String value = entry.getValue().findValue("value").asText();
+                if (data == null) {
+                    map.put(entry.getKey(), new Data(value, property));
+                } else {
+                    data.setValue(value);
+                }
+            }
+            return this;
+        }
+
+        private JsonNode getPropertySourceNode(String property) {
+            Iterator<JsonNode> iterator = root.iterator();
+            while (iterator.hasNext()) {
+                JsonNode node = iterator.next();
+                String name = node.findValue("name").asText();
+                if (property.equalsIgnoreCase(name)) {
+                    return node;
+                }
+            }
+            return null;
+        }
 
         public PropertySourceBuilder coverApplyServerPort() {
             JsonNode value = root.findValue("server.ports");
@@ -308,7 +383,29 @@ public class InstanceServiceImpl implements InstanceService {
             }
             JsonNode managementServerPort = value.findValue("local.management.port");
             if (serverPort != null) {
-                map.put("management.port", new Data(managementServerPort.asText(), "server.ports"));
+                map.put("management.port", new Data(managementServerPort.asText(), "management.port"));
+            }
+            return this;
+        }
+
+        public PropertySourceBuilder coverApplyServerPortSpringBoot2() {
+            JsonNode propertySourceNode = getPropertySourceNode("server.ports");
+            if (propertySourceNode == null) {
+                return this;
+            }
+            JsonNode properties = propertySourceNode.findValue("properties");
+            Iterator<Map.Entry<String, JsonNode>> propertiesIterator = properties.fields();
+            while (propertiesIterator.hasNext()){
+                Map.Entry<String, JsonNode> entry = propertiesIterator.next();
+                String key = entry.getKey();
+                JsonNode value = entry.getValue();
+                if("local.server.port".equalsIgnoreCase(key)) {
+                    map.put("server.port", new Data(value.findValue("value").asText(), "server.ports"));
+                }
+                if("local.management.port".equalsIgnoreCase(key)) {
+                    map.put("management.port", new Data(value.findValue("value").asText(), "management.port"));
+                }
+
             }
             return this;
         }
@@ -328,6 +425,28 @@ public class InstanceServiceImpl implements InstanceService {
                 if (mapExistKey != null) {
                     Data data = map.get(mapExistKey);
                     data.setValue(entry.getValue().asText());
+                }
+            }
+            return this;
+        }
+
+        public PropertySourceBuilder coverApplySpringBoot2(final String property) {
+            if (property == null) {
+                return this;
+            }
+            JsonNode propertySourceNode = getPropertySourceNode(property);
+            if (propertySourceNode == null) {
+                return this;
+            }
+            JsonNode properties = propertySourceNode.findValue("properties");
+            Iterator<Map.Entry<String, JsonNode>> propertiesIterator = properties.fields();
+            while (propertiesIterator.hasNext()){
+                Map.Entry<String, JsonNode> entry = propertiesIterator.next();
+                String mapExistKey = getKeyByRelaxedNames(entry.getKey());
+                if (mapExistKey != null) {
+                    Data data = map.get(mapExistKey);
+                    String value = entry.getValue().findValue("value").asText();
+                    data.setValue(value);
                 }
             }
             return this;
