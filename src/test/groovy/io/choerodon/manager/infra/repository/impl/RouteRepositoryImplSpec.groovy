@@ -14,8 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DuplicateKeyException
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.client.RestTemplate
 import spock.lang.Shared
 import spock.lang.Specification
+
+import java.lang.reflect.Field
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 
@@ -25,8 +30,6 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import(IntegrationTestConfiguration)
 class RouteRepositoryImplSpec extends Specification {
-    //private RouteMapper routeMapper = Mock(RouteMapper)
-    //private RouteRepository routeRepository = new RouteRepositoryImpl(routeMapper)
 
     @Autowired
     private RouteMapper routeMapper
@@ -74,33 +77,56 @@ class RouteRepositoryImplSpec extends Specification {
     }
 
     def "AddRoute"() {
+        given: "反射注入restTemplate"
+        RouteRepositoryImpl repository = new RouteRepositoryImpl(routeMapper)
+        RestTemplate restTemplate = Mock(RestTemplate)
+        Field field = repository.getClass().getDeclaredField("restTemplate")
+        field.setAccessible(true)
+        field.set(repository, restTemplate)
+
+        Field field1 = repository.getClass().getDeclaredField("registerUrl")
+        field1.setAccessible(true)
+        field1.set(repository, "aaa/eureka")
+        ResponseEntity responseEntity = Mock(ResponseEntity)
+        restTemplate.postForEntity(_, _, _) >> responseEntity
+        responseEntity.getStatusCode() >> HttpStatus.OK
+
         when: "正常AddRoute"
-        def addRouteE = routeRepository.addRoute(routeE)
+        def addRouteE = repository.addRoute(routeE)
+
         then: "校验正常信息并删除routeE"
         addRouteE.getName().equals(routeE.getName())
         addRouteE.getPath().equals(routeE.getPath())
         routeMapper.delete(ConvertHelper.convert(addRouteE, RouteDO))
 
         when: "name异常AddRoute"
-        routeRepository.addRoute(nameDuplicateRouteE)
+        repository.addRoute(nameDuplicateRouteE)
         then: "校验异常信息"
         def error = thrown(CommonException)
         error.message == "error.route.insert.nameDuplicate"
 
         when: "path异常AddRoute"
-        routeRepository.addRoute(pathDuplicateRouteE)
+        repository.addRoute(pathDuplicateRouteE)
         then: "校验异常信息"
         error = thrown(CommonException)
         error.message == "error.route.insert.pathDuplicate"
-        /*where: "异常对比"
-        duplicateRouteE || expectedException | expectedMessage
-        nameDuplicateRouteE || CommonException | "error.route.insert.nameDuplicate"
-        pathDuplicateRouteE || CommonException | "error.route.insert.pathDuplicate"*/
     }
 
     def "UpdateRoute"() {
         given: "构造addRouteE"
-        def addRouteE = routeRepository.addRoute(routeE)
+        RouteRepositoryImpl repository = new RouteRepositoryImpl(routeMapper)
+        RestTemplate restTemplate = Mock(RestTemplate)
+        Field field = repository.getClass().getDeclaredField("restTemplate")
+        field.setAccessible(true)
+        field.set(repository, restTemplate)
+
+        Field field1 = repository.getClass().getDeclaredField("registerUrl")
+        field1.setAccessible(true)
+        field1.set(repository, "aaa/eureka")
+        ResponseEntity responseEntity = Mock(ResponseEntity)
+        restTemplate.postForEntity(_, _, _) >> responseEntity
+        responseEntity.getStatusCode() >> HttpStatus.OK
+        def addRouteE = repository.addRoute(routeE)
         addRouteE.setName("testupdate")
         addRouteE.setPath("/testupdate/**")
         addRouteE.setServiceId("testupdate-service")
@@ -109,41 +135,41 @@ class RouteRepositoryImplSpec extends Specification {
         def errorRouteE = new RouteE()
         BeanUtils.copyProperties(addRouteE, errorRouteE)
         errorRouteE.setId(100L)
-        routeRepository.updateRoute(errorRouteE)
+        repository.updateRoute(errorRouteE)
 
         then: "校验异常信息"
         def error = thrown(CommonException)
         error.message == "error.route.not.exist"
 
-        when:"要更新的Route getObjectVersionNumber为null"
+        when: "要更新的Route getObjectVersionNumber为null"
         BeanUtils.copyProperties(addRouteE, errorRouteE)
         errorRouteE.setObjectVersionNumber(null)
-        routeRepository.updateRoute(errorRouteE)
+        repository.updateRoute(errorRouteE)
 
         then: "校验异常信息"
         error = thrown(CommonException)
         error.message == "error.objectVersionNumber.empty"
 
-        when:"要更新的Route name重复"
+        when: "要更新的Route name重复"
         BeanUtils.copyProperties(addRouteE, errorRouteE)
         errorRouteE.setName("manager")
-        routeRepository.updateRoute(errorRouteE)
+        repository.updateRoute(errorRouteE)
 
         then: "校验异常信息"
         error = thrown(CommonException)
         error.message == "error.route.insert.nameDuplicate"
 
-        when:"要更新的Route path重复"
+        when: "要更新的Route path重复"
         BeanUtils.copyProperties(addRouteE, errorRouteE)
         errorRouteE.setPath("/manager/**")
-        routeRepository.updateRoute(errorRouteE)
+        repository.updateRoute(errorRouteE)
 
         then: "校验异常信息"
         error = thrown(CommonException)
         error.message == "error.route.insert.pathDuplicate"
 
         when: "正确调用UpdateRoute"
-        def updateRouteE = routeRepository.updateRoute(addRouteE)
+        def updateRouteE = repository.updateRoute(addRouteE)
 
         then: "校验更新后RouteE"
         updateRouteE.getName().equals(addRouteE.getName())
@@ -153,10 +179,22 @@ class RouteRepositoryImplSpec extends Specification {
 
     def "DeleteRoute"() {
         given: "构造addRouteE"
-        def addRouteE = routeRepository.addRoute(routeE)
+        RouteRepositoryImpl repository = new RouteRepositoryImpl(routeMapper)
+        RestTemplate restTemplate = Mock(RestTemplate)
+        Field field = repository.getClass().getDeclaredField("restTemplate")
+        field.setAccessible(true)
+        field.set(repository, restTemplate)
+
+        Field field1 = repository.getClass().getDeclaredField("registerUrl")
+        field1.setAccessible(true)
+        field1.set(repository, "aaa/eureka")
+        ResponseEntity responseEntity = Mock(ResponseEntity)
+        restTemplate.postForEntity(_, _, _) >> responseEntity
+        responseEntity.getStatusCode() >> HttpStatus.OK
+        def addRouteE = repository.addRoute(routeE)
 
         when: "调用DeleteRoute方法"
-        def success = routeRepository.deleteRoute(addRouteE)
+        def success = repository.deleteRoute(addRouteE)
 
         then: "校验正常信息并删除routeE"
         success
@@ -172,6 +210,19 @@ class RouteRepositoryImplSpec extends Specification {
 
     def "AddRoutesBatch"() {
         given: "构造routeEs参数"
+        RouteRepositoryImpl repository = new RouteRepositoryImpl(routeMapper)
+        RestTemplate restTemplate = Mock(RestTemplate)
+        Field field = repository.getClass().getDeclaredField("restTemplate")
+        field.setAccessible(true)
+        field.set(repository, restTemplate)
+
+        Field field1 = repository.getClass().getDeclaredField("registerUrl")
+        field1.setAccessible(true)
+        field1.set(repository, "aaa/eureka")
+        ResponseEntity responseEntity = Mock(ResponseEntity)
+        restTemplate.postForEntity(_, _, _) >> responseEntity
+        responseEntity.getStatusCode() >> HttpStatus.OK
+
         def routeEList = new ArrayList<RouteE>()
         def routeE1 = new RouteE()
         routeE1.setName("test1")
@@ -185,7 +236,7 @@ class RouteRepositoryImplSpec extends Specification {
         routeEList.add(routeE2)
 
         when: "调用AddRoutesBatch"
-        def retuenRouteEList = routeRepository.addRoutesBatch(routeEList)
+        def retuenRouteEList = repository.addRoutesBatch(routeEList)
 
         then: "校验并删除插入的RouteE"
         !retuenRouteEList.isEmpty()
