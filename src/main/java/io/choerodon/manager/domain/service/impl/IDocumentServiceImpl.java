@@ -213,4 +213,15 @@ public class IDocumentServiceImpl implements IDocumentService {
 
     }
 
+    @Override
+    public String fetchActuatorJson(final EurekaEventPayload payload) {
+        ResponseEntity<String> response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + "/v1/actuator/all",
+                String.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            return response.getBody();
+        } else {
+            throw new CommonException("fetch actuator error, statusCode is not 2XX, serviceId: " + payload.getId());
+        }
+    }
+
 }

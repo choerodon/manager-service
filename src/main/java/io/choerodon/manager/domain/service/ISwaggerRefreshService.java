@@ -8,7 +8,7 @@ import io.choerodon.eureka.event.EurekaEventPayload;
  * @author zhipeng.zuo
  * @author wuguokai
  */
-public interface SwaggerRefreshService {
+public interface ISwaggerRefreshService {
 
     /**
      * 更新或者插入swagger json

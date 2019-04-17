@@ -2,7 +2,7 @@ package io.choerodon.manager.domain.service.impl;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.eureka.event.EurekaEventPayload;
-import io.choerodon.manager.domain.service.SwaggerRefreshService;
+import io.choerodon.manager.domain.service.ISwaggerRefreshService;
 import io.choerodon.manager.domain.service.VersionStrategy;
 import io.choerodon.manager.infra.dataobject.SwaggerDO;
 import io.choerodon.manager.infra.mapper.SwaggerMapper;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  * @author wuguokai
  */
 @Service
-public class ISwaggerRefreshServiceImpl implements SwaggerRefreshService {
+public class ISwaggerRefreshServiceImpl implements ISwaggerRefreshService {
 
     private SwaggerMapper swaggerMapper;
 
