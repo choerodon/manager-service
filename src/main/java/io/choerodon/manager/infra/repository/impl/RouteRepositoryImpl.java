@@ -13,7 +13,6 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -139,9 +138,10 @@ public class RouteRepositoryImpl implements RouteRepository {
 
     private void addOrUpdateRouteToGoRegister(RouteDO routeDO, String message) {
         String zuulRootUrl = getZuulRootUrl();
-        ResponseEntity<Void> response = restTemplate.postForEntity(zuulRootUrl, routeDO, Void.class);
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new CommonException("{}, exception: {}", message, response.getStatusCodeValue());
+        try {
+            restTemplate.postForEntity(zuulRootUrl, routeDO, Void.class);
+        } catch (Exception e) {
+            throw new CommonException(message);
         }
     }
 
