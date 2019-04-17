@@ -3,7 +3,7 @@ package io.choerodon.manager.api.eventhandler
 import io.choerodon.eureka.event.EurekaEventPayload
 import io.choerodon.manager.domain.service.IDocumentService
 import io.choerodon.manager.domain.service.IRouteService
-import io.choerodon.manager.domain.service.SwaggerRefreshService
+import io.choerodon.manager.domain.service.ISwaggerRefreshService
 import spock.lang.Specification
 
 class EurekaEventObserverSpec extends Specification {
@@ -12,7 +12,7 @@ class EurekaEventObserverSpec extends Specification {
         def service = Mock(IDocumentService) {
             fetchSwaggerJsonByIp(_) >> '{}'
         }
-        def service1 = Mock(SwaggerRefreshService)
+        def service1 = Mock(ISwaggerRefreshService)
         def service2 = Mock(IRouteService)
         def observer = new EurekaEventObserver(service, service1, service2)
 
