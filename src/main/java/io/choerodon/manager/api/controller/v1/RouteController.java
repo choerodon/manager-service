@@ -1,6 +1,5 @@
 package io.choerodon.manager.api.controller.v1;
 
-import java.util.Optional;
 import javax.validation.Valid;
 
 import io.swagger.annotations.ApiOperation;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.RouteDTO;
@@ -99,10 +97,9 @@ public class RouteController {
     @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("根据routeId删除一个路由")
     @DeleteMapping(value = "/{route_id}")
-    public ResponseEntity<Boolean> delete(@PathVariable("route_id") Long id) {
-        return Optional.ofNullable(routeService.delete(id))
-                .map(i -> new ResponseEntity<>(i, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.route.delete"));
+    public ResponseEntity delete(@PathVariable("route_id") Long id) {
+        routeService.delete(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})

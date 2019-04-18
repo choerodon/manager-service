@@ -34,6 +34,7 @@ public class RouteRepositoryImpl implements RouteRepository {
     private RestTemplate restTemplate = new RestTemplate();
 
     private static final String ADD_ZUUL_ROOT_URL = "/zuul";
+    private static final String DELETE_ZUUL_ROOT_URL = "/zuul/delete";
 
     public RouteRepositoryImpl(RouteMapper routeMapper) {
         this.routeMapper = routeMapper;
@@ -58,7 +59,7 @@ public class RouteRepositoryImpl implements RouteRepository {
             if (isInsert != 1) {
                 throw new CommonException("error.insert.route");
             }
-            addOrUpdateRouteToGoRegister(routeDO, "error to add route to register server");
+            modifyRouteFromGoRegister(routeDO, ADD_ZUUL_ROOT_URL, "error to add route to register server");
         } catch (DuplicateKeyException e) {
             if (routeMapper.selectCount(new RouteDO(routeE.getName())) > 0) {
                 throw new CommonException("error.route.insert.nameDuplicate");
@@ -91,7 +92,7 @@ public class RouteRepositoryImpl implements RouteRepository {
             if (isUpdate != 1) {
                 throw new CommonException("error.update.route");
             }
-            addOrUpdateRouteToGoRegister(routeDO, "error to update route to register server");
+            modifyRouteFromGoRegister(routeDO, ADD_ZUUL_ROOT_URL, "error to update route to register server");
         } catch (DuplicateKeyException e) {
             if (routeE.getName() != null && routeMapper.selectCount(new RouteDO(routeE.getName())) > 0) {
                 throw new CommonException("error.route.insert.nameDuplicate");
@@ -136,8 +137,22 @@ public class RouteRepositoryImpl implements RouteRepository {
         return routeMapper.selectCount(routeDO);
     }
 
-    private void addOrUpdateRouteToGoRegister(RouteDO routeDO, String message) {
-        String zuulRootUrl = getZuulRootUrl();
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(Long routeId) {
+        RouteDO route = routeMapper.selectByPrimaryKey(routeId);
+        if (route == null) {
+            throw new CommonException("error.route.not.existed", routeId);
+        }
+        if (route.getBuiltIn()) {
+            throw new CommonException("error.builtIn.route.can.not.delete");
+        }
+        routeMapper.deleteByPrimaryKey(routeId);
+        modifyRouteFromGoRegister(route, DELETE_ZUUL_ROOT_URL, "error to delete route from register server");
+    }
+
+    private void modifyRouteFromGoRegister(RouteDO routeDO, String suffix, String message) {
+        String zuulRootUrl = getZuulRootUrl(suffix);
         try {
             restTemplate.postForEntity(zuulRootUrl, routeDO, Void.class);
         } catch (Exception e) {
@@ -145,12 +160,12 @@ public class RouteRepositoryImpl implements RouteRepository {
         }
     }
 
-    private String getZuulRootUrl() {
+    private String getZuulRootUrl(String suffix) {
         if (!registerUrl.endsWith("/eureka") && !registerUrl.endsWith("/eureka/")) {
             throw new CommonException("error.illegal.register-service.url");
         }
         String[] array = registerUrl.split("/eureka");
         String registerHost = array[0];
-        return registerHost + ADD_ZUUL_ROOT_URL;
+        return registerHost + suffix;
     }
 }

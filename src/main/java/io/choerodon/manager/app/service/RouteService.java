@@ -42,7 +42,7 @@ public interface RouteService {
      * @param routeId 路由id
      * @return boolean
      */
-    Boolean delete(Long routeId);
+    void delete(Long routeId);
 
     /**
      * 批量添加路由

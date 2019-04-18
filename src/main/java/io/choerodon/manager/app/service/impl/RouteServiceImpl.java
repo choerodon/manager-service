@@ -6,13 +6,13 @@ import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.RouteDTO;
 import io.choerodon.manager.app.service.RouteService;
-import io.choerodon.manager.domain.factory.RouteEFactory;
 import io.choerodon.manager.domain.manager.entity.RouteE;
 import io.choerodon.manager.domain.repository.RouteRepository;
 import io.choerodon.manager.domain.service.IRouteService;
 import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -28,7 +28,6 @@ public class RouteServiceImpl implements RouteService {
     private IRouteService irouteService;
 
     private RouteRepository routeRepository;
-
 
     /**
      * 构造器
@@ -56,10 +55,9 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
-    public Boolean delete(Long routeId) {
-        RouteE routeE = RouteEFactory.createRouteE();
-        routeE.setId(routeId);
-        return routeE.deleteRoute();
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(Long routeId) {
+        routeRepository.delete(routeId);
     }
 
     @Override
