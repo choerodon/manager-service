@@ -10,5 +10,5 @@ public interface IActuatorRefreshService {
      */
     boolean updateOrInsertActuator(String serviceName, String serviceVersion, String json);
 
-    void sendEvent(String json);
+    void sendEvent(String json, String service);
 }

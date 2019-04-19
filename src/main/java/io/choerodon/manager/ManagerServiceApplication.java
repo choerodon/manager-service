@@ -10,7 +10,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableEurekaClient
-@EnableFeignClients
+@EnableFeignClients("io.choerodon")
 @EnableScheduling
 @SpringBootApplication
 @EnableConfigurationProperties(GatewayProperties.class)

@@ -44,7 +44,7 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
             throw new RemoteAccessException("fetch actuator json data is empty, " + payload);
         }
         if(actuatorRefreshService.updateOrInsertActuator(payload.getAppName(), payload.getVersion(), actuatorJson)){
-            actuatorRefreshService.sendEvent(actuatorJson);
+            actuatorRefreshService.sendEvent(actuatorJson, payload.getAppName());
         }
     }
 

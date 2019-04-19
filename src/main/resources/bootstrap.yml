@@ -10,3 +10,6 @@ management:
     web:
       exposure:
         include: '*'
+feign:
+  hystrix:
+    enabled: false

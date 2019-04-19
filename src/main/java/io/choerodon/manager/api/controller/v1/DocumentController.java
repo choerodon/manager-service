@@ -1,6 +1,7 @@
 package io.choerodon.manager.api.controller.v1;
 
 
+import io.choerodon.base.annotation.Permission;
 import io.choerodon.manager.app.service.ApiService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.manager.infra.common.utils.VersionUtil;
-import io.choerodon.swagger.annotation.Permission;
 
 /**
  * 获取swagger信息controller

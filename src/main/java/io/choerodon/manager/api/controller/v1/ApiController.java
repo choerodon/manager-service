@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.choerodon.base.annotation.Permission;
+import io.choerodon.base.enums.ResourceType;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
@@ -15,7 +17,6 @@ import springfox.documentation.swagger.web.SwaggerResource;
 
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.InitRoleCode;
-import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.swagger.ControllerDTO;
 import io.choerodon.manager.app.service.ApiService;
 import io.choerodon.manager.app.service.SwaggerService;
@@ -24,7 +25,6 @@ import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.CustomPageRequest;
-import io.choerodon.swagger.annotation.Permission;
 
 /**
  * @author superlee
@@ -50,14 +50,14 @@ public class ApiController {
         this.apiService = apiService;
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询不包含跳过的服务的路由列表")
     @GetMapping("/resources")
     public ResponseEntity<List<SwaggerResource>> resources() {
         return new ResponseEntity<>(swaggerService.getSwaggerResource(), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询服务controller和接口")
     @GetMapping("/{service_prefix}/controllers")
     @CustomPageRequest
@@ -76,7 +76,7 @@ public class ApiController {
         return new ResponseEntity<>(apiService.getControllers(serviceName, version, pageRequest, map), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("根据path的url和method查询单个path")
     @GetMapping("/{service_prefix}/controllers/{name}/paths")
     public ResponseEntity<ControllerDTO> queryPathDetail(@PathVariable("service_prefix") String serviceName,
@@ -86,14 +86,14 @@ public class ApiController {
         return new ResponseEntity<>(apiService.queryPathDetail(serviceName, version, controllerName, operationId), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询运行的服务实例的api接口数量")
     @GetMapping("/api/count")
     public ResponseEntity<Map<String, Object>> queryInstancesAndApiCount() {
         return new ResponseEntity<>(apiService.queryInstancesAndApiCount(), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("根据日期查询服务的调用次数")
     @GetMapping("/service_invoke/count")
     public ResponseEntity<Map<String, Object>> queryServiceInvoke(@RequestParam(value = "begin_date")
@@ -103,7 +103,7 @@ public class ApiController {
         return new ResponseEntity<>(apiService.queryServiceInvoke(beginDate, endDate), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询日期或者服务名或path路径查询api的调用次数")
     @GetMapping("/api_invoke/count")
     public ResponseEntity<Map<String, Object>> queryApiInvoke(@RequestParam(value = "begin_date")
@@ -114,7 +114,7 @@ public class ApiController {
         return new ResponseEntity<>(apiService.queryInvokeCount(beginDate, endDate, service, "api", Collections.emptySet()), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询树形接口目录")
     @GetMapping("/tree")
     public ResponseEntity<Map> queryTreeMenu() {

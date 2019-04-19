@@ -1,9 +1,9 @@
 package io.choerodon.manager.api.controller.v1;
 
-import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.base.annotation.Permission;
+import io.choerodon.base.enums.ResourceType;
 import io.choerodon.manager.api.dto.MenuClickDTO;
 import io.choerodon.manager.app.service.StatisticService;
-import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
@@ -26,7 +26,7 @@ public class StatisticController {
         this.statisticService = statisticService;
     }
 
-    @Permission(level = ResourceLevel.SITE, permissionLogin = true)
+    @Permission(type = ResourceType.SITE, permissionLogin = true)
     @ApiOperation("菜单点击次数统计保存接口")
     @PostMapping("/menu_click/save")
     public ResponseEntity saveMenuClick(@RequestBody List<MenuClickDTO> menuClickList) {
@@ -34,7 +34,7 @@ public class StatisticController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE)
+    @Permission(type = ResourceType.SITE)
     @ApiOperation("根据日期和层级查询菜单的调用次数")
     @GetMapping("/menu_click")
     public ResponseEntity<Map<String, Object>> queryMenuClick(@RequestParam(value = "begin_date")
