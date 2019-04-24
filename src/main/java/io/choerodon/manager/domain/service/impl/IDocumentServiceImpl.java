@@ -215,7 +215,7 @@ public class IDocumentServiceImpl implements IDocumentService {
 
     @Override
     public String fetchActuatorJson(final EurekaEventPayload payload) {
-        ResponseEntity<String> response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + "/v2/choerodon/actuator/all",
+        ResponseEntity<String> response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + "/choerodon/actuator/all",
                 String.class);
         if (response.getStatusCode() == HttpStatus.OK) {
             return response.getBody();
