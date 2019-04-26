@@ -29,4 +29,6 @@ public interface RouteRepository {
     Page<RouteE> pageAllRoutes(PageRequest pageRequest, RouteDO routeDO, String params);
 
     int countRoute(RouteDO routeDO);
+
+    void delete(Long routeId);
 }
