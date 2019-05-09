@@ -73,7 +73,7 @@ public class ActuatorRefreshServiceImpl implements IActuatorRefreshService {
                     .newBuilder()
                     .withLevel(ResourceLevel.SITE)
                     .withRefType("application")
-                    .withSagaCode(ACTUATOR_REFRESH_SAGA_CODE), startSagaBuilder -> startSagaBuilder.withPayloadAndSerialize(jsonMap));
+                    .withSagaCode(METADATA_REFRESH_SAGA_CODE), startSagaBuilder -> startSagaBuilder.withPayloadAndSerialize(jsonMap));
         } catch (IOException e) {
             LOGGER.warn("actuator send event exception", e);
         }

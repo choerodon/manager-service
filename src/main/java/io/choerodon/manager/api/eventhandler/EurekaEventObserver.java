@@ -49,11 +49,15 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
         actuatorRefreshService.updateOrInsertActuator(payload.getAppName(), payload.getVersion(), actuatorJson);
         actuatorRefreshService.sendActuatorEvent(actuatorJson, payload.getAppName());
 
-        String metadataJson = iDocumentService.fetchMetadataJson(payload);
-        if (StringUtils.isEmpty(metadataJson)) {
-            LOGGER.info("fetch metadata json data is empty skip: {}", payload);
-        } else {
-            actuatorRefreshService.sendMetadataEvent(metadataJson, payload.getAppName());
+        try {
+            String metadataJson = iDocumentService.fetchMetadataJson(payload);
+            if (StringUtils.isEmpty(metadataJson)) {
+                LOGGER.info("fetch metadata json data is empty skip: {}", payload);
+            } else {
+                actuatorRefreshService.sendMetadataEvent(metadataJson, payload.getAppName());
+            }
+        } catch (Exception e){
+            LOGGER.info("fetch metadata exception skip: {}, {}", payload, e.getMessage());
         }
     }
 
