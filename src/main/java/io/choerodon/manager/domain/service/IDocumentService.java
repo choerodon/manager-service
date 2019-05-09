@@ -38,4 +38,6 @@ public interface IDocumentService {
     String fetchSwaggerJsonByIp(EurekaEventPayload payload);
 
     String fetchActuatorJson(EurekaEventPayload payload);
+
+    String fetchMetadataJson(EurekaEventPayload payload);
 }

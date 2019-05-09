@@ -232,6 +232,23 @@ public class IDocumentServiceImpl implements IDocumentService {
         }
     }
 
+    @Override
+    public String fetchMetadataJson(final EurekaEventPayload payload) {
+        ResponseEntity<Map> response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + "/choerodon/metadata", Map.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            Map<String, Object> result = response.getBody();
+            result.put("service", payload.getAppName());
+            result.put("version", payload.getVersion());
+            try {
+                return MAPPER.writeValueAsString(result);
+            } catch (JsonProcessingException e) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
     private PropertyData fetchPropertyData(String address) {
         ResponseEntity<PropertyData> response = restTemplate.getForEntity("http://"
                 + address + "/choerodon/asgard", PropertyData.class);

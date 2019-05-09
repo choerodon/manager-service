@@ -6,6 +6,8 @@ import io.choerodon.manager.domain.service.IActuatorRefreshService;
 import io.choerodon.manager.domain.service.IDocumentService;
 import io.choerodon.manager.domain.service.IRouteService;
 import io.choerodon.manager.domain.service.ISwaggerRefreshService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 @Component
 public class EurekaEventObserver extends AbstractEurekaEventObserver {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EurekaEventObserver.class);
 
     private IDocumentService iDocumentService;
 
@@ -44,7 +47,14 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
             throw new RemoteAccessException("fetch actuator json data is empty, " + payload);
         }
         actuatorRefreshService.updateOrInsertActuator(payload.getAppName(), payload.getVersion(), actuatorJson);
-        actuatorRefreshService.sendEvent(actuatorJson, payload.getAppName());
+        actuatorRefreshService.sendActuatorEvent(actuatorJson, payload.getAppName());
+
+        String metadataJson = iDocumentService.fetchMetadataJson(payload);
+        if (StringUtils.isEmpty(metadataJson)) {
+            LOGGER.info("fetch metadata json data is empty skip: {}", payload);
+        } else {
+            actuatorRefreshService.sendMetadataEvent(metadataJson, payload.getAppName());
+        }
     }
 
     @Override
