@@ -39,4 +39,5 @@ public interface IDocumentService {
 
     String fetchActuatorJson(EurekaEventPayload payload);
 
+    String fetchMetadataJson(EurekaEventPayload payload);
 }

@@ -21,6 +21,7 @@ public class ActuatorRefreshServiceImpl implements IActuatorRefreshService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ActuatorRefreshServiceImpl.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String ACTUATOR_REFRESH_SAGA_CODE = "mgmt-actuator-refresh";
+    private static final String METADATA_REFRESH_SAGA_CODE = "mgmt-metadata-refresh";
     @Autowired
     private ActuatorMapper actuatorMapper;
     @Autowired
@@ -47,7 +48,7 @@ public class ActuatorRefreshServiceImpl implements IActuatorRefreshService {
     @Override
     @SuppressWarnings("unchecked")
     @Saga(code = ACTUATOR_REFRESH_SAGA_CODE, description = "刷新Actuator端口数据", inputSchemaClass = String.class)
-    public void sendEvent(String json, String service){
+    public void sendActuatorEvent(String json, String service){
         try {
             Map jsonMap = OBJECT_MAPPER.readValue(json, Map.class);
             jsonMap.put("service", service);
@@ -56,6 +57,23 @@ public class ActuatorRefreshServiceImpl implements IActuatorRefreshService {
                     .withLevel(ResourceLevel.SITE)
                     .withRefType("application")
                     .withSagaCode(ACTUATOR_REFRESH_SAGA_CODE), startSagaBuilder -> startSagaBuilder.withPayloadAndSerialize(jsonMap));
+        } catch (IOException e) {
+            LOGGER.warn("actuator send event exception", e);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    @Saga(code = METADATA_REFRESH_SAGA_CODE, description = "刷新Metadata端口数据", inputSchemaClass = String.class)
+    public void sendMetadataEvent(String json, String service){
+        try {
+            Map jsonMap = OBJECT_MAPPER.readValue(json, Map.class);
+            jsonMap.put("service", service);
+            producer.apply(StartSagaBuilder
+                    .newBuilder()
+                    .withLevel(ResourceLevel.SITE)
+                    .withRefType("application")
+                    .withSagaCode(METADATA_REFRESH_SAGA_CODE), startSagaBuilder -> startSagaBuilder.withPayloadAndSerialize(jsonMap));
         } catch (IOException e) {
             LOGGER.warn("actuator send event exception", e);
         }

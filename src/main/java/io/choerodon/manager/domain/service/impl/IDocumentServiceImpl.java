@@ -1,8 +1,10 @@
 package io.choerodon.manager.domain.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.choerodon.asgard.property.PropertyData;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.eureka.event.EurekaEventPayload;
 import io.choerodon.manager.domain.manager.entity.RouteE;
@@ -215,12 +217,45 @@ public class IDocumentServiceImpl implements IDocumentService {
 
     @Override
     public String fetchActuatorJson(final EurekaEventPayload payload) {
-        ResponseEntity<String> response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + "/choerodon/actuator/all",
-                String.class);
+        ResponseEntity<Map> response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + "/choerodon/actuator/all", Map.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            Map<String, Object> result = response.getBody();
+            result.put("asgard", fetchPropertyData(payload.getInstanceAddress()));
+            result.put("version", payload.getVersion());
+            try {
+                return MAPPER.writeValueAsString(result);
+            } catch (JsonProcessingException e) {
+                return null;
+            }
+        } else {
+            throw new CommonException("fetch actuator error, statusCode is not 2XX, serviceId: " + payload.getId());
+        }
+    }
+
+    @Override
+    public String fetchMetadataJson(final EurekaEventPayload payload) {
+        ResponseEntity<Map> response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + "/choerodon/metadata", Map.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            Map<String, Object> result = response.getBody();
+            result.put("service", payload.getAppName());
+            result.put("version", payload.getVersion());
+            try {
+                return MAPPER.writeValueAsString(result);
+            } catch (JsonProcessingException e) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private PropertyData fetchPropertyData(String address) {
+        ResponseEntity<PropertyData> response = restTemplate.getForEntity("http://"
+                + address + "/choerodon/asgard", PropertyData.class);
         if (response.getStatusCode() == HttpStatus.OK) {
             return response.getBody();
         } else {
-            throw new CommonException("fetch actuator error, statusCode is not 2XX, serviceId: " + payload.getId());
+            throw new RemoteAccessException("error.fetchPropertyData.statusCodeNot2XX");
         }
     }
 
