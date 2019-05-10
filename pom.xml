@@ -10,10 +10,13 @@
     <parent>
         <groupId>io.choerodon</groupId>
         <artifactId>choerodon-framework-parent</artifactId>
-        <version>0.9.0.RELEASE</version>
+        <version>0.11.0.RELEASE</version>
     </parent>
     <properties>
         <choerodon.starters.version>0.11.0.RELEASE</choerodon.starters.version>
+        <choerodon.mainClass>io.choerodon.manager.ManagerServiceApplication</choerodon.mainClass>
+        <choerodon.serviceBuild>true</choerodon.serviceBuild>
+        <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
     </properties>
 
     <dependencies>
@@ -160,51 +163,5 @@
     </dependencies>
     <build>
         <finalName>app</finalName>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.gmavenplus</groupId>
-                <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>addTestSources</goal>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.18.1</version>
-                <configuration>
-                    <includes>
-                        <include>**/*Test.java</include>
-                        <include>**/*Spec.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
-        </plugins>
-        <!-- 用自定义swagger-ui.html和springfox.js覆盖 jar包中的文件-->
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>src/main/resources/swagger-ui</directory>
-                <targetPath>META-INF/resources</targetPath>
-            </resource>
-        </resources>
-
     </build>
 </project>
