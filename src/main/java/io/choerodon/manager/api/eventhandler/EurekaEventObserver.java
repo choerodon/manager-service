@@ -36,18 +36,26 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
 
     @Override
     public void receiveUpEvent(EurekaEventPayload payload) {
-        String json = iDocumentService.fetchSwaggerJsonByIp(payload);
-        if (StringUtils.isEmpty(json)) {
-            throw new RemoteAccessException("fetch swagger json data is empty, " + payload);
+        try {
+            String json = iDocumentService.fetchSwaggerJsonByIp(payload);
+            if (StringUtils.isEmpty(json)) {
+                throw new RemoteAccessException("fetch swagger json data is empty, " + payload);
+            }
+            swaggerRefreshService.updateOrInsertSwagger(payload, json);
+            iRouteService.autoRefreshRoute(json);
+        } catch (Exception e) {
+            LOGGER.info("process swagger data exception skip: {}, {}", payload, e.getMessage());
         }
-        swaggerRefreshService.updateOrInsertSwagger(payload, json);
-        iRouteService.autoRefreshRoute(json);
-        String actuatorJson = iDocumentService.fetchActuatorJson(payload);
-        if (StringUtils.isEmpty(json)) {
-            throw new RemoteAccessException("fetch actuator json data is empty, " + payload);
+        try {
+            String actuatorJson = iDocumentService.fetchActuatorJson(payload);
+            if (StringUtils.isEmpty(actuatorJson)) {
+                throw new RemoteAccessException("fetch actuator json data is empty, " + payload);
+            }
+            actuatorRefreshService.updateOrInsertActuator(payload.getAppName(), payload.getVersion(), actuatorJson);
+            actuatorRefreshService.sendActuatorEvent(actuatorJson, payload.getAppName());
+        } catch (Exception e) {
+            LOGGER.info("process actuator data exception skip: {}, {}", payload, e.getMessage());
         }
-        actuatorRefreshService.updateOrInsertActuator(payload.getAppName(), payload.getVersion(), actuatorJson);
-        actuatorRefreshService.sendActuatorEvent(actuatorJson, payload.getAppName());
 
         try {
             String metadataJson = iDocumentService.fetchMetadataJson(payload);
@@ -56,13 +64,13 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
             } else {
                 actuatorRefreshService.sendMetadataEvent(metadataJson, payload.getAppName());
             }
-        } catch (Exception e){
-            LOGGER.info("fetch metadata exception skip: {}, {}", payload, e.getMessage());
+        } catch (Exception e) {
+            LOGGER.info("process metadata data exception skip: {}, {}", payload, e.getMessage());
         }
     }
 
     @Override
     public void receiveDownEvent(EurekaEventPayload payload) {
-       // do nothing
+        // do nothing
     }
 }
