@@ -1,5 +1,6 @@
 package io.choerodon.manager.app.service.impl;
 
+import io.choerodon.base.enums.ResourceType;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.MenuClickDTO;
@@ -83,13 +84,13 @@ public class StatisticServiceImpl implements StatisticService {
         validateLevel(level);
     }
 
-    private void validateLevel(String level) {
-        Set<String> levels = new HashSet<>();
-        for (ResourceLevel resourceLevel : ResourceLevel.values()) {
-            levels.add(resourceLevel.value());
+    private void validateLevel(String type) {
+        Set<String> types = new HashSet<>();
+        for (ResourceType resourceType : ResourceType.values()) {
+            types.add(resourceType.value());
         }
-        if (!levels.contains(level)) {
-            throw new CommonException("error.menuClick.illegal.level");
+        if (!types.contains(type)) {
+            throw new RuntimeException("menu level validata error : " + type);
         }
     }
 }
