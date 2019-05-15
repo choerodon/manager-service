@@ -1,7 +1,7 @@
 {
   "name": "@choerodon/manager",
   "routeName": "manager",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "./react/src/app/iam/containers/IAMIndex.js",
   "dependencies": {

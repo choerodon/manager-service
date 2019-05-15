@@ -28,3 +28,4 @@ gitlabci/.generated
 rebel.xml
 application-default.yml
 node_modules
+lib

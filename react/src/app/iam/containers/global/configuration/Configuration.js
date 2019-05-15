@@ -113,7 +113,7 @@ export default class Configuration extends Component {
             total: data.total,
           },
         });
-        ConfigurationStore.setConfigData(data.content.slice());
+        ConfigurationStore.setConfigData(data.list.slice());
         ConfigurationStore.setLoading(false);
       })
       .catch((error) => {
