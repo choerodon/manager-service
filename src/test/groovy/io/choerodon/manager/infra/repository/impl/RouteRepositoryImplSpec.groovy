@@ -1,5 +1,6 @@
 package io.choerodon.manager.infra.repository.impl
 
+import com.github.pagehelper.PageInfo
 import io.choerodon.core.convertor.ConvertHelper
 import io.choerodon.core.domain.Page
 import io.choerodon.core.exception.CommonException
@@ -8,12 +9,10 @@ import io.choerodon.manager.domain.manager.entity.RouteE
 import io.choerodon.manager.domain.repository.RouteRepository
 import io.choerodon.manager.infra.dataobject.RouteDO
 import io.choerodon.manager.infra.mapper.RouteMapper
-import io.choerodon.mybatis.pagehelper.domain.PageRequest
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
-import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
@@ -247,15 +246,14 @@ class RouteRepositoryImplSpec extends Specification {
 
     def "PageAllRoutes"() {
         given: "构造RouteDO参数"
-        def pageRequest = new PageRequest(0, 10)
         def routeDO = new RouteDO()
         def params = null
 
         when: "调用pageAllRoutes"
-        Page<RouteE> page = routeRepository.pageAllRoutes(pageRequest, routeDO, params)
+        PageInfo<RouteDO> page = routeRepository.pageAllRoutes(0, 10, routeDO, params)
 
         then: "校验"
-        !page.isEmpty()
+        !page.getList().isEmpty()
     }
 
     def "CountRoute"() {

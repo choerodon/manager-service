@@ -38,6 +38,7 @@
             path LIKE concat(concat('%',#{params}),'%') OR
             service_id LIKE concat(concat('%',#{params}),'%')
         </if>
+        order by id asc
     </select>
 
 </mapper>

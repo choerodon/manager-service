@@ -1,16 +1,14 @@
 package io.choerodon.manager.infra.repository.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import io.choerodon.core.convertor.ConvertHelper;
-import io.choerodon.core.convertor.ConvertPageHelper;
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.domain.manager.entity.RouteE;
 import io.choerodon.manager.domain.repository.RouteRepository;
 import io.choerodon.manager.infra.common.annotation.RouteNotifyRefresh;
 import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.manager.infra.mapper.RouteMapper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
@@ -127,9 +125,8 @@ public class RouteRepositoryImpl implements RouteRepository {
     }
 
     @Override
-    public Page<RouteE> pageAllRoutes(PageRequest pageRequest, RouteDO routeDO, String params) {
-        Page<RouteDO> routeDOPage = PageHelper.doPageAndSort(pageRequest, () -> routeMapper.selectRoutes(routeDO, params));
-        return ConvertPageHelper.convertPage(routeDOPage, RouteE.class);
+    public PageInfo<RouteDO> pageAllRoutes(int page, int size, RouteDO routeDO, String params) {
+        return PageHelper.startPage(page,size).doSelectPageInfo(()->routeMapper.selectRoutes(routeDO, params));
     }
 
     @Override

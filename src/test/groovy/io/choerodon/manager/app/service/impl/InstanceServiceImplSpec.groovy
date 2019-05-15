@@ -6,10 +6,9 @@ import io.choerodon.core.exception.CommonException
 import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.api.dto.InstanceDTO
 import io.choerodon.manager.app.service.InstanceService
+import io.choerodon.manager.infra.dataobject.Sort
 import io.choerodon.manager.infra.feign.ConfigServerClient
 import io.choerodon.manager.infra.mapper.ConfigMapper
-import io.choerodon.mybatis.pagehelper.domain.PageRequest
-import io.choerodon.mybatis.pagehelper.domain.Sort
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.client.DefaultServiceInstance
@@ -47,7 +46,7 @@ class InstanceServiceImplSpec extends Specification {
 
     def "Query"() {
         given: '创建参数'
-        def instanceDTO = new InstanceDTO("test_server:test_ip:test_port",null,null,null,null,null)
+        def instanceDTO = new InstanceDTO("test_server:test_ip:test_port", null, null, null, null, null)
         def instanceId = instanceDTO.getInstanceId()
         def wrongInstanceId = 'test_server:wrong'
         def service = 'test_service'
@@ -75,7 +74,7 @@ class InstanceServiceImplSpec extends Specification {
 
     def "fetchEnvInfo[illegalURL]"() {
         given: '创建参数'
-        def instanceDTO = new InstanceDTO("test_server:test_ip:test_port",null,null,null,null,null,null)
+        def instanceDTO = new InstanceDTO("test_server:test_ip:test_port", null, null, null, null, null, null)
         def instanceId = instanceDTO.getInstanceId()
         def service = 'test_service'
         def wrongUrlInstanceInfo = new InstanceInfo(instanceId: "test_ip:test_server:test_port", healthCheckUrl: "wrong://111.111.11.111:1111/")
@@ -216,19 +215,19 @@ class InstanceServiceImplSpec extends Specification {
 
         and: "构造pageRequest"
         def order = new Sort.Order("id")
-        def pageRequest = new PageRequest(1, 20, new Sort(order))
+        Sort sort = new Sort(order)
 
         and: 'mock'
         mockDiscoveryClient.getServices() >> { return serviceList }
         mockDiscoveryClient.getInstances(_) >> { return serviceInstanceList }
 
         when: '查询实例列表'
-        instanceService.listByOptions(service, map, pageRequest)
+        instanceService.listByOptions(service, map, 1, 20, sort)
         then: '结果分析'
         noExceptionThrown()
 
         when: '查询实例列表'
-        instanceService.listByOptions("", map, pageRequest)
+        instanceService.listByOptions("", map, 1, 20, sort)
         then: '结果分析'
         noExceptionThrown()
     }

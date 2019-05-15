@@ -6,9 +6,9 @@ import io.choerodon.manager.app.service.ApiService
 import io.choerodon.manager.domain.service.IDocumentService
 import io.choerodon.manager.domain.service.ISwaggerService
 import io.choerodon.manager.infra.dataobject.RouteDO
+import io.choerodon.manager.infra.dataobject.Sort
 import io.choerodon.manager.infra.mapper.RouteMapper
-import io.choerodon.mybatis.pagehelper.domain.PageRequest
-import io.choerodon.mybatis.pagehelper.domain.Sort
+import org.apache.poi.ss.formula.functions.Odd
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -49,9 +49,6 @@ class ApiServiceImplSpec extends Specification {
         map.put("name", null)
         map.put("description", null)
 
-        and: "构造pageRequest"
-        def order = new Sort.Order("id")
-        def pageRequest = new PageRequest(0, 20, new Sort(order))
 
         and: 'mock getSwaggerJson方法'
         def file = new File(this.class.getResource('/swagger.json').toURI())
@@ -59,10 +56,12 @@ class ApiServiceImplSpec extends Specification {
         mockIDocumentService.expandSwaggerJson(_, _, _) >> { file.getText('UTF-8') }
 
         when: "方法调用"
-        def list = apiService.getControllers(name, version, pageRequest, map)
+        Sort.Order order = new Sort.Order("id")
+        Sort sort = new Sort(order)
+        def list = apiService.getControllers(name, version, 1, 20, sort, map)
 
         then: "结果分析"
-        !list.isEmpty()
+        !list.getList().isEmpty()
     }
 
 //    def "GetControllers[Exception]"() {
@@ -171,7 +170,7 @@ class ApiServiceImplSpec extends Specification {
         then:
         1 * stringRedisTemplate.hasKey(_) >> true
         1 * stringRedisTemplate.opsForValue() >> valueOperations
-        1*valueOperations.get(_)>>"{\"name\":\"api-controller\",\"description\":\"api测试\",\"paths\":[{\"url\":\"/v1/swaggers/resources\",\"method\":\"get\",\"consumes\":[\"application/json\"],\"produces\":[\"*/*\"],\"operationId\":\"resourcesUsingGET\",\"parameters\":[],\"responses\":[{\"httpStatus\":\"200\",\"description\":\"OK\",\"body\":\"[\\n{\\n\\\"swaggerVersion\\\":\\\"string\\\"\\n\\\"name\\\":\\\"string\\\"\\n\\\"location\\\":\\\"string\\\"\\n}\\n]\"},{\"httpStatus\":\"401\",\"description\":\"Unauthorized\",\"body\":null},{\"httpStatus\":\"403\",\"description\":\"Forbidden\",\"body\":null},{\"httpStatus\":\"404\",\"description\":\"Not Found\",\"body\":null}],\"remark\":\"查询不包含跳过的服务的路由列表\",\"description\":\"{\\\"permission\\\":{\\\"action\\\":\\\"resources\\\",\\\"menuLevel\\\":null,\\\"permissionLevel\\\":\\\"site\\\",\\\"roles\\\":[\\\"role/site/default/developer\\\"],\\\"permissionLogin\\\":false,\\\"permissionPublic\\\":false,\\\"permissionWithin\\\":false},\\\"label\\\":null}\",\"refController\":\"api-controller\",\"innerInterface\":false,\"basePath\":\"/manager\",\"code\":\"manager-service.api.resources\"}]}"
+        1 * valueOperations.get(_) >> "{\"name\":\"api-controller\",\"description\":\"api测试\",\"paths\":[{\"url\":\"/v1/swaggers/resources\",\"method\":\"get\",\"consumes\":[\"application/json\"],\"produces\":[\"*/*\"],\"operationId\":\"resourcesUsingGET\",\"parameters\":[],\"responses\":[{\"httpStatus\":\"200\",\"description\":\"OK\",\"body\":\"[\\n{\\n\\\"swaggerVersion\\\":\\\"string\\\"\\n\\\"name\\\":\\\"string\\\"\\n\\\"location\\\":\\\"string\\\"\\n}\\n]\"},{\"httpStatus\":\"401\",\"description\":\"Unauthorized\",\"body\":null},{\"httpStatus\":\"403\",\"description\":\"Forbidden\",\"body\":null},{\"httpStatus\":\"404\",\"description\":\"Not Found\",\"body\":null}],\"remark\":\"查询不包含跳过的服务的路由列表\",\"description\":\"{\\\"permission\\\":{\\\"action\\\":\\\"resources\\\",\\\"menuLevel\\\":null,\\\"permissionLevel\\\":\\\"site\\\",\\\"roles\\\":[\\\"role/site/default/developer\\\"],\\\"permissionLogin\\\":false,\\\"permissionPublic\\\":false,\\\"permissionWithin\\\":false},\\\"label\\\":null}\",\"refController\":\"api-controller\",\"innerInterface\":false,\"basePath\":\"/manager\",\"code\":\"manager-service.api.resources\"}]}"
         value.getName() == "api-controller"
     }
 }

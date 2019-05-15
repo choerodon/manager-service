@@ -1,8 +1,8 @@
 package io.choerodon.manager.infra.common.utils;
 
-import io.choerodon.core.domain.Page;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageInfo;
+import io.choerodon.manager.infra.dataobject.Sort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -20,29 +20,23 @@ public class ManualPageHelper {
     private ManualPageHelper() {
     }
 
-    public static <T> Page<T> postPage(final List<T> source, final PageRequest pageRequest, final Map<String, Object> filters) {
-        return postPage(source, pageRequest, filters, defaultCompare(pageRequest));
+    public static <T> PageInfo<T> postPage(final List<T> source, int page, int size, Sort sort, final Map<String, Object> filters) {
+        return postPage(source, page, size, filters, defaultCompare(sort));
     }
 
-    public static <T> Page<T> postPage(final List<T> source, final PageRequest pageRequest,
-                                       final Map<String, Object> filters, Comparator<T> comparable) {
-        Page<T> page = new Page<>();
-        page.setSize(pageRequest.getSize());
-        page.setNumber(pageRequest.getPage());
+    public static <T> PageInfo<T> postPage(final List<T> source, int page, int size,
+                                           final Map<String, Object> filters, Comparator<T> comparable) {
+        Page<T> result = new Page<>(page, size);
         final List<T> filterList = source.stream().filter(t -> throughFilter(t, filters))
                 .sorted(comparable).collect(Collectors.toList());
-        List<T> pageList = getPageList(pageRequest.getPage(), pageRequest.getSize(), filterList);
-        int pageSize = filterList.size() / pageRequest.getSize() + (filterList.size() % pageRequest.getSize() > 0 ? 1 : 0);
-        page.setTotalPages(pageSize);
-        page.setTotalElements(filterList.size());
-        page.setNumberOfElements(pageList.size());
-        page.setContent(pageList);
-        return page;
+        List<T> pageList = getPageList(page, size, filterList);
+        result.setTotal(filterList.size());
+        result.addAll(pageList);
+        return result.toPageInfo();
     }
 
-    private static <T> Comparator<T> defaultCompare(final PageRequest pageRequest) {
+    private static <T> Comparator<T> defaultCompare(final Sort sort) {
         return (T o1, T o2) -> {
-            Sort sort = pageRequest.getSort();
             Iterator<Sort.Order> iterator = sort.iterator();
             if (iterator.hasNext()) {
                 Sort.Order order = iterator.next();
@@ -88,11 +82,11 @@ public class ManualPageHelper {
             return Collections.emptyList();
         }
         int totalCount = source.size();
-        int fromIndex = page * pageSize;
+        int fromIndex = (page - 1) * pageSize;
         if (fromIndex >= totalCount) {
             return Collections.emptyList();
         }
-        int toIndex = ((page + 1) * pageSize);
+        int toIndex = page * pageSize;
         if (toIndex > totalCount) {
             toIndex = totalCount;
         }

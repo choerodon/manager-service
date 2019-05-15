@@ -1,18 +1,19 @@
 package io.choerodon.manager.infra.repository.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import io.choerodon.core.convertor.ConvertHelper;
-import io.choerodon.core.convertor.ConvertPageHelper;
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.ConfigDTO;
 import io.choerodon.manager.domain.repository.ConfigRepository;
 import io.choerodon.manager.infra.dataobject.ConfigDO;
 import io.choerodon.manager.infra.mapper.ConfigMapper;
-import io.choerodon.mybatis.pagehelper.PageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -33,20 +34,23 @@ public class ConfigRepositoryImpl implements ConfigRepository {
     }
 
     @Override
-    public Page<ConfigDTO> listByServiceName(String serviceName, PageRequest pageRequest, ConfigDO queryInfo, String queryParam) {
-        Page<ConfigDO> configDOPage =
-                PageHelper.doPageAndSort(pageRequest, () -> configMapper.fulltextSearch(queryInfo, serviceName, queryParam));
-        return ConvertPageHelper.convertPage(configDOPage, ConfigDTO.class);
+    public PageInfo<ConfigDTO> listByServiceName(String serviceName, int page, int size, ConfigDO queryInfo, String queryParam) {
+        PageInfo<ConfigDO> pageInfo =
+                PageHelper.startPage(page, size).doSelectPageInfo(() -> configMapper.fulltextSearch(queryInfo, serviceName, queryParam));
+        Page<ConfigDTO> result = new Page<>(page, size);
+        result.setTotal(pageInfo.getTotal());
+        List<ConfigDTO> configs = new ArrayList<>();
+        pageInfo.getList().forEach(c -> {
+            ConfigDTO dto = new ConfigDTO();
+            BeanUtils.copyProperties(c, dto);
+            configs.add(dto);
+        });
+        result.addAll(configs);
+        return result.toPageInfo();
     }
 
     @Override
-    public Page<ConfigDTO> list(PageRequest pageRequest) {
-        return ConvertPageHelper.convertPage(PageHelper.doPageAndSort(pageRequest,
-                () -> configMapper.selectAll()), ConfigDTO.class);
-    }
-
-    @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public ConfigDO setConfigDefault(Long configId) {
         ConfigDO configDO = configMapper.selectByPrimaryKey(configId);
         if (configDO == null) {

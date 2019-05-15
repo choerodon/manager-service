@@ -1,8 +1,7 @@
 package io.choerodon.manager.app.service;
 
-import io.choerodon.core.domain.Page;
+import com.github.pagehelper.PageInfo;
 import io.choerodon.manager.api.dto.*;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * @author wuguokai
@@ -13,7 +12,7 @@ public interface ConfigService {
 
     ConfigDTO queryByServiceNameAndConfigVersion(String serviceName, String configVersion);
 
-    Page<ConfigDTO> listByServiceName(String serviceName, PageRequest pageRequest, ConfigDTO queryInfo, String queryParam);
+    PageInfo<ConfigDTO> listByServiceName(String serviceName, int page, int size, ConfigDTO queryInfo, String queryParam);
 
     ConfigDTO setServiceConfigDefault(Long configId);
 

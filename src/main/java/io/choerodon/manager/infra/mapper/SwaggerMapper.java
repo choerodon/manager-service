@@ -2,17 +2,17 @@ package io.choerodon.manager.infra.mapper;
 
 import java.util.List;
 
+import io.choerodon.mybatis.common.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import io.choerodon.manager.infra.dataobject.SwaggerDO;
-import io.choerodon.mybatis.common.BaseMapper;
 
 /**
  * @author zhipeng.zuo
  * @date 2018/1/24
  */
-public interface SwaggerMapper extends BaseMapper<SwaggerDO> {
+public interface SwaggerMapper extends Mapper<SwaggerDO> {
 
     /**
      * 获取服务所有版本

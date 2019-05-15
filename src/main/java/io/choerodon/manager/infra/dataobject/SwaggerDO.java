@@ -1,12 +1,11 @@
 package io.choerodon.manager.infra.dataobject;
 
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import io.choerodon.mybatis.annotation.ModifyAudit;
-import io.choerodon.mybatis.annotation.VersionAudit;
-import io.choerodon.mybatis.domain.AuditDomain;
+import io.choerodon.mybatis.entity.BaseDTO;
 
 /**
  * 存储swagger json的表对应的实体
@@ -14,13 +13,11 @@ import io.choerodon.mybatis.domain.AuditDomain;
  * @author zhipeng.zuo
  * @date 2018/1/24
  */
-@VersionAudit
-@ModifyAudit
 @Table(name = "mgmt_swagger")
-public class SwaggerDO extends AuditDomain {
+public class SwaggerDO extends BaseDTO {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String serviceName;

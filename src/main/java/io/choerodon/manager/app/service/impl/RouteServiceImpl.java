@@ -1,8 +1,8 @@
 package io.choerodon.manager.app.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageInfo;
 import io.choerodon.core.convertor.ConvertHelper;
-import io.choerodon.core.convertor.ConvertPageHelper;
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.RouteDTO;
 import io.choerodon.manager.app.service.RouteService;
@@ -11,10 +11,11 @@ import io.choerodon.manager.domain.manager.entity.RouteE;
 import io.choerodon.manager.domain.repository.RouteRepository;
 import io.choerodon.manager.domain.service.IRouteService;
 import io.choerodon.manager.infra.dataobject.RouteDO;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,9 +40,19 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
-    public Page<RouteDTO> list(PageRequest pageRequest, RouteDO routeDO, String params) {
-        Page<RouteE> routeEPage = irouteService.pageAll(pageRequest, routeDO, params);
-        return ConvertPageHelper.convertPage(routeEPage, RouteDTO.class);
+    public PageInfo<RouteDTO> list(int page, int size, RouteDO routeDO, String params) {
+        PageInfo<RouteDO> result = irouteService.pageAll(page,size, routeDO, params);
+        List<RouteDO> routes = result.getList();
+        Page<RouteDTO> convertPage = new Page<>(page,size);
+        convertPage.setTotal(result.getTotal());
+        List<RouteDTO> routeList = new ArrayList<>();
+        routes.forEach(r -> {
+            RouteDTO dto = new RouteDTO();
+            BeanUtils.copyProperties(r, dto);
+            routeList.add(dto);
+        });
+        convertPage.addAll(routeList);
+        return convertPage.toPageInfo();
     }
 
     @Override

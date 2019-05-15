@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.choerodon.manager.domain.service.ISwaggerService;
 import io.choerodon.manager.infra.dataobject.RouteDO;
+import io.choerodon.manager.infra.dataobject.Sort;
 import io.choerodon.manager.infra.mapper.RouteMapper;
 import org.apache.commons.collections.MapIterator;
 import org.apache.commons.collections.keyvalue.MultiKey;
@@ -20,7 +22,6 @@ import org.springframework.remoting.RemoteAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.swagger.PermissionData;
 import io.choerodon.core.swagger.SwaggerExtraData;
@@ -29,7 +30,6 @@ import io.choerodon.manager.app.service.ApiService;
 import io.choerodon.manager.domain.manager.entity.MyLinkedList;
 import io.choerodon.manager.domain.service.IDocumentService;
 import io.choerodon.manager.infra.common.utils.ManualPageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import springfox.documentation.swagger.web.SwaggerResource;
 
 import java.io.IOException;
@@ -77,10 +77,10 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public Page<ControllerDTO> getControllers(String name, String version, PageRequest pageRequest, Map<String, Object> map) {
+    public PageInfo<ControllerDTO> getControllers(String name, String version, int page, int size, Sort sort, Map<String, Object> map) {
         String json = getSwaggerJson(name, version);
         return Optional.ofNullable(json)
-                .map(j -> ManualPageHelper.postPage(processJson2ControllerDTO(name, j), pageRequest, map))
+                .map(j -> ManualPageHelper.postPage(processJson2ControllerDTO(name, j), page, size, sort, map))
                 .orElseThrow(() -> new CommonException("error.service.swaggerJson.empty"));
     }
 

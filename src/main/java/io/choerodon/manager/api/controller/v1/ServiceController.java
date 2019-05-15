@@ -2,7 +2,9 @@ package io.choerodon.manager.api.controller.v1;
 
 import java.util.List;
 
+import com.github.pagehelper.PageInfo;
 import io.choerodon.base.annotation.Permission;
+import io.choerodon.base.constant.PageConstant;
 import io.choerodon.base.enums.ResourceType;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
@@ -10,17 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.manager.api.dto.ConfigDTO;
 import io.choerodon.manager.api.dto.ServiceDTO;
 import io.choerodon.manager.api.dto.ServiceManagerDTO;
 import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.manager.app.service.ServiceService;
-import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
-import io.choerodon.swagger.annotation.CustomPageRequest;
 
 /**
  * 操作服务控制器
@@ -54,15 +51,13 @@ public class ServiceController {
      */
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("微服务管理列表")
-    @CustomPageRequest
     @GetMapping("/manager")
-    public ResponseEntity<Page<ServiceManagerDTO>> pageManager(
+    public ResponseEntity<PageInfo<ServiceManagerDTO>> pageManager(
             @RequestParam(required = false, name = "service_name") String serviceName,
             @RequestParam(required = false) String params,
-            @ApiIgnore
-            @SortDefault(value = "name", direction = Sort.Direction.DESC)
-                    PageRequest pageRequest) {
-        return new ResponseEntity<>(serviceService.pageManager(serviceName, params, pageRequest), HttpStatus.OK);
+            @RequestParam(defaultValue = PageConstant.PAGE, required = false) final int page,
+            @RequestParam(defaultValue = PageConstant.SIZE, required = false) final int size) {
+        return new ResponseEntity<>(serviceService.pageManager(serviceName, params, page, size), HttpStatus.OK);
     }
 
     /**
@@ -116,20 +111,18 @@ public class ServiceController {
      * @return Page
      */
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
-    @CustomPageRequest
     @ApiOperation("分页模糊查询服务的配置")
     @GetMapping("/{service_name}/configs")
-    public ResponseEntity<Page<ConfigDTO>> list(
+    public ResponseEntity<PageInfo<ConfigDTO>> list(
             @PathVariable("service_name") String serviceName,
-            @ApiIgnore
-            @SortDefault(value = "id", direction = Sort.Direction.DESC)
-                    PageRequest pageRequest,
+            @RequestParam(defaultValue = PageConstant.PAGE, required = false) final int page,
+            @RequestParam(defaultValue = PageConstant.SIZE, required = false) final int size,
             @RequestParam(required = false, name = "name") String name,
             @RequestParam(required = false, name = "source") String source,
             @RequestParam(required = false, name = "configVersion") String configVersion,
             @RequestParam(required = false, name = "isDefault") Boolean isDefault,
             @RequestParam(required = false, name = "params") String param) {
-        return new ResponseEntity<>(configService.listByServiceName(serviceName, pageRequest,
+        return new ResponseEntity<>(configService.listByServiceName(serviceName, page, size,
                 new ConfigDTO(name, configVersion, isDefault, source), param), HttpStatus.OK);
     }
 

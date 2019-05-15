@@ -5,7 +5,6 @@ import io.choerodon.manager.domain.manager.entity.RouteE
 import io.choerodon.manager.domain.repository.RouteRepository
 import io.choerodon.manager.domain.service.IRouteService
 import io.choerodon.manager.infra.dataobject.RouteDO
-import io.choerodon.mybatis.pagehelper.domain.PageRequest
 import org.apache.commons.collections.map.MultiKeyMap
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -37,14 +36,13 @@ class IRouteServiceImplSpec extends Specification {
     def "PageAll"() {
         given: "构建请求对象"
         def routeDO = new RouteDO()
-        def pageRequest = new PageRequest(0, 10)
         def params = "params"
 
         when: "调用创建routeDTO方法"
-        iRouteService.pageAll(pageRequest, routeDO, params)
+        iRouteService.pageAll(0, 10, routeDO, params)
 
         then: "校验调用次数"
-        1 * mockRouteRepository.pageAllRoutes(_ as PageRequest, _ as RouteDO, params)
+        1 * mockRouteRepository.pageAllRoutes(_, _, _ as RouteDO, params)
         0 * _
     }
 

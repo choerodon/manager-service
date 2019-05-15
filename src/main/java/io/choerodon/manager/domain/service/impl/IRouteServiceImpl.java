@@ -1,8 +1,8 @@
 package io.choerodon.manager.domain.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageInfo;
 import io.choerodon.core.convertor.ConvertHelper;
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.swagger.ChoerodonRouteData;
 import io.choerodon.manager.api.dto.RouteDTO;
@@ -11,7 +11,6 @@ import io.choerodon.manager.domain.repository.RouteRepository;
 import io.choerodon.manager.domain.service.IRouteService;
 import io.choerodon.manager.infra.common.utils.VersionUtil;
 import io.choerodon.manager.infra.dataobject.RouteDO;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.swagger.extra.ExtraData;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.lang.StringUtils;
@@ -53,12 +52,12 @@ public class IRouteServiceImpl implements IRouteService {
     }
 
     @Override
-    public Page<RouteE> pageAll(PageRequest pageRequest, RouteDO routeDO, String params) {
-        return routeRepository.pageAllRoutes(pageRequest, routeDO, params);
+    public PageInfo<RouteDO> pageAll(int page, int size, RouteDO routeDO, String params) {
+        return routeRepository.pageAllRoutes(page, size, routeDO, params);
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public List<RouteE> addRoutes(List<RouteE> routeEList) {
         return routeRepository.addRoutesBatch(routeEList);
     }

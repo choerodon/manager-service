@@ -1,6 +1,7 @@
 package io.choerodon.manager.app.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageInfo;
 import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -15,9 +16,6 @@ import io.choerodon.manager.infra.common.annotation.ConfigNotifyRefresh;
 import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
 import io.choerodon.manager.infra.dataobject.ConfigDO;
 import io.choerodon.manager.infra.dataobject.ServiceDO;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
-import io.choerodon.mybatis.util.StringUtil;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -62,16 +60,10 @@ public class ConfigServiceImpl implements ConfigService {
     public void setGetRouteServices(String[] getRouteServices) {
         this.getRouteServices = getRouteServices;
     }
+
     @Override
-    public Page<ConfigDTO> listByServiceName(String serviceName, PageRequest pageRequest, ConfigDTO queryInfo, String queryParam) {
-        List<Sort.Order> orders = new ArrayList<>();
-        Iterator<Sort.Order> iterator = pageRequest.getSort().iterator();
-        orders.add(new Sort.Order(Sort.Direction.DESC, "isDefault"));
-        while (iterator.hasNext()) {
-            orders.add(iterator.next());
-        }
-        pageRequest.setSort(new Sort(orders));
-        return configRepository.listByServiceName(serviceName, pageRequest,
+    public PageInfo<ConfigDTO> listByServiceName(String serviceName, int page, int size, ConfigDTO queryInfo, String queryParam) {
+        return configRepository.listByServiceName(serviceName, page,size,
                 ConvertHelper.convert(queryInfo, ConfigDO.class), queryParam);
     }
 
@@ -219,7 +211,7 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     @ConfigNotifyRefresh
     public ItemDto saveItem(Long configId, ItemDto item) {
-        if (item == null || StringUtil.isEmpty(item.getProperty()) || StringUtil.isEmpty(item.getValue())) {
+        if (item == null || StringUtils.isEmpty(item.getProperty()) || StringUtils.isEmpty(item.getValue())) {
             throw new CommonException("error.config.item.add");
         }
         ConfigDTO configDTO = query(configId, null);
@@ -237,7 +229,7 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     @ConfigNotifyRefresh
     public void deleteItem(Long configId, String property) {
-        if (StringUtil.isEmpty(property)) {
+        if (StringUtils.isEmpty(property)) {
             throw new CommonException("error.config.item.update");
         }
         ConfigDTO configDTO = query(configId, null);

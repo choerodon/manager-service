@@ -99,6 +99,7 @@
             mgmt_service_config.config_version LIKE concat(concat('%',#{param}),'%')
             )
         </if>
+        order by mgmt_service_config.is_default desc
     </select>
 
 </mapper>

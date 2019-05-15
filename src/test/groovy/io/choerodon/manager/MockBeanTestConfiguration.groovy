@@ -49,7 +49,7 @@ class MockBeanTestConfiguration {
     @Bean("mockSwaggerRefreshService")
     @Primary
     ISwaggerRefreshService swaggerRefreshService() {
-        return detachedMockFactory.Mock(SwaggerRefreshService)
+        return detachedMockFactory.Mock(ISwaggerRefreshService)
     }
 
     @Bean("mockIRouteService")
