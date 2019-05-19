@@ -4,7 +4,7 @@
   site:
     - "site-statistics":
         icon: timeline
-        Routes: /iam/site-statistics
+        Routes: /manager/site-statistics
         sort: 9
         delete: true
         permission:
@@ -17,20 +17,20 @@
   site:
     - "micro":
         icon: microservice
-        Routes: /iam/microservice
+        Routes: /manager/microservice
         sort: 1
         permission:
           - 'manager-service.service.pageManager'
     - "instance-management":
         icon: instance_outline
-        Routes: /iam/instance
+        Routes: /manager/instance
         sort: 2
         permission:
           - 'manager-service.instance.list'
           - 'manager-service.instance.query'
     - "config-management":
         icon: settings_input_composite
-        Routes: /iam/configuration
+        Routes: /manager/configuration
         sort: 3
         delete: true
         permission:
@@ -42,7 +42,7 @@
           - 'manager-service.config.updateConfigDefault'
     - "route-management":
         icon: routeroutline
-        Routes: /iam/route
+        Routes: /manager/route
         sort: 4
         permission:
           - 'manager-service.route.list'
@@ -51,7 +51,7 @@
           - 'manager-service.route.delete'
     - "api-management":
         icon: API
-        Routes: /iam/api-test
+        Routes: /manager/api-test
         sort: 5
         permission:
         - 'manager-service.api.queryTreeMenu'
@@ -65,7 +65,7 @@
   site:
     - "api-test":
         icon: APItest
-        Routes: /iam/api-test
+        Routes: /manager/api-test
         sort: 2
         delete: true
         permission:
@@ -73,7 +73,7 @@
         - 'manager-service.api.queryPathDetail'
     - "api-overview":
         icon: dashboard
-        Routes: /iam/api-overview
+        Routes: /manager/api-overview
         sort: 1
         delete: true
         permission:
@@ -88,7 +88,7 @@
   site:
     - "api-report":
         icon: dashboard
-        Routes: /iam/api-overview
+        Routes: /manager/api-overview
         sort: 3
         permission:
         - 'manager-service.api.queryInstancesAndApiCount'
@@ -96,7 +96,7 @@
         - 'manager-service.api.queryServiceInvoke'
     - "menu-report":
         icon: timeline
-        Routes: /iam/site-statistics
+        Routes: /manager/site-statistics
         sort: 4
         permission:
         - 'manager-service.statistic.queryMenuClick'

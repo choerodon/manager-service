@@ -204,7 +204,7 @@ export default class ApiTree extends Component {
           />
         );
         return (
-          <TreeNode title={<Tooltip title={title} getPopupContainer={() => document.getElementsByClassName(`c7n-iam-apitest-tree-${item.key}`)[0]}><div className="ant-tree-title-ellipsis">{title}</div></Tooltip>} key={item.key} dataRef={item} icon={icon2}>
+          <TreeNode title={<Tooltip title={title} getPopupContainer={() => document.getElementsByClassName(`c7n-iam-apitest-tree-${item.key}`)[0]}><div className="c7n-tree-title-ellipsis">{title}</div></Tooltip>} key={item.key} dataRef={item} icon={icon2}>
             {this.renderTreeNodes(item.children)}
           </TreeNode>
         );
