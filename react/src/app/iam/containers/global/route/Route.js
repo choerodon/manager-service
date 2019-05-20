@@ -152,7 +152,7 @@ export default class Route extends Component {
             pageSize: data.pageSize,
             total: data.total,
           },
-          content: data.content,
+          content: data.list,
           loading: false,
         });
       })

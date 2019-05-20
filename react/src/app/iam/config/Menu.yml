@@ -1,0 +1,102 @@
+"iam":
+  icon: IAM
+  sort: 1
+  site:
+    - "site-statistics":
+        icon: timeline
+        Routes: /manager/site-statistics
+        sort: 9
+        delete: true
+        permission:
+        - 'manager-service.statistic.queryMenuClick'
+
+# 微服务管理
+"microservice":
+  icon: pages
+  sort: 4
+  site:
+    - "micro":
+        icon: microservice
+        Routes: /manager/microservice
+        sort: 1
+        permission:
+          - 'manager-service.service.pageManager'
+    - "instance-management":
+        icon: instance_outline
+        Routes: /manager/instance
+        sort: 2
+        permission:
+          - 'manager-service.instance.list'
+          - 'manager-service.instance.query'
+    - "config-management":
+        icon: settings_input_composite
+        Routes: /manager/configuration
+        sort: 3
+        delete: true
+        permission:
+          - 'manager-service.config.query'
+          - 'manager-service.config.create'
+          - 'manager-service.config.delete'
+          - 'manager-service.config.queryYaml'
+          - 'manager-service.config.updateConfig'
+          - 'manager-service.config.updateConfigDefault'
+    - "route-management":
+        icon: routeroutline
+        Routes: /manager/route
+        sort: 4
+        permission:
+          - 'manager-service.route.list'
+          - 'manager-service.route.create'
+          - 'manager-service.route.update'
+          - 'manager-service.route.delete'
+    - "api-management":
+        icon: API
+        Routes: /manager/api-test
+        sort: 5
+        permission:
+        - 'manager-service.api.queryTreeMenu'
+        - 'manager-service.api.queryPathDetail'
+
+# api管理
+"api":
+  icon: API
+  sort: 2
+  delete: true
+  site:
+    - "api-test":
+        icon: APItest
+        Routes: /manager/api-test
+        sort: 2
+        delete: true
+        permission:
+        - 'manager-service.api.queryTreeMenu'
+        - 'manager-service.api.queryPathDetail'
+    - "api-overview":
+        icon: dashboard
+        Routes: /manager/api-overview
+        sort: 1
+        delete: true
+        permission:
+        - 'manager-service.api.queryInstancesAndApiCount'
+        - 'manager-service.api.queryApiInvoke'
+        - 'manager-service.api.queryServiceInvoke'
+
+# 平台统计
+"statistics":
+  icon: bar_chart
+  sort: 5
+  site:
+    - "api-report":
+        icon: dashboard
+        Routes: /manager/api-overview
+        sort: 3
+        permission:
+        - 'manager-service.api.queryInstancesAndApiCount'
+        - 'manager-service.api.queryApiInvoke'
+        - 'manager-service.api.queryServiceInvoke'
+    - "menu-report":
+        icon: timeline
+        Routes: /manager/site-statistics
+        sort: 4
+        permission:
+        - 'manager-service.statistic.queryMenuClick'
