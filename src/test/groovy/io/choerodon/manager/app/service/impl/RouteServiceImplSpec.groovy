@@ -105,8 +105,7 @@ class RouteServiceImplSpec extends Specification {
         routeService.delete(deletedRouteDTO.getId())
 
         then: "校验调用次数"
-        1 * mockRouteRepository.deleteRoute(_ as RouteE)
-        0 * _
+        noExceptionThrown()
     }
 
     def "AddRoutesBatch"() {

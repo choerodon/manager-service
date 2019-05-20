@@ -1,6 +1,5 @@
 package io.choerodon.manager.api.controller.v1;
 
-import java.util.Optional;
 import javax.validation.Valid;
 
 import com.github.pagehelper.PageInfo;
@@ -12,12 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.manager.api.dto.RouteDTO;
 import io.choerodon.manager.app.service.RouteService;
 import io.choerodon.manager.infra.dataobject.RouteDO;
-import io.choerodon.swagger.annotation.CustomPageRequest;
 
 /**
  * 路由操作控制器
@@ -45,7 +42,6 @@ public class RouteController {
      */
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("分页查询路由信息")
-    @CustomPageRequest
     @GetMapping
     public ResponseEntity<PageInfo<RouteDTO>> list(@RequestParam(defaultValue = PageConstant.PAGE, required = false) final int page,
                                                    @RequestParam(defaultValue = PageConstant.SIZE, required = false) final int size,
@@ -97,10 +93,9 @@ public class RouteController {
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("根据routeId删除一个路由")
     @DeleteMapping(value = "/{route_id}")
-    public ResponseEntity<Boolean> delete(@PathVariable("route_id") Long id) {
-        return Optional.ofNullable(routeService.delete(id))
-                .map(i -> new ResponseEntity<>(i, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.route.delete"));
+    public ResponseEntity delete(@PathVariable("route_id") Long id) {
+        routeService.delete(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
