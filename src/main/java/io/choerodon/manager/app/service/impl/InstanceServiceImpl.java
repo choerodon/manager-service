@@ -11,8 +11,10 @@ import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageInfo;
 import com.netflix.appinfo.InstanceInfo;
 import io.choerodon.manager.infra.common.utils.RelaxedNames;
+import io.choerodon.manager.infra.dataobject.Sort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.ServiceInstance;
@@ -24,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.api.dto.InstanceDetailDTO;
@@ -34,7 +35,6 @@ import io.choerodon.manager.infra.common.utils.ManualPageHelper;
 import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
 import io.choerodon.manager.infra.feign.ConfigServerClient;
 import io.choerodon.manager.infra.mapper.ConfigMapper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * @author flyleft
@@ -347,7 +347,7 @@ public class InstanceServiceImpl implements InstanceService {
             }
             JsonNode properties = propertySourceNode.findValue("properties");
             Iterator<Map.Entry<String, JsonNode>> propertiesIterator = properties.fields();
-            while (propertiesIterator.hasNext()){
+            while (propertiesIterator.hasNext()) {
                 Map.Entry<String, JsonNode> entry = propertiesIterator.next();
                 Data data = getDataByRelaxedNames(entry.getKey());
                 String value = entry.getValue().findValue("value").asText();
@@ -395,14 +395,14 @@ public class InstanceServiceImpl implements InstanceService {
             }
             JsonNode properties = propertySourceNode.findValue("properties");
             Iterator<Map.Entry<String, JsonNode>> propertiesIterator = properties.fields();
-            while (propertiesIterator.hasNext()){
+            while (propertiesIterator.hasNext()) {
                 Map.Entry<String, JsonNode> entry = propertiesIterator.next();
                 String key = entry.getKey();
                 JsonNode value = entry.getValue();
-                if("local.server.port".equalsIgnoreCase(key)) {
+                if ("local.server.port".equalsIgnoreCase(key)) {
                     map.put("server.port", new Data(value.findValue("value").asText(), "server.ports"));
                 }
-                if("local.management.port".equalsIgnoreCase(key)) {
+                if ("local.management.port".equalsIgnoreCase(key)) {
                     map.put("management.port", new Data(value.findValue("value").asText(), "management.port"));
                 }
 
@@ -440,7 +440,7 @@ public class InstanceServiceImpl implements InstanceService {
             }
             JsonNode properties = propertySourceNode.findValue("properties");
             Iterator<Map.Entry<String, JsonNode>> propertiesIterator = properties.fields();
-            while (propertiesIterator.hasNext()){
+            while (propertiesIterator.hasNext()) {
                 Map.Entry<String, JsonNode> entry = propertiesIterator.next();
                 String mapExistKey = getKeyByRelaxedNames(entry.getKey());
                 if (mapExistKey != null) {
@@ -549,7 +549,7 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public Page<InstanceDTO> listByOptions(String service, Map<String, Object> map, PageRequest pageRequest) {
+    public PageInfo<InstanceDTO> listByOptions(String service, Map<String, Object> map, int page, int size, Sort sort) {
         List<InstanceDTO> serviceInstances = new ArrayList<>();
         if (StringUtils.isEmpty(service)) {
             List<String> services = discoveryClient.getServices();
@@ -560,7 +560,7 @@ public class InstanceServiceImpl implements InstanceService {
             serviceInstances.addAll(toInstanceDTOList(discoveryClient.getInstances(service)));
         }
 
-        return ManualPageHelper.postPage(serviceInstances, pageRequest, map);
+        return ManualPageHelper.postPage(serviceInstances, page, size, sort, map);
     }
 
     private List<InstanceDTO> toInstanceDTOList(final List<ServiceInstance> serviceInstances) {

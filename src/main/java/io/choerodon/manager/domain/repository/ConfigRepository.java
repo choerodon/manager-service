@@ -1,9 +1,8 @@
 package io.choerodon.manager.domain.repository;
 
-import io.choerodon.core.domain.Page;
+import com.github.pagehelper.PageInfo;
 import io.choerodon.manager.api.dto.ConfigDTO;
 import io.choerodon.manager.infra.dataobject.ConfigDO;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * {@inheritDoc}
@@ -16,9 +15,7 @@ public interface ConfigRepository {
 
     ConfigDTO queryByServiceNameAndConfigVersion(String serviceName, String configVersion);
 
-    Page<ConfigDTO> listByServiceName(String serviceName, PageRequest pageRequest, ConfigDO queryInfo, String queryParam);
-
-    Page<ConfigDTO> list(PageRequest pageRequest);
+    PageInfo<ConfigDTO> listByServiceName(String serviceName, int page, int size, ConfigDO queryInfo, String queryParam);
 
     ConfigDO setConfigDefault(Long configId);
 

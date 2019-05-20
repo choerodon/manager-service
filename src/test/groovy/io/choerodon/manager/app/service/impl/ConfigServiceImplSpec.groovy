@@ -15,8 +15,6 @@ import io.choerodon.manager.domain.repository.ServiceRepository
 import io.choerodon.manager.infra.common.utils.config.ConfigUtil
 import io.choerodon.manager.infra.dataobject.ConfigDO
 import io.choerodon.manager.infra.dataobject.ServiceDO
-import io.choerodon.mybatis.pagehelper.domain.PageRequest
-import io.choerodon.mybatis.pagehelper.domain.Sort
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -266,12 +264,9 @@ class ConfigServiceImplSpec extends Specification {
         def queryInfo = new ConfigDTO()
         def queryParam = ""
 
-        and: "构造pageRequest"
-        def order = new Sort.Order("id")
-        def pageRequest = new PageRequest(1, 20, new Sort(order))
 
         when: '列出指定服务下配置'
-        configService.listByServiceName(serviceName, pageRequest, queryInfo, queryParam)
+        configService.listByServiceName(serviceName, 1,20, queryInfo, queryParam)
 
         then: '配置列表不为空'
         noExceptionThrown()

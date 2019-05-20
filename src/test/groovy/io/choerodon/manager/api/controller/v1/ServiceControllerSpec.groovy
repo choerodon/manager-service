@@ -4,7 +4,6 @@ import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.api.dto.ConfigDTO
 import io.choerodon.manager.app.service.ConfigService
 import io.choerodon.manager.app.service.ServiceService
-import io.choerodon.mybatis.pagehelper.domain.PageRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -45,7 +44,7 @@ class ServiceControllerSpec extends Specification {
 
         then: "校验状态码和调用次数"
         entity.statusCode.is2xxSuccessful()
-        1 * mockServiceService.pageManager(serviceName, params, _ as PageRequest)
+        1 * mockServiceService.pageManager(serviceName, params, _, _)
         0 * _
     }
 
@@ -101,7 +100,7 @@ class ServiceControllerSpec extends Specification {
 
         then: "校验状态码和调用次数"
         entity.statusCode.is2xxSuccessful()
-        1 * mockConfigService.listByServiceName(serviceName, _ as PageRequest, _ as ConfigDTO, params)
+        1 * mockConfigService.listByServiceName(serviceName, _, _, _ as ConfigDTO, params)
         0 * _
     }
 }

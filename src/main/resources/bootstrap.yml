@@ -3,6 +3,10 @@ server:
 spring:
   application:
     name: manager-service
+  mvc:
+    static-path-pattern: /**
+  resources:
+    static-locations: classpath:/static,classpath:/public,classpath:/resources,classpath:/META-INF/resources,file:/dist
 management:
   server:
     port: 8964
@@ -10,3 +14,6 @@ management:
     web:
       exposure:
         include: '*'
+feign:
+  hystrix:
+    enabled: false

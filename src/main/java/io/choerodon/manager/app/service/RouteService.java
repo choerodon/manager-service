@@ -2,10 +2,9 @@ package io.choerodon.manager.app.service;
 
 import java.util.List;
 
-import io.choerodon.core.domain.Page;
+import com.github.pagehelper.PageInfo;
 import io.choerodon.manager.api.dto.RouteDTO;
 import io.choerodon.manager.infra.dataobject.RouteDO;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * 路由信息应用层服务
@@ -18,7 +17,7 @@ public interface RouteService {
      *
      * @return page
      */
-    Page<RouteDTO> list(PageRequest pageRequest, RouteDO routeDO, String params);
+    PageInfo<RouteDTO> list(int page,int size, RouteDO routeDO, String params);
 
     /**
      * 添加一个路由

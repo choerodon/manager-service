@@ -1,13 +1,13 @@
 package io.choerodon.manager.app.service.impl;
 
+import com.github.pagehelper.PageInfo;
 import io.choerodon.core.convertor.ConvertHelper;
-import io.choerodon.core.domain.Page;
 import io.choerodon.manager.api.dto.ServiceDTO;
 import io.choerodon.manager.api.dto.ServiceManagerDTO;
 import io.choerodon.manager.app.service.ServiceService;
 import io.choerodon.manager.domain.repository.ServiceRepository;
 import io.choerodon.manager.infra.common.utils.ManualPageHelper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.manager.infra.dataobject.Sort;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,9 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Override
-    public Page<ServiceManagerDTO> pageManager(String serviceName, String params, PageRequest pageRequest) {
+    public PageInfo<ServiceManagerDTO> pageManager(String serviceName, String params, int page, int size) {
+        Sort.Order order = new Sort.Order(Sort.Direction.DESC, "name");
+        Sort sort = new Sort(order);
         List<ServiceManagerDTO> serviceManagerDTOS = new ArrayList<>();
         discoveryClient.getServices().forEach(t -> serviceManagerDTOS
                 .add(new ServiceManagerDTO(t, discoveryClient.getInstances(t).size())));
@@ -47,6 +49,6 @@ public class ServiceServiceImpl implements ServiceService {
         Map<String, Object> map = new HashMap<>();
         map.put("serviceName", serviceName);
         map.put("params", params);
-        return ManualPageHelper.postPage(serviceManagerDTOS, pageRequest, map);
+        return ManualPageHelper.postPage(serviceManagerDTOS, page,size,sort, map);
     }
 }

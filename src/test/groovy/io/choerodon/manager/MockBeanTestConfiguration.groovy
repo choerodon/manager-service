@@ -4,7 +4,7 @@ import io.choerodon.eureka.event.EurekaEventPayload
 import io.choerodon.manager.domain.repository.RouteRepository
 import io.choerodon.manager.domain.service.IDocumentService
 import io.choerodon.manager.domain.service.IRouteService
-import io.choerodon.manager.domain.service.SwaggerRefreshService
+import io.choerodon.manager.domain.service.ISwaggerRefreshService
 import org.mockito.ArgumentMatcher
 import org.mockito.Mockito
 import org.springframework.boot.test.context.TestConfiguration
@@ -48,8 +48,8 @@ class MockBeanTestConfiguration {
 
     @Bean("mockSwaggerRefreshService")
     @Primary
-    SwaggerRefreshService swaggerRefreshService() {
-        return detachedMockFactory.Mock(SwaggerRefreshService)
+    ISwaggerRefreshService swaggerRefreshService() {
+        return detachedMockFactory.Mock(ISwaggerRefreshService)
     }
 
     @Bean("mockIRouteService")

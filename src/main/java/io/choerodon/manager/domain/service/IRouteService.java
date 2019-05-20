@@ -2,13 +2,12 @@ package io.choerodon.manager.domain.service;
 
 import java.util.List;
 
+import com.github.pagehelper.PageInfo;
 import io.choerodon.manager.infra.dataobject.RouteDO;
 import org.apache.commons.collections.map.MultiKeyMap;
 
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.swagger.ChoerodonRouteData;
 import io.choerodon.manager.domain.manager.entity.RouteE;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * 路由信息操作业务service
@@ -22,7 +21,7 @@ public interface IRouteService {
      *
      * @return page
      */
-    Page<RouteE> pageAll(PageRequest pageRequest, RouteDO routeDO, String params);
+    PageInfo<RouteDO> pageAll(int page,int size, RouteDO routeDO, String params);
 
     /**
      * 批量添加路由信息

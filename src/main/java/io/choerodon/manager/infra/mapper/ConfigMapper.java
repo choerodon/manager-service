@@ -1,12 +1,12 @@
 package io.choerodon.manager.infra.mapper;
 
 import io.choerodon.manager.infra.dataobject.ConfigDO;
-import io.choerodon.mybatis.common.BaseMapper;
+import io.choerodon.mybatis.common.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-public interface ConfigMapper extends BaseMapper<ConfigDO> {
+public interface ConfigMapper extends Mapper<ConfigDO> {
 
     List selectByServiceDefault(@Param("serviceName") String serviceName);
 

@@ -3,7 +3,6 @@ package io.choerodon.manager.app.service.impl
 import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.app.service.ServiceService
 import io.choerodon.manager.domain.repository.ServiceRepository
-import io.choerodon.mybatis.pagehelper.domain.PageRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.client.discovery.DiscoveryClient
@@ -51,15 +50,14 @@ class ServiceServiceImplSpec extends Specification {
         given: "构造参数"
         def serviceName = "manager-service"
         def params = "manager"
-        def pageRequest = new PageRequest(0, 10)
 
         when: "调用接口"
-        def list = serviceService.pageManager(serviceName, params, pageRequest)
+        def list = serviceService.pageManager(serviceName, params, 1,10)
 
         then: "校验调用次数和返回List不为空"
         //1 * discoveryClient.getServices()
         //1 * discoveryClient.getInstances(serviceName)
         0 * _
-        !list.isEmpty()
+        !list.getList().isEmpty()
     }
 }

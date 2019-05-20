@@ -1,9 +1,8 @@
 package io.choerodon.manager.app.service;
 
-import io.choerodon.core.domain.Page;
+import com.github.pagehelper.PageInfo;
 import io.choerodon.manager.api.dto.ServiceDTO;
 import io.choerodon.manager.api.dto.ServiceManagerDTO;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 
@@ -14,5 +13,5 @@ public interface ServiceService {
 
     List<ServiceDTO> list(String param);
 
-    Page<ServiceManagerDTO> pageManager(String serviceName, String params, PageRequest pageRequest);
+    PageInfo<ServiceManagerDTO> pageManager(String serviceName, String params, int page, int size);
 }

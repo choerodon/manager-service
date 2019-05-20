@@ -2,23 +2,19 @@ package io.choerodon.manager.api.controller.v1;
 
 import javax.validation.Valid;
 
+import com.github.pagehelper.PageInfo;
+import io.choerodon.base.annotation.Permission;
+import io.choerodon.base.constant.PageConstant;
+import io.choerodon.base.enums.ResourceType;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.InitRoleCode;
-import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.RouteDTO;
 import io.choerodon.manager.app.service.RouteService;
 import io.choerodon.manager.infra.dataobject.RouteDO;
-import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
-import io.choerodon.swagger.annotation.CustomPageRequest;
-import io.choerodon.swagger.annotation.Permission;
 
 /**
  * 路由操作控制器
@@ -44,22 +40,22 @@ public class RouteController {
      *
      * @return page
      */
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("分页查询路由信息")
-    @CustomPageRequest
     @GetMapping
-    public ResponseEntity<Page<RouteDTO>> list(@ApiIgnore @SortDefault(value = "id", direction = Sort.Direction.ASC) PageRequest pageRequest,
-                                               @RequestParam(required = false, name = "name") String name,
-                                               @RequestParam(required = false, name = "path") String path,
-                                               @RequestParam(required = false, name = "serviceId") String serviceId,
-                                               @RequestParam(required = false, name = "builtIn") Boolean builtIn,
-                                               @RequestParam(required = false, name = "params") String params) {
+    public ResponseEntity<PageInfo<RouteDTO>> list(@RequestParam(defaultValue = PageConstant.PAGE, required = false) final int page,
+                                                   @RequestParam(defaultValue = PageConstant.SIZE, required = false) final int size,
+                                                   @RequestParam(required = false, name = "name") String name,
+                                                   @RequestParam(required = false, name = "path") String path,
+                                                   @RequestParam(required = false, name = "serviceId") String serviceId,
+                                                   @RequestParam(required = false, name = "builtIn") Boolean builtIn,
+                                                   @RequestParam(required = false, name = "params") String params) {
         RouteDO routeDO = new RouteDO();
         routeDO.setName(name);
         routeDO.setPath(path);
         routeDO.setServiceId(serviceId);
         routeDO.setBuiltIn(builtIn);
-        return new ResponseEntity<>(routeService.list(pageRequest, routeDO, params), HttpStatus.OK);
+        return new ResponseEntity<>(routeService.list(page,size, routeDO, params), HttpStatus.OK);
     }
 
     /**
@@ -68,7 +64,7 @@ public class RouteController {
      * @param routeDTO 路由信息对象
      * @return RouteDO
      */
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("增加一个新路由")
     @PostMapping
     public ResponseEntity<RouteDTO> create(@RequestBody @Valid RouteDTO routeDTO) {
@@ -81,7 +77,7 @@ public class RouteController {
      * @param routeDTO 路由对象
      * @return RouteDO
      */
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("更新一个路由")
     @PostMapping("/{route_id}")
     public ResponseEntity<RouteDTO> update(@PathVariable("route_id") Long id, @RequestBody RouteDTO routeDTO) {
@@ -94,7 +90,7 @@ public class RouteController {
      * @param id 路由id
      * @return null
      */
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("根据routeId删除一个路由")
     @DeleteMapping(value = "/{route_id}")
     public ResponseEntity delete(@PathVariable("route_id") Long id) {
@@ -102,7 +98,7 @@ public class RouteController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation(value = "route 校验接口")
     @PostMapping(value = "/check")
     public ResponseEntity check(@RequestBody RouteDTO routeDTO) {

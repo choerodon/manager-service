@@ -1,9 +1,9 @@
 package io.choerodon.manager.app.service;
 
-import io.choerodon.core.domain.Page;
+import com.github.pagehelper.PageInfo;
 import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.api.dto.InstanceDetailDTO;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.manager.infra.dataobject.Sort;
 
 import java.util.Map;
 
@@ -17,5 +17,5 @@ public interface InstanceService {
 
     void update(String instanceId, Long configId);
 
-    Page<InstanceDTO> listByOptions(String service, Map<String, Object> map, PageRequest pageRequest);
+    PageInfo<InstanceDTO> listByOptions(String service, Map<String, Object> map, int page, int size, Sort sort);
 }

@@ -5,26 +5,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.github.pagehelper.PageInfo;
+import io.choerodon.base.annotation.Permission;
+import io.choerodon.base.constant.PageConstant;
+import io.choerodon.base.enums.ResourceType;
+import io.choerodon.manager.infra.dataobject.Sort;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 import springfox.documentation.swagger.web.SwaggerResource;
 
-import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.InitRoleCode;
-import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.swagger.ControllerDTO;
 import io.choerodon.manager.app.service.ApiService;
 import io.choerodon.manager.app.service.SwaggerService;
 import io.choerodon.manager.infra.common.utils.VersionUtil;
-import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
-import io.choerodon.swagger.annotation.CustomPageRequest;
-import io.choerodon.swagger.annotation.Permission;
 
 /**
  * @author superlee
@@ -50,33 +47,34 @@ public class ApiController {
         this.apiService = apiService;
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询不包含跳过的服务的路由列表")
     @GetMapping("/resources")
     public ResponseEntity<List<SwaggerResource>> resources() {
         return new ResponseEntity<>(swaggerService.getSwaggerResource(), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询服务controller和接口")
     @GetMapping("/{service_prefix}/controllers")
-    @CustomPageRequest
-    public ResponseEntity<Page<ControllerDTO>> queryByNameAndVersion(
+    public ResponseEntity<PageInfo<ControllerDTO>> queryByNameAndVersion(
+            @RequestParam(defaultValue = PageConstant.PAGE, required = false) final int page,
+            @RequestParam(defaultValue = PageConstant.SIZE, required = false) final int size,
             @PathVariable("service_prefix") String serviceName,
             @RequestParam(value = "version", required = false, defaultValue = VersionUtil.NULL_VERSION) String version,
             @RequestParam(required = false, name = "params") String params,
             @RequestParam(required = false, name = "name") String name,
-            @RequestParam(required = false, name = "description") String description,
-            @ApiIgnore @SortDefault(value = "name", direction = Sort.Direction.ASC)
-                    PageRequest pageRequest) {
+            @RequestParam(required = false, name = "description") String description) {
         Map<String, Object> map = new HashMap<>();
         map.put("params", params);
         map.put("name", name);
         map.put("description", description);
-        return new ResponseEntity<>(apiService.getControllers(serviceName, version, pageRequest, map), HttpStatus.OK);
+        Sort.Order order = new Sort.Order(Sort.Direction.ASC, "name");
+        Sort sort = new Sort(order);
+        return new ResponseEntity<>(apiService.getControllers(serviceName, version, page, size, sort, map), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("根据path的url和method查询单个path")
     @GetMapping("/{service_prefix}/controllers/{name}/paths")
     public ResponseEntity<ControllerDTO> queryPathDetail(@PathVariable("service_prefix") String serviceName,
@@ -86,14 +84,14 @@ public class ApiController {
         return new ResponseEntity<>(apiService.queryPathDetail(serviceName, version, controllerName, operationId), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询运行的服务实例的api接口数量")
     @GetMapping("/api/count")
     public ResponseEntity<Map<String, Object>> queryInstancesAndApiCount() {
         return new ResponseEntity<>(apiService.queryInstancesAndApiCount(), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("根据日期查询服务的调用次数")
     @GetMapping("/service_invoke/count")
     public ResponseEntity<Map<String, Object>> queryServiceInvoke(@RequestParam(value = "begin_date")
@@ -103,7 +101,7 @@ public class ApiController {
         return new ResponseEntity<>(apiService.queryServiceInvoke(beginDate, endDate), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询日期或者服务名或path路径查询api的调用次数")
     @GetMapping("/api_invoke/count")
     public ResponseEntity<Map<String, Object>> queryApiInvoke(@RequestParam(value = "begin_date")
@@ -114,7 +112,7 @@ public class ApiController {
         return new ResponseEntity<>(apiService.queryInvokeCount(beginDate, endDate, service, "api", Collections.emptySet()), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询树形接口目录")
     @GetMapping("/tree")
     public ResponseEntity<Map> queryTreeMenu() {

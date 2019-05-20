@@ -1,10 +1,12 @@
 package io.choerodon.manager.app.service.impl;
 
+import io.choerodon.base.enums.ResourceType;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.manager.api.dto.MenuClickDTO;
 import io.choerodon.manager.app.service.ApiService;
 import io.choerodon.manager.app.service.StatisticService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -18,6 +20,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class StatisticServiceImpl implements StatisticService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StatisticServiceImpl.class);
 
     private StringRedisTemplate redisTemplate;
 
@@ -83,12 +86,13 @@ public class StatisticServiceImpl implements StatisticService {
         validateLevel(level);
     }
 
-    private void validateLevel(String level) {
-        Set<String> levels = new HashSet<>();
-        for (ResourceLevel resourceLevel : ResourceLevel.values()) {
-            levels.add(resourceLevel.value());
+    private void validateLevel(String type) {
+        Set<String> types = new HashSet<>();
+        for (ResourceType resourceType : ResourceType.values()) {
+            types.add(resourceType.value());
         }
-        if (!levels.contains(level)) {
+        if (!types.contains(type)) {
+            LOGGER.warn("menu level validata error {}", type);
             throw new CommonException("error.menuClick.illegal.level");
         }
     }

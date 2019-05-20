@@ -1,19 +1,16 @@
 package io.choerodon.manager.infra.dataobject;
 
+import io.choerodon.mybatis.entity.BaseDTO;
+
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import io.choerodon.mybatis.annotation.ModifyAudit;
-import io.choerodon.mybatis.annotation.VersionAudit;
-import io.choerodon.mybatis.domain.AuditDomain;
-
-@VersionAudit
-@ModifyAudit
 @Table(name = "mgmt_service")
-public class ServiceDO extends AuditDomain {
+public class ServiceDO extends BaseDTO {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
