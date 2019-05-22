@@ -48,7 +48,7 @@ logs:
   parser: spring-boot
 
 service:
-  enable: false
+  enabled: false
   type: ClusterIP
   port: 8963
   name: manager-service
