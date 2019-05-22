@@ -105,6 +105,10 @@
 }
 
 .c7n-iam-apitest {
+  .c7n-tree li span.c7n-tree-switcher {
+    line-height: 28px;
+  }
+
   .c7n-spin-nested-loading {
     flex: 1;
   }
