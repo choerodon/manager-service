@@ -178,7 +178,7 @@ export default class Instance extends Component {
 
   /* 跳转详情页 */
   goDetail = (record) => {
-    this.props.history.push(`/iam/instance/detail/${record.instanceId}`);
+    this.props.history.push(`/manager/instance/detail/${record.instanceId}`);
   }
 
   render() {

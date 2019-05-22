@@ -532,7 +532,7 @@ class CreateConfig extends Component {
           ConfigurationStore.service.find(item => item.name === data.serviceName);
         ConfigurationStore.setRelatedService(currentService);
         Choerodon.prompt(intl.formatMessage({ id: 'create.success' }));
-        this.props.history.push('/iam/configuration');
+        this.props.history.push('/manager/configuration');
       }
     });
   };
@@ -540,7 +540,7 @@ class CreateConfig extends Component {
   /* 取消 */
   cancelAll = () => {
     ConfigurationStore.setRelatedService(ConfigurationStore.getCurrentService);
-    this.props.history.push('/iam/configuration');
+    this.props.history.push('/manager/configuration');
   };
 
 
@@ -564,7 +564,7 @@ class CreateConfig extends Component {
           title={<FormattedMessage
             id={`${intlPrefix}.create`}
           />}
-          backPath="/iam/configuration"
+          backPath="/manager/configuration"
         />
         <Content
           code={code}

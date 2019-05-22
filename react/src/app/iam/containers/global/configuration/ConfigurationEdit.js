@@ -182,7 +182,7 @@ class EditConfig extends Component {
         ConfigurationStore.setRelatedService(currentService);
         ConfigurationStore.setStatus('');
         Choerodon.prompt(intl.formatMessage({ id: 'modify.success' }));
-        this.props.history.push('/iam/configuration');
+        this.props.history.push('/manager/configuration');
       }
     });
   };
@@ -192,7 +192,7 @@ class EditConfig extends Component {
     const currentService = ConfigurationStore.service.find(service => service.name === this.state.service);
     ConfigurationStore.setRelatedService(currentService);
     ConfigurationStore.setStatus('');
-    this.props.history.push('/iam/configuration');
+    this.props.history.push('/manager/configuration');
   };
 
 
@@ -431,7 +431,7 @@ class EditConfig extends Component {
       >
         <Header
           title={<FormattedMessage id={`${intlPrefix}.modify`} />}
-          backPath="/iam/configuration"
+          backPath="/iamanagerm/configuration"
         />
         <Content
           code={`${intlPrefix}.modify`}

@@ -7,7 +7,7 @@
     flex-direction: column;
     border-right: 1px solid rgba(0, 0, 0, 0.36);
 
-    .ant-tree-title-ellipsis {
+    .c7n-tree-title-ellipsis {
       max-width: 186px;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -33,19 +33,19 @@
       border-radius: 3px;
     }
 
-    .ant-input-wrapper {
+    .c7n-input-wrapper {
       margin-bottom: 0;
     }
 
-    .ant-input-rendered-wrapper {
+    .c7n-input-rendered-wrapper {
       padding-left: 10px;
     }
 
-    .ant-input-prefix {
+    .c7n-input-prefix {
       left: 8px;
     }
 
-    .ant-input-underline {
+    .c7n-input-underline {
       border-bottom-color: #979797;
     }
   }
@@ -55,11 +55,11 @@
     overflow-x: hidden;
     overflow-y: auto;
 
-    .ant-tree > li:first-child {
+    .c7n-tree > li:first-child {
       padding-top: 18px;
     }
 
-    .ant-tree li .ant-tree-node-content-wrapper {
+    .c7n-tree li .c7n-tree-node-content-wrapper {
       width: calc(100% - 22px);
       display: inline-flex;
       align-items: center;
@@ -68,15 +68,15 @@
       cursor: pointer;
     }
 
-    .ant-tree li .ant-tree-node-content-wrapper.ant-tree-node-selected {
+    .c7n-tree li .c7n-tree-node-content-wrapper.c7n-tree-node-selected {
       background: rgba(0, 0, 0, .04);
     }
 
-    .ant-tree-switcher {
+    .c7n-tree-switcher {
       margin-top: 5px;
     }
 
-    .ant-tree li span.ant-tree-iconEle {
+    .c7n-tree li span.c7n-tree-iconEle {
       margin-right: 6px;
       cursor: pointer;
 
@@ -85,7 +85,7 @@
       }
     }
 
-    .ant-tree-child-tree {
+    .c7n-tree-child-tree {
       li.c7n-iam-apitest-api-wrapper:last-child {
         margin-bottom: 0;
       }
@@ -134,11 +134,11 @@
       //margin-bottom: 10px;
       white-space: normal;
 
-      .ant-tree-iconEle {
+      .c7n-tree-iconEle {
         cursor: pointer !important;
       }
 
-      .ant-tree-title {
+      .c7n-tree-title {
         cursor: pointer !important;
         //word-break: break-word;
         //line-height: 16px;
@@ -150,11 +150,11 @@
       margin-bottom: 10px;
       white-space: normal;
 
-      .ant-tree-iconEle {
+      .c7n-tree-iconEle {
         cursor: pointer !important;
       }
 
-      .ant-tree-title {
+      .c7n-tree-title {
         cursor: pointer !important;
         word-break: break-word;
         line-height: 16px;
@@ -166,17 +166,17 @@
       margin-bottom: 4px;
       white-space: normal;
 
-      .ant-tree-iconEle {
+      .c7n-tree-iconEle {
         cursor: pointer !important;
       }
 
-      .ant-tree-title {
+      .c7n-tree-title {
         cursor: pointer !important;
         word-break: break-word;
         line-height: 16px;
       }
 
-      .ant-tree-node-content-wrapper {
+      .c7n-tree-node-content-wrapper {
         padding: 23px 0 !important;
       }
     }
@@ -186,23 +186,23 @@
       margin-bottom: 4px;
       white-space: normal;
 
-      .ant-tree-iconEle {
+      .c7n-tree-iconEle {
         cursor: pointer !important;
       }
 
-      .ant-tree-title {
+      .c7n-tree-title {
         cursor: pointer !important;
         word-break: break-word;
         line-height: 16px;
       }
 
-      .ant-tree-node-content-wrapper {
+      .c7n-tree-node-content-wrapper {
         padding: 32px 0 !important;
       }
     }
 
-    .ant-tooltip {
-      .ant-tooltip-inner > span {
+    .c7n-tooltip {
+      .c7n-tooltip-inner > span {
         font-weight: 500;
       }
     }
@@ -211,15 +211,15 @@
     //  margin-bottom: 10px;
     //  white-space: normal;
     //
-    //  //.ant-tree-node-content-wrapper {
+    //  //.c7n-tree-node-content-wrapper {
     //  //  align-items: flex-start !important;
     //  //}
     //
-    //  .ant-tree-iconEle {
+    //  .c7n-tree-iconEle {
     //    cursor: pointer !important;
     //  }
     //
-    //  .ant-tree-title {
+    //  .c7n-tree-title {
     //    cursor: pointer !important;
     //    word-break: break-word;
     //    line-height: 16px;

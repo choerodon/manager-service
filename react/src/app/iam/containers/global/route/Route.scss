@@ -1,5 +1,5 @@
 .c7n-route-table {
-  > .ant-spin-nested-loading {
+  > .c7n-spin-nested-loading {
     height: 500px;
   }
 }
@@ -10,12 +10,12 @@
     }
   }
 
-  .ant-input-disabled .ant-input-suffix {
+  .c7n-input-disabled .c7n-input-suffix {
     color: rgba(0, 0, 0, 0.26);
   }
 
-  .ant-popover-content {
-    .ant-popover-inner-content {
+  .c7n-popover-content {
+    .c7n-popover-inner-content {
       max-width: 180px;
     }
   }

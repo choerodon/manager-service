@@ -146,7 +146,7 @@ export default class InstanceDetail extends Component {
       <Page>
         <Header
           title={<FormattedMessage id={`${intlPrefix}.detail`} />}
-          backPath="/iam/instance"
+          backPath="/manager/instance"
         />
         {
           loading ? <Spin size="large" style={{ paddingTop: 242 }} /> :
