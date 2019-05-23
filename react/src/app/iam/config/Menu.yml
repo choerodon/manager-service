@@ -1,15 +1,3 @@
-"iam":
-  icon: IAM
-  sort: 1
-  site:
-    - "site-statistics":
-        icon: timeline
-        Routes: /manager/site-statistics
-        sort: 9
-        delete: true
-        permission:
-        - 'manager-service.statistic.queryMenuClick'
-
 # 微服务管理
 "microservice":
   icon: pages
@@ -28,18 +16,6 @@
         permission:
           - 'manager-service.instance.list'
           - 'manager-service.instance.query'
-    - "config-management":
-        icon: settings_input_composite
-        Routes: /manager/configuration
-        sort: 3
-        delete: true
-        permission:
-          - 'manager-service.config.query'
-          - 'manager-service.config.create'
-          - 'manager-service.config.delete'
-          - 'manager-service.config.queryYaml'
-          - 'manager-service.config.updateConfig'
-          - 'manager-service.config.updateConfigDefault'
     - "route-management":
         icon: routeroutline
         Routes: /manager/route
@@ -56,30 +32,6 @@
         permission:
         - 'manager-service.api.queryTreeMenu'
         - 'manager-service.api.queryPathDetail'
-
-# api管理
-"api":
-  icon: API
-  sort: 2
-  delete: true
-  site:
-    - "api-test":
-        icon: APItest
-        Routes: /manager/api-test
-        sort: 2
-        delete: true
-        permission:
-        - 'manager-service.api.queryTreeMenu'
-        - 'manager-service.api.queryPathDetail'
-    - "api-overview":
-        icon: dashboard
-        Routes: /manager/api-overview
-        sort: 1
-        delete: true
-        permission:
-        - 'manager-service.api.queryInstancesAndApiCount'
-        - 'manager-service.api.queryApiInvoke'
-        - 'manager-service.api.queryServiceInvoke'
 
 # 平台统计
 "statistics":
