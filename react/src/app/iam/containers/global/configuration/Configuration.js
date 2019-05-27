@@ -234,7 +234,7 @@ export default class Configuration extends Component {
   /* 创建配置 */
   creatConfig = () => {
     ConfigurationStore.setStatus('create');
-    this.props.history.push('/iam/configuration/create');
+    this.props.history.push('/manager/configuration/create');
   }
 
 
@@ -245,7 +245,7 @@ export default class Configuration extends Component {
   createByThis = (record) => {
     ConfigurationStore.setCurrentConfigId(record.id);
     ConfigurationStore.setStatus('baseon');
-    this.props.history.push('/iam/configuration/create');
+    this.props.history.push('/manager/configuration/create');
   }
 
   /**
@@ -253,7 +253,7 @@ export default class Configuration extends Component {
    * @param record 当前行数据
    */
   handleEdit = (record) => {
-    this.props.history.push(`/iam/configuration/edit/${ConfigurationStore.getCurrentService.name}/${record.id}`);
+    this.props.history.push(`/manager/configuration/edit/${ConfigurationStore.getCurrentService.name}/${record.id}`);
   }
 
   render() {

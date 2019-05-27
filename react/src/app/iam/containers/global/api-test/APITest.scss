@@ -76,7 +76,7 @@
   transform: translateY(-50%);
 }
 
-.ant-input-focus + .c7n-iam-TextEditToggle-text-icon {
+.c7n-input-focus + .c7n-iam-TextEditToggle-text-icon {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -98,17 +98,21 @@
 }
 
 .c7n-iam-TextEditToggle-edit {
-  .ant-form-item {
+  .c7n-form-item {
     padding: 0;
     margin: 0;
   }
 }
 
 .c7n-iam-apitest {
-  .ant-spin-nested-loading {
+  .c7n-tree li span.c7n-tree-switcher {
+    line-height: 28px;
+  }
+
+  .c7n-spin-nested-loading {
     flex: 1;
   }
-  .ant-spin-container {
+  .c7n-spin-container {
     height: 100%;
   }
 
@@ -365,15 +369,15 @@
               }
             }
 
-            .ant-form-item {
+            .c7n-form-item {
               margin-bottom: 0;
             }
 
-            .ant-input-placeholder {
+            .c7n-input-placeholder {
               color: #d50000;
             }
 
-            .ant-form-explain {
+            .c7n-form-explain {
               display: none;
             }
 
@@ -535,6 +539,7 @@
                 //white-space: nowrap;
                 font-size: 14px;
                 word-break: break-word;
+                display: flex;
 
                 &:hover {
                   i.icon.icon-library_books {

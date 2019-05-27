@@ -774,7 +774,7 @@ export default class APIDetail extends Component {
       <Page>
         <Header
           title={<FormattedMessage id={`${intlPrefix}.header.title`} />}
-          backPath="/iam/api-test"
+          backPath="/manager/api-test"
         />
         {this.state.loading ? <div style={{ textAlign: 'center', paddingTop: '250px' }}><Spin size="large" /></div>
           : (
