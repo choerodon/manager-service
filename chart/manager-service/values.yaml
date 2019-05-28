@@ -12,7 +12,7 @@ preJob:
   timeout: 300
   image: registry.cn-hangzhou.aliyuncs.com/choerodon-tools/dbtool:0.6.4
   preInitDB:
-    enable: true
+    enabled: true
     datasource:
       url: jdbc:mysql://localhost:3306/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
       username: username
