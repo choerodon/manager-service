@@ -42,7 +42,7 @@ env:
 
 metrics:
   path: /actuator/prometheus
-  label: spring-boot
+  group: spring-boot
 
 logs:
   parser: spring-boot
