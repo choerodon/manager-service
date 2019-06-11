@@ -10,6 +10,7 @@ import io.choerodon.base.annotation.Permission;
 import io.choerodon.base.constant.PageConstant;
 import io.choerodon.base.enums.ResourceType;
 import io.choerodon.manager.infra.dataobject.Sort;
+import io.choerodon.manager.infra.enums.InvokeCountBusinessType;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
@@ -109,7 +110,7 @@ public class ApiController {
                                                               @RequestParam(value = "end_date")
                                                               @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String endDate,
                                                               @RequestParam String service) {
-        return new ResponseEntity<>(apiService.queryInvokeCount(beginDate, endDate, service, "api", Collections.emptySet()), HttpStatus.OK);
+        return new ResponseEntity<>(apiService.queryInvokeCount(beginDate, endDate, service, "api", Collections.emptySet(), InvokeCountBusinessType.API), HttpStatus.OK);
     }
 
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})

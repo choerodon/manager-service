@@ -11,7 +11,7 @@ class StatisticControllerSpec extends Specification {
     def "SaveMenuClick"() {
         given:
         MenuClickDTO menuClickDTO = new MenuClickDTO()
-        menuClickDTO.setLevel("site")
+        menuClickDTO.setRootCode("choerodon.code.top.site")
         MenuClickDTO.Menu menu = new MenuClickDTO.Menu()
         menu.setName("菜单")
         menu.setCode("menu")
@@ -57,6 +57,6 @@ class StatisticControllerSpec extends Specification {
 
         then:
         result.statusCode.is2xxSuccessful()
-        1 * apiService.queryInvokeCount(_, _, _, _, _) >> new HashMap<String, Object>()
+        1 * apiService.queryInvokeCount(_, _, _, _, _, _) >> new HashMap<String, Object>()
     }
 }

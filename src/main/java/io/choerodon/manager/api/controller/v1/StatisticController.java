@@ -41,8 +41,8 @@ public class StatisticController {
                                                   @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String beginDate,
                                               @RequestParam(value = "end_date")
                                                   @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String endDate,
-                                              @RequestParam String level) {
-        return new ResponseEntity(statisticService.queryMenuClick(beginDate, endDate, level), HttpStatus.OK);
+                                              @RequestParam String code) {
+        return new ResponseEntity(statisticService.queryMenuClick(beginDate, endDate, code), HttpStatus.OK);
     }
 
 }

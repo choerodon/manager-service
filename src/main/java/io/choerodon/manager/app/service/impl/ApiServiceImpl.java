@@ -7,9 +7,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import io.choerodon.manager.api.dto.MenuDTO;
 import io.choerodon.manager.domain.service.ISwaggerService;
 import io.choerodon.manager.infra.dataobject.RouteDO;
 import io.choerodon.manager.infra.dataobject.Sort;
+import io.choerodon.manager.infra.enums.InvokeCountBusinessType;
+import io.choerodon.manager.infra.feign.IamClient;
 import io.choerodon.manager.infra.mapper.RouteMapper;
 import org.apache.commons.collections.MapIterator;
 import org.apache.commons.collections.keyvalue.MultiKey;
@@ -18,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.http.ResponseEntity;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -63,17 +67,22 @@ public class ApiServiceImpl implements ApiService {
 
     private ISwaggerService iSwaggerService;
 
+    private IamClient iamClient;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private Cache<String, String> cache = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.DAYS).maximumSize(500).build();
 
     private StringRedisTemplate redisTemplate;
 
-    public ApiServiceImpl(IDocumentService iDocumentService, RouteMapper routeMapper, ISwaggerService iSwaggerService, StringRedisTemplate redisTemplate) {
+    public ApiServiceImpl(IDocumentService iDocumentService, RouteMapper routeMapper,
+                          ISwaggerService iSwaggerService, StringRedisTemplate redisTemplate,
+                          IamClient iamClient) {
         this.iDocumentService = iDocumentService;
         this.routeMapper = routeMapper;
         this.iSwaggerService = iSwaggerService;
         this.redisTemplate = redisTemplate;
+        this.iamClient = iamClient;
     }
 
     @Override
@@ -100,7 +109,10 @@ public class ApiServiceImpl implements ApiService {
         return json;
     }
 
-    private MultiKeyMap getInvokeCount(Set<String> paramValues, Set<String> date, LocalDate begin, LocalDate end, String additionKey) {
+    private MultiKeyMap getInvokeCount(Set<String> paramValues, Set<String> date,
+                                       LocalDate begin, LocalDate end, String additionKey,
+                                       InvokeCountBusinessType businessType) {
+        Map<String, String> menuMap = getMenuMap(businessType);
         MultiKeyMap multiKeyMap = new MultiKeyMap();
         if (begin.isAfter(end)) {
             throw new CommonException("error.date.order");
@@ -111,12 +123,30 @@ public class ApiServiceImpl implements ApiService {
             String key = getKeyByDateAndAdditionKey(additionKey, currentDate);
             Set<ZSetOperations.TypedTuple<String>> serviceSet = redisTemplate.opsForZSet().rangeWithScores(key, 0, -1);
             serviceSet.forEach(tuple -> {
-                paramValues.add(tuple.getValue());
-                multiKeyMap.put(key, tuple.getValue(), tuple.getScore());
+                String code = tuple.getValue();
+                if (menuMap.get(code) != null) {
+                    code = code + COLON + menuMap.get(code);
+                }
+                paramValues.add(code);
+                multiKeyMap.put(key, code, tuple.getScore());
             });
             begin = begin.plusDays(1);
         }
         return multiKeyMap;
+    }
+
+    private Map<String, String> getMenuMap(InvokeCountBusinessType businessType) {
+        Map<String, String> menuMap = new HashMap<>();
+        if (InvokeCountBusinessType.MENU.equals(businessType)) {
+            try {
+                ResponseEntity<List<MenuDTO>> response = iamClient.list();
+                List<MenuDTO> menus = response.getBody();
+                menus.forEach(m -> menuMap.put(m.getCode(), m.getName()));
+            } catch (Exception e) {
+                throw new CommonException(e);
+            }
+        }
+        return menuMap;
     }
 
     private String getKeyByDateAndAdditionKey(String additionalKey, String currentDate) {
@@ -137,11 +167,13 @@ public class ApiServiceImpl implements ApiService {
             Object[] keys = multiKey.getKeys();
             serviceKeySet.add((String) keys[1]);
         }
-        return queryInvokeCount(beginDate, endDate, "", SERVICE, serviceKeySet);
+        return queryInvokeCount(beginDate, endDate, "", SERVICE, serviceKeySet, InvokeCountBusinessType.SERVICE);
     }
 
     @Override
-    public Map<String, Object> queryInvokeCount(String beginDate, String endDate, String additionalKey, String paramKey, Set<String> additionalParamValues) {
+    public Map<String, Object> queryInvokeCount(String beginDate, String endDate, String additionalKey,
+                                                String paramKey, Set<String> additionalParamValues,
+                                                InvokeCountBusinessType businessType) {
         Map<String, Object> map = new HashMap<>();
         Set<String> date = new LinkedHashSet<>();
         List<Map<String, Object>> details = new ArrayList<>();
@@ -151,7 +183,7 @@ public class ApiServiceImpl implements ApiService {
         LocalDate end = LocalDate.parse(endDate);
         Set<String> paramValues = new HashSet<>();
         paramValues.addAll(additionalParamValues);
-        MultiKeyMap multiKeyMap = getInvokeCount(paramValues, date, begin, end, additionalKey);
+        MultiKeyMap multiKeyMap = getInvokeCount(paramValues, date, begin, end, additionalKey, businessType);
         Map<String, Double> lastDayCount = new HashMap<>();
         paramValues.forEach(paramValue -> {
             Map<String, Object> apiMap = new HashMap<>(2);
@@ -176,7 +208,6 @@ public class ApiServiceImpl implements ApiService {
                         .collect(Collectors.toList());
         map.put(paramKey, sortedKey);
         return map;
-
     }
 
     @Override

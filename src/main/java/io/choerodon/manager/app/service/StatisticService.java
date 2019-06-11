@@ -11,5 +11,5 @@ import java.util.Map;
 public interface StatisticService {
     void saveMenuClick(List<MenuClickDTO> menuClickList);
 
-    Map<String, Object> queryMenuClick(String beginDate, String endDate, String level);
+    Map<String, Object> queryMenuClick(String beginDate, String endDate, String code);
 }
