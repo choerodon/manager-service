@@ -3,6 +3,7 @@ package io.choerodon.manager.app.service;
 import com.github.pagehelper.PageInfo;
 import io.choerodon.manager.api.dto.swagger.ControllerDTO;
 import io.choerodon.manager.infra.dataobject.Sort;
+import io.choerodon.manager.infra.enums.InvokeCountBusinessType;
 
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +35,7 @@ public interface ApiService {
 
     /**
      * 根据起始日期和结束日期查询服务的调用次数，显示的服务为正在运行的服务以及日期范围内被调用过的服务
+     *
      * @param beginDate
      * @param endDate
      * @return
@@ -43,14 +45,15 @@ public interface ApiService {
     /**
      * 根据日期范围和服务名在redis中查询api调用次数
      *
-     * @param beginDate     开始日期
-     * @param endDate       结束日期
-     * @param additionalKey 和日期拼接的额外的key
-     * @param paramKey      api或者service集合的参数名
+     * @param beginDate             开始日期
+     * @param endDate               结束日期
+     * @param additionalKey         和日期拼接的额外的key
+     * @param paramKey              api或者service集合的参数名
      * @param additionalParamValues 额外的paramValues
+     * @param businessType          业务类型
      * @return map
      */
-    Map<String, Object> queryInvokeCount(String beginDate, String endDate, String additionalKey, String paramKey, Set<String> additionalParamValues);
+    Map<String, Object> queryInvokeCount(String beginDate, String endDate, String additionalKey, String paramKey, Set<String> additionalParamValues, InvokeCountBusinessType businessType);
 
     /**
      * 查询所有运行实例的api树形接口

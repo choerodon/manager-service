@@ -7,6 +7,7 @@ import io.choerodon.manager.domain.service.IDocumentService
 import io.choerodon.manager.domain.service.ISwaggerService
 import io.choerodon.manager.infra.dataobject.RouteDO
 import io.choerodon.manager.infra.dataobject.Sort
+import io.choerodon.manager.infra.feign.IamClient
 import io.choerodon.manager.infra.mapper.RouteMapper
 import org.apache.poi.ss.formula.functions.Odd
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,7 +37,7 @@ class ApiServiceImplSpec extends Specification {
     RouteMapper routeMapper
 
     def setup() {
-        apiService = new ApiServiceImpl(mockIDocumentService, routeMapper, iSwaggerService, Mock(StringRedisTemplate))
+        apiService = new ApiServiceImpl(mockIDocumentService, routeMapper, iSwaggerService, Mock(StringRedisTemplate), Mock(IamClient))
     }
 
     def "GetControllers"() {
@@ -120,7 +121,7 @@ class ApiServiceImplSpec extends Specification {
         IDocumentService iDocumentService = Mock(IDocumentService)
         StringRedisTemplate stringRedisTemplate = Mock(StringRedisTemplate)
         RouteMapper routeMapper1 = Mock(RouteMapper)
-        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, routeMapper1, iSwaggerService, stringRedisTemplate)
+        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, routeMapper1, iSwaggerService, stringRedisTemplate, Mock(IamClient))
         List<SwaggerResource> resources = new ArrayList<>()
         SwaggerResource resource = new SwaggerResource()
         resource.setName("manager:manager-service")
@@ -149,7 +150,7 @@ class ApiServiceImplSpec extends Specification {
         IDocumentService iDocumentService = Mock(IDocumentService)
         StringRedisTemplate stringRedisTemplate = Mock(StringRedisTemplate)
         RouteMapper routeMapper1 = Mock(RouteMapper)
-        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, routeMapper1, iSwaggerService, stringRedisTemplate)
+        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, routeMapper1, iSwaggerService, stringRedisTemplate, Mock(IamClient))
         List<SwaggerResource> resources = new ArrayList<>()
         SwaggerResource resource = new SwaggerResource()
         resource.setName("manager:manager-service")

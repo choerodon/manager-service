@@ -7,19 +7,19 @@ import java.util.List;
  */
 public class MenuClickDTO {
 
-    private String level;
+    private String rootCode;
 
     private List<Menu> menus;
 
     public MenuClickDTO() {
     }
 
-    public String getLevel() {
-        return level;
+    public String getRootCode() {
+        return rootCode;
     }
 
-    public void setLevel(String level) {
-        this.level = level;
+    public void setRootCode(String rootCode) {
+        this.rootCode = rootCode;
     }
 
     public List<Menu> getMenus() {
@@ -78,7 +78,7 @@ public class MenuClickDTO {
     @Override
     public String toString() {
         return "MenuClickDTO{" +
-                "level='" + level + '\'' +
+                "rootCode='" + rootCode + '\'' +
                 ", menus=" + menus +
                 '}';
     }
