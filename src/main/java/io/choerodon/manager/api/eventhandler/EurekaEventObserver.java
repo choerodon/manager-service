@@ -44,7 +44,7 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
             swaggerRefreshService.updateOrInsertSwagger(payload, json);
             iRouteService.autoRefreshRoute(json);
         } catch (Exception e) {
-            LOGGER.info("process swagger data exception skip: {}, {}", payload, e.getMessage());
+            LOGGER.warn("process swagger data exception skip: {}", payload, e);
         }
         try {
             String actuatorJson = iDocumentService.fetchActuatorJson(payload);
@@ -54,7 +54,7 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
             actuatorRefreshService.updateOrInsertActuator(payload.getAppName(), payload.getVersion(), actuatorJson);
             actuatorRefreshService.sendActuatorEvent(actuatorJson, payload.getAppName());
         } catch (Exception e) {
-            LOGGER.info("process actuator data exception skip: {}, {}", payload, e.getMessage());
+            LOGGER.warn("process actuator data exception skip: {}", payload, e);
         }
 
         try {
@@ -65,7 +65,7 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
                 actuatorRefreshService.sendMetadataEvent(metadataJson, payload.getAppName());
             }
         } catch (Exception e) {
-            LOGGER.info("process metadata data exception skip: {}, {}", payload, e.getMessage());
+            LOGGER.warn("process metadata data exception skip: {}", payload, e);
         }
     }
 
