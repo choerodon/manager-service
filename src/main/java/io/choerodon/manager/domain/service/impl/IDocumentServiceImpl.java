@@ -220,7 +220,11 @@ public class IDocumentServiceImpl implements IDocumentService {
         ResponseEntity<Map> response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + "/choerodon/actuator/all", Map.class);
         if (response.getStatusCode() == HttpStatus.OK) {
             Map<String, Object> result = response.getBody();
-            result.put("asgard", fetchPropertyData(payload.getInstanceAddress()));
+            try {
+                result.put("asgard", fetchPropertyData(payload.getInstanceAddress()));
+            } catch (Exception e){
+                LOGGER.warn("fetch asgard data error skip it : {}, {}", payload, e.getMessage());
+            }
             result.put("version", payload.getVersion());
             try {
                 return MAPPER.writeValueAsString(result);
