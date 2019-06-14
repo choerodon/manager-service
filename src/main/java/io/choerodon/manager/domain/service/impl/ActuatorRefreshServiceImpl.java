@@ -55,7 +55,8 @@ public class ActuatorRefreshServiceImpl implements IActuatorRefreshService {
             producer.apply(StartSagaBuilder
                     .newBuilder()
                     .withLevel(ResourceLevel.SITE)
-                    .withRefType("application")
+                    .withRefType("service")
+                    .withRefId(service)
                     .withSagaCode(ACTUATOR_REFRESH_SAGA_CODE), startSagaBuilder -> startSagaBuilder.withPayloadAndSerialize(jsonMap));
         } catch (IOException e) {
             LOGGER.warn("actuator send event exception", e);
@@ -72,7 +73,8 @@ public class ActuatorRefreshServiceImpl implements IActuatorRefreshService {
             producer.apply(StartSagaBuilder
                     .newBuilder()
                     .withLevel(ResourceLevel.SITE)
-                    .withRefType("application")
+                    .withRefType("service")
+                    .withRefId(service)
                     .withSagaCode(METADATA_REFRESH_SAGA_CODE), startSagaBuilder -> startSagaBuilder.withPayloadAndSerialize(jsonMap));
         } catch (IOException e) {
             LOGGER.warn("actuator send event exception", e);
