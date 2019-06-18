@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { findDOMNode } from 'react-dom';
 import { inject, observer } from 'mobx-react';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import { withRouter } from 'react-router-dom';
@@ -22,6 +23,7 @@ export default class SiteStatistics extends Component {
   componentDidMount() {
     SiteStatisticsStore.setCurrentLevel('site');
     this.handleRefresh();
+    this.ref = React.createRef();
   }
 
   handleRefresh = () => {
@@ -64,7 +66,7 @@ export default class SiteStatistics extends Component {
             <Select
               style={{ width: '175px', marginRight: '34px' }}
               value={SiteStatisticsStore.currentLevel}
-              getPopupContainer={() => document.getElementsByClassName('page-content')[0]}
+              getPopupContainer={() => findDOMNode(this.ref.current)}
               onChange={this.handleChange.bind(this)}
               label={<FormattedMessage id={`${intlPrefix}.belong`} />}
             >
@@ -347,7 +349,7 @@ export default class SiteStatistics extends Component {
           </Button>
           <a id="download" download="site-statistics.csv" href="#" />
         </Header>
-        <Content>
+        <Content ref={this.ref}>
           {this.getChart()}
           {this.getTable()}
         </Content>
