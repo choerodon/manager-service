@@ -122,7 +122,7 @@ class SiteStatisticsStore {
     const queryObj = {
       begin_date: beginDate,
       end_date: endDate,
-      level,
+      code: `choerodon.code.top.${level}`,
     };
     return axios.get(`/manager/v1/statistic/menu_click?${querystring.stringify(queryObj)}`)
       .then((data) => {
@@ -157,7 +157,7 @@ class SiteStatisticsStore {
     const queryObj = {
       begin_date: this.startTime.format().split('T')[0],
       end_date: this.endTime.format().split('T')[0],
-      level,
+      code: `choerodon.code.top.${level}`,
     };
     return axios.get(`/manager/v1/statistic/menu_click?${querystring.stringify(queryObj)}`).then((data) => {
       if (data.failed) {
@@ -169,7 +169,7 @@ class SiteStatisticsStore {
     });
   };
 
-  getMenuData = level => axios.get(`/iam/v1/menus/menu_config?level=${level}`).then((data) => {
+  getMenuData = level => axios.get(`/iam/v1/menus/menu_config?code=choerodon.code.top.${level}`).then((data) => {
     this.dfsAddAllMenu(data, level);
   });
 
