@@ -1,16 +1,15 @@
 {
   "name": "@choerodon/manager",
   "routeName": "manager",
-  "version": "0.17.1",
+  "version": "0.18.0",
   "description": "",
   "main": "./lib/src/app/iam/containers/IAMIndex.js",
   "files": [
     "lib"
   ],
   "dependencies": {
-    "@choerodon/boot": "0.17.x",
-    "@choerodon/master": "0.17.x",
-    "choerodon-ui": "^0.6.3",
+    "@choerodon/boot": "0.18.x",
+    "@choerodon/master": "0.18.x",
     "echarts": "^4.2.1",
     "echarts-for-react": "^2.0.14",
     "hjson": "^3.1.2",

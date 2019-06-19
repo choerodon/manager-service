@@ -1055,8 +1055,8 @@ const zh_CN = {
   'global.instance.envinfo': '环境信息',
   'global.instance.detail': '实例详情',
 
-  // API测试
-  'global.apitest.header.title': 'API测试',
+  // 平台接口
+  'global.apitest.header.title': '平台接口',
   'global.apitest.table.description': '描述',
   'global.apitest.available.range': '可用范围',
   'global.apitest.interface.detail': '接口详情',
@@ -1105,8 +1105,8 @@ const zh_CN = {
   'global.apitest.empty.try.choose': '请在左侧树状图中选择您要查看的API',
   'global.apitest.apis.repository': '接口库',
 
-  // API概览
-  'global.apioverview.header.title': 'API概览',
+  // API统计
+  'global.apioverview.header.title': 'API统计',
   'global.apioverview.api.total.count': '各服务API总数',
   'global.apioverview.api.used.count': '各服务API调用总数',
   'global.apioverview.api.single.count': '单个API调用总数',
@@ -1115,8 +1115,8 @@ const zh_CN = {
   'global.apioverview.belong': '所属微服务',
   'global.apioverview.belong.empty': '无服务',
 
-  // 平台统计
-  'global.site-statistics.header.title': '平台统计',
+  // 菜单分析
+  'global.site-statistics.header.title': '菜单分析',
   'global.site-statistics.menu.count': '菜单点击统计',
   'global.site-statistics.belong': '所属层级',
   'global.site-statistics.table.name': '菜单名称',
