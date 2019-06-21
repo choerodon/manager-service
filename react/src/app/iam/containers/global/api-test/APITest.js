@@ -342,7 +342,7 @@ export default class APITest extends Component {
       value: permission && permission.action,
     }, {
       name: intl.formatMessage({ id: `${intlPrefix}.level` }),
-      value: permission && permission.permissionLevel,
+      value: permission && permission.permissionLevel ? permission.permissionLevel.toLowerCase() : '无',
     }, {
       name: intl.formatMessage({ id: `${intlPrefix}.login.accessible` }),
       value: permission && permission.permissionLogin ? '是' : '否',
