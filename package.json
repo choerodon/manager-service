@@ -1,21 +1,25 @@
 {
   "name": "@choerodon/manager",
   "routeName": "manager",
-  "version": "0.18.0",
+  "version": "0.18.2",
   "description": "",
   "main": "./lib/src/app/iam/containers/IAMIndex.js",
   "files": [
     "lib"
   ],
-  "dependencies": {
+  "peerDependencies": {
     "@choerodon/boot": "0.18.x",
-    "@choerodon/master": "0.18.x",
+    "@choerodon/master": "0.18.x"
+  },
+  "dependencies": {
     "echarts": "^4.2.1",
     "echarts-for-react": "^2.0.14",
     "hjson": "^3.1.2",
     "react-codemirror": "^1.0.0"
   },
   "devDependencies": {
+    "@choerodon/boot": "0.18.x",
+    "@choerodon/master": "0.18.x",
     "babel-preset-env": "^1.7.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^7.0.1",
@@ -40,6 +44,5 @@
     "hooks": {
       "pre-commit": "lint-staged"
     }
-  },
-  "peerDependencies": {}
+  }
 }

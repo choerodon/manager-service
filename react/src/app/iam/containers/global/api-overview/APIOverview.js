@@ -243,8 +243,10 @@ export default class APIOverview extends Component {
       legend: {
         right: 15,
         itemHeight: 11,
+        top: 60,
+        height: '70%',
         y: 'center',
-        type: 'plain',
+        type: 'scroll',
         data: firstChartData ? firstChartData.services : [],
         orient: 'vertical', // 图例纵向排列
         icon: 'circle',
@@ -317,9 +319,9 @@ export default class APIOverview extends Component {
         top: 60,
         right: 16,
         itemHeight: 11,
-        type: 'plain',
         orient: 'vertical', // 图例纵向排列
         icon: 'circle',
+        type: 'scroll',
         data: secChartData ? secChartData.service : [],
       },
       grid: {
