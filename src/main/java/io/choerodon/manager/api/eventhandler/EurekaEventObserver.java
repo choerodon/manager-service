@@ -51,8 +51,12 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
             if (StringUtils.isEmpty(actuatorJson)) {
                 throw new RemoteAccessException("fetch actuator json data is empty, " + payload);
             }
-            actuatorRefreshService.updateOrInsertActuator(payload.getAppName(), payload.getVersion(), actuatorJson);
-            actuatorRefreshService.sendActuatorEvent(actuatorJson, payload.getAppName());
+            if(actuatorRefreshService.updateOrInsertActuator(payload.getAppName(), payload.getVersion(), actuatorJson)){
+                actuatorRefreshService.sendActuatorEvent(actuatorJson, payload.getAppName());
+                LOGGER.info("actuator data saga apply success: {}", payload.getId());
+            } else {
+                LOGGER.info("actuator data not change skip: {}", payload.getId());
+            }
         } catch (Exception e) {
             LOGGER.warn("process actuator data exception skip: {}", payload, e);
         }
@@ -60,7 +64,7 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
         try {
             String metadataJson = iDocumentService.fetchMetadataJson(payload);
             if (StringUtils.isEmpty(metadataJson)) {
-                LOGGER.info("fetch metadata json data is empty skip: {}", payload);
+                LOGGER.info("fetch metadata json data is empty skip: {}", payload.getId());
             } else {
                 actuatorRefreshService.sendMetadataEvent(metadataJson, payload.getAppName());
             }
