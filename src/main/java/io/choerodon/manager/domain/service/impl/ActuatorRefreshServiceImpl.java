@@ -10,8 +10,9 @@ import io.choerodon.manager.infra.dataobject.ActuatorDO;
 import io.choerodon.manager.infra.mapper.ActuatorMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Map;
@@ -22,11 +23,18 @@ public class ActuatorRefreshServiceImpl implements IActuatorRefreshService {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String ACTUATOR_REFRESH_SAGA_CODE = "mgmt-actuator-refresh";
     private static final String METADATA_REFRESH_SAGA_CODE = "mgmt-metadata-refresh";
-    @Autowired
     private ActuatorMapper actuatorMapper;
-    @Autowired
     private TransactionalProducer producer;
+    private IActuatorRefreshService actuatorRefreshService;
+
+    public ActuatorRefreshServiceImpl(ActuatorMapper actuatorMapper, TransactionalProducer producer,@Lazy IActuatorRefreshService actuatorRefreshService) {
+        this.actuatorMapper = actuatorMapper;
+        this.producer = producer;
+        this.actuatorRefreshService = actuatorRefreshService;
+    }
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateOrInsertActuator(String serviceName, String serviceVersion, String json) {
         ActuatorDO example = new ActuatorDO();
         example.setServiceName(serviceName);
@@ -42,6 +50,7 @@ public class ActuatorRefreshServiceImpl implements IActuatorRefreshService {
             example.setValue(json);
             actuatorMapper.insert(example);
         }
+        actuatorRefreshService.sendActuatorEvent(json, serviceName);
         return true;
     }
 

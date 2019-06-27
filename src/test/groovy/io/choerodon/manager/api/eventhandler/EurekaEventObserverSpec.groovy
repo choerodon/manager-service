@@ -14,7 +14,7 @@ class EurekaEventObserverSpec extends Specification {
         }
         def service1 = Mock(ISwaggerRefreshService)
         def service2 = Mock(IRouteService)
-        def observer = new EurekaEventObserver(service, service1, service2)
+        def observer = new EurekaEventObserver(service, service1, service2, actuatorRefreshService)
 
         when:
         observer.receiveUpEvent(new EurekaEventPayload())

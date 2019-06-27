@@ -8,7 +8,6 @@ import io.choerodon.manager.domain.service.IRouteService;
 import io.choerodon.manager.domain.service.ISwaggerRefreshService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -23,15 +22,15 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
 
     private IRouteService iRouteService;
 
-    @Autowired
     private IActuatorRefreshService actuatorRefreshService;
 
     public EurekaEventObserver(IDocumentService iDocumentService,
                                ISwaggerRefreshService swaggerRefreshService,
-                               IRouteService iRouteService) {
+                               IRouteService iRouteService, IActuatorRefreshService actuatorRefreshService) {
         this.iDocumentService = iDocumentService;
         this.swaggerRefreshService = swaggerRefreshService;
         this.iRouteService = iRouteService;
+        this.actuatorRefreshService = actuatorRefreshService;
     }
 
     @Override
@@ -52,7 +51,6 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
                 throw new RemoteAccessException("fetch actuator json data is empty, " + payload);
             }
             if(actuatorRefreshService.updateOrInsertActuator(payload.getAppName(), payload.getVersion(), actuatorJson)){
-                actuatorRefreshService.sendActuatorEvent(actuatorJson, payload.getAppName());
                 LOGGER.info("actuator data saga apply success: {}", payload.getId());
             } else {
                 LOGGER.info("actuator data not change skip: {}", payload.getId());
