@@ -10,7 +10,7 @@ mvn org.apache.maven.plugins:maven-dependency-plugin:get \
  -Dtransitive=false
 
 #java -Dspring.datasource.url="jdbc:oracle:thin:@127.0.0.1:1521:xe" \
-java -Dspring.datasource.url="jdbc:mysql://localhost/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false" \
+java -Dspring.datasource.url="jdbc:mysql://localhost/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false&useInformationSchema=true&remarks=true" \
  -Dspring.datasource.username=root \
  -Dspring.datasource.password=root \
  -Ddata.drop=false -Ddata.init=true \
