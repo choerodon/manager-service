@@ -26,7 +26,8 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
 
     public EurekaEventObserver(IDocumentService iDocumentService,
                                ISwaggerRefreshService swaggerRefreshService,
-                               IRouteService iRouteService, IActuatorRefreshService actuatorRefreshService) {
+                               IRouteService iRouteService,
+                               IActuatorRefreshService actuatorRefreshService) {
         this.iDocumentService = iDocumentService;
         this.swaggerRefreshService = swaggerRefreshService;
         this.iRouteService = iRouteService;

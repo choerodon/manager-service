@@ -5,7 +5,11 @@ import java.util.List;
 import com.github.pagehelper.PageInfo;
 import io.choerodon.base.annotation.Permission;
 import io.choerodon.base.constant.PageConstant;
+import io.choerodon.base.domain.PageRequest;
+import io.choerodon.base.domain.Sort;
 import io.choerodon.base.enums.ResourceType;
+import io.choerodon.mybatis.annotation.SortDefault;
+import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,13 +55,14 @@ public class ServiceController {
      */
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("微服务管理列表")
+    @CustomPageRequest
     @GetMapping("/manager")
     public ResponseEntity<PageInfo<ServiceManagerDTO>> pageManager(
             @RequestParam(required = false, name = "service_name") String serviceName,
             @RequestParam(required = false) String params,
-            @RequestParam(defaultValue = PageConstant.PAGE, required = false) final int page,
-            @RequestParam(defaultValue = PageConstant.SIZE, required = false) final int size) {
-        return new ResponseEntity<>(serviceService.pageManager(serviceName, params, page, size), HttpStatus.OK);
+            @ApiIgnore
+            @SortDefault(value = "name", direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        return new ResponseEntity<>(serviceService.pageManager(serviceName, params, pageRequest), HttpStatus.OK);
     }
 
     /**

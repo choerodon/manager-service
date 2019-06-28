@@ -2,7 +2,8 @@ package io.choerodon.manager.infra.common.utils;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
-import io.choerodon.manager.infra.dataobject.Sort;
+import io.choerodon.base.domain.PageRequest;
+import io.choerodon.base.domain.Sort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -11,6 +12,12 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * list手动分页工具类
+ *
+ * @author flyleft
+ * @author superlee
+ */
 public class ManualPageHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(ManualPageHelper.class);
@@ -20,8 +27,8 @@ public class ManualPageHelper {
     private ManualPageHelper() {
     }
 
-    public static <T> PageInfo<T> postPage(final List<T> source, int page, int size, Sort sort, final Map<String, Object> filters) {
-        return postPage(source, page, size, filters, defaultCompare(sort));
+    public static <T> PageInfo<T> postPage(final List<T> source, PageRequest pageRequest, final Map<String, Object> filters) {
+        return postPage(source, pageRequest.getPage(), pageRequest.getSize(), filters, defaultCompare(pageRequest.getSort()));
     }
 
     public static <T> PageInfo<T> postPage(final List<T> source, int page, int size,

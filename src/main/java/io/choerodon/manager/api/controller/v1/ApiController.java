@@ -7,15 +7,18 @@ import java.util.Map;
 
 import com.github.pagehelper.PageInfo;
 import io.choerodon.base.annotation.Permission;
-import io.choerodon.base.constant.PageConstant;
+import io.choerodon.base.domain.PageRequest;
+import io.choerodon.base.domain.Sort;
 import io.choerodon.base.enums.ResourceType;
-import io.choerodon.manager.infra.dataobject.Sort;
 import io.choerodon.manager.infra.enums.InvokeCountBusinessType;
+import io.choerodon.mybatis.annotation.SortDefault;
+import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 import springfox.documentation.swagger.web.SwaggerResource;
 
 import io.choerodon.core.iam.InitRoleCode;
@@ -55,12 +58,13 @@ public class ApiController {
         return new ResponseEntity<>(swaggerService.getSwaggerResource(), HttpStatus.OK);
     }
 
+    @CustomPageRequest
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询服务controller和接口")
     @GetMapping("/{service_prefix}/controllers")
     public ResponseEntity<PageInfo<ControllerDTO>> queryByNameAndVersion(
-            @RequestParam(defaultValue = PageConstant.PAGE, required = false) final int page,
-            @RequestParam(defaultValue = PageConstant.SIZE, required = false) final int size,
+            @ApiIgnore
+            @SortDefault(value = "name", direction = Sort.Direction.ASC) PageRequest pageRequest,
             @PathVariable("service_prefix") String serviceName,
             @RequestParam(value = "version", required = false, defaultValue = VersionUtil.NULL_VERSION) String version,
             @RequestParam(required = false, name = "params") String params,
@@ -70,9 +74,7 @@ public class ApiController {
         map.put("params", params);
         map.put("name", name);
         map.put("description", description);
-        Sort.Order order = new Sort.Order(Sort.Direction.ASC, "name");
-        Sort sort = new Sort(order);
-        return new ResponseEntity<>(apiService.getControllers(serviceName, version, page, size, sort, map), HttpStatus.OK);
+        return new ResponseEntity<>(apiService.getControllers(serviceName, version, pageRequest, map), HttpStatus.OK);
     }
 
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
