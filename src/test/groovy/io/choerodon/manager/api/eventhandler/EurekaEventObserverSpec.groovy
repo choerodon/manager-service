@@ -1,6 +1,7 @@
 package io.choerodon.manager.api.eventhandler
 
 import io.choerodon.eureka.event.EurekaEventPayload
+import io.choerodon.manager.domain.service.IActuatorRefreshService
 import io.choerodon.manager.domain.service.IDocumentService
 import io.choerodon.manager.domain.service.IRouteService
 import io.choerodon.manager.domain.service.ISwaggerRefreshService
@@ -14,6 +15,7 @@ class EurekaEventObserverSpec extends Specification {
         }
         def service1 = Mock(ISwaggerRefreshService)
         def service2 = Mock(IRouteService)
+        def actuatorRefreshService = Mock(IActuatorRefreshService)
         def observer = new EurekaEventObserver(service, service1, service2, actuatorRefreshService)
 
         when:

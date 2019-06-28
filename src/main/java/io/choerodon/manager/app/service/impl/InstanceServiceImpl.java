@@ -13,8 +13,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
 import com.netflix.appinfo.InstanceInfo;
+import io.choerodon.base.domain.PageRequest;
 import io.choerodon.manager.infra.common.utils.RelaxedNames;
-import io.choerodon.manager.infra.dataobject.Sort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.ServiceInstance;
@@ -52,11 +52,6 @@ public class InstanceServiceImpl implements InstanceService {
      * spring boot 2.0 endpoint
      */
     private static final String ACTUATOR_ENV = "actuator/env";
-
-    /**
-     * spring boot 1.5.x endpoint
-     */
-    private static final String ACTUATOR_ENV_V1 = "env";
 
     private ConfigServerClient configServerClient;
 
@@ -129,48 +124,28 @@ public class InstanceServiceImpl implements InstanceService {
         } else {
             throw new CommonException("error.illegal.management.url");
         }
-        String envUrl = url + ACTUATOR_ENV_V1;
+        String envUrl = url + ACTUATOR_ENV;
         ResponseEntity<String> response;
-        boolean isSpringBoot2 = false;
         try {
-            //todo 这个地方暂时性措施，由于框架和其他服务升级springboot 2.0进度差异，导致框架的actuator端口endpoint为/actuator/**,
-            //spring boot 1.5.x的endpoint为/** 等升级完成后将1.5的情况移除
             response = restTemplate.getForEntity(envUrl, String.class);
             if (response.getStatusCode() == HttpStatus.OK) {
-                processEnvJson(instanceDetail, response.getBody(), isSpringBoot2);
+                processEnvJson(instanceDetail, response.getBody());
             } else {
                 throw new CommonException("error.config.fetchEnv");
             }
         } catch (Exception e) {
-            //try do v2.0.x
-            LOGGER.warn("can not fetch env info for spring boot 1.5.x, request url : {}", envUrl);
-            try {
-                isSpringBoot2 = true;
-                envUrl = url + ACTUATOR_ENV;
-                response = restTemplate.getForEntity(envUrl, String.class);
-                if (response.getStatusCode() == HttpStatus.OK) {
-                    processEnvJson(instanceDetail, response.getBody(), isSpringBoot2);
-                } else {
-                    throw new CommonException("error.config.fetchEnv");
-                }
-            } catch (Exception ex) {
-                LOGGER.warn("can not fetch env info, request url for spring boot 2.0.x : {}, exception message : {}", envUrl, ex.getMessage());
-                throw new CommonException("error.config.fetchEnv");
-            }
+            LOGGER.warn("can not fetch env info, exception message : {}", e.getMessage());
+            throw new CommonException("error.config.fetchEnv");
         }
     }
 
-    private void processEnvJson(InstanceDetailDTO instanceDetail, String json, boolean isSpringBoot2) {
+    private void processEnvJson(InstanceDetailDTO instanceDetail, String json) {
         try {
             JsonNode node = objectMapper.readTree(json);
-            String allConfigYaml = getAllConfigYaml(node, isSpringBoot2);
+            String allConfigYaml = getAllConfigYaml(node);
             instanceDetail.setEnvInfoYml(new YamlDTO(allConfigYaml, ConfigUtil.appearNumber(allConfigYaml, "\n") + 1));
             String activeConfigYaml;
-            if (isSpringBoot2) {
-                activeConfigYaml = getActiveConfigYaml4Spring2(node);
-            } else {
-                activeConfigYaml = getActiveConfigYaml(node);
-            }
+            activeConfigYaml = getActiveConfigYaml(node);
             instanceDetail.setConfigInfoYml(new YamlDTO(activeConfigYaml, ConfigUtil.appearNumber(activeConfigYaml, "\n") + 1));
         } catch (IOException e) {
             LOGGER.info("error.restTemplate.fetchEnvInfo {}", e.getMessage());
@@ -178,41 +153,19 @@ public class InstanceServiceImpl implements InstanceService {
         }
     }
 
-    private String getAllConfigYaml(final JsonNode root, boolean isSpringBoot2) {
+    private String getAllConfigYaml(final JsonNode root) {
         Map<String, Object> map = new HashMap<>();
-        if (isSpringBoot2) {
-            JsonNode propertySources = root.findValue("propertySources");
-            Iterator<JsonNode> subIterator = propertySources.iterator();
-            while (subIterator.hasNext()) {
-                JsonNode node = subIterator.next();
-                String key = node.get("name").asText();
-                JsonNode jsonNode = node.get("properties");
-                if (key.startsWith("applicationConfig: [classpath:/")) {
-                    key = key.replace("applicationConfig: [classpath:/", "").replace(".properties]", "")
-                            .replace(".yml]", "");
-                }
-                if (key.startsWith("configService:")) {
-                    key = "config-server";
-                }
-                Iterator<Map.Entry<String, JsonNode>> vit = jsonNode.fields();
-                while (vit.hasNext()) {
-                    Map.Entry<String, JsonNode> value = vit.next();
-                    String jsonValue = value.getValue().get("value").asText();
-                    if (!StringUtils.isEmpty(jsonValue) && !value.getKey().startsWith("java")) {
-                        map.put(key + "." + value.getKey(), jsonValue);
-                    }
-                }
-            }
-        } else {
-            processConfigYaml(map, root.fields());
-        }
+        processConfigYaml(map, root);
         return ConfigUtil.convertMapToText(map, "yaml");
     }
 
-    private void processConfigYaml(Map<String, Object> map, Iterator<Map.Entry<String, JsonNode>> it) {
-        while (it.hasNext()) {
-            Map.Entry<String, JsonNode> entry = it.next();
-            String key = entry.getKey();
+    private void processConfigYaml(Map<String, Object> map, JsonNode root) {
+        JsonNode propertySources = root.findValue("propertySources");
+        Iterator<JsonNode> subIterator = propertySources.iterator();
+        while (subIterator.hasNext()) {
+            JsonNode node = subIterator.next();
+            String key = node.get("name").asText();
+            JsonNode jsonNode = node.get("properties");
             if (key.startsWith("applicationConfig: [classpath:/")) {
                 key = key.replace("applicationConfig: [classpath:/", "").replace(".properties]", "")
                         .replace(".yml]", "");
@@ -220,48 +173,18 @@ public class InstanceServiceImpl implements InstanceService {
             if (key.startsWith("configService:")) {
                 key = "config-server";
             }
-            Iterator<Map.Entry<String, JsonNode>> vit = entry.getValue().fields();
+            Iterator<Map.Entry<String, JsonNode>> vit = jsonNode.fields();
             while (vit.hasNext()) {
                 Map.Entry<String, JsonNode> value = vit.next();
-                if (value.getValue().isValueNode()) {
-                    String jsonValue = value.getValue().asText();
-                    if (!StringUtils.isEmpty(jsonValue) && !value.getKey().startsWith("java")) {
-                        map.put(key + "." + value.getKey(), value.getValue().asText());
-                    }
+                String jsonValue = value.getValue().get("value").asText();
+                if (!StringUtils.isEmpty(jsonValue) && !value.getKey().startsWith("java")) {
+                    map.put(key + "." + value.getKey(), jsonValue);
                 }
             }
         }
     }
 
     private String getActiveConfigYaml(final JsonNode root) {
-        String config = getConfigPropertySource(root);
-        String activeProfile = "default";
-        JsonNode profileNode = root.findValue("profiles");
-        if (profileNode != null && !profileNode.asText().isEmpty()) {
-            activeProfile = profileNode.asText();
-        }
-        activeProfile = "applicationConfig: [classpath:/application-" + activeProfile;
-        Map<String, Data> map = PropertySourceBuilder.newInstance(root)
-                .appendApply("defaultProperties")
-                .appendApply("applicationConfig: [classpath:/bootstrap.properties]")
-                .appendApply("applicationConfig: [classpath:/bootstrap.yml]")
-                .appendApply("kafkaBinderDefaultProperties")
-                .appendApply("applicationConfig: [classpath:/application.properties]")
-                .appendApply("applicationConfig: [classpath:/application.yml]")
-                .appendApply(activeProfile + ".properties]")
-                .appendApply(activeProfile + ".yml]")
-                .appendApply("random")
-                .appendApply(config)
-                .coverApply("systemEnvironment")
-                .coverApply("systemProperties")
-                .appendApply("servletConfigInitParams")
-                .appendApply("commandLineArgs")
-                .coverApplyServerPort()
-                .data();
-        return ConfigUtil.convertDataMapToYaml(map);
-    }
-
-    private String getActiveConfigYaml4Spring2(JsonNode root) {
         JsonNode propertySources = root.findValue("propertySources");
         Iterator<JsonNode> iterator = propertySources.iterator();
         String config = null;
@@ -298,7 +221,6 @@ public class InstanceServiceImpl implements InstanceService {
                         .coverApplyServerPortSpringBoot2()
                         .data();
         return ConfigUtil.convertDataMapToYaml(map);
-
     }
 
     private static class PropertySourceBuilder {
@@ -549,7 +471,7 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public PageInfo<InstanceDTO> listByOptions(String service, Map<String, Object> map, int page, int size, Sort sort) {
+    public PageInfo<InstanceDTO> listByOptions(String service, Map<String, Object> map, PageRequest pageRequest) {
         List<InstanceDTO> serviceInstances = new ArrayList<>();
         if (StringUtils.isEmpty(service)) {
             List<String> services = discoveryClient.getServices();
@@ -560,7 +482,7 @@ public class InstanceServiceImpl implements InstanceService {
             serviceInstances.addAll(toInstanceDTOList(discoveryClient.getInstances(service)));
         }
 
-        return ManualPageHelper.postPage(serviceInstances, page, size, sort, map);
+        return ManualPageHelper.postPage(serviceInstances, pageRequest, map);
     }
 
     private List<InstanceDTO> toInstanceDTOList(final List<ServiceInstance> serviceInstances) {

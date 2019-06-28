@@ -5,9 +5,11 @@ import java.util.Map;
 
 import com.github.pagehelper.PageInfo;
 import io.choerodon.base.annotation.Permission;
-import io.choerodon.base.constant.PageConstant;
+import io.choerodon.base.domain.PageRequest;
+import io.choerodon.base.domain.Sort;
 import io.choerodon.base.enums.ResourceType;
-import io.choerodon.manager.infra.dataobject.Sort;
+import io.choerodon.mybatis.annotation.SortDefault;
+import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.api.dto.InstanceDetailDTO;
 import io.choerodon.manager.app.service.InstanceService;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * @author flyleft
@@ -46,9 +49,10 @@ public class InstanceController {
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询实例列表")
     @GetMapping
+    @CustomPageRequest
     public ResponseEntity<PageInfo<InstanceDTO>> list(@RequestParam(value = "service", required = false) String service,
-                                                      @RequestParam(defaultValue = PageConstant.PAGE, required = false) final int page,
-                                                      @RequestParam(defaultValue = PageConstant.SIZE, required = false) final int size,
+                                                      @ApiIgnore
+                                                      @SortDefault(value = "instanceId", direction = Sort.Direction.DESC) PageRequest pageRequest,
                                                       @RequestParam(required = false, name = "instanceId") String instanceId,
                                                       @RequestParam(required = false, name = "version") String version,
                                                       @RequestParam(required = false, name = "status") String status,
@@ -59,9 +63,7 @@ public class InstanceController {
         map.put("version", version);
         map.put("status", status);
         map.put("params", params);
-        Sort.Order order = new Sort.Order(Sort.Direction.DESC, "instanceId");
-        Sort sort = new Sort(order);
-        return new ResponseEntity<>(instanceService.listByOptions(service, map, page,size,sort), HttpStatus.OK);
+        return new ResponseEntity<>(instanceService.listByOptions(service, map, pageRequest), HttpStatus.OK);
     }
 
     /**

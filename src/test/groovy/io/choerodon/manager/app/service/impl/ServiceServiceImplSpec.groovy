@@ -1,5 +1,6 @@
 package io.choerodon.manager.app.service.impl
 
+import io.choerodon.base.domain.PageRequest
 import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.app.service.ServiceService
 import io.choerodon.manager.domain.repository.ServiceRepository
@@ -52,7 +53,8 @@ class ServiceServiceImplSpec extends Specification {
         def params = "manager"
 
         when: "调用接口"
-        def list = serviceService.pageManager(serviceName, params, 1,10)
+        PageRequest pageRequest = new PageRequest(1, 0)
+        def list = serviceService.pageManager(serviceName, params, pageRequest)
 
         then: "校验调用次数和返回List不为空"
         //1 * discoveryClient.getServices()

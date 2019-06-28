@@ -7,10 +7,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import io.choerodon.base.domain.PageRequest;
 import io.choerodon.manager.api.dto.MenuDTO;
 import io.choerodon.manager.domain.service.ISwaggerService;
 import io.choerodon.manager.infra.dataobject.RouteDO;
-import io.choerodon.manager.infra.dataobject.Sort;
 import io.choerodon.manager.infra.enums.InvokeCountBusinessType;
 import io.choerodon.manager.infra.feign.IamClient;
 import io.choerodon.manager.infra.mapper.RouteMapper;
@@ -86,10 +86,10 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public PageInfo<ControllerDTO> getControllers(String name, String version, int page, int size, Sort sort, Map<String, Object> map) {
+    public PageInfo<ControllerDTO> getControllers(String name, String version, PageRequest pageRequest, Map<String, Object> map) {
         String json = getSwaggerJson(name, version);
         return Optional.ofNullable(json)
-                .map(j -> ManualPageHelper.postPage(processJson2ControllerDTO(name, j), page, size, sort, map))
+                .map(j -> ManualPageHelper.postPage(processJson2ControllerDTO(name, j), pageRequest, map))
                 .orElseThrow(() -> new CommonException("error.service.swaggerJson.empty"));
     }
 

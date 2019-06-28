@@ -44,7 +44,7 @@ class ServiceControllerSpec extends Specification {
 
         then: "校验状态码和调用次数"
         entity.statusCode.is2xxSuccessful()
-        1 * mockServiceService.pageManager(serviceName, params, _, _)
+        1 * mockServiceService.pageManager(serviceName, params, _)
         0 * _
     }
 
