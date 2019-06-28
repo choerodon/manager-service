@@ -702,28 +702,6 @@ export default class Route extends Component {
               </FormItem>
             ) : ''
           }
-          {(show === 'edit' || helper) && (
-            <FormItem
-              {...formItemLayout}
-            >
-              {getFieldDecorator('helperService', {
-                rules: [{
-                  whitespace: show === 'edit',
-                  message: intl.formatMessage({ id: `${intlPrefix}.helperservice.require.msg` }),
-                }],
-                initialValue: sidebarData.helperService || undefined,
-              })(
-                <Input
-                  disabled={detailValidate}
-                  autoComplete="off"
-                  label={<FormattedMessage id={`${intlPrefix}.helperservice`} />}
-                  style={{ width: inputWidth }}
-                  suffix={this.getSuffix(intl.formatMessage({ id: `${intlPrefix}.helperservice.tip` }))}
-                />,
-              )}
-            </FormItem>
-          )
-          }
         </Form>
       </Content>
     );
