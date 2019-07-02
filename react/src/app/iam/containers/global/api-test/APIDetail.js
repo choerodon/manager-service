@@ -12,6 +12,7 @@ import './APITest.scss';
 import jsonFormat from '../../../common/json-format';
 import APITestStore from '../../../stores/global/api-test';
 import AuthorizeModal from './AuthorizeModal';
+import { API_HOST } from '@choerodon/boot/lib/containers/common/constants';
 
 let statusCode;
 let responseHeader;
@@ -20,7 +21,7 @@ let rcResponseHeader;
 let rcResponse;
 let authorization;
 const intlPrefix = 'global.apitest';
-const urlPrefix = process.env.API_HOST;
+const urlPrefix = API_HOST;
 const { TabPane } = Tabs;
 const { Option } = Select;
 const { TextArea } = Input;
