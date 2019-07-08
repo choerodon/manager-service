@@ -64,8 +64,8 @@ export default class Route extends Component {
   /* 获取sidebar中对应微服务 */
   getOption() {
     const { serviceArr = [] } = this.state;
-    const services = serviceArr.map(({ name }) => (
-      <Option value={name} key={name}>{name}</Option>
+    const services = serviceArr.map(({ serviceName }) => (
+      <Option value={serviceName} key={serviceName}>{serviceName}</Option>
     ));
     return services;
   }
@@ -74,7 +74,7 @@ export default class Route extends Component {
   getService() {
     axios.get('manager/v1/services/manager?size=0').then((res) => {
       this.setState({
-        serviceArr: res,
+        serviceArr: res.list, // PageInfo对象
       });
     });
   }
