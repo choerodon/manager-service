@@ -163,7 +163,10 @@ class SiteStatisticsStore {
       if (data.failed) {
         Choerodon.prompt(data.message);
       } else {
-        data = this.tableDataFormatter(data).map(values => ({ ...values, level }));
+        data = this.tableDataFormatter(data).map(values => {
+          this.set.add(values.code);
+          return { ...values, level };
+        });
         this.allTableDate = this.allTableDate.concat(data);
       }
     });
