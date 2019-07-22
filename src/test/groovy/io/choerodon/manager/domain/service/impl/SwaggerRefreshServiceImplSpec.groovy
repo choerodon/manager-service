@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.choerodon.core.exception.CommonException
 import io.choerodon.eureka.event.EurekaEventPayload
 import io.choerodon.manager.IntegrationTestConfiguration
-import io.choerodon.manager.domain.service.VersionStrategy
-import io.choerodon.manager.infra.dataobject.SwaggerDO
+import io.choerodon.manager.app.service.VersionStrategy
+import io.choerodon.manager.app.service.impl.DefaultVersionStrategy
+import io.choerodon.manager.app.service.impl.SwaggerRefreshServiceImpl
+import io.choerodon.manager.infra.dto.SwaggerDTO
 import io.choerodon.manager.infra.mapper.SwaggerMapper
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -18,16 +20,16 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  */
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import(IntegrationTestConfiguration)
-class ISwaggerRefreshServiceImplSpec extends Specification {
+class SwaggerRefreshServiceImplSpec extends Specification {
 
     private ObjectMapper objectMapper = new ObjectMapper()
     private SwaggerMapper mockSwaggerMapper = Mock(SwaggerMapper)
-    private VersionStrategy versionStrategy = new IDefaultVersionStrategy()
+    private VersionStrategy versionStrategy = new DefaultVersionStrategy()
 
-    private ISwaggerRefreshServiceImpl iSwaggerRefreshService
+    private SwaggerRefreshServiceImpl iSwaggerRefreshService
 
     def setup() {
-        iSwaggerRefreshService = new ISwaggerRefreshServiceImpl(mockSwaggerMapper, versionStrategy)
+        iSwaggerRefreshService = new SwaggerRefreshServiceImpl(mockSwaggerMapper, versionStrategy)
     }
 
     def "UpdateOrInsertSwagger"() {
@@ -37,10 +39,10 @@ class ISwaggerRefreshServiceImplSpec extends Specification {
         def errorPayloadJson = '{"status":"UP","appName":"error","version":"1.0","instanceAddress":"127.0.0.1"}'
         def errorRegisterInstancePayload = objectMapper.readValue(errorPayloadJson, EurekaEventPayload)
         def json = "json"
-        def swaggerDO = new SwaggerDO()
+        def swaggerDO = new SwaggerDTO()
         swaggerDO.setServiceName("manager")
         swaggerDO.setServiceVersion("null_version")
-        def swaggerDO1 = new SwaggerDO()
+        def swaggerDO1 = new SwaggerDTO()
         swaggerDO1.setServiceName("error")
         swaggerDO1.setServiceVersion("0.9")
 

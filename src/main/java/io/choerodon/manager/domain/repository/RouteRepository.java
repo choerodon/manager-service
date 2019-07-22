@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.github.pagehelper.PageInfo;
 import io.choerodon.manager.domain.manager.entity.RouteE;
-import io.choerodon.manager.infra.dataobject.RouteDO;
+import io.choerodon.manager.infra.dto.RouteDTO;
 
 /**
  * {@inheritDoc}
@@ -25,9 +25,9 @@ public interface RouteRepository {
 
     List<RouteE> addRoutesBatch(List<RouteE> routeEList);
 
-    PageInfo<RouteDO> pageAllRoutes(int page, int size, RouteDO routeDO, String params);
+    PageInfo<RouteDTO> pageAllRoutes(int page, int size, RouteDTO routeDTO, String params);
 
-    int countRoute(RouteDO routeDO);
+    int countRoute(RouteDTO routeDTO);
 
     void delete(Long routeId);
 }

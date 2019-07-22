@@ -4,7 +4,7 @@ import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.domain.manager.entity.ServiceE;
 import io.choerodon.manager.domain.repository.ServiceRepository;
-import io.choerodon.manager.infra.dataobject.ServiceDO;
+import io.choerodon.manager.infra.dto.ServiceDTO;
 import io.choerodon.manager.infra.mapper.ServiceMapper;
 import org.springframework.stereotype.Component;
 
@@ -29,24 +29,24 @@ public class ServiceRepositoryImpl implements ServiceRepository {
 
     @Override
     public ServiceE addService(ServiceE serviceE) {
-        ServiceDO serviceDO = ConvertHelper.convert(serviceE, ServiceDO.class);
-        int isInsert = serviceMapper.insert(serviceDO);
+        ServiceDTO serviceDTO = ConvertHelper.convert(serviceE, ServiceDTO.class);
+        int isInsert = serviceMapper.insert(serviceDTO);
         if (isInsert != 1) {
             throw new CommonException("error.service.add");
         }
-        return ConvertHelper.convert(serviceDO, ServiceE.class);
+        return ConvertHelper.convert(serviceDTO, ServiceE.class);
     }
 
     @Override
     public ServiceE updateService(ServiceE serviceE) {
-        ServiceDO oldServiceDO = serviceMapper.selectByPrimaryKey(serviceE.getId());
-        ServiceDO serviceDO = ConvertHelper.convert(serviceE, ServiceDO.class);
-        serviceDO.setObjectVersionNumber(oldServiceDO.getObjectVersionNumber());
-        int isUpdate = serviceMapper.updateByPrimaryKeySelective(serviceDO);
+        ServiceDTO oldServiceDTO = serviceMapper.selectByPrimaryKey(serviceE.getId());
+        ServiceDTO serviceDTO = ConvertHelper.convert(serviceE, ServiceDTO.class);
+        serviceDTO.setObjectVersionNumber(oldServiceDTO.getObjectVersionNumber());
+        int isUpdate = serviceMapper.updateByPrimaryKeySelective(serviceDTO);
         if (isUpdate != 1) {
             throw new CommonException("error.service.update");
         }
-        return ConvertHelper.convert(serviceDO, ServiceE.class);
+        return ConvertHelper.convert(serviceDTO, ServiceE.class);
     }
 
     @Override
@@ -59,17 +59,17 @@ public class ServiceRepositoryImpl implements ServiceRepository {
     }
 
     @Override
-    public List<ServiceDO> getAllService() {
+    public List<ServiceDTO> getAllService() {
         return serviceMapper.selectAll();
     }
 
     @Override
-    public ServiceDO getService(String serviceName) {
-        return serviceMapper.selectOne(new ServiceDO(serviceName));
+    public ServiceDTO getService(String serviceName) {
+        return serviceMapper.selectOne(new ServiceDTO(serviceName));
     }
 
     @Override
-    public List<ServiceDO> selectServicesByFilter(String param) {
+    public List<ServiceDTO> selectServicesByFilter(String param) {
         return serviceMapper.selectServicesByFilter(param);
     }
 }

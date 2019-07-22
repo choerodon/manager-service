@@ -1,10 +1,10 @@
 package io.choerodon.manager.app.service;
 
-import java.util.List;
-
 import com.github.pagehelper.PageInfo;
-import io.choerodon.manager.api.dto.RouteDTO;
-import io.choerodon.manager.infra.dataobject.RouteDO;
+import io.choerodon.base.domain.PageRequest;
+import io.choerodon.manager.domain.manager.entity.RouteE;
+import io.choerodon.manager.infra.dto.RouteDTO;
+import org.apache.commons.collections.map.MultiKeyMap;
 
 /**
  * 路由信息应用层服务
@@ -17,7 +17,7 @@ public interface RouteService {
      *
      * @return page
      */
-    PageInfo<RouteDTO> list(int page,int size, RouteDO routeDO, String params);
+    PageInfo<RouteDTO> list(PageRequest pageRequest, RouteDTO routeDTO, String params);
 
     /**
      * 添加一个路由
@@ -25,7 +25,7 @@ public interface RouteService {
      * @param routeDTO 路由对象
      * @return routeDTO
      */
-    RouteDTO  create(RouteDTO routeDTO);
+    RouteDTO create(RouteDTO routeDTO);
 
     /**
      * 更新一个路由对象
@@ -43,23 +43,25 @@ public interface RouteService {
      */
     void delete(Long routeId);
 
-    /**
-     * 批量添加路由
-     *
-     * @param routeDTOList 路由对象集合
-     * @return list
-     */
-    List<RouteDTO> addRoutesBatch(List<RouteDTO> routeDTOList);
-
-    /**
-     * 获取所有路由对象
-     *
-     * @return list
-     */
-    List<RouteDTO> getAllRoute();
-
-    RouteDTO queryByName(String name);
-
 
     void checkRoute(RouteDTO routeDTO);
+
+    /**
+     * 获取所有正在运行实例的ZuulRoute
+     *
+     * @return 正在运行实例的map (serviceId, version):(zuulRoute)
+     */
+    MultiKeyMap getAllRunningInstances();
+
+    /**
+     * 从MultiKeyMap中根据那么查找ZuulRoute
+     *
+     * @param runningMap 查找范围
+     * @param name       形如：uaa
+     * @param version    版本号
+     * @return 查找的ZuulRoute
+     */
+    RouteE getRouteFromRunningInstancesMap(MultiKeyMap runningMap, String name, String version);
+
+    void autoRefreshRoute(String swaggerJson);
 }

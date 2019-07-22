@@ -1,12 +1,12 @@
 package io.choerodon.manager.infra.mapper;
 
-import io.choerodon.manager.infra.dataobject.ServiceDO;
+import io.choerodon.manager.infra.dto.ServiceDTO;
 import io.choerodon.mybatis.common.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-public interface ServiceMapper extends Mapper<ServiceDO> {
+public interface ServiceMapper extends Mapper<ServiceDTO> {
 
-    List<ServiceDO> selectServicesByFilter(@Param("param") String param);
+    List<ServiceDTO> selectServicesByFilter(@Param("param") String param);
 }

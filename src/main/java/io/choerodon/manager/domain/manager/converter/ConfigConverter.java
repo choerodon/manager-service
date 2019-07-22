@@ -3,9 +3,9 @@ package io.choerodon.manager.domain.manager.converter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.core.convertor.ConvertorI;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.manager.api.dto.ConfigDTO;
+import io.choerodon.manager.api.dto.ConfigVO;
 import io.choerodon.manager.domain.manager.entity.ConfigE;
-import io.choerodon.manager.infra.dataobject.ConfigDO;
+import io.choerodon.manager.infra.dto.ConfigDTO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
@@ -17,13 +17,13 @@ import java.util.Map;
  * @author wuguokai
  */
 @Component
-public class ConfigConverter implements ConvertorI<ConfigE, ConfigDO, ConfigDTO> {
+public class ConfigConverter implements ConvertorI<ConfigE, ConfigDTO, ConfigVO> {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String COMMON_EXCEPTION_1 = "error.config.parser";
 
     @Override
-    public ConfigE dtoToEntity(ConfigDTO dto) {
+    public ConfigE dtoToEntity(ConfigVO dto) {
         try {
             ConfigE configE = new ConfigE();
             String value = null;
@@ -40,23 +40,23 @@ public class ConfigConverter implements ConvertorI<ConfigE, ConfigDO, ConfigDTO>
 
     @Override
     @SuppressWarnings("unchecked")
-    public ConfigDTO entityToDto(ConfigE entity) {
+    public ConfigVO entityToDto(ConfigE entity) {
         try {
-            ConfigDTO configDTO = new ConfigDTO();
+            ConfigVO configVO = new ConfigVO();
             Map<String, Object> value = new HashMap<>();
             if (entity.getValue() != null) {
                 value = MAPPER.readValue(entity.getValue(), Map.class);
             }
-            BeanUtils.copyProperties(entity, configDTO);
-            configDTO.setValue(value);
-            return configDTO;
+            BeanUtils.copyProperties(entity, configVO);
+            configVO.setValue(value);
+            return configVO;
         } catch (IOException e) {
             throw new CommonException(COMMON_EXCEPTION_1);
         }
     }
 
     @Override
-    public ConfigE doToEntity(ConfigDO dataObject) {
+    public ConfigE doToEntity(ConfigDTO dataObject) {
         ConfigE configE = new ConfigE();
         BeanUtils.copyProperties(dataObject, configE);
         return configE;
@@ -64,40 +64,40 @@ public class ConfigConverter implements ConvertorI<ConfigE, ConfigDO, ConfigDTO>
     }
 
     @Override
-    public ConfigDO entityToDo(ConfigE entity) {
-        ConfigDO configDO = new ConfigDO();
-        BeanUtils.copyProperties(entity, configDO);
-        return configDO;
+    public ConfigDTO entityToDo(ConfigE entity) {
+        ConfigDTO configDTO = new ConfigDTO();
+        BeanUtils.copyProperties(entity, configDTO);
+        return configDTO;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public ConfigDTO doToDto(ConfigDO dataObject) {
+    public ConfigVO doToDto(ConfigDTO dataObject) {
         try {
-            ConfigDTO configDTO = new ConfigDTO();
+            ConfigVO configVO = new ConfigVO();
             Map<String, Object> value = new HashMap<>();
             if (dataObject.getValue() != null) {
                 value = MAPPER.readValue(dataObject.getValue(), Map.class);
             }
-            BeanUtils.copyProperties(dataObject, configDTO);
-            configDTO.setValue(value);
-            return configDTO;
+            BeanUtils.copyProperties(dataObject, configVO);
+            configVO.setValue(value);
+            return configVO;
         } catch (IOException e) {
             throw new CommonException(COMMON_EXCEPTION_1);
         }
     }
 
     @Override
-    public ConfigDO dtoToDo(ConfigDTO dto) {
+    public ConfigDTO dtoToDo(ConfigVO dto) {
         try {
-            ConfigDO configDO = new ConfigDO();
+            ConfigDTO configDTO = new ConfigDTO();
             String value = null;
             if (dto.getValue() != null) {
                 value = MAPPER.writeValueAsString(dto.getValue());
             }
-            BeanUtils.copyProperties(dto, configDO);
-            configDO.setValue(value);
-            return configDO;
+            BeanUtils.copyProperties(dto, configDTO);
+            configDTO.setValue(value);
+            return configDTO;
         } catch (IOException e) {
             throw new CommonException(COMMON_EXCEPTION_1);
         }

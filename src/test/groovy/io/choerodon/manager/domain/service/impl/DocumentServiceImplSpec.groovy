@@ -2,8 +2,9 @@ package io.choerodon.manager.domain.service.impl
 
 import com.netflix.appinfo.InstanceInfo
 import io.choerodon.manager.IntegrationTestConfiguration
+import io.choerodon.manager.app.service.impl.DocumentServiceImpl
 import io.choerodon.manager.domain.service.IRouteService
-import io.choerodon.manager.infra.dataobject.SwaggerDO
+import io.choerodon.manager.infra.dto.SwaggerDTO
 import io.choerodon.manager.infra.mapper.SwaggerMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -26,9 +27,9 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  */
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import(IntegrationTestConfiguration)
-class IDocumentServiceImplSpec extends Specification {
+class DocumentServiceImplSpec extends Specification {
     @Autowired
-    IDocumentServiceImpl iDocumentService
+    DocumentServiceImpl iDocumentService
 
     private RestTemplate restTemplate = Mock(RestTemplate)
 
@@ -39,7 +40,7 @@ class IDocumentServiceImplSpec extends Specification {
     private IRouteService mockIRouteService = Mock(IRouteService)
 
     def setup() {
-        iDocumentService = new IDocumentServiceImpl(mockSwaggerMapper, mockDiscoveryClient, mockIRouteService)
+        iDocumentService = new DocumentServiceImpl(mockSwaggerMapper, mockDiscoveryClient, mockIRouteService)
         iDocumentService.setRestTemplate(restTemplate)
         iDocumentService.setProfiles("default")
         iDocumentService.setClient("client")
@@ -58,7 +59,7 @@ class IDocumentServiceImplSpec extends Specification {
 
     def "fetchSwaggerJsonByService"() {
         given: '创建mock参数'
-        def swaggerDO = new SwaggerDO()
+        def swaggerDO = new SwaggerDTO()
         swaggerDO.setId(1L)
 
         def nullVersion = "null_version"
@@ -82,7 +83,7 @@ class IDocumentServiceImplSpec extends Specification {
 
     def "fetch[HttpStatus.NOT_FOUND]"() {
         given: '创建mock参数'
-        def swaggerDO = new SwaggerDO()
+        def swaggerDO = new SwaggerDTO()
         swaggerDO.setId(1L)
 
         def nullVersion = "null_version"
@@ -110,7 +111,7 @@ class IDocumentServiceImplSpec extends Specification {
 
     def "fetch"() {
         given: '创建mock参数'
-        def swaggerDO = new SwaggerDO()
+        def swaggerDO = new SwaggerDTO()
         swaggerDO.setId(1L)
 
         def nullVersion = "null_version"
@@ -138,7 +139,7 @@ class IDocumentServiceImplSpec extends Specification {
 
     def "GetSwaggerJsonByIdAndVersion"() {
         given: '创建mock参数'
-        def swaggerDO = new SwaggerDO()
+        def swaggerDO = new SwaggerDTO()
         swaggerDO.setId(1L)
         swaggerDO.setValue('{"paths":"test"}')
         def nullVersion = "null_version"

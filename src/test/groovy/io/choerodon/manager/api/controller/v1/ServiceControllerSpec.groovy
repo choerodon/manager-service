@@ -1,7 +1,7 @@
 package io.choerodon.manager.api.controller.v1
 
 import io.choerodon.manager.IntegrationTestConfiguration
-import io.choerodon.manager.api.dto.ConfigDTO
+import io.choerodon.manager.api.dto.ConfigVO
 import io.choerodon.manager.app.service.ConfigService
 import io.choerodon.manager.app.service.ServiceService
 import org.springframework.beans.factory.annotation.Autowired
@@ -100,7 +100,7 @@ class ServiceControllerSpec extends Specification {
 
         then: "校验状态码和调用次数"
         entity.statusCode.is2xxSuccessful()
-        1 * mockConfigService.listByServiceName(serviceName, _, _, _ as ConfigDTO, params)
+        1 * mockConfigService.listByServiceName(serviceName, _, _, _ as ConfigVO, params)
         0 * _
     }
 }

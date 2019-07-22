@@ -46,14 +46,14 @@ class ConfigControllerSpec extends Specification {
         inValidDto.setYaml(null)
 
         when: "用合法的DTO向【创建配置】接口发送POST请求"
-        def vaildEntity = restTemplate.postForEntity('/v1/configs', validDto, ConfigDTO)
+        def vaildEntity = restTemplate.postForEntity('/v1/configs', validDto, ConfigVO)
 
         then: "验证状态码成功；验证参数生效"
         vaildEntity.statusCode.is2xxSuccessful()
         1 * mockConfigService.create(_)
 
         when: "用不合法的DTO向【创建配置】接口发送POST请求"
-        def inVaildEntity = restTemplate.postForEntity('/v1/configs', inValidDto, ConfigDTO)
+        def inVaildEntity = restTemplate.postForEntity('/v1/configs', inValidDto, ConfigVO)
 
         then: "验证状态码成功；验证参数未生效"
         inVaildEntity.statusCode.is2xxSuccessful()
@@ -67,7 +67,7 @@ class ConfigControllerSpec extends Specification {
         def type = 'yaml'
 
         when: '向【查询配置】接口发送GET请求'
-        def entity = restTemplate.getForEntity('/v1/configs/{config_id}?type={type}', ConfigDTO, configId, type)
+        def entity = restTemplate.getForEntity('/v1/configs/{config_id}?type={type}', ConfigVO, configId, type)
 
         then: '验证状态码成功；验证参数生效'
         entity.statusCode.is2xxSuccessful()
@@ -91,12 +91,12 @@ class ConfigControllerSpec extends Specification {
         def configId = 1L
 
         when: '向【设置配置为默认配置】接口发送PUT请求'
-        HttpEntity<ConfigDTO> httpEntity = new HttpEntity<>()
-        def entity = restTemplate.exchange('/v1/configs/{config_id}/default', HttpMethod.PUT, httpEntity, ConfigDTO, configId)
+        HttpEntity<ConfigVO> httpEntity = new HttpEntity<>()
+        def entity = restTemplate.exchange('/v1/configs/{config_id}/default', HttpMethod.PUT, httpEntity, ConfigVO, configId)
 
         then: '验证状态码成功；验证参数生效'
         entity.statusCode.is2xxSuccessful()
-        1 * mockConfigService.setServiceConfigDefault(configId)
+        1 * mockConfigService.updateConfigDefault(configId)
     }
 
 
@@ -137,7 +137,7 @@ class ConfigControllerSpec extends Specification {
 
         def type = 'yaml'
 
-        def configDTO = new ConfigDTO()
+        def configDTO = new ConfigVO()
         configDTO.setName('test')
         Map<String, String> map = new HashMap<>()
         map.put("testadd", "testadd")
@@ -145,12 +145,12 @@ class ConfigControllerSpec extends Specification {
         configDTO.setObjectVersionNumber(1L)
 
         when: '向【修改配置】接口发送PUT请求'
-        HttpEntity<ConfigDTO> httpEntity = new HttpEntity<>(configDTO)
-        def entity = restTemplate.exchange('/v1/configs/{config_id}?type={type}', HttpMethod.PUT, httpEntity, ConfigDTO, configId, type)
+        HttpEntity<ConfigVO> httpEntity = new HttpEntity<>(configDTO)
+        def entity = restTemplate.exchange('/v1/configs/{config_id}?type={type}', HttpMethod.PUT, httpEntity, ConfigVO, configId, type)
 
         then: '验证状态码成功；验证参数生效'
         entity.statusCode.is2xxSuccessful()
-        1 * mockConfigService.updateConfig(configId, _ as ConfigDTO, type)
+        1 * mockConfigService.updateConfig(configId, _ as ConfigVO, type)
     }
 
     def "check"() {

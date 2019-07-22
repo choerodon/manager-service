@@ -1,4 +1,4 @@
-package io.choerodon.manager.domain.service;
+package io.choerodon.manager.app.service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.choerodon.eureka.event.EurekaEventPayload;
@@ -11,7 +11,7 @@ import java.io.IOException;
  * @author xausky
  * @author wuguokai
  */
-public interface IDocumentService {
+public interface DocumentService {
 
     /**
      * 根据swagger json

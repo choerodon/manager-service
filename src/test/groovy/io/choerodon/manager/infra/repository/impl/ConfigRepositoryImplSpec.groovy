@@ -5,7 +5,7 @@ import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.domain.manager.entity.ServiceE
 import io.choerodon.manager.domain.repository.ConfigRepository
 import io.choerodon.manager.domain.repository.ServiceRepository
-import io.choerodon.manager.infra.dataobject.ConfigDO
+import io.choerodon.manager.infra.dto.ConfigDTO
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -24,11 +24,11 @@ class ConfigRepositoryImplSpec extends Specification {
     @Shared
     ServiceE sharedServiceE
     @Shared
-    ConfigDO sharedConfigDO
+    ConfigDTO sharedConfigDO
 
     def "Create"() {
         given: '准备参数'
-        def configDO = new ConfigDO()
+        def configDO = new ConfigDTO()
         configDO.setName("testConfigDO")
         configDO.setValue('{"testValue":"testValue"}')
         configDO.setConfigVersion("testConfigVersion")
@@ -48,11 +48,11 @@ class ConfigRepositoryImplSpec extends Specification {
 
     def "Update[Exception]"() {
         given: '准备参数'
-        def configDOWithOutOVN = new ConfigDO()
+        def configDOWithOutOVN = new ConfigDTO()
         configDOWithOutOVN.setValue(sharedConfigDO.getValue())
         configDOWithOutOVN.setName("update_service")
 
-        def configDO = new ConfigDO()
+        def configDO = new ConfigDTO()
         configDO.setValue(sharedConfigDO.getValue())
         configDO.setName("update_service")
         configDO.setObjectVersionNumber(sharedConfigDO.getObjectVersionNumber())
@@ -72,7 +72,7 @@ class ConfigRepositoryImplSpec extends Specification {
 
     def "Update"() {
         given: '准备参数'
-        def configDO = new ConfigDO()
+        def configDO = new ConfigDTO()
         configDO.setValue(sharedConfigDO.getValue())
         configDO.setName("updateConfigDO")
         configDO.setObjectVersionNumber(sharedConfigDO.getObjectVersionNumber())

@@ -1,9 +1,9 @@
-package io.choerodon.manager.domain.service.impl;
+package io.choerodon.manager.app.service.impl;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
-import io.choerodon.manager.domain.service.VersionStrategy;
+import io.choerodon.manager.app.service.VersionStrategy;
 import io.choerodon.manager.infra.common.utils.VersionUtil;
 
 /**
@@ -13,7 +13,7 @@ import io.choerodon.manager.infra.common.utils.VersionUtil;
  * @author wuguokai
  */
 @Component
-public class IDefaultVersionStrategy implements VersionStrategy {
+public class DefaultVersionStrategy implements VersionStrategy {
 
     @Override
     public int compareVersion(String v1, String v2) {

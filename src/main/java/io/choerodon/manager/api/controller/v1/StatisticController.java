@@ -38,10 +38,10 @@ public class StatisticController {
     @ApiOperation("根据日期和层级查询菜单的调用次数")
     @GetMapping("/menu_click")
     public ResponseEntity<Map<String, Object>> queryMenuClick(@RequestParam(value = "begin_date")
-                                                  @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String beginDate,
-                                              @RequestParam(value = "end_date")
-                                                  @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String endDate,
-                                              @RequestParam String code) {
+                                                              @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String beginDate,
+                                                              @RequestParam(value = "end_date")
+                                                              @ApiParam(value = "日期格式yyyy-MM-dd", required = true) String endDate,
+                                                              @RequestParam String code) {
         return new ResponseEntity(statisticService.queryMenuClick(beginDate, endDate, code), HttpStatus.OK);
     }
 

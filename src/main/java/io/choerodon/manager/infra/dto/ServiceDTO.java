@@ -1,6 +1,7 @@
-package io.choerodon.manager.infra.dataobject;
+package io.choerodon.manager.infra.dto;
 
 import io.choerodon.mybatis.entity.BaseDTO;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -8,11 +9,13 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Table(name = "mgmt_service")
-public class ServiceDO extends BaseDTO {
+public class ServiceDTO extends BaseDTO {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ApiModelProperty(value = "主键ID")
     private Long id;
 
+    @ApiModelProperty(value = "服务名")
     private String name;
 
     public Long getId() {
@@ -31,10 +34,10 @@ public class ServiceDO extends BaseDTO {
         this.name = name;
     }
 
-    public ServiceDO() {
+    public ServiceDTO() {
     }
 
-    public ServiceDO(String name) {
+    public ServiceDTO(String name) {
         this.name = name;
     }
 }

@@ -1,34 +1,50 @@
-package io.choerodon.manager.infra.dataobject;
+package io.choerodon.manager.infra.dto;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 
 import io.choerodon.mybatis.entity.BaseDTO;
+import io.swagger.annotations.ApiModelProperty;
 
 @Table(name = "mgmt_route")
-public class RouteDO extends BaseDTO {
+public class RouteDTO extends BaseDTO {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ApiModelProperty(value = "主键ID")
     private Long id;
 
+    @ApiModelProperty(value = "名称/必填")
+    @NotEmpty(message = "name不可为空")
     private String name;
 
+    @ApiModelProperty(value = "路径/必填")
+    @NotEmpty(message = "path不可为空")
     private String path;
 
+    @ApiModelProperty(value = "服务ID/必填")
+    @NotEmpty(message = "serviceId不可为空")
     private String serviceId;
 
+    @ApiModelProperty(hidden = true)
     private String url;
 
+    @ApiModelProperty(value = "是否去除前缀/非必填")
     private Boolean stripPrefix;
 
+    @ApiModelProperty(value = "是否重试/非必填")
     private Boolean retryable;
 
+    @ApiModelProperty(value = "是否过滤敏感头信息/非必填")
     private String sensitiveHeaders;
 
+    @ApiModelProperty(value = "敏感头信息/非必填")
     private Boolean customSensitiveHeaders;
 
+    @ApiModelProperty(value = "Helper服务名")
     private String helperService;
 
     @Column(name = "is_built_in")
+    @ApiModelProperty(value = "是否内置")
     private Boolean builtIn;
 
     public String getHelperService() {
@@ -119,14 +135,14 @@ public class RouteDO extends BaseDTO {
         this.builtIn = builtIn;
     }
 
-    public RouteDO(String name) {
+    public RouteDTO(String name) {
         this.name = name;
     }
 
-    public RouteDO() {
+    public RouteDTO() {
     }
 
-    public RouteDO(String name, String path) {
+    public RouteDTO(String name, String path) {
         this.name = name;
         this.path = path;
     }

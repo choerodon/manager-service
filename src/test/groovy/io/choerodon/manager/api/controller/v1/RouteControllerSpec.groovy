@@ -2,9 +2,8 @@ package io.choerodon.manager.api.controller.v1
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.choerodon.manager.IntegrationTestConfiguration
-import io.choerodon.manager.api.dto.RouteDTO
 import io.choerodon.manager.app.service.RouteService
-import io.choerodon.manager.infra.dataobject.RouteDO
+import io.choerodon.manager.infra.dto.RouteDTO
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -47,7 +46,7 @@ class RouteControllerSpec extends Specification {
 
         then: "校验状态码和调用次数"
         entity.statusCode.is2xxSuccessful()
-        1 * mockRouteService.list(_,_, _ as RouteDO, params)
+        1 * mockRouteService.list(_,_, _ as RouteDTO, params)
         0 * _
     }
 

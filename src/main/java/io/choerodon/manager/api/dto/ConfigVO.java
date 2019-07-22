@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
 import java.util.Map;
 
-public class ConfigDTO {
+public class ConfigVO {
 
     @ApiModelProperty(value = "主键ID")
     private Long id;
@@ -36,14 +36,14 @@ public class ConfigDTO {
     @ApiModelProperty(value = "修改时间")
     private Date lastUpdateDate;
 
-    public ConfigDTO(String name, String configVersion, Boolean isDefault, String source) {
+    public ConfigVO(String name, String configVersion, Boolean isDefault, String source) {
         this.name = name;
         this.configVersion = configVersion;
         this.isDefault = isDefault;
         this.source = source;
     }
 
-    public ConfigDTO() {
+    public ConfigVO() {
     }
 
 
@@ -137,7 +137,7 @@ public class ConfigDTO {
 
     @Override
     public String toString() {
-        return "ConfigDTO{" +
+        return "ConfigVO{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", configVersion='" + configVersion + '\'' +

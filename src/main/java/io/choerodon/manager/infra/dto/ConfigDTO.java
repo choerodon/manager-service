@@ -1,6 +1,7 @@
-package io.choerodon.manager.infra.dataobject;
+package io.choerodon.manager.infra.dto;
 
 import io.choerodon.mybatis.entity.BaseDTO;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.util.Date;
 import javax.persistence.GeneratedValue;
@@ -12,18 +13,20 @@ import javax.persistence.Table;
  * @author wuguokai
  */
 @Table(name = "mgmt_service_config")
-public class ConfigDO extends BaseDTO {
+public class ConfigDTO extends BaseDTO {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ApiModelProperty(value = "主键ID")
     private Long id;
 
+    @ApiModelProperty(value = "配置名")
     private String name;
-
+    @ApiModelProperty(value = "配置版本")
     private String configVersion;
-
+    @ApiModelProperty(value = "是否是默认配置")
     private Boolean isDefault;
-
+    @ApiModelProperty(value = "对应微服务ID")
     private Long serviceId;
 
     private String value;
@@ -32,10 +35,10 @@ public class ConfigDO extends BaseDTO {
 
     private Date publicTime;
 
-    public ConfigDO() {
+    public ConfigDTO() {
     }
 
-    public ConfigDO(Boolean isDefault, Long serviceId) {
+    public ConfigDTO(Boolean isDefault, Long serviceId) {
         this.isDefault = isDefault;
         this.serviceId = serviceId;
     }

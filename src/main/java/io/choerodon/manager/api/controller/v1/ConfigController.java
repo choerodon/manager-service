@@ -38,7 +38,7 @@ public class ConfigController {
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("创建配置")
     @PostMapping
-    public ResponseEntity<ConfigDTO> create(@RequestBody @Valid CreateConfigDTO configDTO) {
+    public ResponseEntity<ConfigVO> create(@RequestBody @Valid CreateConfigDTO configDTO) {
         return new ResponseEntity<>(configService.create(configDTO), HttpStatus.OK);
     }
 
@@ -46,7 +46,7 @@ public class ConfigController {
      * 删除配置，默认配置不可删除
      *
      * @param configId 配置id
-     * @return ConfigDTO
+     * @return ConfigVO
      */
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("删除配置，默认配置不可删除")
@@ -59,27 +59,27 @@ public class ConfigController {
      * 将某一个配置设置为默认配置
      *
      * @param configId 配置id
-     * @return ConfigDTO
+     * @return ConfigVO
      */
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("设置配置为默认配置")
     @PutMapping(value = "/{config_id}/default")
-    public ResponseEntity<ConfigDTO> updateConfigDefault(@PathVariable("config_id") Long configId) {
-        return new ResponseEntity<>(configService.setServiceConfigDefault(configId), HttpStatus.OK);
+    public ResponseEntity<ConfigVO> updateConfigDefault(@PathVariable("config_id") Long configId) {
+        return new ResponseEntity<>(configService.updateConfigDefault(configId), HttpStatus.OK);
     }
 
     /**
      * 查询某一个配置
      *
      * @param configId 配置id
-     * @return ConfigDTO
+     * @return ConfigVO
      */
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("查询配置")
     @GetMapping(value = "/{config_id}")
-    public ResponseEntity<ConfigDTO> query(@PathVariable("config_id") Long configId,
-                                           @ApiParam("要返回的配置文本类型，可为properties或者yaml，对应DTO的txt字段，为空不返回")
-                                           @RequestParam(value = "type", required = false) String type) {
+    public ResponseEntity<ConfigVO> query(@PathVariable("config_id") Long configId,
+                                          @ApiParam("要返回的配置文本类型，可为properties或者yaml，对应DTO的txt字段，为空不返回")
+                                          @RequestParam(value = "type", required = false) String type) {
         return new ResponseEntity<>(configService.query(configId, type), HttpStatus.OK);
     }
 
@@ -136,12 +136,12 @@ public class ConfigController {
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("修改配置")
     @PutMapping("/{config_id}")
-    public ResponseEntity<ConfigDTO> updateConfig(@PathVariable("config_id") Long configId,
-                                                  @ApiParam("要更新的配置文本类型，可为properties或者yaml，对应DTO的txt字段，为空则根据value值更新")
-                                                  @RequestParam(value = "type", required = false) String type,
-                                                  @RequestBody ConfigDTO configDTO) {
-        configDTO.setId(configId);
-        return new ResponseEntity<>(configService.updateConfig(configId, configDTO, type), HttpStatus.OK);
+    public ResponseEntity<ConfigVO> updateConfig(@PathVariable("config_id") Long configId,
+                                                 @ApiParam("要更新的配置文本类型，可为properties或者yaml，对应DTO的txt字段，为空则根据value值更新")
+                                                 @RequestParam(value = "type", required = false) String type,
+                                                 @RequestBody ConfigVO configVO) {
+        configVO.setId(configId);
+        return new ResponseEntity<>(configService.updateConfig(configId, configVO, type), HttpStatus.OK);
     }
 
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})

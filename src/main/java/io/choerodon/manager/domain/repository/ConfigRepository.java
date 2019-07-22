@@ -1,8 +1,8 @@
 package io.choerodon.manager.domain.repository;
 
 import com.github.pagehelper.PageInfo;
-import io.choerodon.manager.api.dto.ConfigDTO;
-import io.choerodon.manager.infra.dataobject.ConfigDO;
+import io.choerodon.manager.api.dto.ConfigVO;
+import io.choerodon.manager.infra.dto.ConfigDTO;
 
 /**
  * {@inheritDoc}
@@ -11,23 +11,23 @@ import io.choerodon.manager.infra.dataobject.ConfigDO;
  */
 public interface ConfigRepository {
 
-    ConfigDTO queryDefaultByServiceName(String serviceName);
+    ConfigVO queryDefaultByServiceName(String serviceName);
 
-    ConfigDTO queryByServiceNameAndConfigVersion(String serviceName, String configVersion);
+    ConfigVO queryByServiceNameAndConfigVersion(String serviceName, String configVersion);
 
-    PageInfo<ConfigDTO> listByServiceName(String serviceName, int page, int size, ConfigDO queryInfo, String queryParam);
+    PageInfo<ConfigVO> listByServiceName(String serviceName, int page, int size, ConfigDTO queryInfo, String queryParam);
 
-    ConfigDO setConfigDefault(Long configId);
+    ConfigDTO setConfigDefault(Long configId);
 
-    ConfigDO query(Long serviceConfigId);
+    ConfigDTO query(Long serviceConfigId);
 
     boolean delete(Long configId);
 
-    ConfigDO update(Long configId, ConfigDO configDO);
+    ConfigDTO update(Long configId, ConfigDTO configDTO);
 
-    ConfigDO create(ConfigDO configDO);
+    ConfigDTO create(ConfigDTO configDTO);
 
-    ConfigDO queryByServiceIdAndVersion(Long serviceId, String configVersion);
+    ConfigDTO queryByServiceIdAndVersion(Long serviceId, String configVersion);
 
-    ConfigDO queryByServiceIdAndName(Long serviceId, String name);
+    ConfigDTO queryByServiceIdAndName(Long serviceId, String name);
 }

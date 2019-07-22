@@ -1,7 +1,7 @@
 package io.choerodon.manager.domain.repository;
 
 import io.choerodon.manager.domain.manager.entity.ServiceE;
-import io.choerodon.manager.infra.dataobject.ServiceDO;
+import io.choerodon.manager.infra.dto.ServiceDTO;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface ServiceRepository {
 
-    ServiceDO getService(String serviceName);
+    ServiceDTO getService(String serviceName);
 
     ServiceE getService(Long serviceId);
 
@@ -21,7 +21,7 @@ public interface ServiceRepository {
 
     boolean deleteService(Long serviceId);
 
-    List<ServiceDO> getAllService();
+    List<ServiceDTO> getAllService();
 
-    List<ServiceDO> selectServicesByFilter(String param);
+    List<ServiceDTO> selectServicesByFilter(String param);
 }

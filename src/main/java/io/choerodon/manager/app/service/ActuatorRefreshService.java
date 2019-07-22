@@ -1,6 +1,6 @@
-package io.choerodon.manager.domain.service;
+package io.choerodon.manager.app.service;
 
-public interface IActuatorRefreshService {
+public interface ActuatorRefreshService {
     /**
      * 插入或者更新Actuator数据到表中
      * @param serviceName 服务名称

@@ -1,9 +1,8 @@
 package io.choerodon.manager.domain.manager.converter
 
 import io.choerodon.manager.IntegrationTestConfiguration
-import io.choerodon.manager.api.dto.ConfigDTO
 import io.choerodon.manager.domain.manager.entity.ConfigE
-import io.choerodon.manager.infra.dataobject.ConfigDO
+import io.choerodon.manager.infra.dto.ConfigDTO
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -22,7 +21,7 @@ class ConfigConverterSpec extends Specification {
     @Shared
     ConfigE configE
     @Shared
-    ConfigDO configDO
+    ConfigDTO configDO
     void setupSpec(){
         def name="test_name"
         def configVersion="test_version"

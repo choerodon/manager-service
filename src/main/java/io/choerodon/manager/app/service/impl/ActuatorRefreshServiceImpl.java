@@ -1,12 +1,12 @@
-package io.choerodon.manager.domain.service.impl;
+package io.choerodon.manager.app.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.asgard.saga.annotation.Saga;
 import io.choerodon.asgard.saga.producer.StartSagaBuilder;
 import io.choerodon.asgard.saga.producer.TransactionalProducer;
 import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.manager.domain.service.IActuatorRefreshService;
-import io.choerodon.manager.infra.dataobject.ActuatorDO;
+import io.choerodon.manager.app.service.ActuatorRefreshService;
+import io.choerodon.manager.infra.dto.ActuatorDTO;
 import io.choerodon.manager.infra.mapper.ActuatorMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,16 +18,16 @@ import java.io.IOException;
 import java.util.Map;
 
 @Service
-public class ActuatorRefreshServiceImpl implements IActuatorRefreshService {
+public class ActuatorRefreshServiceImpl implements ActuatorRefreshService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ActuatorRefreshServiceImpl.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String ACTUATOR_REFRESH_SAGA_CODE = "mgmt-actuator-refresh";
     private static final String METADATA_REFRESH_SAGA_CODE = "mgmt-metadata-refresh";
     private ActuatorMapper actuatorMapper;
     private TransactionalProducer producer;
-    private IActuatorRefreshService actuatorRefreshService;
+    private ActuatorRefreshService actuatorRefreshService;
 
-    public ActuatorRefreshServiceImpl(ActuatorMapper actuatorMapper, TransactionalProducer producer,@Lazy IActuatorRefreshService actuatorRefreshService) {
+    public ActuatorRefreshServiceImpl(ActuatorMapper actuatorMapper, TransactionalProducer producer,@Lazy ActuatorRefreshService actuatorRefreshService) {
         this.actuatorMapper = actuatorMapper;
         this.producer = producer;
         this.actuatorRefreshService = actuatorRefreshService;
@@ -36,10 +36,10 @@ public class ActuatorRefreshServiceImpl implements IActuatorRefreshService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateOrInsertActuator(String serviceName, String serviceVersion, String json) {
-        ActuatorDO example = new ActuatorDO();
+        ActuatorDTO example = new ActuatorDTO();
         example.setServiceName(serviceName);
         example.setServiceVersion(serviceVersion);
-        ActuatorDO actuator = actuatorMapper.selectOne(example);
+        ActuatorDTO actuator = actuatorMapper.selectOne(example);
         if (actuator != null){
             if (actuator.getValue().equals(json)){
                 return false;

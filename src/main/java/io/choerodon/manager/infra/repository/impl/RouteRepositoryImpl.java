@@ -7,7 +7,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.domain.manager.entity.RouteE;
 import io.choerodon.manager.domain.repository.RouteRepository;
 import io.choerodon.manager.infra.common.annotation.RouteNotifyRefresh;
-import io.choerodon.manager.infra.dataobject.RouteDO;
+import io.choerodon.manager.infra.dto.RouteDTO;
 import io.choerodon.manager.infra.mapper.RouteMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
@@ -40,8 +40,8 @@ public class RouteRepositoryImpl implements RouteRepository {
 
     @Override
     public RouteE queryRoute(RouteE routeE) {
-        RouteDO routeDO = ConvertHelper.convert(routeE, RouteDO.class);
-        return ConvertHelper.convert(routeMapper.selectOne(routeDO), RouteE.class);
+        RouteDTO routeDTO = ConvertHelper.convert(routeE, RouteDTO.class);
+        return ConvertHelper.convert(routeMapper.selectOne(routeDTO), RouteE.class);
     }
 
     @Override
@@ -51,21 +51,21 @@ public class RouteRepositoryImpl implements RouteRepository {
         if (routeE.getBuiltIn() == null) {
             routeE.setBuiltIn(false);
         }
-        RouteDO routeDO = ConvertHelper.convert(routeE, RouteDO.class);
+        RouteDTO routeDTO = ConvertHelper.convert(routeE, RouteDTO.class);
         try {
-            int isInsert = routeMapper.insert(routeDO);
+            int isInsert = routeMapper.insert(routeDTO);
             if (isInsert != 1) {
                 throw new CommonException("error.insert.route");
             }
-            modifyRouteFromGoRegister(routeDO, ADD_ZUUL_ROOT_URL, "error to add route to register server");
+            modifyRouteFromGoRegister(routeDTO, ADD_ZUUL_ROOT_URL, "error to add route to register server");
         } catch (DuplicateKeyException e) {
-            if (routeMapper.selectCount(new RouteDO(routeE.getName())) > 0) {
+            if (routeMapper.selectCount(new RouteDTO(routeE.getName())) > 0) {
                 throw new CommonException("error.route.insert.nameDuplicate");
             } else {
                 throw new CommonException("error.route.insert.pathDuplicate");
             }
         }
-        return ConvertHelper.convert(routeMapper.selectByPrimaryKey(routeDO.getId()), RouteE.class);
+        return ConvertHelper.convert(routeMapper.selectByPrimaryKey(routeDTO.getId()), RouteE.class);
     }
 
 
@@ -73,26 +73,26 @@ public class RouteRepositoryImpl implements RouteRepository {
     @RouteNotifyRefresh
     @Transactional(rollbackFor = CommonException.class)
     public RouteE updateRoute(RouteE routeE) {
-        RouteDO oldRouteD = routeMapper.selectByPrimaryKey(routeE.getId());
+        RouteDTO oldRouteD = routeMapper.selectByPrimaryKey(routeE.getId());
         if (oldRouteD == null) {
             throw new CommonException("error.route.not.exist");
         }
         if (oldRouteD.getBuiltIn()) {
             throw new CommonException("error.route.updateBuiltIn");
         }
-        RouteDO routeDO = ConvertHelper.convert(routeE, RouteDO.class);
-        if (routeDO.getObjectVersionNumber() == null) {
+        RouteDTO routeDTO = ConvertHelper.convert(routeE, RouteDTO.class);
+        if (routeDTO.getObjectVersionNumber() == null) {
             throw new CommonException("error.objectVersionNumber.empty");
         }
-        routeDO.setBuiltIn(null);
+        routeDTO.setBuiltIn(null);
         try {
-            int isUpdate = routeMapper.updateByPrimaryKeySelective(routeDO);
+            int isUpdate = routeMapper.updateByPrimaryKeySelective(routeDTO);
             if (isUpdate != 1) {
                 throw new CommonException("error.update.route");
             }
-            modifyRouteFromGoRegister(routeDO, ADD_ZUUL_ROOT_URL, "error to update route to register server");
+            modifyRouteFromGoRegister(routeDTO, ADD_ZUUL_ROOT_URL, "error to update route to register server");
         } catch (DuplicateKeyException e) {
-            if (routeE.getName() != null && routeMapper.selectCount(new RouteDO(routeE.getName())) > 0) {
+            if (routeE.getName() != null && routeMapper.selectCount(new RouteDTO(routeE.getName())) > 0) {
                 throw new CommonException("error.route.insert.nameDuplicate");
             } else {
                 throw new CommonException("error.route.insert.pathDuplicate");
@@ -105,8 +105,8 @@ public class RouteRepositoryImpl implements RouteRepository {
     @Override
     @RouteNotifyRefresh
     public boolean deleteRoute(RouteE routeE) {
-        RouteDO routeDO = ConvertHelper.convert(routeE, RouteDO.class);
-        int isDelete = routeMapper.delete(routeDO);
+        RouteDTO routeDTO = ConvertHelper.convert(routeE, RouteDTO.class);
+        int isDelete = routeMapper.delete(routeDTO);
         if (isDelete != 1) {
             throw new CommonException("error.delete.route");
         }
@@ -115,8 +115,8 @@ public class RouteRepositoryImpl implements RouteRepository {
 
     @Override
     public List<RouteE> getAllRoute() {
-        List<RouteDO> routeDOList = routeMapper.selectAll();
-        return ConvertHelper.convertList(routeDOList, RouteE.class);
+        List<RouteDTO> routeDTOList = routeMapper.selectAll();
+        return ConvertHelper.convertList(routeDTOList, RouteE.class);
     }
 
     @Override
@@ -125,19 +125,19 @@ public class RouteRepositoryImpl implements RouteRepository {
     }
 
     @Override
-    public PageInfo<RouteDO> pageAllRoutes(int page, int size, RouteDO routeDO, String params) {
-        return PageHelper.startPage(page,size).doSelectPageInfo(()->routeMapper.selectRoutes(routeDO, params));
+    public PageInfo<RouteDTO> pageAllRoutes(int page, int size, RouteDTO routeDTO, String params) {
+        return PageHelper.startPage(page,size).doSelectPageInfo(()->routeMapper.selectRoutes(routeDTO, params));
     }
 
     @Override
-    public int countRoute(RouteDO routeDO) {
-        return routeMapper.selectCount(routeDO);
+    public int countRoute(RouteDTO routeDTO) {
+        return routeMapper.selectCount(routeDTO);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long routeId) {
-        RouteDO route = routeMapper.selectByPrimaryKey(routeId);
+        RouteDTO route = routeMapper.selectByPrimaryKey(routeId);
         if (route == null) {
             throw new CommonException("error.route.not.existed", routeId);
         }
@@ -148,10 +148,10 @@ public class RouteRepositoryImpl implements RouteRepository {
         modifyRouteFromGoRegister(route, DELETE_ZUUL_ROOT_URL, "error to delete route from register server");
     }
 
-    private void modifyRouteFromGoRegister(RouteDO routeDO, String suffix, String message) {
+    private void modifyRouteFromGoRegister(RouteDTO routeDTO, String suffix, String message) {
         String zuulRootUrl = getZuulRootUrl(suffix);
         try {
-            restTemplate.postForEntity(zuulRootUrl, routeDO, Void.class);
+            restTemplate.postForEntity(zuulRootUrl, routeDTO, Void.class);
         } catch (Exception e) {
             throw new CommonException(message);
         }

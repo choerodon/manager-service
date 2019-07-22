@@ -1,10 +1,10 @@
-package io.choerodon.manager.domain.service.impl;
+package io.choerodon.manager.app.service.impl;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.eureka.event.EurekaEventPayload;
-import io.choerodon.manager.domain.service.ISwaggerRefreshService;
-import io.choerodon.manager.domain.service.VersionStrategy;
-import io.choerodon.manager.infra.dataobject.SwaggerDO;
+import io.choerodon.manager.app.service.SwaggerRefreshService;
+import io.choerodon.manager.app.service.VersionStrategy;
+import io.choerodon.manager.infra.dto.SwaggerDTO;
 import io.choerodon.manager.infra.mapper.SwaggerMapper;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  * @author wuguokai
  */
 @Service
-public class ISwaggerRefreshServiceImpl implements ISwaggerRefreshService {
+public class SwaggerRefreshServiceImpl implements SwaggerRefreshService {
 
     private SwaggerMapper swaggerMapper;
 
@@ -24,45 +24,45 @@ public class ISwaggerRefreshServiceImpl implements ISwaggerRefreshService {
     /**
      * 构造器
      */
-    public ISwaggerRefreshServiceImpl(SwaggerMapper swaggerMapper,
-                                      VersionStrategy versionStrategy) {
+    public SwaggerRefreshServiceImpl(SwaggerMapper swaggerMapper,
+                                     VersionStrategy versionStrategy) {
         this.swaggerMapper = swaggerMapper;
         this.versionStrategy = versionStrategy;
     }
 
     @Override
     public void updateOrInsertSwagger(EurekaEventPayload registerInstancePayload, String json) {
-        SwaggerDO example = new SwaggerDO();
+        SwaggerDTO example = new SwaggerDTO();
         example.setServiceVersion(registerInstancePayload.getVersion());
         example.setServiceName(registerInstancePayload.getAppName());
-        SwaggerDO swagger = swaggerMapper.selectOne(example);
+        SwaggerDTO swagger = swaggerMapper.selectOne(example);
         if (swagger != null) {
             swagger.setValue(json);
             if (swaggerMapper.updateByPrimaryKey(swagger) != 1) {
                 throw new CommonException("error.swagger.update");
             }
         } else {
-            SwaggerDO swaggerDO = new SwaggerDO();
-            swaggerDO.setServiceName(registerInstancePayload.getAppName());
-            swaggerDO.setServiceVersion(registerInstancePayload.getVersion());
-            swaggerDO.setValue(json);
-            SwaggerDO queryDefault = new SwaggerDO();
+            SwaggerDTO swaggerDTO = new SwaggerDTO();
+            swaggerDTO.setServiceName(registerInstancePayload.getAppName());
+            swaggerDTO.setServiceVersion(registerInstancePayload.getVersion());
+            swaggerDTO.setValue(json);
+            SwaggerDTO queryDefault = new SwaggerDTO();
             queryDefault.setServiceName(registerInstancePayload.getAppName());
             queryDefault.setDefault(true);
-            SwaggerDO defaultVersion = swaggerMapper.selectOne(queryDefault);
+            SwaggerDTO defaultVersion = swaggerMapper.selectOne(queryDefault);
             if (defaultVersion == null) {
-                swaggerDO.setDefault(true);
+                swaggerDTO.setDefault(true);
             } else if (versionStrategy
                     .compareVersion(registerInstancePayload.getVersion(), defaultVersion.getServiceVersion()) > 0) {
-                swaggerDO.setDefault(true);
+                swaggerDTO.setDefault(true);
                 defaultVersion.setDefault(false);
                 if (swaggerMapper.updateByPrimaryKeySelective(defaultVersion) != 1) {
                     throw new CommonException("error.swagger.update");
                 }
             } else {
-                swaggerDO.setDefault(false);
+                swaggerDTO.setDefault(false);
             }
-            if (swaggerMapper.insert(swaggerDO) != 1) {
+            if (swaggerMapper.insert(swaggerDTO) != 1) {
                 throw new CommonException("error.swagger.insert");
             }
         }

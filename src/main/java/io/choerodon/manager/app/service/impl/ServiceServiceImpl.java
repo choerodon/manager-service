@@ -3,12 +3,11 @@ package io.choerodon.manager.app.service.impl;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
 import io.choerodon.base.domain.PageRequest;
-import io.choerodon.core.convertor.ConvertHelper;
-import io.choerodon.manager.api.dto.ServiceDTO;
 import io.choerodon.manager.api.dto.ServiceManagerDTO;
 import io.choerodon.manager.app.service.ServiceService;
-import io.choerodon.manager.domain.repository.ServiceRepository;
 import io.choerodon.manager.infra.common.utils.ManualPageHelper;
+import io.choerodon.manager.infra.dto.ServiceDTO;
+import io.choerodon.manager.infra.mapper.ServiceMapper;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
@@ -22,21 +21,24 @@ import java.util.*;
 @Service
 public class ServiceServiceImpl implements ServiceService {
 
-    private ServiceRepository serviceRepository;
 
     private DiscoveryClient discoveryClient;
 
-    public ServiceServiceImpl(ServiceRepository serviceRepository, DiscoveryClient discoveryClient) {
-        this.serviceRepository = serviceRepository;
+    private ServiceMapper serviceMapper;
+
+    public ServiceServiceImpl(DiscoveryClient discoveryClient,
+                              ServiceMapper serviceMapper) {
         this.discoveryClient = discoveryClient;
+        this.serviceMapper = serviceMapper;
     }
 
     @Override
     public List<ServiceDTO> list(String param) {
         if (StringUtils.isEmpty(param)) {
-            return ConvertHelper.convertList(serviceRepository.getAllService(), ServiceDTO.class);
+            return serviceMapper.selectAll();
+        } else {
+            return serviceMapper.selectServicesByFilter(param);
         }
-        return ConvertHelper.convertList(serviceRepository.selectServicesByFilter(param), ServiceDTO.class);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package io.choerodon.manager.domain.service;
+package io.choerodon.manager.app.service;
 
 import io.choerodon.eureka.event.EurekaEventPayload;
 
@@ -8,7 +8,7 @@ import io.choerodon.eureka.event.EurekaEventPayload;
  * @author zhipeng.zuo
  * @author wuguokai
  */
-public interface ISwaggerRefreshService {
+public interface SwaggerRefreshService {
 
     /**
      * 更新或者插入swagger json

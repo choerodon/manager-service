@@ -2,12 +2,11 @@ package io.choerodon.manager.infra.repository.impl
 
 import com.github.pagehelper.PageInfo
 import io.choerodon.core.convertor.ConvertHelper
-import io.choerodon.core.domain.Page
 import io.choerodon.core.exception.CommonException
 import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.domain.manager.entity.RouteE
 import io.choerodon.manager.domain.repository.RouteRepository
-import io.choerodon.manager.infra.dataobject.RouteDO
+import io.choerodon.manager.infra.dto.RouteDTO
 import io.choerodon.manager.infra.mapper.RouteMapper
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -96,7 +95,7 @@ class RouteRepositoryImplSpec extends Specification {
         then: "校验正常信息并删除routeE"
         addRouteE.getName().equals(routeE.getName())
         addRouteE.getPath().equals(routeE.getPath())
-        routeMapper.delete(ConvertHelper.convert(addRouteE, RouteDO))
+        routeMapper.delete(ConvertHelper.convert(addRouteE, RouteDTO))
 
         when: "name异常AddRoute"
         repository.addRoute(nameDuplicateRouteE)
@@ -173,7 +172,7 @@ class RouteRepositoryImplSpec extends Specification {
         then: "校验更新后RouteE"
         updateRouteE.getName().equals(addRouteE.getName())
         updateRouteE.getPath().equals(addRouteE.getPath())
-        routeMapper.delete(ConvertHelper.convert(updateRouteE, RouteDO))
+        routeMapper.delete(ConvertHelper.convert(updateRouteE, RouteDTO))
     }
 
     def "DeleteRoute"() {
@@ -240,17 +239,17 @@ class RouteRepositoryImplSpec extends Specification {
         then: "校验并删除插入的RouteE"
         !retuenRouteEList.isEmpty()
         retuenRouteEList.size() == 2
-        routeMapper.delete(ConvertHelper.convert(retuenRouteEList.get(0), RouteDO))
-        routeMapper.delete(ConvertHelper.convert(retuenRouteEList.get(1), RouteDO))
+        routeMapper.delete(ConvertHelper.convert(retuenRouteEList.get(0), RouteDTO))
+        routeMapper.delete(ConvertHelper.convert(retuenRouteEList.get(1), RouteDTO))
     }
 
     def "PageAllRoutes"() {
         given: "构造RouteDO参数"
-        def routeDO = new RouteDO()
+        def routeDO = new RouteDTO()
         def params = null
 
         when: "调用pageAllRoutes"
-        PageInfo<RouteDO> page = routeRepository.pageAllRoutes(0, 10, routeDO, params)
+        PageInfo<RouteDTO> page = routeRepository.pageAllRoutes(0, 10, routeDO, params)
 
         then: "校验"
         !page.getList().isEmpty()
@@ -258,7 +257,7 @@ class RouteRepositoryImplSpec extends Specification {
 
     def "CountRoute"() {
         given: "构造RouteDO参数"
-        def routeDO = new RouteDO()
+        def routeDO = new RouteDTO()
 
         when: "调用CountRoute"
         def number = routeRepository.countRoute(routeDO)

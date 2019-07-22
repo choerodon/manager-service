@@ -3,10 +3,9 @@ package io.choerodon.manager.infra.repository.impl
 import io.choerodon.core.convertor.ConvertHelper
 import io.choerodon.core.exception.CommonException
 import io.choerodon.manager.IntegrationTestConfiguration
-import io.choerodon.manager.api.dto.ServiceDTO
 import io.choerodon.manager.domain.manager.entity.ServiceE
 import io.choerodon.manager.domain.repository.ServiceRepository
-import io.choerodon.manager.infra.dataobject.ServiceDO
+import io.choerodon.manager.infra.dto.ServiceDTO
 import io.choerodon.manager.infra.mapper.ServiceMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -76,7 +75,7 @@ class ServiceRepositoryImplSpec extends Specification {
         when: "异常更新，mock"
         mockServiceRepository.updateService(errorServiceE)
         then:
-        1 * mockServiceMapper.selectByPrimaryKey(_) >> { ConvertHelper.convert(updatedServiceE, ServiceDO) }
+        1 * mockServiceMapper.selectByPrimaryKey(_) >> { ConvertHelper.convert(updatedServiceE, ServiceDTO) }
         1 * mockServiceMapper.updateByPrimaryKeySelective(_) >> { 2 }
         def error = thrown(expectedException)
         error.message == expectedMessage
@@ -93,7 +92,7 @@ class ServiceRepositoryImplSpec extends Specification {
         def serviceDTO = ConvertHelper.convert(serviceE, ServiceDTO)
         //提高覆盖率
         ConvertHelper.convert(serviceDTO, ServiceE)
-        ConvertHelper.convert(ConvertHelper.convert(serviceDTO, ServiceDO), ServiceDTO)
+        ConvertHelper.convert(ConvertHelper.convert(serviceDTO, ServiceDTO), ServiceDTO)
         mockServiceRepository.deleteService(errorServiceE.getId())
 
         then:

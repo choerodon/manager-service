@@ -1,17 +1,20 @@
 package io.choerodon.manager.app.service.impl
 
-import com.fasterxml.jackson.core.type.TypeReference
+
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.github.pagehelper.PageInfo
 import io.choerodon.core.exception.CommonException
+import io.choerodon.eureka.event.EurekaEventPayload
 import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.MockBeanTestConfiguration
-import io.choerodon.manager.api.dto.RouteDTO
+import io.choerodon.manager.api.eventhandler.EurekaEventObserver
+import io.choerodon.manager.app.service.ActuatorRefreshService
+import io.choerodon.manager.app.service.DocumentService
 import io.choerodon.manager.app.service.RouteService
+import io.choerodon.manager.app.service.SwaggerRefreshService
 import io.choerodon.manager.domain.manager.entity.RouteE
 import io.choerodon.manager.domain.repository.RouteRepository
 import io.choerodon.manager.domain.service.IRouteService
-import io.choerodon.manager.infra.dataobject.RouteDO
+import io.choerodon.manager.infra.dto.RouteDTO
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -63,7 +66,7 @@ class RouteServiceImplSpec extends Specification {
 
 //    def "List"() {
 //        given: "构建RouteDO和PageRequest"
-//        def routeDO = new RouteDO()
+//        def routeDO = new RouteDTO()
 //        def params = ""
 //
 //        when: "调用list方法"
@@ -108,37 +111,37 @@ class RouteServiceImplSpec extends Specification {
         noExceptionThrown()
     }
 
-    def "AddRoutesBatch"() {
-        given: "创建正确的List<RouteDTO>对象"
-        String routeDTOListJson = '[{"id":10,"name":"testdyq","path":"/testdyq/**","serviceId":"testdyq-service"}' +
-                ',{"id":11,"name":"test1","path":"/testdyq1/**","serviceId":"testdyq1-service"}]'
-        List<RouteDTO> routeDTOList = objectMapper.readValue(routeDTOListJson, new TypeReference<List<RouteDTO>>() {})
+//    def "AddRoutesBatch"() {
+//        given: "创建正确的List<RouteDTO>对象"
+//        String routeDTOListJson = '[{"id":10,"name":"testdyq","path":"/testdyq/**","serviceId":"testdyq-service"}' +
+//                ',{"id":11,"name":"test1","path":"/testdyq1/**","serviceId":"testdyq1-service"}]'
+//        List<RouteDTO> routeDTOList = objectMapper.readValue(routeDTOListJson, new TypeReference<List<RouteDTO>>() {})
+//
+//        when: "调用创建routeDTO方法"
+//        routeService.addRoutesBatch(routeDTOList)
+//
+//        then: "校验调用次数"
+//        1 * mockIrouteService.addRoutes(_)
+//        0 * _
+//    }
 
-        when: "调用创建routeDTO方法"
-        routeService.addRoutesBatch(routeDTOList)
+//    def "GetAllRoute"() {
+//        when: "调用获取所有routeDTO方法"
+//        routeService.getAllRoute()
+//
+//        then: "校验调用次数"
+//        1 * mockIrouteService.getAll()
+//        0 * _
+//    }
 
-        then: "校验调用次数"
-        1 * mockIrouteService.addRoutes(_)
-        0 * _
-    }
-
-    def "GetAllRoute"() {
-        when: "调用获取所有routeDTO方法"
-        routeService.getAllRoute()
-
-        then: "校验调用次数"
-        1 * mockIrouteService.getAll()
-        0 * _
-    }
-
-    def "QueryByName"() {
-        when: "调用通过名字查找routeDTO方法"
-        routeService.queryByName(createdRouteDTO.getName())
-
-        then: "校验调用次数"
-        1 * mockRouteRepository.queryRoute(_)
-        0 * _
-    }
+//    def "QueryByName"() {
+//        when: "调用通过名字查找routeDTO方法"
+//        routeService.queryByName(createdRouteDTO.getName())
+//
+//        then: "校验调用次数"
+//        1 * mockRouteRepository.queryRoute(_)
+//        0 * _
+//    }
 
     def "CheckRoute"() {
         given: "构造Route"
@@ -155,7 +158,7 @@ class RouteServiceImplSpec extends Specification {
 
         then: "校验异常信息和调用次数"
         (1..2) * mockRouteRepository.countRoute(_) >> {
-            RouteDO r -> (r.getName().equals(nameDuplicateRouteDTO.getName()) || r.getPath().equals(pathDuplicateRouteDTO.getPath())) ? 1 : 0
+            RouteDTO r -> (r.getName().equals(nameDuplicateRouteDTO.getName()) || r.getPath().equals(pathDuplicateRouteDTO.getPath())) ? 1 : 0
         }
         def error = thrown(expectedException)
         error.message == expectedMessage

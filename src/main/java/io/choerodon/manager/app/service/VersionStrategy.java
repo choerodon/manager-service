@@ -1,4 +1,4 @@
-package io.choerodon.manager.domain.service;
+package io.choerodon.manager.app.service;
 
 /**
  * 服务版本对比工具

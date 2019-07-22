@@ -1,4 +1,4 @@
-package io.choerodon.manager.domain.service.impl;
+package io.choerodon.manager.app.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,11 +7,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.choerodon.asgard.property.PropertyData;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.eureka.event.EurekaEventPayload;
+import io.choerodon.manager.app.service.RouteService;
 import io.choerodon.manager.domain.manager.entity.RouteE;
-import io.choerodon.manager.domain.service.IDocumentService;
+import io.choerodon.manager.app.service.DocumentService;
 import io.choerodon.manager.domain.service.IRouteService;
 import io.choerodon.manager.infra.common.utils.VersionUtil;
-import io.choerodon.manager.infra.dataobject.SwaggerDO;
+import io.choerodon.manager.infra.dto.SwaggerDTO;
 import io.choerodon.manager.infra.mapper.SwaggerMapper;
 import io.swagger.models.auth.OAuth2Definition;
 import org.apache.commons.collections.map.MultiKeyMap;
@@ -37,12 +38,12 @@ import java.util.*;
  * @author wuguokai
  */
 @org.springframework.stereotype.Service
-public class IDocumentServiceImpl implements IDocumentService {
+public class DocumentServiceImpl implements DocumentService {
 
 
     @Value("${choerodon.profiles.active:sit}")
     private String profiles;
-    private static final Logger LOGGER = LoggerFactory.getLogger(IDocumentServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DocumentServiceImpl.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String METADATA_CONTEXT = "CONTEXT";
     private static final String DEFAULT = "default";
@@ -57,16 +58,17 @@ public class IDocumentServiceImpl implements IDocumentService {
     private RestTemplate restTemplate = new RestTemplate();
     private SwaggerMapper swaggerMapper;
     private DiscoveryClient discoveryClient;
-    private IRouteService iRouteService;
+    private RouteService routeService;
 
     /**
      * 构造器
      */
-    public IDocumentServiceImpl(SwaggerMapper swaggerMapper,
-                                DiscoveryClient discoveryClient, IRouteService iRouteService) {
+    public DocumentServiceImpl(SwaggerMapper swaggerMapper,
+                               DiscoveryClient discoveryClient,
+                               RouteService routeService) {
         this.swaggerMapper = swaggerMapper;
         this.discoveryClient = discoveryClient;
-        this.iRouteService = iRouteService;
+        this.routeService = routeService;
     }
 
     public void setProfiles(String profiles) {
@@ -116,15 +118,15 @@ public class IDocumentServiceImpl implements IDocumentService {
 
     @Override
     public String fetchSwaggerJsonByService(String service, String version) {
-        SwaggerDO query = new SwaggerDO();
+        SwaggerDTO query = new SwaggerDTO();
         query.setServiceName(service);
         query.setServiceVersion(version);
-        SwaggerDO data = swaggerMapper.selectOne(query);
+        SwaggerDTO data = swaggerMapper.selectOne(query);
         if (profiles.equals(DEFAULT) || data == null || StringUtils.isEmpty(data.getValue())) {
             String json = fetchFromDiscoveryClient(service, version);
             if (json != null && data == null) {
                 //insert
-                SwaggerDO insertSwagger = new SwaggerDO();
+                SwaggerDTO insertSwagger = new SwaggerDTO();
                 insertSwagger.setServiceName(service);
                 insertSwagger.setServiceVersion(version);
                 insertSwagger.setDefault(false);
@@ -164,9 +166,8 @@ public class IDocumentServiceImpl implements IDocumentService {
 
     @Override
     public String expandSwaggerJson(String name, String version, String json) throws IOException {
-        MultiKeyMap multiKeyMap = iRouteService.getAllRunningInstances();
-        RouteE routeE = iRouteService
-                .getRouteFromRunningInstancesMap(multiKeyMap, name, version);
+        MultiKeyMap multiKeyMap = routeService.getAllRunningInstances();
+        RouteE routeE = routeService.getRouteFromRunningInstancesMap(multiKeyMap, name, version);
         if (routeE == null) {
             return "";
         }
@@ -222,7 +223,7 @@ public class IDocumentServiceImpl implements IDocumentService {
             Map<String, Object> result = response.getBody();
             try {
                 result.put("asgard", fetchPropertyData(payload.getInstanceAddress()));
-            } catch (Exception e){
+            } catch (Exception e) {
                 LOGGER.warn("fetch asgard data error skip it : {}, {}", payload, e.getMessage());
             }
             result.put("version", payload.getVersion());

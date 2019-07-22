@@ -7,7 +7,7 @@ import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.app.service.SwaggerService
 import io.choerodon.manager.domain.manager.entity.SwaggerE
 import io.choerodon.manager.domain.service.ISwaggerService
-import io.choerodon.manager.infra.dataobject.SwaggerDO
+import io.choerodon.manager.infra.dto.SwaggerDTO
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import spock.lang.Specification
@@ -63,12 +63,12 @@ class SwaggerServiceImplSpec extends Specification {
 
     def "测试SwaggerConverter转换器"() {
         given:
-        def swaggerDO = new SwaggerDO()
+        def swaggerDO = new SwaggerDTO()
         swaggerDO.setServiceName("test-service")
 
         when:
         def convertSwaggerE = ConvertHelper.convert(swaggerDO, SwaggerE)
-        def convertSwaggerDO = ConvertHelper.convert(convertSwaggerE, SwaggerDO)
+        def convertSwaggerDO = ConvertHelper.convert(convertSwaggerE, SwaggerDTO)
 
         then:
         noExceptionThrown()

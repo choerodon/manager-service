@@ -3,7 +3,6 @@ package io.choerodon.manager.app.service.impl
 import io.choerodon.core.exception.CommonException
 import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.api.dto.ConfigCheckDTO
-import io.choerodon.manager.api.dto.ConfigDTO
 import io.choerodon.manager.api.dto.CreateConfigDTO
 import io.choerodon.manager.api.dto.ItemDto
 import io.choerodon.manager.app.service.ConfigService
@@ -13,8 +12,8 @@ import io.choerodon.manager.domain.repository.ConfigRepository
 import io.choerodon.manager.domain.repository.RouteRepository
 import io.choerodon.manager.domain.repository.ServiceRepository
 import io.choerodon.manager.infra.common.utils.config.ConfigUtil
-import io.choerodon.manager.infra.dataobject.ConfigDO
-import io.choerodon.manager.infra.dataobject.ServiceDO
+import io.choerodon.manager.infra.dto.ConfigDTO
+import io.choerodon.manager.infra.dto.ServiceDTO
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -63,7 +62,7 @@ class ConfigServiceImplSpec extends Specification {
         createConfigDTO.setVersion("v1")
         createConfigDTO.setYaml(yaml)
 
-        def serviceDO = new ServiceDO(name: serviceName)
+        def serviceDO = new ServiceDTO(name: serviceName)
 
         and: 'mock serviceRepository.addService'
         mockServiceRepository.getService(_) >> { return serviceDO }
@@ -162,7 +161,7 @@ class ConfigServiceImplSpec extends Specification {
         def configId = 1L
         def type = 'properties'
 
-        def configDO = new ConfigDO()
+        def configDO = new ConfigDTO()
         configDO.setServiceId(1L)
 
         def serviceE = new ServiceE()
@@ -184,7 +183,7 @@ class ConfigServiceImplSpec extends Specification {
         def configId = 1L
         def type = 'properties'
 
-        def configDO = new ConfigDO()
+        def configDO = new ConfigDTO()
         configDO.setServiceId(1L)
 
         def serviceE = new ServiceE()
@@ -202,7 +201,7 @@ class ConfigServiceImplSpec extends Specification {
         def configId = 1L
         def type = 'properties'
 
-        def configDO = new ConfigDO()
+        def configDO = new ConfigDTO()
         configDO.setServiceId(1L)
 
         def serviceE = new ServiceE()
@@ -221,7 +220,7 @@ class ConfigServiceImplSpec extends Specification {
     def "queryYaml"() {
         given: '创建参数'
         def configId = 1L
-        def configDO = new ConfigDO()
+        def configDO = new ConfigDTO()
         configDO.setValue('{"item1":"item1","item2":"item2"}')
         configDO.setObjectVersionNumber(1L)
         def serviceE = new ServiceE()
@@ -275,7 +274,7 @@ class ConfigServiceImplSpec extends Specification {
     def "setServiceConfigDefault"() {
         given: '指定需要设置默认的配置Id'
         def configId = 1L
-        def configDO = new ConfigDO()
+        def configDO = new ConfigDTO()
         configDO.setName("test")
         configDO.setIsDefault(true)
 
@@ -283,7 +282,7 @@ class ConfigServiceImplSpec extends Specification {
         mockConfigRepository.setConfigDefault(configId) >> { return configDO }
 
         when: '根据配置Id将配置设为默认'
-        def configDTO = configService.setServiceConfigDefault(configId)
+        def configDTO = configService.updateConfigDefault(configId)
 
         then: '解析配置是否是默认'
         noExceptionThrown()
@@ -332,7 +331,7 @@ class ConfigServiceImplSpec extends Specification {
         given: '准备参数'
         def configId = 1L
         def configDTO = new ConfigDTO()
-        def configDO = new ConfigDO()
+        def configDO = new ConfigDTO()
 
         and: 'mock configRepository.update'
         mockConfigRepository.update(_, _) >> { return configDO }
@@ -385,9 +384,9 @@ class ConfigServiceImplSpec extends Specification {
         def configCheckDTO = new ConfigCheckDTO()
         configCheckDTO.setConfigVersion("test_version")
         configCheckDTO.setName("test")
-        def serviceDO = new ServiceDO()
+        def serviceDO = new ServiceDTO()
         serviceDO.setId(1L)
-        def configDO = new ConfigDO()
+        def configDO = new ConfigDTO()
         configDO.setId(1L)
         when: '配置校验-configDTO为null'
         configService.check(null)
@@ -423,9 +422,9 @@ class ConfigServiceImplSpec extends Specification {
         configCheckDTO.setConfigVersion("test_version")
         configCheckDTO.setName("test")
         configCheckDTO.setServiceName("test_service")
-        def serviceDO = new ServiceDO()
+        def serviceDO = new ServiceDTO()
         serviceDO.setId(1L)
-        def configDO = new ConfigDO()
+        def configDO = new ConfigDTO()
         configDO.setId(1L)
 
         and: 'mock'
@@ -462,7 +461,7 @@ class ConfigServiceImplSpec extends Specification {
         def configDTO = new ConfigDTO()
         configDTO.setValue(value)
 
-        def configDO = new ConfigDO()
+        def configDO = new ConfigDTO()
         configDO.setServiceId(1L)
 
         def serviceE = new ServiceE()
@@ -496,7 +495,7 @@ class ConfigServiceImplSpec extends Specification {
         def configId = 1L
         def property = "test"
 
-        def configDO = new ConfigDO()
+        def configDO = new ConfigDTO()
         configDO.setServiceId(1L)
         configDO.setValue('{"test":"test"}')
 
@@ -516,7 +515,7 @@ class ConfigServiceImplSpec extends Specification {
         def configId = 1L
         def property = "test"
 
-        def configDO = new ConfigDO()
+        def configDO = new ConfigDTO()
         configDO.setServiceId(1L)
 
         def serviceE = new ServiceE()
