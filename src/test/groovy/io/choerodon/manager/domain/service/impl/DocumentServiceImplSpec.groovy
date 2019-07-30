@@ -2,8 +2,8 @@ package io.choerodon.manager.domain.service.impl
 
 import com.netflix.appinfo.InstanceInfo
 import io.choerodon.manager.IntegrationTestConfiguration
+import io.choerodon.manager.app.service.RouteService
 import io.choerodon.manager.app.service.impl.DocumentServiceImpl
-import io.choerodon.manager.domain.service.IRouteService
 import io.choerodon.manager.infra.dto.SwaggerDTO
 import io.choerodon.manager.infra.mapper.SwaggerMapper
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,10 +37,11 @@ class DocumentServiceImplSpec extends Specification {
 
     private DiscoveryClient mockDiscoveryClient = Mock(DiscoveryClient)
 
-    private IRouteService mockIRouteService = Mock(IRouteService)
+    RouteService routeService = Mock(RouteService)
+
 
     def setup() {
-        iDocumentService = new DocumentServiceImpl(mockSwaggerMapper, mockDiscoveryClient, mockIRouteService)
+        iDocumentService = new DocumentServiceImpl(mockSwaggerMapper, mockDiscoveryClient, routeService)
         iDocumentService.setRestTemplate(restTemplate)
         iDocumentService.setProfiles("default")
         iDocumentService.setClient("client")

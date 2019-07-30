@@ -2,7 +2,6 @@ package io.choerodon.manager.app.service;
 
 import com.github.pagehelper.PageInfo;
 import io.choerodon.base.domain.PageRequest;
-import io.choerodon.manager.domain.manager.entity.RouteE;
 import io.choerodon.manager.infra.dto.RouteDTO;
 import org.apache.commons.collections.map.MultiKeyMap;
 
@@ -61,7 +60,7 @@ public interface RouteService {
      * @param version    版本号
      * @return 查找的ZuulRoute
      */
-    RouteE getRouteFromRunningInstancesMap(MultiKeyMap runningMap, String name, String version);
+    RouteDTO getRouteFromRunningInstancesMap(MultiKeyMap runningMap, String name, String version);
 
     void autoRefreshRoute(String swaggerJson);
 }

@@ -1,4 +1,4 @@
-package io.choerodon.manager.domain.manager.entity;
+package io.choerodon.manager.infra.dto;
 
 /**
  * @author superlee

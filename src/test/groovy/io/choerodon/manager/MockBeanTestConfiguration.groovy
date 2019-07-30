@@ -1,9 +1,7 @@
 package io.choerodon.manager
 
 import io.choerodon.eureka.event.EurekaEventPayload
-import io.choerodon.manager.domain.repository.RouteRepository
 import io.choerodon.manager.app.service.DocumentService
-import io.choerodon.manager.domain.service.IRouteService
 import io.choerodon.manager.app.service.SwaggerRefreshService
 import org.mockito.ArgumentMatcher
 import org.mockito.Mockito
@@ -19,11 +17,11 @@ import spock.mock.DetachedMockFactory
 class MockBeanTestConfiguration {
     private final detachedMockFactory = new DetachedMockFactory()
 
-    @Bean("mockRouteRepository")
-    @Primary
-    RouteRepository routeRepository() {
-        return detachedMockFactory.Mock(RouteRepository)
-    }
+//    @Bean("mockRouteRepository")
+//    @Primary
+//    RouteRepository routeRepository() {
+//        return detachedMockFactory.Mock(RouteRepository)
+//    }
 
     /*@Bean("mockIDocumentService")
     @Primary
@@ -51,10 +49,10 @@ class MockBeanTestConfiguration {
     SwaggerRefreshService swaggerRefreshService() {
         return detachedMockFactory.Mock(SwaggerRefreshService)
     }
-
-    @Bean("mockIRouteService")
-    @Primary
-    IRouteService iRouteService() {
-        return detachedMockFactory.Mock(IRouteService)
-    }
+//
+//    @Bean("mockIRouteService")
+//    @Primary
+//    IRouteService iRouteService() {
+//        return detachedMockFactory.Mock(IRouteService)
+//    }
 }

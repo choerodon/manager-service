@@ -1,6 +1,7 @@
 package io.choerodon.manager.infra.conventer;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
@@ -55,11 +56,25 @@ public class ConfigConverter {
     }
 
     public static PageInfo<ConfigVO> dto2Vo(PageInfo<ConfigDTO> pageInfo) {
-        Page<ConfigVO> page = new Page<>(pageInfo.getPageNum(),pageInfo.getPageSize());
-        List<ConfigDTO> dtoList =  pageInfo.getList();
+        Page<ConfigVO> page = new Page<>(pageInfo.getPageNum(), pageInfo.getPageSize());
+        List<ConfigDTO> dtoList = pageInfo.getList();
         page.setTotal(dtoList.size());
         List<ConfigVO> result = dto2Vo(dtoList);
         page.addAll(result);
         return page.toPageInfo();
+    }
+
+    public static ConfigDTO vo2Dto(ConfigVO configVO) {
+        ConfigDTO dto = new ConfigDTO();
+        BeanUtils.copyProperties(configVO, dto);
+        Map<String, Object> map = configVO.getValue();
+        if (map != null) {
+            try {
+                dto.setValue(MAPPER.writeValueAsString(dto.getValue()));
+            } catch (JsonProcessingException e) {
+                throw new CommonException("error.config.parser");
+            }
+        }
+        return dto;
     }
 }

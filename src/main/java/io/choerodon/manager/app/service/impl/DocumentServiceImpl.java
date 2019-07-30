@@ -8,10 +8,9 @@ import io.choerodon.asgard.property.PropertyData;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.eureka.event.EurekaEventPayload;
 import io.choerodon.manager.app.service.RouteService;
-import io.choerodon.manager.domain.manager.entity.RouteE;
 import io.choerodon.manager.app.service.DocumentService;
-import io.choerodon.manager.domain.service.IRouteService;
 import io.choerodon.manager.infra.common.utils.VersionUtil;
+import io.choerodon.manager.infra.dto.RouteDTO;
 import io.choerodon.manager.infra.dto.SwaggerDTO;
 import io.choerodon.manager.infra.mapper.SwaggerMapper;
 import io.swagger.models.auth.OAuth2Definition;
@@ -167,11 +166,11 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public String expandSwaggerJson(String name, String version, String json) throws IOException {
         MultiKeyMap multiKeyMap = routeService.getAllRunningInstances();
-        RouteE routeE = routeService.getRouteFromRunningInstancesMap(multiKeyMap, name, version);
-        if (routeE == null) {
+        RouteDTO routeDTO = routeService.getRouteFromRunningInstancesMap(multiKeyMap, name, version);
+        if (routeDTO == null) {
             return "";
         }
-        String basePath = routeE.getPath().replace("/**", "");
+        String basePath = routeDTO.getPath().replace("/**", "");
         if (swaggerLocal) {
             basePath = "/";
             gatewayDomain = "localhost:8963";

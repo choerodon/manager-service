@@ -32,7 +32,7 @@ import io.choerodon.core.swagger.PermissionData;
 import io.choerodon.core.swagger.SwaggerExtraData;
 import io.choerodon.manager.api.dto.swagger.*;
 import io.choerodon.manager.app.service.ApiService;
-import io.choerodon.manager.domain.manager.entity.MyLinkedList;
+import io.choerodon.manager.infra.dto.MyLinkedList;
 import io.choerodon.manager.infra.common.utils.ManualPageHelper;
 import springfox.documentation.swagger.web.SwaggerResource;
 

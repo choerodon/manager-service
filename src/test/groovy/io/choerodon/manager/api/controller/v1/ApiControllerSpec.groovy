@@ -89,7 +89,7 @@ class ApiControllerSpec extends Specification {
         DocumentService iDocumentService = Mock(DocumentService)
         SwaggerService swaggerService = Mock(SwaggerService)
         RouteMapper routeMapper = Mock(RouteMapper)
-        ApiServiceImpl impl = new ApiServiceImpl(iDocumentService, routeMapper, swaggerService, Mock(StringRedisTemplate), Mock(IamClient))
+        ApiServiceImpl impl = new ApiServiceImpl(iDocumentService, routeMapper, Mock(StringRedisTemplate), Mock(IamClient), swaggerService)
         ApiController controller = new ApiController(null, impl)
 
         SwaggerResource swaggerResource = new SwaggerResource()
@@ -117,7 +117,7 @@ class ApiControllerSpec extends Specification {
         given:
         StringRedisTemplate redisTemplate = Mock(StringRedisTemplate)
         SwaggerService swaggerService = Mock(SwaggerService)
-        ApiServiceImpl apiService = new ApiServiceImpl(null, null, swaggerService, redisTemplate, Mock(IamClient))
+        ApiServiceImpl apiService = new ApiServiceImpl(null, null, redisTemplate, Mock(IamClient), swaggerService)
         ApiController controller = new ApiController(null, apiService)
         List swaggerList = new ArrayList()
         SwaggerResource swaggerResource = Mock(SwaggerResource)
@@ -145,7 +145,7 @@ class ApiControllerSpec extends Specification {
         given:
         StringRedisTemplate redisTemplate = Mock(StringRedisTemplate)
         SwaggerService swaggerService = Mock(SwaggerService)
-        ApiServiceImpl apiService = new ApiServiceImpl(null, null, swaggerService, redisTemplate, Mock(IamClient))
+        ApiServiceImpl apiService = new ApiServiceImpl(null, null, redisTemplate, Mock(IamClient), swaggerService)
         ApiController controller = new ApiController(null, apiService)
         ZSetOperations zSetOperations = Mock(ZSetOperations)
         redisTemplate.opsForZSet() >> zSetOperations
@@ -168,7 +168,7 @@ class ApiControllerSpec extends Specification {
         SwaggerService swaggerService = Mock(SwaggerService)
         DocumentService iDocumentService = Mock(DocumentService)
         StringRedisTemplate stringRedisTemplate = Mock(StringRedisTemplate)
-        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, null, swaggerService, stringRedisTemplate, Mock(IamClient))
+        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, null, stringRedisTemplate, Mock(IamClient), swaggerService)
         ApiController controller = new ApiController(null, apiService)
         List<SwaggerResource> resources = new ArrayList<>()
         SwaggerResource resource = new SwaggerResource()
@@ -190,7 +190,7 @@ class ApiControllerSpec extends Specification {
         SwaggerService swaggerService = Mock(SwaggerService)
         DocumentService iDocumentService = Mock(DocumentService)
         StringRedisTemplate stringRedisTemplate = Mock(StringRedisTemplate)
-        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, null, swaggerService, stringRedisTemplate, Mock(IamClient))
+        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, null, stringRedisTemplate, Mock(IamClient), swaggerService)
         ApiController controller = new ApiController(null, apiService)
         List<SwaggerResource> resources = new ArrayList<>()
         SwaggerResource resource = new SwaggerResource()

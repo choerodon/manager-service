@@ -1,32 +1,28 @@
 package io.choerodon.manager.app.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import io.choerodon.base.domain.PageRequest;
-import io.choerodon.core.convertor.ConvertHelper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.exception.ext.NotExistedException;
 import io.choerodon.core.exception.ext.UpdateExcetion;
 import io.choerodon.manager.api.dto.*;
 import io.choerodon.manager.app.service.ConfigService;
-import io.choerodon.manager.domain.manager.entity.RouteE;
-import io.choerodon.manager.domain.manager.entity.ServiceE;
-import io.choerodon.manager.domain.repository.ConfigRepository;
-import io.choerodon.manager.domain.repository.RouteRepository;
-import io.choerodon.manager.domain.repository.ServiceRepository;
+import io.choerodon.manager.infra.asserts.ConfigAssertHelper;
 import io.choerodon.manager.infra.common.annotation.ConfigNotifyRefresh;
 import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
 import io.choerodon.manager.infra.conventer.ConfigConverter;
 import io.choerodon.manager.infra.dto.ConfigDTO;
+import io.choerodon.manager.infra.dto.RouteDTO;
 import io.choerodon.manager.infra.dto.ServiceDTO;
 import io.choerodon.manager.infra.mapper.ConfigMapper;
+import io.choerodon.manager.infra.mapper.RouteMapper;
+import io.choerodon.manager.infra.mapper.ServiceMapper;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,29 +42,30 @@ public class ConfigServiceImpl implements ConfigService {
 
     public static final String CONFIG_TYPE_YAML = "yaml";
 
-    private static final String ERROR_SERVICENAME_NOTEXIST = "error.config.serviceName.notExist";
+    private static final String ERROR_SERVICE_NAME_NOT_EXIST = "error.config.serviceName.notExist";
 
     @Value("${choerodon.gateway.names}")
     private String[] getRouteServices;
 
-    private ConfigRepository configRepository;
-
-    private ServiceRepository serviceRepository;
-
-    private RouteRepository routeRepository;
-
     private ConfigMapper configMapper;
+
+    private ServiceMapper serviceMapper;
+
+    private ConfigAssertHelper configAssertHelper;
+
+    private RouteMapper routeMapper;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigServiceImpl.class);
 
-    public ConfigServiceImpl(ConfigRepository configRepository,
-                             ServiceRepository serviceRepository,
-                             RouteRepository routeRepository,
-                             ConfigMapper configMapper) {
-        this.configRepository = configRepository;
-        this.serviceRepository = serviceRepository;
-        this.routeRepository = routeRepository;
+    public ConfigServiceImpl(ConfigMapper configMapper,
+                             ServiceMapper serviceMapper,
+                             ConfigAssertHelper configAssertHelper,
+                             RouteMapper routeMapper) {
         this.configMapper = configMapper;
+        this.serviceMapper = serviceMapper;
+        this.configAssertHelper = configAssertHelper;
+        this.routeMapper = routeMapper;
+        this.serviceMapper = serviceMapper;
     }
 
     public void setGetRouteServices(String[] getRouteServices) {
@@ -87,10 +84,7 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ConfigVO updateConfigDefault(Long configId) {
-        ConfigDTO dto = configMapper.selectByPrimaryKey(configId);
-        if (dto == null) {
-            throw new NotExistedException("error.config.not.existed");
-        }
+        ConfigDTO dto = configAssertHelper.notExisted(configId);
         boolean isDefault = dto.getIsDefault();
         if (!isDefault) {
             ConfigDTO example = new ConfigDTO();
@@ -113,13 +107,12 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public ConfigVO query(Long configId, String type) {
-        ConfigVO configVO = ConvertHelper.convert(configRepository.query(configId), ConfigVO.class);
-        if (configVO == null) {
-            throw new CommonException("error.config.not.exist");
-        }
-        ServiceE serviceE = serviceRepository.getService(configVO.getServiceId());
-        if (serviceE == null) {
-            throw new CommonException("error.service.notExist", configVO.getServiceId());
+        ConfigDTO configDTO = configAssertHelper.notExisted(configId);
+        ConfigVO configVO = ConfigConverter.dto2Vo(configDTO);
+        Long serviceId = configVO.getServiceId();
+        ServiceDTO serviceDTO = serviceMapper.selectByPrimaryKey(serviceId);
+        if (serviceDTO == null) {
+            throw new NotExistedException("error.service.notExist", serviceId);
         }
         if (!StringUtils.isEmpty(type)) {
             configVO.setTxt(ConfigUtil.convertMapToText(configVO.getValue(), type));
@@ -129,15 +122,25 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public Boolean delete(Long configId) {
-        return configRepository.delete(configId);
+        ConfigDTO configDTO = configAssertHelper.notExisted(configId);
+        if (configDTO.getIsDefault()) {
+            throw new CommonException("error.config.delete.default");
+        }
+        configMapper.deleteByPrimaryKey(configId);
+        return true;
     }
 
     @Override
     public ConfigVO update(Long configId, ConfigVO configVO) {
         configVO.setIsDefault(null);
         configVO.setSource(null);
-        return ConvertHelper.convert(configRepository.update(configId,
-                ConvertHelper.convert(configVO, ConfigDTO.class)), ConfigVO.class);
+        configAssertHelper.objectVersionNumberNotNull(configVO.getObjectVersionNumber());
+        configAssertHelper.notExisted(configId);
+        ConfigDTO configDTO = ConfigConverter.vo2Dto(configVO);
+        if (configMapper.updateByPrimaryKeySelective(configDTO) != 1) {
+            throw new CommonException("error.config.update");
+        }
+        return ConfigConverter.dto2Vo(configAssertHelper.notExisted(configId));
     }
 
     @ConfigNotifyRefresh
@@ -158,32 +161,32 @@ public class ConfigServiceImpl implements ConfigService {
      * 提取出来的判断方法
      */
     @SuppressWarnings("unchecked")
-    private void setRoutes(final List<RouteE> routeEList, final Map map) {
-        for (RouteE routeE : routeEList) {
-            String prefix = "zuul.routes." + routeE.getName() + ".";
-            if (routeE.getPath() != null) {
-                map.put(prefix + "path", routeE.getPath());
+    private void setRoutes(final List<RouteDTO> routes, final Map map) {
+        for (RouteDTO dto : routes) {
+            String prefix = "zuul.routes." + dto.getName() + ".";
+            if (dto.getPath() != null) {
+                map.put(prefix + "path", dto.getPath());
             }
-            if (routeE.getServiceId() != null) {
-                map.put(prefix + "serviceId", routeE.getServiceId());
+            if (dto.getServiceId() != null) {
+                map.put(prefix + "serviceId", dto.getServiceId());
             }
-            if (routeE.getUrl() != null) {
-                map.put(prefix + "url", routeE.getUrl());
+            if (dto.getUrl() != null) {
+                map.put(prefix + "url", dto.getUrl());
             }
-            if (routeE.getStripPrefix() != null) {
-                map.put(prefix + "stripPrefix", routeE.getStripPrefix());
+            if (dto.getStripPrefix() != null) {
+                map.put(prefix + "stripPrefix", dto.getStripPrefix());
             }
-            if (routeE.getRetryable() != null) {
-                map.put(prefix + "retryable", routeE.getRetryable());
+            if (dto.getRetryable() != null) {
+                map.put(prefix + "retryable", dto.getRetryable());
             }
-            if (routeE.getHelperService() != null) {
-                map.put(prefix + "helperService", routeE.getHelperService());
+            if (dto.getHelperService() != null) {
+                map.put(prefix + "helperService", dto.getHelperService());
             }
-            if (routeE.getCustomSensitiveHeaders() != null && routeE.getCustomSensitiveHeaders()) {
-                map.put(prefix + "customSensitiveHeaders", routeE.getCustomSensitiveHeaders());
+            if (dto.getCustomSensitiveHeaders() != null && dto.getCustomSensitiveHeaders()) {
+                map.put(prefix + "customSensitiveHeaders", dto.getCustomSensitiveHeaders());
             }
-            if (routeE.getSensitiveHeaders() != null) {
-                map.put(prefix + "sensitiveHeaders", routeE.getSensitiveHeaders());
+            if (dto.getSensitiveHeaders() != null) {
+                map.put(prefix + "sensitiveHeaders", dto.getSensitiveHeaders());
             }
         }
     }
@@ -191,14 +194,18 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public ConfigVO queryDefaultByServiceName(String serviceName) {
-        ConfigVO configVO = configRepository.queryDefaultByServiceName(serviceName);
-        if (configVO == null) {
+        ConfigDTO configDTO;
+        List<ConfigDTO> configs = configMapper.selectByServiceDefault(serviceName);
+        if (!configs.isEmpty()) {
+            configDTO = configs.get(0);
+        } else {
             LOGGER.info("$${}$$", serviceName);
             throw new CommonException("error.serviceConfigDO.query.serviceNameNotFound");
         }
+        ConfigVO configVO = ConfigConverter.dto2Vo(configDTO);
         if (ArrayUtils.contains(getRouteServices, serviceName)) {
-            final List<RouteE> routeEList = routeRepository.getAllRoute();
-            setRoutes(routeEList, configVO.getValue());
+            List<RouteDTO> routes = routeMapper.selectAll();
+            setRoutes(routes, configVO.getValue());
         }
         return configVO;
     }
@@ -206,32 +213,46 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public ConfigVO queryByServiceNameAndConfigVersion(String serviceName, String configVersion) {
-        ConfigVO configVO =
-                configRepository.queryByServiceNameAndConfigVersion(serviceName, configVersion);
-        if (configVO == null) {
+        List<ConfigDTO> configs = configMapper.selectByServiceAndConfigVersion(serviceName, configVersion);
+        ConfigDTO configDTO;
+        if (!configs.isEmpty()) {
+            configDTO = configs.get(0);
+        } else {
             throw new CommonException("error.serviceConfigDO.query.serviceNameOrConfigVersionNotFound");
         }
+        ConfigVO configVO = ConfigConverter.dto2Vo(configDTO);
         if (ArrayUtils.contains(getRouteServices, serviceName)) {
-            final List<RouteE> routeEList = routeRepository.getAllRoute();
-            setRoutes(routeEList, configVO.getValue());
+            List<RouteDTO> routes = routeMapper.selectAll();
+            setRoutes(routes, configVO.getValue());
         }
         return configVO;
     }
 
     @Override
-    public ConfigVO create(CreateConfigDTO ccd) {
-        ServiceDTO serviceDTO = serviceRepository.getService(ccd.getServiceName());
+    public ConfigVO create(CreateConfigDTO dto) {
+        ServiceDTO example = new ServiceDTO();
+        example.setName(dto.getName());
+        ServiceDTO serviceDTO = serviceMapper.selectOne(example);
         if (serviceDTO == null) {
-            throw new CommonException(ERROR_SERVICENAME_NOTEXIST);
+            throw new CommonException(ERROR_SERVICE_NAME_NOT_EXIST);
         }
         try {
             ConfigDTO configDTO = new ConfigDTO();
-            configDTO.setName(ccd.getName());
+            configDTO.setName(dto.getName());
             configDTO.setServiceId(serviceDTO.getId());
-            configDTO.setConfigVersion(ccd.getVersion());
-            Map<String, Object> value = ConfigUtil.convertTextToMap(CONFIG_TYPE_YAML, ccd.getYaml());
+            configDTO.setConfigVersion(dto.getVersion());
+            Map<String, Object> value = ConfigUtil.convertTextToMap(CONFIG_TYPE_YAML, dto.getYaml());
             configDTO.setValue(mapper.writeValueAsString(removeZuulRoute(value)));
-            return ConvertHelper.convert(configRepository.create(configDTO), ConfigVO.class);
+
+            configDTO.setIsDefault(false);
+            configDTO.setSource("页面生成");
+            if (configDTO.getPublicTime() == null) {
+                configDTO.setPublicTime(new Date(System.currentTimeMillis()));
+            }
+            if (configMapper.insert(configDTO) != 1) {
+                throw new CommonException("error.config.create");
+            }
+            return ConfigConverter.dto2Vo(configMapper.selectByPrimaryKey(configDTO.getId()));
         } catch (IOException e) {
             throw new CommonException("error.config.yml");
         }
@@ -290,14 +311,11 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     @SuppressWarnings("unchecked")
     public YamlDTO queryYaml(Long configId) {
-        ConfigDTO configDTO = configRepository.query(configId);
-        if (configDTO == null) {
-            throw new CommonException("error.config.not.exist");
-        }
+        ConfigDTO configDTO = configAssertHelper.notExisted(configId);
         try {
             Map<String, Object> map = mapper.readValue(configDTO.getValue(), Map.class);
-            ServiceE serviceE = serviceRepository.getService(configDTO.getServiceId());
-            if (serviceE == null) {
+            ServiceDTO serviceDTO = serviceMapper.selectByPrimaryKey(configDTO.getServiceId());
+            if (serviceDTO == null) {
                 throw new CommonException("error.config.service.not.exist");
             }
             YamlDTO yamlDTO = new YamlDTO();
@@ -317,22 +335,28 @@ public class ConfigServiceImpl implements ConfigService {
             return;
         }
         if (configDTO.getServiceName() == null) {
-            throw new CommonException(ERROR_SERVICENAME_NOTEXIST);
+            throw new CommonException(ERROR_SERVICE_NAME_NOT_EXIST);
         }
-        ServiceDTO serviceDTO = serviceRepository.getService(configDTO.getServiceName());
+        ServiceDTO serviceExample = new ServiceDTO();
+        serviceExample.setName(configDTO.getServiceName());
+        ServiceDTO serviceDTO = serviceMapper.selectOne(serviceExample);
         if (serviceDTO == null) {
-            throw new CommonException(ERROR_SERVICENAME_NOTEXIST);
+            throw new CommonException(ERROR_SERVICE_NAME_NOT_EXIST);
         }
         if (configDTO.getConfigVersion() != null) {
-            ConfigDTO configDO = configRepository.queryByServiceIdAndVersion(
-                    serviceDTO.getId(), configDTO.getConfigVersion());
+            ConfigDTO example = new ConfigDTO();
+            example.setServiceId(serviceDTO.getId());
+            example.setConfigVersion(configDTO.getConfigVersion());
+            ConfigDTO configDO = configMapper.selectOne(example);
             if (configDO != null) {
                 throw new CommonException("error.config.insert.versionDuplicate");
             }
         }
         if (configDTO.getName() != null) {
-            ConfigDTO configDO = configRepository.queryByServiceIdAndName(
-                    serviceDTO.getId(), configDTO.getName());
+            ConfigDTO example = new ConfigDTO();
+            example.setServiceId(serviceDTO.getId());
+            example.setName(configDTO.getName());
+            ConfigDTO configDO = configMapper.selectOne(example);
             if (configDO != null) {
                 throw new CommonException("error.config.insert.nameDuplicate");
             }

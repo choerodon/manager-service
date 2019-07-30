@@ -46,8 +46,7 @@ class RouteControllerSpec extends Specification {
 
         then: "校验状态码和调用次数"
         entity.statusCode.is2xxSuccessful()
-        1 * mockRouteService.list(_,_, _ as RouteDTO, params)
-        0 * _
+        1 * mockRouteService.list(_, _ as RouteDTO, params)
     }
 
     def "Create"() {

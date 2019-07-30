@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableEurekaClient
 @EnableFeignClients("io.choerodon")
-@EnableScheduling
+//@EnableScheduling
 @SpringBootApplication
 @EnableConfigurationProperties(GatewayProperties.class)
 public class ManagerServiceApplication {

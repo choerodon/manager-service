@@ -4,7 +4,7 @@ import java.util.*;
 
 import io.choerodon.eureka.event.EurekaEventProperties;
 import io.choerodon.manager.app.service.RouteService;
-import io.choerodon.manager.domain.manager.entity.RouteE;
+import io.choerodon.manager.infra.dto.RouteDTO;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,7 +55,7 @@ public class SwaggerServiceImpl implements SwaggerService {
         Iterator iterator = set.iterator();
         while (iterator.hasNext()) {
             MultiKey multiKey = (MultiKey) iterator.next();
-            RouteE route = (RouteE) multiKeyMap.get(multiKey);
+            RouteDTO route = (RouteDTO) multiKeyMap.get(multiKey);
             String serviceId = route.getServiceId();
             if (serviceId != null) {
                 boolean isSkip =

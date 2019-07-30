@@ -37,7 +37,7 @@ class ApiServiceImplSpec extends Specification {
     RouteMapper routeMapper
 
     def setup() {
-        apiService = new ApiServiceImpl(mockIDocumentService, routeMapper, swaggerService, Mock(StringRedisTemplate), Mock(IamClient))
+        apiService = new ApiServiceImpl(mockIDocumentService, routeMapper, Mock(StringRedisTemplate), Mock(IamClient), swaggerService)
     }
 
     def "GetControllers"() {
@@ -72,7 +72,7 @@ class ApiServiceImplSpec extends Specification {
         DocumentService iDocumentService = Mock(DocumentService)
         StringRedisTemplate stringRedisTemplate = Mock(StringRedisTemplate)
         RouteMapper routeMapper1 = Mock(RouteMapper)
-        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, routeMapper1, swaggerService1, stringRedisTemplate, Mock(IamClient))
+        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, routeMapper1, stringRedisTemplate, Mock(IamClient), swaggerService1)
         List<SwaggerResource> resources = new ArrayList<>()
         SwaggerResource resource = new SwaggerResource()
         resource.setName("manager:manager-service")
@@ -101,7 +101,7 @@ class ApiServiceImplSpec extends Specification {
         DocumentService iDocumentService = Mock(DocumentService)
         StringRedisTemplate stringRedisTemplate = Mock(StringRedisTemplate)
         RouteMapper routeMapper1 = Mock(RouteMapper)
-        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, routeMapper1, swaggerService1, stringRedisTemplate, Mock(IamClient))
+        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, routeMapper1, stringRedisTemplate, Mock(IamClient), swaggerService1)
         List<SwaggerResource> resources = new ArrayList<>()
         SwaggerResource resource = new SwaggerResource()
         resource.setName("manager:manager-service")
