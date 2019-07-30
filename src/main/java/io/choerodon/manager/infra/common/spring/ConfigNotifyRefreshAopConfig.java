@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import io.choerodon.manager.infra.common.utils.RefreshUtil;
-import io.choerodon.manager.infra.dataobject.ConfigDO;
-import io.choerodon.manager.infra.dataobject.ServiceDO;
+import io.choerodon.manager.infra.dto.ConfigDTO;
+import io.choerodon.manager.infra.dto.ServiceDTO;
 import io.choerodon.manager.infra.mapper.ConfigMapper;
 import io.choerodon.manager.infra.mapper.ServiceMapper;
 
@@ -48,9 +48,9 @@ public class ConfigNotifyRefreshAopConfig {
             Object[] args = joinPoint.getArgs();
             Long configId = (Long) args[0];
             if (configId != null) {
-                ConfigDO configDO = configMapper.selectByPrimaryKey(configId);
-                ServiceDO serviceDO = serviceMapper.selectByPrimaryKey(configDO.getServiceId());
-                refreshUtil.refresh(serviceDO.getName());
+                ConfigDTO configDTO = configMapper.selectByPrimaryKey(configId);
+                ServiceDTO serviceDTO = serviceMapper.selectByPrimaryKey(configDTO.getServiceId());
+                refreshUtil.refresh(serviceDTO.getName());
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage());

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="io.choerodon.manager.infra.mapper.ConfigMapper">
 
-    <select id="selectByServiceDefault" resultType="io.choerodon.manager.infra.dataobject.ConfigDO">
+    <select id="selectByServiceDefault" resultType="io.choerodon.manager.infra.dto.ConfigDTO">
         SELECT
           mgmt_service_config.*
         FROM
@@ -15,7 +15,7 @@
           mgmt_service_config.is_default = 1
     </select>
 
-    <select id="selectByServiceAndConfigVersion" resultType="io.choerodon.manager.infra.dataobject.ConfigDO">
+    <select id="selectByServiceAndConfigVersion" resultType="io.choerodon.manager.infra.dto.ConfigDTO">
         SELECT
           mgmt_service_config.*
         FROM
@@ -28,7 +28,7 @@
           mgmt_service_config.config_version=#{configVersion}
     </select>
 
-    <select id="listByServiceName" resultType="io.choerodon.manager.infra.dataobject.ConfigDO">
+    <select id="listByServiceName" resultType="io.choerodon.manager.infra.dto.ConfigDTO">
         SELECT
         mgmt_service_config.id,
         mgmt_service_config.name,
@@ -59,7 +59,7 @@
         id = #{id}
     </select>
 
-    <select id="fulltextSearch" resultType="io.choerodon.manager.infra.dataobject.ConfigDO">
+    <select id="fulltextSearch" resultType="io.choerodon.manager.infra.dto.ConfigDTO">
         SELECT
         mgmt_service_config.id,
         mgmt_service_config.name,

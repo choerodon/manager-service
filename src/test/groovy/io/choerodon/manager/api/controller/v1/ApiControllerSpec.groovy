@@ -4,9 +4,8 @@ import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.app.service.ApiService
 import io.choerodon.manager.app.service.SwaggerService
 import io.choerodon.manager.app.service.impl.ApiServiceImpl
-import io.choerodon.manager.domain.service.IDocumentService
-import io.choerodon.manager.domain.service.ISwaggerService
-import io.choerodon.manager.infra.dataobject.RouteDO
+import io.choerodon.manager.app.service.DocumentService
+import io.choerodon.manager.infra.dto.RouteDTO
 import io.choerodon.manager.infra.feign.IamClient
 import io.choerodon.manager.infra.mapper.RouteMapper
 import org.springframework.beans.factory.annotation.Autowired
@@ -87,10 +86,10 @@ class ApiControllerSpec extends Specification {
 
     def "QueryInstancesAndApiCount"() {
         given:
-        IDocumentService iDocumentService = Mock(IDocumentService)
-        ISwaggerService iSwaggerService = Mock(ISwaggerService)
+        DocumentService iDocumentService = Mock(DocumentService)
+        SwaggerService swaggerService = Mock(SwaggerService)
         RouteMapper routeMapper = Mock(RouteMapper)
-        ApiServiceImpl impl = new ApiServiceImpl(iDocumentService, routeMapper, iSwaggerService, Mock(StringRedisTemplate), Mock(IamClient))
+        ApiServiceImpl impl = new ApiServiceImpl(iDocumentService, routeMapper, Mock(StringRedisTemplate), Mock(IamClient), swaggerService)
         ApiController controller = new ApiController(null, impl)
 
         SwaggerResource swaggerResource = new SwaggerResource()
@@ -99,11 +98,11 @@ class ApiControllerSpec extends Specification {
         swaggerResource.setSwaggerVersion("2.0")
         List<SwaggerResource> resources = new ArrayList<>()
         resources << swaggerResource
-        iSwaggerService.getSwaggerResource() >> resources
+        swaggerService.getSwaggerResource() >> resources
         def file = new File(this.class.getResource('/swagger.json').toURI())
         iDocumentService.fetchSwaggerJsonByService(_, _) >> { file.getText('UTF-8') }
         iDocumentService.expandSwaggerJson(_, _, _) >> { file.getText('UTF-8') }
-        RouteDO routeDO = new RouteDO()
+        RouteDTO routeDO = new RouteDTO()
         routeDO.setName("mamager")
         routeDO.setServiceId("manager-service")
         routeMapper.selectOne(_) >> routeDO
@@ -117,13 +116,13 @@ class ApiControllerSpec extends Specification {
     def "QueryServiceInvoke"() {
         given:
         StringRedisTemplate redisTemplate = Mock(StringRedisTemplate)
-        ISwaggerService iSwaggerService = Mock(ISwaggerService)
-        ApiServiceImpl apiService = new ApiServiceImpl(null, null, iSwaggerService, redisTemplate, Mock(IamClient))
+        SwaggerService swaggerService = Mock(SwaggerService)
+        ApiServiceImpl apiService = new ApiServiceImpl(null, null, redisTemplate, Mock(IamClient), swaggerService)
         ApiController controller = new ApiController(null, apiService)
         List swaggerList = new ArrayList()
         SwaggerResource swaggerResource = Mock(SwaggerResource)
         swaggerList << swaggerResource
-        iSwaggerService.getSwaggerResource() >> swaggerList
+        swaggerService.getSwaggerResource() >> swaggerList
         swaggerResource.getName() >> "manager:manager-service"
         swaggerResource.getLocation() >> "/docs/manager?version=null_version"
         ZSetOperations zSetOperations = Mock(ZSetOperations)
@@ -145,8 +144,8 @@ class ApiControllerSpec extends Specification {
     def "QueryApiInvoke"() {
         given:
         StringRedisTemplate redisTemplate = Mock(StringRedisTemplate)
-        ISwaggerService iSwaggerService = Mock(ISwaggerService)
-        ApiServiceImpl apiService = new ApiServiceImpl(null, null, iSwaggerService, redisTemplate, Mock(IamClient))
+        SwaggerService swaggerService = Mock(SwaggerService)
+        ApiServiceImpl apiService = new ApiServiceImpl(null, null, redisTemplate, Mock(IamClient), swaggerService)
         ApiController controller = new ApiController(null, apiService)
         ZSetOperations zSetOperations = Mock(ZSetOperations)
         redisTemplate.opsForZSet() >> zSetOperations
@@ -166,17 +165,17 @@ class ApiControllerSpec extends Specification {
 
     def "QueryTreeMenu"() {
         given:
-        ISwaggerService iSwaggerService = Mock(ISwaggerService)
-        IDocumentService iDocumentService = Mock(IDocumentService)
+        SwaggerService swaggerService = Mock(SwaggerService)
+        DocumentService iDocumentService = Mock(DocumentService)
         StringRedisTemplate stringRedisTemplate = Mock(StringRedisTemplate)
-        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, null, iSwaggerService, stringRedisTemplate, Mock(IamClient))
+        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, null, stringRedisTemplate, Mock(IamClient), swaggerService)
         ApiController controller = new ApiController(null, apiService)
         List<SwaggerResource> resources = new ArrayList<>()
         SwaggerResource resource = new SwaggerResource()
         resource.setName("manager:manager-service")
         resource.setLocation("/docs/manager?version=null_version")
         resources << resource
-        iSwaggerService.getSwaggerResource() >> resources
+        swaggerService.getSwaggerResource() >> resources
         def file = new File(this.class.getResource('/swagger.json').toURI())
         iDocumentService.fetchSwaggerJsonByService(_, _) >> { file.getText('UTF-8') }
 
@@ -188,17 +187,17 @@ class ApiControllerSpec extends Specification {
 
     def "QueryTreeMenu(from cache)"() {
         given:
-        ISwaggerService iSwaggerService = Mock(ISwaggerService)
-        IDocumentService iDocumentService = Mock(IDocumentService)
+        SwaggerService swaggerService = Mock(SwaggerService)
+        DocumentService iDocumentService = Mock(DocumentService)
         StringRedisTemplate stringRedisTemplate = Mock(StringRedisTemplate)
-        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, null, iSwaggerService, stringRedisTemplate, Mock(IamClient))
+        ApiServiceImpl apiService = new ApiServiceImpl(iDocumentService, null, stringRedisTemplate, Mock(IamClient), swaggerService)
         ApiController controller = new ApiController(null, apiService)
         List<SwaggerResource> resources = new ArrayList<>()
         SwaggerResource resource = new SwaggerResource()
         resource.setName("manager:manager-service")
         resource.setLocation("/docs/manager?version=null_version")
         resources << resource
-        iSwaggerService.getSwaggerResource() >> resources
+        swaggerService.getSwaggerResource() >> resources
         def file = new File(this.class.getResource('/swagger.json').toURI())
         iDocumentService.fetchSwaggerJsonByService(_, _) >> { file.getText('UTF-8') }
 //        ValueOperations valueOperations = Mock(ValueOperations)

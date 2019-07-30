@@ -3,7 +3,7 @@
 
 <mapper namespace="io.choerodon.manager.infra.mapper.ServiceMapper">
 
-    <select id="selectServicesByFilter" resultType="io.choerodon.manager.infra.dataobject.ServiceDO">
+    <select id="selectServicesByFilter" resultType="io.choerodon.manager.infra.dto.ServiceDTO">
         select * FROM mgmt_service WHERE 1 = 1
         <if test="param != null">
             AND

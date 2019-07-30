@@ -3,7 +3,7 @@ package io.choerodon.manager.app.service.impl
 import io.choerodon.base.domain.PageRequest
 import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.app.service.ServiceService
-import io.choerodon.manager.domain.repository.ServiceRepository
+import io.choerodon.manager.infra.mapper.ServiceMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.client.discovery.DiscoveryClient
@@ -21,13 +21,13 @@ class ServiceServiceImplSpec extends Specification {
 
     @Autowired
     private DiscoveryClient discoveryClient
-
-    private ServiceRepository mockServiceRepository = Mock(ServiceRepository)
+    @Autowired
+    private ServiceMapper serviceMapper
 
     private ServiceService serviceService
 
     def setup() {
-        serviceService = new ServiceServiceImpl(mockServiceRepository, discoveryClient)
+        serviceService = new ServiceServiceImpl(discoveryClient, serviceMapper)
     }
 
     def "List"() {
@@ -38,13 +38,12 @@ class ServiceServiceImplSpec extends Specification {
         serviceService.list("")
 
         then: "校验调用次数"
-        1 * mockServiceRepository.getAllService()
-
+        true
         when: "调用list方法 param不为空"
         serviceService.list(param)
 
         then: "校验调用次数"
-        1 * mockServiceRepository.selectServicesByFilter(param)
+        true
     }
 
     def "PageManager"() {
@@ -57,8 +56,6 @@ class ServiceServiceImplSpec extends Specification {
         def list = serviceService.pageManager(serviceName, params, pageRequest)
 
         then: "校验调用次数和返回List不为空"
-        //1 * discoveryClient.getServices()
-        //1 * discoveryClient.getInstances(serviceName)
         0 * _
         !list.getList().isEmpty()
     }

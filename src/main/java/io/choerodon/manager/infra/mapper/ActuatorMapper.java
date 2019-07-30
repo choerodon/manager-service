@@ -1,7 +1,7 @@
 package io.choerodon.manager.infra.mapper;
 
-import io.choerodon.manager.infra.dataobject.ActuatorDO;
+import io.choerodon.manager.infra.dto.ActuatorDTO;
 import io.choerodon.mybatis.common.Mapper;
 
-public interface ActuatorMapper extends Mapper<ActuatorDO> {
+public interface ActuatorMapper extends Mapper<ActuatorDTO> {
 }

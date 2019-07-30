@@ -4,17 +4,20 @@ import javax.validation.Valid;
 
 import com.github.pagehelper.PageInfo;
 import io.choerodon.base.annotation.Permission;
-import io.choerodon.base.constant.PageConstant;
+import io.choerodon.base.domain.PageRequest;
+import io.choerodon.base.domain.Sort;
 import io.choerodon.base.enums.ResourceType;
+import io.choerodon.manager.infra.dto.RouteDTO;
+import io.choerodon.mybatis.annotation.SortDefault;
+import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.choerodon.core.iam.InitRoleCode;
-import io.choerodon.manager.api.dto.RouteDTO;
 import io.choerodon.manager.app.service.RouteService;
-import io.choerodon.manager.infra.dataobject.RouteDO;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * 路由操作控制器
@@ -43,26 +46,27 @@ public class RouteController {
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("分页查询路由信息")
     @GetMapping
-    public ResponseEntity<PageInfo<RouteDTO>> list(@RequestParam(defaultValue = PageConstant.PAGE, required = false) final int page,
-                                                   @RequestParam(defaultValue = PageConstant.SIZE, required = false) final int size,
+    @CustomPageRequest
+    public ResponseEntity<PageInfo<RouteDTO>> list(@ApiIgnore
+                                                   @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
                                                    @RequestParam(required = false, name = "name") String name,
                                                    @RequestParam(required = false, name = "path") String path,
                                                    @RequestParam(required = false, name = "serviceId") String serviceId,
                                                    @RequestParam(required = false, name = "builtIn") Boolean builtIn,
                                                    @RequestParam(required = false, name = "params") String params) {
-        RouteDO routeDO = new RouteDO();
-        routeDO.setName(name);
-        routeDO.setPath(path);
-        routeDO.setServiceId(serviceId);
-        routeDO.setBuiltIn(builtIn);
-        return new ResponseEntity<>(routeService.list(page,size, routeDO, params), HttpStatus.OK);
+        RouteDTO routeDTO = new RouteDTO();
+        routeDTO.setName(name);
+        routeDTO.setPath(path);
+        routeDTO.setServiceId(serviceId);
+        routeDTO.setBuiltIn(builtIn);
+        return new ResponseEntity<>(routeService.list(pageRequest, routeDTO, params), HttpStatus.OK);
     }
 
     /**
      * 增加一个新路由
      *
      * @param routeDTO 路由信息对象
-     * @return RouteDO
+     * @return RouteDTO
      */
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("增加一个新路由")
@@ -75,7 +79,7 @@ public class RouteController {
      * 更新一个路由
      *
      * @param routeDTO 路由对象
-     * @return RouteDO
+     * @return RouteDTO
      */
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("更新一个路由")

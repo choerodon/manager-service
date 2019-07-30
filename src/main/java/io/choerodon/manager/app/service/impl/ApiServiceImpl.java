@@ -9,8 +9,9 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.choerodon.base.domain.PageRequest;
 import io.choerodon.manager.api.dto.MenuDTO;
-import io.choerodon.manager.domain.service.ISwaggerService;
-import io.choerodon.manager.infra.dataobject.RouteDO;
+import io.choerodon.manager.app.service.DocumentService;
+import io.choerodon.manager.app.service.SwaggerService;
+import io.choerodon.manager.infra.dto.RouteDTO;
 import io.choerodon.manager.infra.enums.InvokeCountBusinessType;
 import io.choerodon.manager.infra.feign.IamClient;
 import io.choerodon.manager.infra.mapper.RouteMapper;
@@ -31,8 +32,7 @@ import io.choerodon.core.swagger.PermissionData;
 import io.choerodon.core.swagger.SwaggerExtraData;
 import io.choerodon.manager.api.dto.swagger.*;
 import io.choerodon.manager.app.service.ApiService;
-import io.choerodon.manager.domain.manager.entity.MyLinkedList;
-import io.choerodon.manager.domain.service.IDocumentService;
+import io.choerodon.manager.infra.dto.MyLinkedList;
 import io.choerodon.manager.infra.common.utils.ManualPageHelper;
 import springfox.documentation.swagger.web.SwaggerResource;
 
@@ -61,11 +61,11 @@ public class ApiServiceImpl implements ApiService {
     private static final String UNDERLINE = "-";
     private static final String SERVICE = "service";
 
-    private IDocumentService iDocumentService;
+    private DocumentService documentService;
 
     private RouteMapper routeMapper;
 
-    private ISwaggerService iSwaggerService;
+    private SwaggerService swaggerService;
 
     private IamClient iamClient;
 
@@ -75,14 +75,14 @@ public class ApiServiceImpl implements ApiService {
 
     private StringRedisTemplate redisTemplate;
 
-    public ApiServiceImpl(IDocumentService iDocumentService, RouteMapper routeMapper,
-                          ISwaggerService iSwaggerService, StringRedisTemplate redisTemplate,
-                          IamClient iamClient) {
-        this.iDocumentService = iDocumentService;
+    public ApiServiceImpl(DocumentService documentService, RouteMapper routeMapper,
+                          StringRedisTemplate redisTemplate,
+                          IamClient iamClient, SwaggerService swaggerService) {
+        this.documentService = documentService;
         this.routeMapper = routeMapper;
-        this.iSwaggerService = iSwaggerService;
         this.redisTemplate = redisTemplate;
         this.iamClient = iamClient;
+        this.swaggerService = swaggerService;
     }
 
     @Override
@@ -96,11 +96,11 @@ public class ApiServiceImpl implements ApiService {
     @Override
     public String getSwaggerJson(String name, String version) {
         String serviceName = getRouteName(name);
-        String json = iDocumentService.fetchSwaggerJsonByService(serviceName, version);
+        String json = documentService.fetchSwaggerJsonByService(serviceName, version);
         try {
             if (json != null) {
                 //自定义扩展swaggerJson
-                json = iDocumentService.expandSwaggerJson(name, version, json);
+                json = documentService.expandSwaggerJson(name, version, json);
             }
         } catch (IOException e) {
             logger.error("fetch swagger json error, service: {}, version: {}, exception: {}", name, version, e.getMessage());
@@ -297,7 +297,7 @@ public class ApiServiceImpl implements ApiService {
     private boolean processChildrenFromSwaggerJson(String routeName, String service, String version, List<Map<String, Object>> versionChildren) {
         boolean done = false;
         try {
-            String json = iDocumentService.fetchSwaggerJsonByService(service, version);
+            String json = documentService.fetchSwaggerJsonByService(service, version);
             if (StringUtils.isEmpty(json)) {
                 logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
             } else {
@@ -415,7 +415,7 @@ public class ApiServiceImpl implements ApiService {
      */
     private MultiKeyMap getServiceMap() {
         MultiKeyMap multiKeyMap = new MultiKeyMap();
-        List<SwaggerResource> resources = iSwaggerService.getSwaggerResource();
+        List<SwaggerResource> resources = swaggerService.getSwaggerResource();
         for (SwaggerResource resource : resources) {
             String name = resource.getName();
             String[] nameArray = name.split(COLON);
@@ -442,9 +442,9 @@ public class ApiServiceImpl implements ApiService {
 
     private String getRouteName(String name) {
         String serviceName;
-        RouteDO routeDO = new RouteDO();
-        routeDO.setName(name);
-        RouteDO route = routeMapper.selectOne(routeDO);
+        RouteDTO routeDTO = new RouteDTO();
+        routeDTO.setName(name);
+        RouteDTO route = routeMapper.selectOne(routeDTO);
         if (route == null) {
             throw new CommonException("error.route.not.found.routeName{" + name + "}");
         } else {
@@ -531,7 +531,7 @@ public class ApiServiceImpl implements ApiService {
             boolean done = false;
             if (version != null) {
                 try {
-                    String json = iDocumentService.fetchSwaggerJsonByService(service, version);
+                    String json = documentService.fetchSwaggerJsonByService(service, version);
                     if (StringUtils.isEmpty(json)) {
                         logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
                     } else {

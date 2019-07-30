@@ -3,7 +3,7 @@
 
 <mapper namespace="io.choerodon.manager.infra.mapper.RouteMapper">
 
-    <resultMap id="routeDo" type="io.choerodon.manager.infra.dataobject.RouteDO">
+    <resultMap id="routeDo" type="io.choerodon.manager.infra.dto.RouteDTO">
         <id property="id" column="id"/>
         <result property="name" column="name"/>
         <result property="path" column="path"/>
@@ -20,17 +20,17 @@
 
     <select id="selectRoutes" resultMap="routeDo">
         select * FROM mgmt_route WHERE 1 = 1
-        <if test="routeDO.name!= null">
-            AND name LIKE concat(concat('%',#{routeDO.name}),'%')
+        <if test="routeDTO.name!= null">
+            AND name LIKE concat(concat('%',#{routeDTO.name}),'%')
         </if>
-        <if test="routeDO.path!= null">
-            AND path LIKE concat(concat('%',#{routeDO.path}),'%')
+        <if test="routeDTO.path!= null">
+            AND path LIKE concat(concat('%',#{routeDTO.path}),'%')
         </if>
-        <if test="routeDO.serviceId!= null">
-            AND service_id LIKE concat(concat('%',#{routeDO.serviceId}),'%')
+        <if test="routeDTO.serviceId!= null">
+            AND service_id LIKE concat(concat('%',#{routeDTO.serviceId}),'%')
         </if>
-        <if test="routeDO.builtIn != null">
-            AND is_built_in = #{routeDO.builtIn}
+        <if test="routeDTO.builtIn != null">
+            AND is_built_in = #{routeDTO.builtIn}
         </if>
         <if test="params != null">
             AND

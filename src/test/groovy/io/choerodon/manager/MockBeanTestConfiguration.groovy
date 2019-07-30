@@ -1,10 +1,8 @@
 package io.choerodon.manager
 
 import io.choerodon.eureka.event.EurekaEventPayload
-import io.choerodon.manager.domain.repository.RouteRepository
-import io.choerodon.manager.domain.service.IDocumentService
-import io.choerodon.manager.domain.service.IRouteService
-import io.choerodon.manager.domain.service.ISwaggerRefreshService
+import io.choerodon.manager.app.service.DocumentService
+import io.choerodon.manager.app.service.SwaggerRefreshService
 import org.mockito.ArgumentMatcher
 import org.mockito.Mockito
 import org.springframework.boot.test.context.TestConfiguration
@@ -19,22 +17,22 @@ import spock.mock.DetachedMockFactory
 class MockBeanTestConfiguration {
     private final detachedMockFactory = new DetachedMockFactory()
 
-    @Bean("mockRouteRepository")
-    @Primary
-    RouteRepository routeRepository() {
-        return detachedMockFactory.Mock(RouteRepository)
-    }
+//    @Bean("mockRouteRepository")
+//    @Primary
+//    RouteRepository routeRepository() {
+//        return detachedMockFactory.Mock(RouteRepository)
+//    }
 
     /*@Bean("mockIDocumentService")
     @Primary
-    IDocumentService iDocumentService() {
-        return detachedMockFactory.Mock(IDocumentService)
+    DocumentService documentService() {
+        return detachedMockFactory.Mock(DocumentService)
     }*/
 
     @Bean("mockIDocumentService")
     @Primary
-    IDocumentService iDocumentService() {
-        IDocumentService mockIDocumentService = Mockito.mock(IDocumentService)
+    DocumentService iDocumentService() {
+        DocumentService mockIDocumentService = Mockito.mock(DocumentService)
         def file = new File(this.class.getResource('/swagger.json').toURI())
         //Mockito.doReturn(file.getText("UTF-8")).when(mockIDocumentService).fetchSwaggerJsonByIp(Mockito.any(RegisterInstancePayload))
         Mockito.doReturn(file.getText("UTF-8")).when(mockIDocumentService).fetchSwaggerJsonByIp(Mockito.argThat(new ArgumentMatcher<EurekaEventPayload>() {
@@ -48,13 +46,13 @@ class MockBeanTestConfiguration {
 
     @Bean("mockSwaggerRefreshService")
     @Primary
-    ISwaggerRefreshService swaggerRefreshService() {
-        return detachedMockFactory.Mock(ISwaggerRefreshService)
+    SwaggerRefreshService swaggerRefreshService() {
+        return detachedMockFactory.Mock(SwaggerRefreshService)
     }
-
-    @Bean("mockIRouteService")
-    @Primary
-    IRouteService iRouteService() {
-        return detachedMockFactory.Mock(IRouteService)
-    }
+//
+//    @Bean("mockIRouteService")
+//    @Primary
+//    IRouteService iRouteService() {
+//        return detachedMockFactory.Mock(IRouteService)
+//    }
 }

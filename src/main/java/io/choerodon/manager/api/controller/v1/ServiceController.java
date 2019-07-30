@@ -8,6 +8,9 @@ import io.choerodon.base.constant.PageConstant;
 import io.choerodon.base.domain.PageRequest;
 import io.choerodon.base.domain.Sort;
 import io.choerodon.base.enums.ResourceType;
+import io.choerodon.manager.api.dto.ConfigVO;
+import io.choerodon.manager.infra.dto.ConfigDTO;
+import io.choerodon.manager.infra.dto.ServiceDTO;
 import io.choerodon.mybatis.annotation.SortDefault;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
@@ -17,8 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import io.choerodon.core.iam.InitRoleCode;
-import io.choerodon.manager.api.dto.ConfigDTO;
-import io.choerodon.manager.api.dto.ServiceDTO;
 import io.choerodon.manager.api.dto.ServiceManagerDTO;
 import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.manager.app.service.ServiceService;
@@ -83,12 +84,12 @@ public class ServiceController {
      * 通过服务名获取配置信息，对外隐藏api
      *
      * @param serviceName 服务名
-     * @return ConfigDTO
+     * @return ConfigVO
      */
     @Permission(permissionWithin = true)
     @GetMapping("/{service_name}/configs/default")
     @ApiIgnore
-    public ResponseEntity<ConfigDTO> queryDefaultConfigByServiceName(@PathVariable("service_name") String serviceName) {
+    public ResponseEntity<ConfigVO> queryDefaultConfigByServiceName(@PathVariable("service_name") String serviceName) {
         return new ResponseEntity<>(configService.queryDefaultByServiceName(serviceName), HttpStatus.OK);
     }
 
@@ -98,13 +99,13 @@ public class ServiceController {
      *
      * @param serviceName   服务名
      * @param configVersion 配置版本
-     * @return ConfigDTO
+     * @return ConfigVO
      */
     @Permission(permissionWithin = true)
     @ApiIgnore
     @GetMapping("/{service_name}/configs/{config_version:.*}")
-    public ResponseEntity<ConfigDTO> queryConfigByServiceNameAndVersion(@PathVariable("service_name") String serviceName,
-                                                                        @PathVariable("config_version") String configVersion) {
+    public ResponseEntity<ConfigVO> queryConfigByServiceNameAndVersion(@PathVariable("service_name") String serviceName,
+                                                                       @PathVariable("config_version") String configVersion) {
         return new ResponseEntity<>(configService.queryByServiceNameAndConfigVersion(serviceName, configVersion),
                 HttpStatus.OK);
     }
@@ -118,17 +119,22 @@ public class ServiceController {
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("分页模糊查询服务的配置")
     @GetMapping("/{service_name}/configs")
-    public ResponseEntity<PageInfo<ConfigDTO>> list(
+    @CustomPageRequest
+    public ResponseEntity<PageInfo<ConfigVO>> list(
             @PathVariable("service_name") String serviceName,
-            @RequestParam(defaultValue = PageConstant.PAGE, required = false) final int page,
-            @RequestParam(defaultValue = PageConstant.SIZE, required = false) final int size,
+            @ApiIgnore
+            @SortDefault(value = "name", direction = Sort.Direction.ASC) PageRequest pageRequest,
             @RequestParam(required = false, name = "name") String name,
             @RequestParam(required = false, name = "source") String source,
             @RequestParam(required = false, name = "configVersion") String configVersion,
             @RequestParam(required = false, name = "isDefault") Boolean isDefault,
             @RequestParam(required = false, name = "params") String param) {
-        return new ResponseEntity<>(configService.listByServiceName(serviceName, page, size,
-                new ConfigDTO(name, configVersion, isDefault, source), param), HttpStatus.OK);
+        ConfigDTO dto = new ConfigDTO();
+        dto.setName(name);
+        dto.setConfigVersion(configVersion);
+        dto.setIsDefault(isDefault);
+        dto.setSource(source);
+        return new ResponseEntity<>(configService.listByServiceName(serviceName, pageRequest, dto, param), HttpStatus.OK);
     }
 
 }

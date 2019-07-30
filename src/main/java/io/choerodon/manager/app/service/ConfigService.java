@@ -1,32 +1,34 @@
 package io.choerodon.manager.app.service;
 
 import com.github.pagehelper.PageInfo;
+import io.choerodon.base.domain.PageRequest;
 import io.choerodon.manager.api.dto.*;
+import io.choerodon.manager.infra.dto.ConfigDTO;
 
 /**
  * @author wuguokai
  */
 public interface ConfigService {
 
-    ConfigDTO queryDefaultByServiceName(String serviceName);
+    ConfigVO queryDefaultByServiceName(String serviceName);
 
-    ConfigDTO queryByServiceNameAndConfigVersion(String serviceName, String configVersion);
+    ConfigVO queryByServiceNameAndConfigVersion(String serviceName, String configVersion);
 
-    PageInfo<ConfigDTO> listByServiceName(String serviceName, int page, int size, ConfigDTO queryInfo, String queryParam);
+    PageInfo<ConfigVO> listByServiceName(String serviceName, PageRequest pageRequest, ConfigDTO configDTO, String queryParam);
 
-    ConfigDTO setServiceConfigDefault(Long configId);
+    ConfigVO updateConfigDefault(Long configId);
 
-    ConfigDTO query(Long configId, String type);
+    ConfigVO query(Long configId, String type);
 
     YamlDTO queryYaml(Long configId);
 
     Boolean delete(Long configId);
 
-    ConfigDTO update(Long configId, ConfigDTO configDTO);
+    ConfigVO update(Long configId, ConfigVO configVO);
 
-    ConfigDTO updateConfig(Long configId, ConfigDTO configDTO, String type);
+    ConfigVO updateConfig(Long configId, ConfigVO configVO, String type);
 
-    ConfigDTO create(CreateConfigDTO createConfigDTO);
+    ConfigVO create(CreateConfigDTO createConfigDTO);
 
     void check(ConfigCheckDTO configDTO);
 
