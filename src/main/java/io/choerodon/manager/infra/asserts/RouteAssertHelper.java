@@ -1,6 +1,6 @@
 package io.choerodon.manager.infra.asserts;
 
-import io.choerodon.core.exception.ext.AlreadyExsitedException;
+import io.choerodon.core.exception.ext.AlreadyExistedException;
 import io.choerodon.core.exception.ext.IllegalArgumentException;
 import io.choerodon.core.exception.ext.NotExistedException;
 import io.choerodon.manager.infra.dto.RouteDTO;
@@ -58,7 +58,7 @@ public class RouteAssertHelper extends AssertHelper {
         RouteDTO dto = new RouteDTO();
         dto.setName(name);
         if (routeMapper.selectOne(dto) != null) {
-            throw new AlreadyExsitedException("error.route.name.existed");
+            throw new AlreadyExistedException("error.route.name.existed");
         }
     }
 
@@ -66,7 +66,7 @@ public class RouteAssertHelper extends AssertHelper {
         RouteDTO dto = new RouteDTO();
         dto.setPath(path);
         if (routeMapper.selectOne(dto) != null) {
-            throw new AlreadyExsitedException("error.route.path.existed");
+            throw new AlreadyExistedException("error.route.path.existed");
         }
     }
 
