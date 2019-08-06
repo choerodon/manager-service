@@ -37,4 +37,9 @@ databaseChangeLog(logicalFilePath: 'script/db/mgmt_swaggeragger.groovy') {
             column(name: 'SERVICE_VERSION', type: 'VARCHAR(64)')
         }
     }
+
+    changeSet(author: 'superleader8@gmail.com', id: '2019-08-06-add-index'){
+        dropIndex(indexName: 'IDX_MGMT_SWAGGER_I1', tableName:'MGMT_SWAGGER')
+        addUniqueConstraint(tableName: 'MGMT_SWAGGER', columnNames: 'SERVICE_NAME,SERVICE_VERSION', constraintName: 'UK_MGMT_SWAGGER_U1')
+    }
 }
