@@ -1,58 +1,58 @@
 # Manager Service
+本服务是猪齿鱼微服务框架的服务管理中心，主要功能包括配置管理，路由管理，和swagger管理
 
-This service is the management center of the Choerodon Microservices Framework. It`s main functions include configuration management, route management, and swagger management.
 
-## Installation and Getting Started
+## 依赖
 
-Create a `manager_service` database in MySQL：
+- mysql: 5.6+
+- redis: 3.0+
 
-```sql
-CREATE USER 'choerodon'@'%' IDENTIFIED BY "123456";
-CREATE DATABASE manager_service DEFAULT CHARACTER SET utf8;
-GRANT ALL PRIVILEGES ON manager_service.* TO choerodon@'%';
+
+## 安装和运行
+* d1 在mysql数据库中创建`manager_service`数据库,并在该数据库执行下面的SQL语句来创建choerodon用户，并赋予权限。  
+```sql 
+CREATE USER 'choerodon'@'%' IDENTIFIED BY "123456"; 
+CREATE DATABASE manager_service DEFAULT CHARACTER SET utf8; 
+GRANT ALL PRIVILEGES ON manager_service.* TO choerodon@'%'; 
 FLUSH PRIVILEGES;
-```
-New file of `init-local-database.sh` in the root directory of the `manager-service` project：
-
+```   
+* 在`manager_service`项目的根文件目录下创建`init-local-database.sh` 脚本,并写入下面的代码。
 ```sh
 mkdir -p target
 if [ ! -f target/choerodon-tool-liquibase.jar ]
 then
     curl http://nexus.choerodon.com.cn/repository/choerodon-release/io/choerodon/choerodon-tool-liquibase/0.6.0.RELEASE/choerodon-tool-liquibase-0.6.0.RELEASE.jar -o target/choerodon-tool-liquibase.jar
 fi
-java -Dspring.datasource.url="jdbc:mysql://localhost/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false&useInformationSchema=true&remarks=true" \
+java -Dspring.datasource.url="jdbc:mysql://localhost/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false" \
  -Dspring.datasource.username=choerodon \
  -Dspring.datasource.password=123456 \
  -Ddata.drop=false -Ddata.init=true \
  -Ddata.dir=src/main/resources \
  -jar target/choerodon-tool-liquibase.jar
 ```
-
-And executed in the root directory of the `manager-service` project：
-
+* 在`manager_service`根文件目录下执行上述创建的`init-local-database.sh`文件
 ```sh
 sh init-local-database.sh
 ```
-Then run the project in the root directory of the project：
-
+* 运行`manager_service`程序
 ```sh
 mvn spring-boot:run
 ```
 
-## Usage
-1. Configuration management：
-    * Manager provides configuration of new, update, and delete operations.
-    * You can use the `json`, `yaml`, or `properties` text formats.
-    * You can create or modify a configuration item for a version of a configuration.
-    * After updating a configuration, the manager informs the `config-server` service and the corresponding service pulls the new configuration.
-1. Route Management：
-    * The initial route can be obtained by initializing the configuration of the `api-gateway` service.
-    * You can create, edit, and edit routes.
-    * After modifying the route, the manager will notify the `config-server` service and 
-    
-## Links
+## 链接
+* [修改日志](./CHANGELOG.zh-CN.md)
 
-* [Change Log](./CHANGELOG.zh-CN.md)
+## 用法
+1. 对于`Configuration management`: 
+ * 该服务可以提供配置的new，update和delete操作
+ * 可以使用json，yml或properties的文件格式
+ * 可以为一个配置版本创建或者修改配置项
+ * 在更新配置后，可以通知`config-server`服务，从而让与之对应的服务拉去新的配置信息
+2. 对于`Route Management`
+ * 可以通过初始化`api-gateway`服务的配置信息来获取初始路由
+ * 可以创建和编辑路由
+ * 在修改路由后，可以通知`config-server`服务并让`api-gateway`服务重新拉出路由
 
-## How to Contribute
-Pull requests are welcome! Follow [this link](https://github.com/choerodon/choerodon/blob/master/CONTRIBUTING.md) for more information on how to contribute.
+## 如何提交修改
+
+如果你也想参与这个项目的开发和修改， [点击](https://github.com/choerodon/choerodon/blob/master/CONTRIBUTING.md) 去了解如何参与
