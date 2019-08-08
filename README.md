@@ -9,7 +9,7 @@
 
 
 ## 安装和运行
-* d1 在mysql数据库中创建`manager_service`数据库,并在该数据库执行下面的SQL语句来创建choerodon用户，并赋予权限。  
+* 在mysql数据库中创建`manager_service`数据库,并在该数据库执行下面的SQL语句来创建choerodon用户，并赋予权限。  
 ```sql 
 CREATE USER 'choerodon'@'%' IDENTIFIED BY "123456"; 
 CREATE DATABASE manager_service DEFAULT CHARACTER SET utf8; 
@@ -18,17 +18,22 @@ FLUSH PRIVILEGES;
 ```   
 * 在`manager_service`项目的根文件目录下创建`init-local-database.sh` 脚本,并写入下面的代码。
 ```sh
-mkdir -p target
-if [ ! -f target/choerodon-tool-liquibase.jar ]
-then
-    curl http://nexus.choerodon.com.cn/repository/choerodon-release/io/choerodon/choerodon-tool-liquibase/0.6.0.RELEASE/choerodon-tool-liquibase-0.6.0.RELEASE.jar -o target/choerodon-tool-liquibase.jar
-fi
-java -Dspring.datasource.url="jdbc:mysql://localhost/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false" \
+#!/usr/bin/env bash
+MAVEN_LOCAL_REPO=$(cd / && mvn help:evaluate -Dexpression=settings.localRepository -q -DforceStdout)
+TOOL_GROUP_ID=io.choerodon
+TOOL_ARTIFACT_ID=choerodon-tool-liquibase
+TOOL_VERSION=0.11.0.RELEASE
+TOOL_JAR_PATH=${MAVEN_LOCAL_REPO}/${TOOL_GROUP_ID/\./\/}/${TOOL_ARTIFACT_ID}/${TOOL_VERSION}/${TOOL_ARTIFACT_ID}-${TOOL_VERSION}.jar
+mvn org.apache.maven.plugins:maven-dependency-plugin:get \
+ -Dartifact=${TOOL_GROUP_ID}:${TOOL_ARTIFACT_ID}:${TOOL_VERSION} \
+ -Dtransitive=false
+
+java -Dspring.datasource.url="jdbc:mysql://localhost/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false&useInformationSchema=true&remarks=true" \
  -Dspring.datasource.username=choerodon \
  -Dspring.datasource.password=123456 \
  -Ddata.drop=false -Ddata.init=true \
  -Ddata.dir=src/main/resources \
- -jar target/choerodon-tool-liquibase.jar
+ -jar ${TOOL_JAR_PATH}
 ```
 * 在`manager_service`根文件目录下执行上述创建的`init-local-database.sh`文件
 ```sh
