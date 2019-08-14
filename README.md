@@ -7,6 +7,75 @@
 - mysql: 5.6+
 - redis: 3.0+
 
+## 服务配置
+
+- application.yml配置
+```
+spring:
+  datasource:
+    url: jdbc:mysql://localhost/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false&useInformationSchema=true&remarks=true
+    username: choerodon
+    password: 123456
+  redis:
+    host: localhost
+    port: 6379
+    #使用和gateway-helper同一个redis数据库，存储在gateway-helper,查询在manager-service
+    database: 4
+mybatis:
+  mapperLocations: classpath*:/mapper/*.xml
+  configuration:
+    mapUnderscoreToCamelCase: true
+eureka:
+  instance:
+    preferIpAddress: true
+    leaseRenewalIntervalInSeconds: 1
+    leaseExpirationDurationInSeconds: 3
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8000/eureka/}
+choerodon:
+  eureka:
+    event:
+      max-cache-size: 300
+      retry-time: 5
+      retry-interval: 3
+      skip-services: config**, **register-server, **gateway**, zipkin**, hystrix**, oauth**
+  swagger:
+    client: client
+    oauth-url: http://localhost:8080/oauth/oauth/authorize
+  gateway:
+    domain: 127.0.0.1:8080
+    names: api-gateway, gateway-helper
+  register:
+    executetTime: 100
+  profiles:
+    active: sit
+```
+- bootstrap.yml配置
+```
+server:
+  port: 8963
+spring:
+  application:
+    name: manager-service
+  mvc:
+    static-path-pattern: /**
+  resources:
+    static-locations: classpath:/static,classpath:/public,classpath:/resources,classpath:/META-INF/resources,file:/dist
+management:
+  endpoint:
+    health:
+      show-details: ALWAYS
+  server:
+    port: 8964
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+feign:
+  hystrix:
+    enabled: false
+```
 
 ## 安装和运行
 * 在mysql数据库中创建`manager_service`数据库,并在该数据库执行下面的SQL语句来创建choerodon用户，并赋予权限。  
