@@ -6,7 +6,7 @@ import com.github.pagehelper.PageInfo;
 import io.choerodon.base.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.exception.ext.NotExistedException;
-import io.choerodon.core.exception.ext.UpdateExcetion;
+import io.choerodon.core.exception.ext.UpdateException;
 import io.choerodon.manager.api.dto.*;
 import io.choerodon.manager.app.service.ConfigService;
 import io.choerodon.manager.infra.asserts.ConfigAssertHelper;
@@ -94,12 +94,12 @@ public class ConfigServiceImpl implements ConfigService {
             if (defaultDto != null) {
                 defaultDto.setIsDefault(false);
                 if (configMapper.updateByPrimaryKeySelective(defaultDto) != 1) {
-                    throw new UpdateExcetion("error.config.update");
+                    throw new UpdateException("error.config.update");
                 }
             }
             dto.setIsDefault(true);
             if (configMapper.updateByPrimaryKeySelective(dto) != 1) {
-                throw new UpdateExcetion("error.config.update");
+                throw new UpdateException("error.config.update");
             }
         }
         return ConfigConverter.dto2Vo(dto);

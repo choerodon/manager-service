@@ -6,7 +6,7 @@ import com.github.pagehelper.PageInfo;
 import io.choerodon.base.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.exception.ext.InsertException;
-import io.choerodon.core.exception.ext.UpdateExcetion;
+import io.choerodon.core.exception.ext.UpdateException;
 import io.choerodon.core.swagger.ChoerodonRouteData;
 import io.choerodon.manager.app.service.RouteService;
 import io.choerodon.manager.infra.asserts.RouteAssertHelper;
@@ -122,7 +122,7 @@ public class RouteServiceImpl implements RouteService {
         }
         route.setBuiltIn(null);
         if (routeMapper.updateByPrimaryKeySelective(routeDTO) != 1) {
-            throw new UpdateExcetion("error.route.update");
+            throw new UpdateException("error.route.update");
         }
         modifyRouteFromGoRegister(routeDTO, ADD_ZUUL_ROOT_URL, "error to update route to register server");
         return routeMapper.selectByPrimaryKey(id);
