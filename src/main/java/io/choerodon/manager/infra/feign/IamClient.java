@@ -13,7 +13,7 @@ import java.util.List;
  * @author superlee
  * @since 2019-06-11
  */
-@FeignClient(value = "iam-service", fallback = ConfigServerClientFallback.class)
+@FeignClient(value = "base-service", fallback = ConfigServerClientFallback.class)
 public interface IamClient {
 
     /**
