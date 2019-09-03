@@ -1,10 +1,11 @@
 .c7n-iam-site-statistics {
   &-third-container {
     width: 100%;
-    margin-top: 2%;
+    margin-top: -19px;
     background: #fff;
     box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.20), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
     margin-bottom: 20px;
+
     .c7n-spin-spinning {
       display: flex;
       justify-content: center;
@@ -14,11 +15,16 @@
 
     &-timewrapper {
       display: flex;
-      align-items: flex-end;
       position: absolute;
       top: 30px;
-      right: 178px;
+      width: 100%;
       z-index: 222;
+
+      .c7n-iam-chart-date-wrap {
+        width: 66%;
+        margin-left: 3%;
+        justify-content: flex-end;
+      }
     }
   }
 }

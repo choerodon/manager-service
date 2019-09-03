@@ -1,9 +1,11 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
+/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
 import { inject, observer } from 'mobx-react';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import { withRouter } from 'react-router-dom';
-import { axios, Content, Header, Page, Permission } from '@choerodon/boot';
+import { axios, Content, Header, Page, Breadcrumb } from '@choerodon/master';
 import { Button, Table, Select, Spin } from 'choerodon-ui';
 import moment from 'moment';
 import ReactEcharts from 'echarts-for-react';
@@ -63,25 +65,28 @@ export default class SiteStatistics extends Component {
       <div className="c7n-iam-site-statistics-third-container">
         <Spin spinning={SiteStatisticsStore.loading}>
           <div className="c7n-iam-site-statistics-third-container-timewrapper">
-            <Select
-              style={{ width: '175px', marginRight: '34px' }}
-              value={SiteStatisticsStore.currentLevel}
-              getPopupContainer={() => findDOMNode(this.ref.current)}
-              onChange={this.handleChange.bind(this)}
-              label={<FormattedMessage id={`${intlPrefix}.belong`} />}
-            >
-              {this.getOptionList()}
-            </Select>
             <TimePicker
               showDatePicker
               startTime={SiteStatisticsStore.getStartDate}
               endTime={SiteStatisticsStore.getEndDate}
               func={this.loadChart}
-              handleSetStartTime={startTime => SiteStatisticsStore.setStartTime(startTime)}
-              handleSetEndTime={endTime => SiteStatisticsStore.setEndTime(endTime)}
-              handleSetStartDate={startTime => SiteStatisticsStore.setStartDate(startTime)}
-              handleSetEndDate={endTime => SiteStatisticsStore.setEndDate(endTime)}
+              handleSetStartTime={(startTime) => SiteStatisticsStore.setStartTime(startTime)}
+              handleSetEndTime={(endTime) => SiteStatisticsStore.setEndTime(endTime)}
+              handleSetStartDate={(startTime) => SiteStatisticsStore.setStartDate(startTime)}
+              handleSetEndDate={(endTime) => SiteStatisticsStore.setEndDate(endTime)}
             />
+            <div style={{ flex: 1 }}>
+              <Select
+                style={{ width: 'calc(100% - 32px)', margin: '0 16px' }}
+                value={SiteStatisticsStore.currentLevel}
+                // eslint-disable-next-line react/no-find-dom-node
+                getPopupContainer={() => findDOMNode(this.ref.current)}
+                onChange={this.handleChange.bind(this)}
+                label={<FormattedMessage id={`${intlPrefix}.belong`} />}
+              >
+                {this.getOptionList()}
+              </Select>
+            </div>
           </div>
           <ReactEcharts
             className="c7n-iam-site-statistics-third-chart"
@@ -155,7 +160,7 @@ export default class SiteStatistics extends Component {
     let handledData = [];
     let handledApis = {};
     if (chartData) {
-      handledData = chartData.details.map(item => ({
+      handledData = chartData.details.map((item) => ({
         type: 'line',
         name: `${item.menu.split(':')[1]}: ${item.menu.split(':')[0]}`,
         data: item.data,
@@ -214,6 +219,7 @@ export default class SiteStatistics extends Component {
         selected: handledApis,
         formatter(name) {
           const showLength = 44; // 截取长度
+          // eslint-disable-next-line prefer-destructuring
           name = name.split(':')[1];
           if (name.length > showLength) {
             name = `${name.substring(0, showLength)}...`;
@@ -340,15 +346,10 @@ export default class SiteStatistics extends Component {
             icon="get_app"
           >
             导出表格csv文件
-          </Button>
-          <Button
-            onClick={this.handleRefresh}
-            icon="refresh"
-          >
-            <FormattedMessage id="refresh" />
-          </Button>
+          </Button>          
           <a id="download" download="site-statistics.csv" href="#" />
         </Header>
+        <Breadcrumb />
         <Content ref={this.ref}>
           {this.getChart()}
           {this.getTable()}

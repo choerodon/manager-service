@@ -1,5 +1,6 @@
+/* eslint-disable max-classes-per-file */
 import { action, computed, observable, toJS } from 'mobx';
-import { axios, store, stores } from '@choerodon/boot';
+import { axios, store, stores } from '@choerodon/master';
 import moment from 'moment';
 import querystring from 'query-string';
 
@@ -21,14 +22,23 @@ class DataSorter {
 @store('SiteStatisticsStore')
 class SiteStatisticsStore {
   @observable chartData = null;
+
   @observable tableData = [];
+
   @observable startTime = moment().subtract(6, 'days');
+
   @observable endTime = moment();
+
   @observable currentLevel = 'site';
+
   @observable startDate = null;
+
   @observable endDate = null;
+
   @observable loading = false;
+
   allTableDate = [];
+
   set = new Set();
 
   @action setStartDate(data) {
@@ -44,7 +54,7 @@ class SiteStatisticsStore {
   }
 
   @action setTableData(data) {
-    this.tableData = (data.details ? data.details.map(v => ({
+    this.tableData = (data.details ? data.details.map((v) => ({
       code: v.menu.split(':')[0],
       name: v.menu.split(':')[1],
       sum: v.data.reduce((prev, cur) => prev + cur, 0),
@@ -130,7 +140,7 @@ class SiteStatisticsStore {
           Choerodon.prompt(data.message);
         } else {
           if (data.menu.length) {
-            const arr = data.menu.map(item => `${item.split(':')[1]}: ${item.split(':')[0]}`);
+            const arr = data.menu.map((item) => `${item.split(':')[1]}: ${item.split(':')[0]}`);
             data.menu = arr;
           }
 
@@ -145,7 +155,7 @@ class SiteStatisticsStore {
   };
 
   tableDataFormatter = (data) => {
-    const tableData = (data.details ? data.details.map(v => ({
+    const tableData = (data.details ? data.details.map((v) => ({
       code: v.menu.split(':')[0],
       name: v.menu.split(':')[1],
       sum: v.data.reduce((prev, cur) => prev + cur, 0),
@@ -163,7 +173,7 @@ class SiteStatisticsStore {
       if (data.failed) {
         Choerodon.prompt(data.message);
       } else {
-        data = this.tableDataFormatter(data).map(values => {
+        data = this.tableDataFormatter(data).map((values) => {
           this.set.add(values.code);
           return { ...values, level };
         });
@@ -172,7 +182,7 @@ class SiteStatisticsStore {
     });
   };
 
-  getMenuData = level => axios.get(`/iam/v1/menus/menu_config?code=choerodon.code.top.${level}`).then((data) => {
+  getMenuData = (level) => axios.get(`/iam/v1/menus/menu_config?code=choerodon.code.top.${level}`).then((data) => {
     this.dfsAddAllMenu(data.subMenus, level);
   });
 
