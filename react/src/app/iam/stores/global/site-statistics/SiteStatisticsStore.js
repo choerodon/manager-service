@@ -182,7 +182,7 @@ class SiteStatisticsStore {
     });
   };
 
-  getMenuData = (level) => axios.get(`/iam/v1/menus/menu_config?code=choerodon.code.top.${level}`).then((data) => {
+  getMenuData = (level) => axios.get(`/base/v1/menus/menu_config?code=choerodon.code.top.${level}`).then((data) => {
     this.dfsAddAllMenu(data.subMenus, level);
   });
 
