@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Tree, Input, Icon, Tooltip } from 'choerodon-ui';
 import { inject, observer } from 'mobx-react';
 import { injectIntl, FormattedMessage } from 'react-intl';
-import { axios } from '@choerodon/boot';
+import { axios } from '@choerodon/master';
 import _ from 'lodash';
 import querystring from 'query-string';
 import classnames from 'classnames';
@@ -161,7 +161,7 @@ export default class ApiTree extends Component {
     const expandedKeys = this.state.expandedKeys;
     const { searchValue } = this.state;
     let icon = <Icon
-      style={{ color: '#3F51B5' }}
+      style={{ color: 'rgba(0,0,0,0.65)', fontSize: '.14rem' }}
       type="folder_open"
     />;
 
@@ -198,7 +198,7 @@ export default class ApiTree extends Component {
       if (item.children) {
         const icon2 = (
           <Icon
-            style={{ color: '#3F51B5' }}
+            style={{ color: 'rgba(0,0,0,0.65)', fontSize: '.14rem' }}
             type={expandedKeys.includes(item.key) ? 'folder_open2' : 'folder_open'}
             className={`c7n-iam-apitest-tree-${item.key}`}
           />
@@ -220,7 +220,7 @@ export default class ApiTree extends Component {
       <div className="c7n-iam-apitest-tree-content">
         <div className="c7n-iam-apitest-tree-top">
           <Input
-            prefix={<Icon type="filter_list" style={{ color: 'black' }} />}
+            prefix={<Icon type="search" style={{ color: 'black' }} />}
             placeholder={intl.formatMessage({ id: 'global.apitest.filter' })}
             onChange={e => this.filterApi.call(null, e.target.value)}
           />
