@@ -77,7 +77,7 @@ export default class SiteStatistics extends Component {
             />
             <div style={{ flex: 1 }}>
               <Select
-                style={{ width: 'calc(100% - 32px)', margin: '0 16px' }}
+                style={{ width: 'calc(100% - 60px)', marginLeft: 'calc(16px + 6%)', marginRight: '16px' }}
                 value={SiteStatisticsStore.currentLevel}
                 // eslint-disable-next-line react/no-find-dom-node
                 getPopupContainer={() => findDOMNode(this.ref.current)}
@@ -346,7 +346,7 @@ export default class SiteStatistics extends Component {
             icon="get_app"
           >
             导出表格csv文件
-          </Button>          
+          </Button>
           <a id="download" download="site-statistics.csv" href="#" />
         </Header>
         <Breadcrumb />
