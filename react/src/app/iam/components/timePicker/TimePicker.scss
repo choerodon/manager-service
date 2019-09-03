@@ -1,38 +1,30 @@
 .c7n-iam-chart-date-wrap {
   display: flex;
+  align-items: center;
 
   &-btn {
     display: inline-block;
     margin-right: 10px;
+
     .c7n-btn {
       padding: 0 8px;
     }
   }
 
   .c7n-iam-chart-date-time-pick {
-    //display: inline-block;
-    height: 32px;
     width: 214px;
-    line-height: 32px;
-    //background: rgba(0, 0, 0, .04);
     border-radius: 0 2px 2px 0;
 
-    .c7n-calendar-picker-input {
-      margin-bottom: 3px;
-      padding-left: 24px;
+    .c7n-input-has-border.c7n-input-wrapper:before {
+      border: none;
     }
 
-    .c7n-calendar-range-picker-input {
-      width: 80px;
-    }
-
-    .c7n-calendar-picker-icon {
+    .c7n-input-suffix {
       left: 8px;
-      font-size: 20px;
     }
 
-    .c7n-calendar-underline {
-      display: none;
+    .c7n-calendar-picker-input {
+      padding-left: 24px;
     }
 
     &-selected {

@@ -1,6 +1,6 @@
 const config = {
-  server: 'http://api.alpha.saas.hand-china.com',
-  master: '@choerodon/master',
+  server: 'http://api.staging.saas.hand-china.com',
+  master: './node_modules/@choerodon/master/lib/master.js',
   projectType: 'choerodon',
   buildType: 'single',
   dashboard: {},
