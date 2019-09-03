@@ -58,6 +58,14 @@
     .c7n-tree > li:first-child {
       padding-top: 18px;
     }
+    .c7n-tree li ul {
+      padding: 0 0 0 .12rem;
+    }
+
+    .c7n-tree-title {
+      cursor: pointer !important;
+      color: rgba(0, 0, 0, .65);
+    }
 
     .c7n-tree li .c7n-tree-node-content-wrapper {
       width: calc(100% - 22px);
@@ -74,6 +82,16 @@
 
     .c7n-tree-switcher {
       margin-top: 5px;
+    }
+    .c7n-iam-apitest-api-wrapper-1,
+    .c7n-iam-apitest-api-wrapper-2,
+    .c7n-iam-apitest-api-wrapper-3,
+    .c7n-iam-apitest-api-wrapper-4,
+    .c7n-iam-apitest-api-wrapper-5 {
+      // margin-bottom: 0 !important;
+      .c7n-tree-switcher {
+        width: 0.1rem;
+      }
     }
 
     .c7n-tree li span.c7n-tree-iconEle {
@@ -95,14 +113,15 @@
       text-align: center;
       font-size: 13px;
       color: #fff;
-      text-transform: uppercase;
       border-radius: 2px;
-      height: 18px;
+      width: .4rem;
+      height: .16rem;
       display: inline-flex;
       align-items: center;
 
       > div {
         transform: scale(.8);
+        margin: 0 auto;
       }
 
       &-get {
