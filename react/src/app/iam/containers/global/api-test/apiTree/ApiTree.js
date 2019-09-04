@@ -9,7 +9,7 @@ import classnames from 'classnames';
 import './ApiTree.scss';
 import APITestStore from '../../../../stores/global/api-test';
 
-const TreeNode = Tree.TreeNode;
+const { TreeNode } = Tree;
 
 @injectIntl
 @inject('AppState')
@@ -19,14 +19,8 @@ export default class ApiTree extends Component {
     searchValue: '',
     treeData: [],
     dataList: [],
-    pagination: {
-      current: 1,
-      pageSize: 200,
-      total: 0,
-    },
     expandedKeys: [],
     autoExpandParent: false,
-    eventKey: null, // 当前点击节点的key
     selectedKeys: [],
   }
 
@@ -55,8 +49,8 @@ export default class ApiTree extends Component {
   generateList = (data) => {
     for (let i = 0; i < data.length; i += 1) {
       const node = data[i];
-      const key = node.key;
-      const title = node.title;
+      const { key } = node;
+      const { title } = node;
       this.state.dataList.push({ key, title });
       if (node.children) {
         this.generateList(node.children, node.key);
@@ -70,21 +64,7 @@ export default class ApiTree extends Component {
       expandedKeys: newExpandedKeys,
       autoExpandParent: false,
     });
-    // APITestStore.setExpandedKeys(expandedKeys);
-    // const { expandedKeys } = this.state;
-    // let newKey;
-    // if (expanded) {
-    //   // newKey = expandedKeys.filter(el => el !== newExpandedKeys[0]);
-    //   this.setState({
-    //     expandedKeys: newExpandedKeys,
-    //     autoExpandParent: false,
-    //   });
-    // } else {
-    //   window.console.log('test');
-    // }
-    // this.setState({ expandedKeys, autoExpandParent: false });
   }
-
 
   onSelect = (selectedKey, info) => {
     if (info.selectedNodes[0].props.children && !info.selectedNodes[0].props.children.length) {
@@ -103,7 +83,7 @@ export default class ApiTree extends Component {
         newExpandedKey = expandedKeys;
         newExpandedKey.push(selectedKey[0]);
       } else {
-        newExpandedKey = expandedKeys.filter(el => el !== selectedKey[0]);
+        newExpandedKey = expandedKeys.filter((el) => el !== selectedKey[0]);
       }
       this.setState({
         expandedKeys: newExpandedKey,
@@ -113,26 +93,13 @@ export default class ApiTree extends Component {
       });
     }
   }
-  // const { getDetail } = this.props;
-  // const eventKey = APITestStore.getEventKey;
-  // if (eventKey !== node.props.eventKey) {
-  //   APITestStore.setEventKey(node.props.eventKey);
-  //   if (selectedNodes[0].props.method) {
-  //     APITestStore.setCurrentNode(selectedNodes);
-  //     getDetail(selectedNodes);
-  //   } else {
-  //     APITestStore.setDetailFlag('empty');
-  //     APITestStore.setCurrentNode(null);
-  //   }
-  // }
-  // }
 
   getParentKey = (key, tree) => {
     let parentKey;
     for (let i = 0; i < tree.length; i += 1) {
       const node = tree[i];
       if (node.children) {
-        if (node.children.some(item => item.key === key)) {
+        if (node.children.some((item) => item.key === key)) {
           parentKey = node.key;
         } else if (this.getParentKey(key, node.children)) {
           parentKey = this.getParentKey(key, node.children);
@@ -158,12 +125,14 @@ export default class ApiTree extends Component {
   }, 1000);
 
   renderTreeNodes = (data) => {
-    const expandedKeys = this.state.expandedKeys;
+    const { expandedKeys } = this.state;
     const { searchValue } = this.state;
-    let icon = <Icon
-      style={{ color: 'rgba(0,0,0,0.65)', fontSize: '.14rem' }}
-      type="folder_open"
-    />;
+    let icon = (
+      <Icon
+        style={{ color: 'rgba(0,0,0,0.65)', fontSize: '.14rem' }}
+        type="folder_open"
+      />
+    );
 
     return data.map((item) => {
       const index = item.title.indexOf(searchValue);
@@ -222,15 +191,12 @@ export default class ApiTree extends Component {
           <Input
             prefix={<Icon type="search" style={{ color: 'black' }} />}
             placeholder={intl.formatMessage({ id: 'global.apitest.filter' })}
-            onChange={e => this.filterApi.call(null, e.target.value)}
+            onChange={(e) => this.filterApi.call(null, e.target.value)}
           />
           <div
             role="none"
             className="c7n-iam-apitest-tree-top-button"
-            onClick={onClose}
-          >
-            <Icon type="navigate_before" />
-          </div>
+          />
         </div>
         <div className="c7n-iam-apitest-tree-main">
           <Tree

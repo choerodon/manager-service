@@ -7,7 +7,7 @@ import { inject, observer } from 'mobx-react';
 import { Button, Tooltip, Tree, Input, Icon, Form, Row, Col, Select, Table, Spin, Modal } from 'choerodon-ui';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import { withRouter } from 'react-router-dom';
-import { axios as defaultAxios, Content, Header, Page, Permission } from '@choerodon/master';
+import { axios as defaultAxios, Content, Header, Page, Permission, Breadcrumb } from '@choerodon/master';
 import querystring from 'query-string';
 import _ from 'lodash';
 import classnames from 'classnames';
@@ -321,7 +321,7 @@ export default class APITest extends Component {
     handledDescWithComment = jsonFormat(handledDescWithComment);
     const handledDesc = Hjson.parse(desc);
     const { permission = { roles: [] } } = handledDesc;
-    const roles = permission.roles.length && permission.roles.map(item => ({
+    const roles = permission.roles.length && permission.roles.map((item) => ({
       name: intl.formatMessage({ id: `${intlPrefix}.default.role` }),
       value: item,
     }));
@@ -367,13 +367,15 @@ export default class APITest extends Component {
         <div className="c7n-iam-apitest-content-right-container-title">
           <span
             className={classnames('c7n-iam-apitest-content-right-container-title-methodTag', `c7n-iam-apitest-content-right-container-title-methodTag-${method}`)}
-          ><span>{method}</span></span>
+          ><span>{method}</span>
+          </span>
           <span className="c7n-iam-apitest-content-right-container-title-url">{url}</span>
           <span className={classnames('c7n-iam-apitest-content-right-container-title-rangeTag', {
             'c7n-iam-apitest-content-right-container-title-rangeTag-inner': innerInterface,
             'c7n-iam-apitest-content-right-container-title-rangeTag-outer': !innerInterface,
           })}
-          >{innerInterface ? '内部' : '公开'}</span>
+          >{innerInterface ? '内部' : '公开'}
+          </span>
         </div>
         <div className="c7n-iam-apitest-content-right-container-info">
           <div className="c7n-iam-apitest-content-right-container-info-title">
@@ -383,12 +385,12 @@ export default class APITest extends Component {
           <div className="c7n-iam-apitest-content-right-container-info-content">
             <div className="c7n-iam-apitest-content-right-container-info-interfaceinfo">
               {
-                tableValue.map(({ name, value }, index) =>
+                tableValue.map(({ name, value }, index) => (
                   <Row key={`${name}-${index}`} className="c7n-iam-apitest-content-right-container-info-interfaceinfo-row">
                     <Col span={7}>{name}:</Col>
                     <Col span={17}>{value}</Col>
-                  </Row>,
-                )
+                  </Row>
+                ))
               }
             </div>
             <div className="c7n-iam-apitest-content-right-container-info-responsedata">
@@ -505,7 +507,8 @@ ${body}`;
                 )}
               </FormItem>
               <Icon type="mode_edit" className="c7n-iam-TextEditToggle-text-icon" />
-            </div>);
+            </div>
+          );
         } else if (record.type === 'boolean') {
           editableNode = (
             <FormItem>
@@ -542,10 +545,12 @@ ${body}`;
                   <div className="c7n-iam-TextEditToggle-text">
                     <TextArea className={classnames({ errorTextarea: getFieldError(`${record.name}`) })} rows={6} placeholder={getFieldError(`${record.name}`) || '请以换行的形式输入多个值'} onChange={this.changeTextareaValue.bind(this, record.name, record.type)} />
                     <Icon type="mode_edit" className="c7n-iam-TextEditToggle-text-icon" />
-                  </div>)}
+                  </div>,
+                )}
               </FormItem>
 
-            </div>);
+            </div>
+          );
         } else if (record.type === 'file') {
           editableNode = (
             <div className="uploadContainer">
@@ -673,8 +678,7 @@ ${body}`;
               >
                 {intl.formatMessage({ id: `${intlPrefix}.sending` })}
               </Button>
-            )
-            }
+            )}
           </div>
         </div>
         <div style={{ textAlign: 'center', paddingTop: '100px', display: APITestStore.isShowResult === false ? 'block' : 'none' }}><Spin size="large" /></div>
@@ -765,6 +769,11 @@ ${body}`;
     return rightContent;
   }
 
+  goToOverview = () => {
+    const { history } = this.props;
+    history.push('/manager/api-test/overview');
+  }
+
   // 开启授权模态框
   openAuthorizeModal = () => {
     if (this.AuthorizeModal) {
@@ -823,15 +832,16 @@ ${body}`;
             }
           </Button>
           <Button
-            onClick={this.handleRefresh}
-            icon="refresh"
+            onClick={this.goToOverview}
+            icon="dashboard"
           >
-            <FormattedMessage id="refresh" />
+            调用情况
           </Button>
         </Header>
+        <Breadcrumb />
         <Content
           className="c7n-iam-apitest"
-          style={{ padding: 0, display: 'flex' }}
+          style={{ padding: 0 }}
         >
           <Spin spinning={pageLoading}>
             <div className="c7n-iam-apitest-content">
@@ -872,7 +882,7 @@ ${body}`;
             width={454}
             maskClosable={!APITestStore.modalSaving}
             onCancel={this.handleCancel}
-            onOk={e => this.AuthorizeModal.handleSubmit(e)}
+            onOk={(e) => this.AuthorizeModal.handleSubmit(e)}
           >
             {this.renderModalContent()}
           </Modal>

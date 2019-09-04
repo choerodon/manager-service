@@ -105,6 +105,8 @@
 }
 
 .c7n-iam-apitest {
+  padding: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
   .c7n-tree li span.c7n-tree-switcher {
     line-height: 28px;
   }

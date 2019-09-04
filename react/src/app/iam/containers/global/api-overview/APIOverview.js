@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import { withRouter } from 'react-router-dom';
-import { axios, Content, Header, Page, Permission } from '@choerodon/master';
+import { axios, Content, Header, Page, Permission, Breadcrumb } from '@choerodon/master';
 import { Button, Icon, Select, Spin } from 'choerodon-ui';
 import _ from 'lodash';
 import moment from 'moment';
@@ -598,6 +598,7 @@ export default class APIOverview extends Component {
             <FormattedMessage id="refresh" />
           </Button>
         </Header>
+        <Breadcrumb title="调用情况"></Breadcrumb>
         <Content>
           <div className="c7n-iam-api-overview-top-container">
             {this.getFirstChart()}
