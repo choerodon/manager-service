@@ -932,10 +932,10 @@ const zh_CN = {
   'taskdetail.empty': '无',
   'taskdetail.number.pattern': '请输入数字',
   'taskdetail.execute-strategy': '超时策略',
-  'taskdetail.execute-strategy.tips': '超时策略：\n' +
-    '阻塞： 下次触发时间若上次触发任务未完成，则暂停定时任务，任务不再被执行\n' +
-    '串行： 下次触发时间若上次触发任务未完成，两次任务可按照触发时间依次被执行\n' +
-    '并行： 下次触发时间若上次触发任务未完成，两次任务可以同时被执行',
+  'taskdetail.execute-strategy.tips': '超时策略：\n'
+    + '阻塞： 下次触发时间若上次触发任务未完成，则暂停定时任务，任务不再被执行\n'
+    + '串行： 下次触发时间若上次触发任务未完成，两次任务可按照触发时间依次被执行\n'
+    + '并行： 下次触发时间若上次触发任务未完成，两次任务可以同时被执行',
   'taskdetail.execute-strategy.required': '请选择超时策略',
   'taskdetail.stop': '阻塞',
   'taskdetail.serial': '串行',
@@ -1100,7 +1100,7 @@ const zh_CN = {
   'global.apitest.response.format': '响应格式',
   'global.apitest.default.role': '默认角色',
 
-  'global.apitest.filter': '过滤',
+  'global.apitest.filter': '请输入搜索条件',
   'global.apitest.empty.find.not': '检测到您未选择任何API',
   'global.apitest.empty.try.choose': '请在左侧树状图中选择您要查看的API',
   'global.apitest.apis.repository': '接口库',
