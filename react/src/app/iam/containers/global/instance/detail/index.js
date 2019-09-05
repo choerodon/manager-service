@@ -5,6 +5,6 @@ import DetailView from './DetailView';
 
 export default observer((props) => (
   <StoreProvider {...props}>
-    <DetailView {...props} />
+    <DetailView />
   </StoreProvider>
 ));

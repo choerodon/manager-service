@@ -1,94 +1,43 @@
-/**
- * Created by hulingfangzi on 2018/6/26.
- */
-import React, { Component } from 'react';
-import { Content, Header, Page } from '@choerodon/master';
+import React, { Component, useState, useEffect, useContext } from 'react';
+import { Content, Header, Page, axios } from '@choerodon/master';
 import { Col, Row, Table, Tabs, Spin } from 'choerodon-ui';
+import { Icon } from 'choerodon-ui/pro';
 import AceEditor from '../../../../components/yamlAce';
-import InstanceStore from '../../../../stores/global/instance';
 import emptyApi from '../list/img/noright.svg';
+import Store from './stores';
 import './index.less';
 
 const { TabPane } = Tabs;
 const intlPrefix = 'global.instance';
 
-
-export default class InstanceDetail extends Component {
-  state = this.getInitState();
-
-  instanceId = null;
-
-  getInitState() {
-    return {
-      info: null,
-      metadata: null,
-      loading: true,
-    };
-  }
-
-  constructor(props) {
-    super(props);
-    this.instanceId = props.id;
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.instanceId = nextProps.id;
-    this.setState({
-      loading: true,
-    });
-    if (this.instanceId) {
-      InstanceStore.loadInstanceInfo(this.instanceId).then((data) => {
+export default function InstanceDetail() {
+  const { id: instanceId, intl } = useContext(Store);
+  const [info, setInfo] = useState(null);
+  const [metadata, setMetadata] = useState(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (instanceId) {
+      setLoading(true);
+      axios.get(`manager/v1/instances/${instanceId}`).then((data) => {
         if (data.failed) {
-          this.setState({
-            loading: false,
-          });
+          setLoading(false);
           Choerodon.prompt(data.message);
         } else {
-          let metadata = { ...data.metadata };
-          metadata = Object.entries(metadata).map((item) => ({
+          let newMetadata = { ...data.metadata };
+          newMetadata = Object.entries(newMetadata).map((item) => ({
             name: item[0],
             value: item[1],
           }));
-          this.setState({
-            info: data,
-            metadata,
-            loading: false,
-          });
+          setInfo(data);
+          setMetadata(newMetadata);
+          setLoading(false);
         }
       });
     }
-  }
+  }, [instanceId]);
 
-  componentDidMount() {
-    this.setState({
-      loading: true,
-    });
-    if (this.instanceId) {
-      InstanceStore.loadInstanceInfo(this.instanceId).then((data) => {
-        if (data.failed) {
-          this.setState({
-            loading: false,
-          });
-          Choerodon.prompt(data.message);
-        } else {
-          let metadata = { ...data.metadata };
-          metadata = Object.entries(metadata).map((item) => ({
-            name: item[0],
-            value: item[1],
-          }));
-          this.setState({
-            info: data,
-            metadata,
-            loading: false,
-          });
-        }
-      });
-    }
-  }
-
-  getInstanceInfo = () => {
-    const { info, metadata } = this.state;
-    const { intl: { formatMessage } } = this.props;
+  function getInstanceInfo() {
+    const { formatMessage } = intl;
     const columns = [{
       title: formatMessage({ id: `${intlPrefix}.name` }),
       dataIndex: 'name',
@@ -144,11 +93,9 @@ export default class InstanceDetail extends Component {
         />
       </div>
     );
-  };
+  }
 
-  getConfigInfo = () => {
-    const { info } = this.state;
-    const { intl } = this.props;
+  function getConfigInfo() {
     return (
       <div className="configContainer">
         <div>
@@ -167,11 +114,9 @@ export default class InstanceDetail extends Component {
         </div>
       </div>
     );
-  };
+  }
 
-  render() {
-    const { loading } = this.state;
-    const { intl, id } = this.props;
+  function getEmpty() {
     const rightContent = (
       <div style={{
         display: 'flex',
@@ -189,27 +134,31 @@ export default class InstanceDetail extends Component {
         </div>
       </div>
     );
-    if (id === null) {
-      return rightContent;
-    }
-    
-        
+    return rightContent;
+  }
+
+  function getTitle() {
+    return <span><Icon type="instance_outline" />{instanceId}</span>;
+  }
+
+  if (instanceId === null) {
+    return getEmpty();
+  } else {
     return loading ? (<Spin size="large" style={{ paddingTop: 242, margin: '0 auto', width: '100%' }} />)
       : (
         <Content
-          code={`${intlPrefix}.detail`}
-          values={{ name: this.instanceId }}
+          title={getTitle()}
         >
           <Tabs>
             <TabPane
               tab={intl.formatMessage({ id: `${intlPrefix}.instanceinfo` })}
               key="instanceinfo"
-            >{this.getInstanceInfo()}
+            >{getInstanceInfo()}
             </TabPane>
             <TabPane
               tab={intl.formatMessage({ id: `${intlPrefix}.configenvInfo` })}
               key="configenvInfo"
-            >{this.getConfigInfo()}
+            >{getConfigInfo()}
             </TabPane>
           </Tabs>
         </Content>
