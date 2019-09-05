@@ -1,9 +1,9 @@
 import React, { PureComponent, useState, useContext } from 'react';
-import { FormattedMessage, injectIntl } from 'react-intl';
 import { Content, Page, Header, Breadcrumb } from '@choerodon/master';
 import { Icon, Tree } from 'choerodon-ui/pro';
+import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Input, Button } from 'choerodon-ui';
+import { Input } from 'choerodon-ui';
 import DetailView from '../detail';
 import Store from './stores';
 
@@ -16,11 +16,6 @@ export default observer((props) => {
   const [code, setCode] = useState(null);
   const [inputValue, setInputValue] = useState('');
 
-  function refresh() {
-    setCode(null);
-    dataSet.query();
-  }
-  
   function showDetail(record) {
     if (record.get('service')) {
       setCode(record.get('instanceId'));
@@ -30,16 +25,22 @@ export default observer((props) => {
     const name = record.get('instanceId').toLowerCase();
     const searchValue = inputValue.toLowerCase();
     const index = name.indexOf(searchValue);
-    const beforeStr = name.substr(0, index);
-    const afterStr = name.substr(index + searchValue.length);
-    const title = (
+    const beforeStr = name.substr(0, index).toLowerCase();
+    const afterStr = name.substr(index + searchValue.length).toLowerCase();
+    const title = index > -1 ? (
       <span className="tree-title" onClick={() => showDetail(record)}>
         {!record.get('service') && <Icon type={record.get('expand') ? 'folder_open2' : 'folder_open'} />}
         {record.get('service') && <Icon type="instance_outline" />}
 
         {beforeStr}
-        <span style={{ color: '#f50' }}>{inputValue}</span>
+        <span style={{ color: '#f50' }}>{inputValue.toLowerCase()}</span>
         {afterStr}
+      </span>
+    ) : (
+      <span className="tree-title" onClick={() => showDetail(record)}>
+        {!record.get('service') && <Icon type={record.get('expand') ? 'folder_open2' : 'folder_open'} />}
+        {record.get('service') && <Icon type="instance_outline" />}
+        {name}
       </span>
     );
     return title;
@@ -49,6 +50,19 @@ export default observer((props) => {
   }
   function handleSearch(e) {
     setInputValue(e.target.value);
+  }
+  function handleExpand(e) {
+    runInAction(() => {
+      dataSet.forEach((record) => {
+        if (!record.get('service')) {
+          if (record.get('instanceId').toLowerCase().includes(inputValue.toLowerCase())) {
+            record.set('expand', true);
+          } else {
+            record.set('expand', false);
+          }
+        }
+      });
+    });
   }
   
   return (
@@ -63,9 +77,9 @@ export default observer((props) => {
             placeholder="请输入搜索条件"
             onChange={handleSearch}
             value={inputValue}
+            onPressEnter={handleExpand}
           />
           <Tree
-            
             renderer={nodeRenderer}
             dataSet={dataSet}
           />
