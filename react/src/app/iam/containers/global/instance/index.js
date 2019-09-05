@@ -5,14 +5,12 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { asyncRouter, nomatch } from '@choerodon/master';
 
-const index = asyncRouter(() => (import('./Instance')), () => import('../../../stores/global/instance'));
-const detail = asyncRouter(() => import('./InstanceDetail'));
+const list = asyncRouter(() => import('./list'));
 
 const Index = ({ match }) => (
   <Switch>
-    <Route exact path={match.url} component={index} />
-    <Route path={`${match.url}/detail/:id`} component={detail} />
-    <Route path={'*'} component={nomatch} />
+    <Route exact path={match.url} component={list} />
+    <Route path="*" component={nomatch} />
   </Switch>
 );
 
