@@ -131,7 +131,8 @@ const pageDetail = {
   'global.instance.detail.title': '实例"{name}"的实例详情',
   'global.instance.detail.description': '实例属于一个微服务。您可以在此查看实例的详细信息。',
   'global.instance.detail.link': `${docServer}/user-guide/microservice-development/microservice-management/instance/`,
-
+  'global.instance.empty.find.not': '检测到您未选择任何实例',
+  'global.instance.empty.try.choose': '请在左侧树状图中选择您要查看的实例',
 
   // 路由管理
   'global.route.title': '平台"{name}"的路由管理',
@@ -1176,6 +1177,7 @@ const zh_CN = {
   'mailtemplate.mail.content': '邮件内容',
   'mailtemplate.code.exist': '模板编码已存在，请输入其他模板编码',
   'mailtemplate.mailcontent.tip.link': `${docServer}/user-guide/system-configuration/message/variable-description/`,
+  // eslint-disable-next-line no-template-curly-in-string
   'mailtemplate.mailcontent.tip': '模板中的参数变量通过`${}`进行替换，在发送时，将`${}`替换成对应的实际变量。登录名:${loginName}',
   'mailtemplate.mailcontent.required': '邮件模板内容不可为空',
 
@@ -1201,6 +1203,7 @@ const zh_CN = {
   'inmailtemplate.title.required': '请输入站内信标题',
   'inmailtemplate.mail.content': '站内信内容',
   'inmailtemplate.code.exist': '模板编码已存在，请输入其他模板编码',
+  // eslint-disable-next-line no-template-curly-in-string
   'inmailtemplate.mailcontent.tip': '模板中的参数变量通过`${}`进行替换，在发送时，将`${}`替换成对应的实际变量。登录名:${loginName}',
   'inmailtemplate.mailcontent.required': '站内信模板内容不可为空',
 

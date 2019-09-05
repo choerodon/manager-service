@@ -1,0 +1,51 @@
+.c7n-instance {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  border-top: .01rem solid rgba(0, 0, 0, 0.12);
+  &-tree {
+    width: 2.3rem;
+    padding: .1rem;
+    box-sizing: content-box;
+    border-right: .01rem solid rgba(0, 0, 0, 0.12);
+    overflow: auto;
+    flex-shrink: 0;
+    .c7n-tree {
+      .c7n-tree-switcher-noop {
+        width: .05rem;
+        cursor: default;
+      }
+      &-title {
+        .tree-title {
+          display: inline-block;
+          line-height: .24rem;
+        }
+      }
+    }
+    .c7n-input-has-border.c7n-input-wrapper:before {
+      background: rgba(0, 0, 0, 0.06);
+      border: none;
+    }
+
+    .c7n-input-wrapper {
+      margin-bottom: 0;
+    }
+
+    .c7n-input-rendered-wrapper {
+      padding-left: 10px;
+    }
+
+    .c7n-input-prefix {
+      left: 8px;
+    }
+  }
+  &-content {
+    flex: 1;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+    .description {
+      display: none;
+    }
+  }
+}
