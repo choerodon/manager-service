@@ -11,10 +11,12 @@ import io.choerodon.manager.infra.mapper.ActuatorMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -25,12 +27,10 @@ public class ActuatorRefreshServiceImpl implements ActuatorRefreshService {
     private static final String METADATA_REFRESH_SAGA_CODE = "mgmt-metadata-refresh";
     private ActuatorMapper actuatorMapper;
     private TransactionalProducer producer;
-    private ActuatorRefreshService actuatorRefreshService;
 
-    public ActuatorRefreshServiceImpl(ActuatorMapper actuatorMapper, TransactionalProducer producer,@Lazy ActuatorRefreshService actuatorRefreshService) {
+    public ActuatorRefreshServiceImpl(ActuatorMapper actuatorMapper, TransactionalProducer producer) {
         this.actuatorMapper = actuatorMapper;
         this.producer = producer;
-        this.actuatorRefreshService = actuatorRefreshService;
     }
 
     @Override
@@ -45,30 +45,42 @@ public class ActuatorRefreshServiceImpl implements ActuatorRefreshService {
                 return false;
             }
             actuator.setValue(json);
+            actuator.setStatus(ActuatorDTO.STATUS_PREPARED);
             actuatorMapper.updateByPrimaryKey(actuator);
         } else {
             example.setValue(json);
+            example.setStatus(ActuatorDTO.STATUS_PREPARED);
             actuatorMapper.insert(example);
         }
-        actuatorRefreshService.sendActuatorEvent(json, serviceName);
         return true;
     }
 
-    @Override
+    /**
+     * 每10秒尝试发送一次准备好的数据
+     */
+    @Scheduled(fixedDelay = 10000)
     @SuppressWarnings("unchecked")
     @Saga(code = ACTUATOR_REFRESH_SAGA_CODE, description = "刷新Actuator端口数据", inputSchemaClass = String.class)
-    public void sendActuatorEvent(String json, String service){
-        try {
-            Map jsonMap = OBJECT_MAPPER.readValue(json, Map.class);
-            jsonMap.put("service", service);
-            producer.apply(StartSagaBuilder
-                    .newBuilder()
-                    .withLevel(ResourceLevel.SITE)
-                    .withRefType("service")
-                    .withRefId(service)
-                    .withSagaCode(ACTUATOR_REFRESH_SAGA_CODE), startSagaBuilder -> startSagaBuilder.withPayloadAndSerialize(jsonMap));
-        } catch (IOException e) {
-            LOGGER.warn("actuator send event exception", e);
+    public void processActuatorScheduled() {
+        ActuatorDTO example = new ActuatorDTO();
+        example.setStatus(ActuatorDTO.STATUS_PREPARED);
+        List<ActuatorDTO> preparedActuators = actuatorMapper.select(example);
+        for (ActuatorDTO actuator : preparedActuators){
+            try {
+                Map jsonMap = OBJECT_MAPPER.readValue(actuator.getValue(), Map.class);
+                jsonMap.put("service", actuator.getServiceName());
+                producer.apply(StartSagaBuilder
+                        .newBuilder()
+                        .withLevel(ResourceLevel.SITE)
+                        .withRefType("service")
+                        .withRefId(actuator.getServiceName())
+                        .withSagaCode(ACTUATOR_REFRESH_SAGA_CODE), startSagaBuilder -> startSagaBuilder.withPayloadAndSerialize(jsonMap));
+                actuator.setStatus(ActuatorDTO.STATUS_PROCESSED);
+                actuatorMapper.updateByPrimaryKey(actuator);
+                LOGGER.info("start actuator saga success {}", actuator.getServiceName());
+            } catch (IOException e) {
+                LOGGER.warn("actuator send event exception", e);
+            }
         }
     }
 

@@ -31,4 +31,10 @@ databaseChangeLog(logicalFilePath: 'script/db/mgmt_actuator.groovy') {
             column(name: 'SERVICE_VERSION', type: 'VARCHAR(64)')
         }
     }
+
+    changeSet(author: 'xausky@163.com', id: '2019-09-09-add-status'){
+        addColumn(tableName: 'MGMT_ACTUATOR') {
+            column(name: 'STATUS', type: 'VARCHAR(32)', remarks: '发送状态')
+        }
+    }
 }

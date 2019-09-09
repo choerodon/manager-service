@@ -10,7 +10,5 @@ public interface ActuatorRefreshService {
      */
     boolean updateOrInsertActuator(String serviceName, String serviceVersion, String json);
 
-    void sendActuatorEvent(String json, String service);
-
     void sendMetadataEvent(String json, String service);
 }
