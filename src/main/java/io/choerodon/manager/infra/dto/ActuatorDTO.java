@@ -9,6 +9,9 @@ import javax.persistence.Table;
 
 @Table(name = "mgmt_actuator")
 public class ActuatorDTO extends BaseDTO {
+    public static final String STATUS_PREPARED = "PREPARED";
+    public static final String STATUS_PROCESSED = "PROCESSED";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,6 +21,16 @@ public class ActuatorDTO extends BaseDTO {
     private String serviceVersion;
 
     private String value;
+
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public Long getId() {
         return id;
