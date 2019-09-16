@@ -1,96 +1,54 @@
 import React, { Component, useState, useEffect, useContext } from 'react';
 import { Content, Header, Page, axios } from '@choerodon/master';
-import { Col, Row, Table, Tabs, Spin } from 'choerodon-ui';
-import { Icon } from 'choerodon-ui/pro';
+import { Col, Row, Tabs, Spin } from 'choerodon-ui';
+import { Icon, Table, Form, Output } from 'choerodon-ui/pro';
 import AceEditor from '../../../../components/yamlAce';
 import emptyApi from '../list/img/noright.svg';
 import Store from './stores';
 import './index.less';
 
 const { TabPane } = Tabs;
-const intlPrefix = 'global.instance';
+const { Column } = Table;
 
 export default function InstanceDetail() {
-  const { id: instanceId, intl } = useContext(Store);
-  const [info, setInfo] = useState(null);
-  const [metadata, setMetadata] = useState(null);
+  const { id: instanceId, intl, metadataDataSet, instanceDataSet, intlPrefix } = useContext(Store);
+  const configInfo = (instanceDataSet.current && instanceDataSet.current.get('configInfoYml')) || {};
+  const envInfo = (instanceDataSet.current && instanceDataSet.current.get('envInfoYml')) || {};
   const [loading, setLoading] = useState(true);
+  async function loadData() {
+    setLoading(true);
+    instanceDataSet.setQueryParameter('instanceId', instanceId);
+    await instanceDataSet.query();
+    setLoading(false);
+  }
   useEffect(() => {
     if (instanceId) {
-      setLoading(true);
-      axios.get(`manager/v1/instances/${instanceId}`).then((data) => {
-        if (data.failed) {
-          setLoading(false);
-          Choerodon.prompt(data.message);
-        } else {
-          let newMetadata = { ...data.metadata };
-          newMetadata = Object.entries(newMetadata).map((item) => ({
-            name: item[0],
-            value: item[1],
-          }));
-          setInfo(data);
-          setMetadata(newMetadata);
-          setLoading(false);
-        }
-      });
+      loadData();
     }
   }, [instanceId]);
 
   function getInstanceInfo() {
-    const { formatMessage } = intl;
-    const columns = [{
-      title: formatMessage({ id: `${intlPrefix}.name` }),
-      dataIndex: 'name',
-      key: 'name',
-    }, {
-      title: formatMessage({ id: `${intlPrefix}.value` }),
-      dataIndex: 'value',
-      key: 'value',
-    }];
-    const infoList = [{
-      key: formatMessage({ id: `${intlPrefix}.instanceid` }),
-      value: info.instanceId,
-    }, {
-      key: formatMessage({ id: `${intlPrefix}.hostname` }),
-      value: info.hostName,
-    }, {
-      key: formatMessage({ id: `${intlPrefix}.ip` }),
-      value: info.ipAddr,
-    }, {
-      key: formatMessage({ id: `${intlPrefix}.service` }),
-      value: info.app,
-    }, {
-      key: formatMessage({ id: `${intlPrefix}.port` }),
-      value: info.port,
-    }, {
-      key: formatMessage({ id: `${intlPrefix}.version` }),
-      value: info.version,
-    }, {
-      key: formatMessage({ id: `${intlPrefix}.registertime` }),
-      value: info.registrationTime,
-    }, {
-      key: formatMessage({ id: `${intlPrefix}.metadata` }),
-      value: '',
-    }];
     return (
       <div className="instanceInfoContainer">
         <div className="instanceInfo">
-          {
-            infoList.map(({ key, value }) => (
-              <Row key={key}>
-                <Col span={5}>{key}:</Col>
-                <Col span={19}>{value}</Col>
-              </Row>
-            ))
-          }
+          <Form labelLayout="horizontal" labelAlign="left" dataSet={instanceDataSet}>
+            <Output name="instanceId" />
+            <Output name="hostName" />
+            <Output name="ipAddr" />
+            <Output name="app" />
+            <Output name="port" />
+            <Output name="version" />
+            <Output name="registrationTime" />
+            <Output name="metadata" renderer={() => ''} />
+          </Form>
         </div>
         <Table
-          columns={columns}
-          dataSource={metadata}
-          rowKey="name"
-          pagination={false}
-          filterBarPlaceholder={formatMessage({ id: 'filtertable' })}
-        />
+          dataSet={metadataDataSet}
+          queryBar="none"
+        >
+          <Column name="key" />
+          <Column name="value" />
+        </Table>
       </div>
     );
   }
@@ -102,14 +60,14 @@ export default function InstanceDetail() {
           <p>{intl.formatMessage({ id: `${intlPrefix}.configinfo` })}</p>
           <AceEditor
             readOnly="nocursor"
-            value={info.configInfoYml.yaml || ''}
+            value={(configInfo.yaml)}
           />
         </div>
         <div>
           <p>{intl.formatMessage({ id: `${intlPrefix}.envinfo` })}</p>
           <AceEditor
             readOnly="nocursor"
-            value={info.envInfoYml.yaml || ''}
+            value={(envInfo.yaml)}
           />
         </div>
       </div>
