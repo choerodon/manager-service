@@ -270,7 +270,7 @@ export default class APITest extends Component {
           const formData = new FormData();
           formData.append('file', this.fileInput.files[0]);
           instance[APITestStore.getApiDetail.method](this.state.requestUrl, formData)
-            .then(function (res) {
+            .then((res) => {
               this.setState({
                 isSending: false,
               });
@@ -283,7 +283,7 @@ export default class APITest extends Component {
             });
         } else if ('bodyData' in values) {
           instance[APITestStore.getApiDetail.method](this.state.requestUrl,
-            Hjson.parse(values.bodyData || '')).then(function (res) {
+            Hjson.parse(values.bodyData || '')).then((res) => {
             this.setState({
               isSending: false,
             });
@@ -295,12 +295,12 @@ export default class APITest extends Component {
             APITestStore.setIsShowResult(true);
           });
         } else {
-          instance[APITestStore.getApiDetail.method](this.state.requestUrl).then(function (res) {
+          instance[APITestStore.getApiDetail.method](this.state.requestUrl).then((res) => {
             this.setState({
               isSending: false,
             });
             APITestStore.setIsShowResult(true);
-          }).catch((error) => {
+          }).catch(() => {
             this.setState({
               isSending: false,
             });
@@ -420,7 +420,7 @@ export default class APITest extends Component {
     let handledStatusCode;
     let codeClass;
     if (statusCode) {
-      handledStatusCode = String(statusCode).split('')[0];
+      [handledStatusCode] = String(statusCode).split('');
       switch (handledStatusCode) {
         case '1':
           codeClass = 'c7n-iam-apitest-code-1';
@@ -738,7 +738,6 @@ ${body}`;
   }
 
   getRightContent() {
-    const { apiDetail, pageLoading } = APITestStore;
     const detailFlag = APITestStore.getDetailFlag;
     const { intl } = this.props;
     let rightContent;
@@ -804,12 +803,7 @@ ${body}`;
     const { isShowTree, apiDetail, pageLoading } = APITestStore;
     const { loginName, realName } = this.props.AppState.getUserInfo;
 
-    const detailFlag = APITestStore.getDetailFlag;
     const { intl } = this.props;
-    const hCursor = this.state.isHResize ? 'row-resize' : 'default';
-    const hColor = this.state.isHResize ? '#ddd' : '#fff';
-    const vCursor = this.state.isVResize ? 'col-resize' : 'default';
-    const vColor = this.state.isVResize ? 'red' : 'black';
     return (
       <Page
         service={[
@@ -843,9 +837,8 @@ ${body}`;
           className="c7n-iam-apitest"
           style={{ padding: 0 }}
         >
-          <Spin spinning={pageLoading}>
-            <div className="c7n-iam-apitest-content">
-              {!isShowTree && (
+          <div className="c7n-iam-apitest-content">
+            {!isShowTree && (
               <div className="c7n-iam-apitest-bar">
                 <div
                   role="none"
@@ -861,19 +854,18 @@ ${body}`;
                   {intl.formatMessage({ id: `${intlPrefix}.apis.repository` })}
                 </p>
               </div>
-              )}
-              <div className={classnames({ 'c7n-iam-apitest-content-tree-container': isShowTree, 'c7n-iam-apitest-content-tree-container-hidden': !isShowTree })}>
-                <ApiTree
-                  ref={(tree) => { this.apiTree = tree; }}
-                  onClose={() => { APITestStore.setIsShowTree(false); }}
-                  getDetail={this.loadDetail}
-                />
-              </div>
-              <div className="c7n-iam-apitest-content-right">
-                {this.getRightContent()}
-              </div>
+            )}
+            <div className={classnames({ 'c7n-iam-apitest-content-tree-container': isShowTree, 'c7n-iam-apitest-content-tree-container-hidden': !isShowTree })}>
+              <ApiTree
+                ref={(tree) => { this.apiTree = tree; }}
+                onClose={() => { APITestStore.setIsShowTree(false); }}
+                getDetail={this.loadDetail}
+              />
             </div>
-          </Spin>
+            <div className="c7n-iam-apitest-content-right">
+              {this.getRightContent()}
+            </div>
+          </div>
           <Modal
             bodyStyle={{ height: '356px' }}
             visible={APITestStore.getIsShowModal}
