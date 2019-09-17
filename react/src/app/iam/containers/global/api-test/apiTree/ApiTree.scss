@@ -3,7 +3,7 @@
     height: 100%;
     width: 300px;
     display: flex;
-    padding-left: 16px;
+    padding-left: .1rem;
     flex-direction: column;
     border-right: 1px solid rgba(0, 0, 0, 0.36);
 
@@ -26,8 +26,11 @@
     }
 
     &-button {
-      width: 0;
+      cursor: pointer;
+      width: 26px;
       height: 22px;
+      background-color: #3f51b5;
+      color: white;
       text-align: center;
       line-height: 18px;
       margin: 0 6px 0 11px;
@@ -111,11 +114,12 @@
     }
 
     .c7n-iam-apitest-tree-methodTag {
+      text-transform: uppercase;
       text-align: center;
       font-size: 13px;
       color: #fff;
       border-radius: 2px;
-      width: .4rem;
+      width: .48rem;
       height: .16rem;
       display: inline-flex;
       align-items: center;

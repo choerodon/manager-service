@@ -196,7 +196,10 @@ export default class ApiTree extends Component {
           <div
             role="none"
             className="c7n-iam-apitest-tree-top-button"
-          />
+            onClick={onClose}
+          >
+            <Icon type="navigate_before" />
+          </div>
         </div>
         <div className="c7n-iam-apitest-tree-main">
           <Tree
