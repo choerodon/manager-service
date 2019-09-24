@@ -1,4 +1,4 @@
-import React, { PureComponent, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Content, Page, Header, Breadcrumb } from '@choerodon/master';
 import { Icon, Tree } from 'choerodon-ui/pro';
 import { runInAction } from 'mobx';
@@ -21,6 +21,18 @@ export default observer((props) => {
       setCode(record.get('instanceId'));
     }
   }
+
+  function selectFirst() {
+    showDetail(dataSet.data[0]);
+  }
+  useEffect(() => {
+    dataSet.addEventListener('load', selectFirst);
+    return () => {
+      dataSet.removeEventListener('load', selectFirst);
+    };
+  });
+
+  
   function getTitle(record) {
     const name = record.get('instanceId').toLowerCase();
     const searchValue = inputValue.toLowerCase();

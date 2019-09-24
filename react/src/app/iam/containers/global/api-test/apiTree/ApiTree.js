@@ -19,7 +19,7 @@ export default class ApiTree extends Component {
     searchValue: '',
     treeData: [],
     dataList: [],
-    expandedKeys: [],
+    expandedKeys: ['0', '0-0', '0-0-0'],
     autoExpandParent: false,
     selectedKeys: [],
   }
@@ -32,6 +32,7 @@ export default class ApiTree extends Component {
   loadInitData = () => {
     // APITestStore.setLoading(true);
     APITestStore.loadApis().then((res) => {
+      const { getDetail } = this.props;
       if (res.failed) {
         Choerodon.prompt(res.message);
         // APITestStore.setLoading(false);
@@ -42,6 +43,12 @@ export default class ApiTree extends Component {
         this.setState({
           treeData: res.service,
         });
+        const node = [
+          {
+            props: res.service[0].children[0].children[0].children[0],
+          },
+        ];
+        getDetail(node);
       }
     });
   };

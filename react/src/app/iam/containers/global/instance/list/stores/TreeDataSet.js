@@ -23,7 +23,12 @@ export default (intl, intlPrefix) => {
             }
             return true;
           });
-          parsedData.list = parsedData.list.concat([...parentNodes].map((v) => ({ instanceId: v, service: null })));
+          parsedData.list = parsedData.list.concat([...parentNodes].map((v, index) => {
+            if (index === 0) {
+              return { instanceId: v, service: null, expand: true };
+            }
+            return { instanceId: v, service: null };
+          }));
           return parsedData;
         },
       },
