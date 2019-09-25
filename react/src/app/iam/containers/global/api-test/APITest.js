@@ -825,12 +825,6 @@ ${body}`;
               )
             }
           </Button>
-          <Button
-            onClick={this.goToOverview}
-            icon="dashboard"
-          >
-            调用情况
-          </Button>
         </Header>
         <Breadcrumb />
         <Content
