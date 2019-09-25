@@ -598,7 +598,7 @@ export default class APIOverview extends Component {
             <FormattedMessage id="refresh" />
           </Button>
         </Header>
-        <Breadcrumb title="调用情况"></Breadcrumb>
+        <Breadcrumb />
         <Content>
           <div className="c7n-iam-api-overview-top-container">
             {this.getFirstChart()}

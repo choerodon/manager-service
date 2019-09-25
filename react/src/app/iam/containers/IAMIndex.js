@@ -9,6 +9,7 @@ const instance = asyncRouter(() => import('./global/instance'));
 const configuration = asyncRouter(() => import('./global/configuration'));
 const route = asyncRouter(() => import('./global/route'));
 const apiTest = asyncRouter(() => import('./global/api-test'));
+const apiStatistics = asyncRouter(() => import('./global/api-overview'));
 const apiOverview = asyncRouter(() => import('./global/api-overview'));
 
 @inject('AppState')
@@ -26,6 +27,7 @@ class IAMIndex extends React.Component {
           <Route path={`${match.url}/configuration`} component={configuration} />
           <Route path={`${match.url}/route`} component={route} />
           <Route path={`${match.url}/api-test`} component={apiTest} />
+          <Route path={`${match.url}/api-statistics`} component={apiStatistics} />
           <Route path={`${match.url}/api-overview`} component={apiOverview} />
           <Route path="*" component={nomatch} />
         </Switch>
