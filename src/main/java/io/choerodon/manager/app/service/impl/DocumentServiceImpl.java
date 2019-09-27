@@ -170,7 +170,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (routeDTO == null) {
             return "";
         }
-        String basePath = routeDTO.getPath().replace("/**", "");
+        String basePath = routeDTO.getBackendPath().replace("/**", "");
         if (swaggerLocal) {
             basePath = "/";
             gatewayDomain = "localhost:8963";
