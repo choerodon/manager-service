@@ -14,10 +14,8 @@ import io.choerodon.manager.infra.common.annotation.ConfigNotifyRefresh;
 import io.choerodon.manager.infra.common.utils.config.ConfigUtil;
 import io.choerodon.manager.infra.conventer.ConfigConverter;
 import io.choerodon.manager.infra.dto.ConfigDTO;
-import io.choerodon.manager.infra.dto.RouteDTO;
 import io.choerodon.manager.infra.dto.ServiceDTO;
 import io.choerodon.manager.infra.mapper.ConfigMapper;
-import io.choerodon.manager.infra.mapper.RouteMapper;
 import io.choerodon.manager.infra.mapper.ServiceMapper;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -53,18 +51,14 @@ public class ConfigServiceImpl implements ConfigService {
 
     private ConfigAssertHelper configAssertHelper;
 
-    private RouteMapper routeMapper;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigServiceImpl.class);
 
     public ConfigServiceImpl(ConfigMapper configMapper,
                              ServiceMapper serviceMapper,
-                             ConfigAssertHelper configAssertHelper,
-                             RouteMapper routeMapper) {
+                             ConfigAssertHelper configAssertHelper) {
         this.configMapper = configMapper;
         this.serviceMapper = serviceMapper;
         this.configAssertHelper = configAssertHelper;
-        this.routeMapper = routeMapper;
         this.serviceMapper = serviceMapper;
     }
 
@@ -157,41 +151,6 @@ public class ConfigServiceImpl implements ConfigService {
         return update(configId, configVO);
     }
 
-    /**
-     * 提取出来的判断方法
-     */
-    @SuppressWarnings("unchecked")
-    private void setRoutes(final List<RouteDTO> routes, final Map map) {
-        for (RouteDTO dto : routes) {
-            String prefix = "zuul.routes." + dto.getName() + ".";
-            if (dto.getPath() != null) {
-                map.put(prefix + "path", dto.getPath());
-            }
-            if (dto.getServiceId() != null) {
-                map.put(prefix + "serviceId", dto.getServiceId());
-            }
-            if (dto.getUrl() != null) {
-                map.put(prefix + "url", dto.getUrl());
-            }
-            if (dto.getStripPrefix() != null) {
-                map.put(prefix + "stripPrefix", dto.getStripPrefix());
-            }
-            if (dto.getRetryable() != null) {
-                map.put(prefix + "retryable", dto.getRetryable());
-            }
-            if (dto.getHelperService() != null) {
-                map.put(prefix + "helperService", dto.getHelperService());
-            }
-            if (dto.getCustomSensitiveHeaders() != null && dto.getCustomSensitiveHeaders()) {
-                map.put(prefix + "customSensitiveHeaders", dto.getCustomSensitiveHeaders());
-            }
-            if (dto.getSensitiveHeaders() != null) {
-                map.put(prefix + "sensitiveHeaders", dto.getSensitiveHeaders());
-            }
-        }
-    }
-
-
     @Override
     public ConfigVO queryDefaultByServiceName(String serviceName) {
         ConfigDTO configDTO;
@@ -202,12 +161,7 @@ public class ConfigServiceImpl implements ConfigService {
             LOGGER.info("$${}$$", serviceName);
             throw new CommonException("error.serviceConfigDO.query.serviceNameNotFound");
         }
-        ConfigVO configVO = ConfigConverter.dto2Vo(configDTO);
-        if (ArrayUtils.contains(getRouteServices, serviceName)) {
-            List<RouteDTO> routes = routeMapper.selectAll();
-            setRoutes(routes, configVO.getValue());
-        }
-        return configVO;
+        return ConfigConverter.dto2Vo(configDTO);
     }
 
 
@@ -220,12 +174,7 @@ public class ConfigServiceImpl implements ConfigService {
         } else {
             throw new CommonException("error.serviceConfigDO.query.serviceNameOrConfigVersionNotFound");
         }
-        ConfigVO configVO = ConfigConverter.dto2Vo(configDTO);
-        if (ArrayUtils.contains(getRouteServices, serviceName)) {
-            List<RouteDTO> routes = routeMapper.selectAll();
-            setRoutes(routes, configVO.getValue());
-        }
-        return configVO;
+        return ConfigConverter.dto2Vo(configDTO);
     }
 
     @Override

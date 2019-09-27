@@ -56,15 +56,16 @@ public class SwaggerServiceImpl implements SwaggerService {
         while (iterator.hasNext()) {
             MultiKey multiKey = (MultiKey) iterator.next();
             RouteDTO route = (RouteDTO) multiKeyMap.get(multiKey);
-            String serviceId = route.getServiceId();
+            String serviceId = route.getServiceCode();
+            String name = route.getBackendPath().replace("/**", "").replace("/", "");
             if (serviceId != null) {
                 boolean isSkip =
                         Arrays.stream(properties.getSkipServices()).anyMatch(t -> matcher.match(t, serviceId));
                 if (!isSkip) {
                     SwaggerResource resource = new SwaggerResource();
-                    resource.setName(route.getName() + ":" + serviceId);
+                    resource.setName(name + ":" + serviceId);
                     resource.setSwaggerVersion("2.0");
-                    resource.setLocation("/docs/" + route.getName() + "?version=" + multiKey.getKey(1));
+                    resource.setLocation("/docs/" + name + "?version=" + multiKey.getKey(1));
                     resources.add(resource);
                 }
             }

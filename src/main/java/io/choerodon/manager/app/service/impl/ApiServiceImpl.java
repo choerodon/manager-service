@@ -14,7 +14,6 @@ import io.choerodon.manager.app.service.SwaggerService;
 import io.choerodon.manager.infra.dto.RouteDTO;
 import io.choerodon.manager.infra.enums.InvokeCountBusinessType;
 import io.choerodon.manager.infra.feign.IamClient;
-import io.choerodon.manager.infra.mapper.RouteMapper;
 import org.apache.commons.collections.MapIterator;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections.map.MultiKeyMap;
@@ -63,8 +62,6 @@ public class ApiServiceImpl implements ApiService {
 
     private DocumentService documentService;
 
-    private RouteMapper routeMapper;
-
     private SwaggerService swaggerService;
 
     private IamClient iamClient;
@@ -75,11 +72,10 @@ public class ApiServiceImpl implements ApiService {
 
     private StringRedisTemplate redisTemplate;
 
-    public ApiServiceImpl(DocumentService documentService, RouteMapper routeMapper,
+    public ApiServiceImpl(DocumentService documentService,
                           StringRedisTemplate redisTemplate,
                           IamClient iamClient, SwaggerService swaggerService) {
         this.documentService = documentService;
-        this.routeMapper = routeMapper;
         this.redisTemplate = redisTemplate;
         this.iamClient = iamClient;
         this.swaggerService = swaggerService;
@@ -442,13 +438,11 @@ public class ApiServiceImpl implements ApiService {
 
     private String getRouteName(String name) {
         String serviceName;
-        RouteDTO routeDTO = new RouteDTO();
-        routeDTO.setName(name);
-        RouteDTO route = routeMapper.selectOne(routeDTO);
+        RouteDTO route = iamClient.selectRoute(name).iterator().next();
         if (route == null) {
             throw new CommonException("error.route.not.found.routeName{" + name + "}");
         } else {
-            serviceName = route.getServiceId();
+            serviceName = route.getServiceCode();
         }
         return serviceName;
     }

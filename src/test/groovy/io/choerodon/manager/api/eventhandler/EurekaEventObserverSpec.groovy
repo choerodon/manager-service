@@ -22,7 +22,6 @@ class EurekaEventObserverSpec extends Specification {
         observer.receiveUpEvent(new EurekaEventPayload())
         then:
         1 * service1.updateOrInsertSwagger(_, _)
-        1 * service2.autoRefreshRoute(_)
 
     }
 }

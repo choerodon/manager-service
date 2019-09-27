@@ -2,6 +2,7 @@ package io.choerodon.manager.infra.feign.fallback;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.MenuDTO;
+import io.choerodon.manager.infra.dto.RouteDTO;
 import io.choerodon.manager.infra.feign.IamClient;
 import org.springframework.http.ResponseEntity;
 
@@ -17,5 +18,10 @@ public class IamClientFallback implements IamClient {
     @Override
     public ResponseEntity<List<MenuDTO>> list() {
         throw new CommonException("error.iam.menu.list.failed");
+    }
+
+    @Override
+    public List<RouteDTO> selectRoute(String name) {
+        throw new CommonException("error.iam.route.list.failed");
     }
 }

@@ -43,7 +43,6 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
                 throw new RemoteAccessException("fetch swagger json data is empty, " + payload);
             }
             swaggerRefreshService.updateOrInsertSwagger(payload, json);
-            routeService.autoRefreshRoute(json);
         } catch (Exception e) {
             LOGGER.warn("process swagger data exception skip: {}", payload, e);
         }

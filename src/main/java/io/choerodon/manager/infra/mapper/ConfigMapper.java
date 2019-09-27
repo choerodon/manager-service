@@ -8,9 +8,9 @@ import java.util.List;
 
 public interface ConfigMapper extends Mapper<ConfigDTO> {
 
-    List selectByServiceDefault(@Param("serviceName") String serviceName);
+    List<ConfigDTO> selectByServiceDefault(@Param("serviceName") String serviceName);
 
-    List selectByServiceAndConfigVersion(@Param("serviceName") String serviceName,
+    List<ConfigDTO> selectByServiceAndConfigVersion(@Param("serviceName") String serviceName,
                                          @Param("configVersion") String configVersion);
 
     List<ConfigDTO> fulltextSearch(@Param("config") ConfigDTO configDTO,
