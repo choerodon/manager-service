@@ -1,5 +1,5 @@
 # Choerodon Manager Service
-Choerodon Manager Service是猪齿鱼微服务框架的服务管理中心，主要功能包括配置管理，路由管理，和swagger管理
+Choerodon Manager Service是猪齿鱼微服务框架的服务管理中心，主要功能包括配置管理、swagger管理、API统计和菜单统计。
 
 ## Introduction
 
