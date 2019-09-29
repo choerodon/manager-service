@@ -6,7 +6,7 @@ spring:
   redis:
     host: localhost
     port: 6379
-    #使用和gateway-helper同一个redis数据库，存储在gateway-helper,查询在manager-service
+    # 使用和api-gateway同一个redis数据库，因为api调用统计存储在api-gateway,查询在manager-service
     database: 4
 mybatis:
   mapperLocations: classpath*:/mapper/*.xml
