@@ -3,6 +3,63 @@
   width: 100%;
   padding: 0;
   border-top: .01rem solid rgba(0, 0, 0, 0.12);
+  .hidden-button {
+      display: inline-block;
+      cursor: pointer;
+      width: 22px;
+      height: 22px;
+      background-color: #3f51b5;
+      color: white;
+      text-align: center;
+      line-height: 18px;
+      margin: 0 6px 0 11px;
+      border-radius: 3px;
+
+  }
+  .c7n-iam-apitest {
+    &-bar {
+      //position: fixed;
+      width: 22.5px;
+      border-right: 1px solid rgba(0, 0, 0, 0.12);
+      &-button {
+        cursor: pointer;
+        width: 22px;
+        height: 22px;
+        background-color: #3f51b5;
+        color: white;
+        text-align: center;
+        line-height: 18px;
+        border-radius: 3px;
+        margin-bottom: 10px;
+      }
+      p {
+        cursor: pointer;
+        background: rgba(0, 0, 0, 0.08);
+        text-align: center;
+        color: rgba(0, 0, 0, 0.65);
+        font-size: 13px;
+        font-weight: 400;
+        letter-spacing: 0.01em;
+        line-height: 20px;
+        margin-bottom: 24px;
+      }
+    }
+  }
+  .c7n-tree-switcher + .c7n-tree-node-content-wrapper {
+    .tree-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 1.95rem;
+      display: inline-block;
+      position: relative;
+      top: -0.01rem;
+      .icon {
+        position: relative;
+        top: -0.02rem;
+      }
+    }
+  }
   &-tree {
     width: 2.3rem;
     padding: .1rem;

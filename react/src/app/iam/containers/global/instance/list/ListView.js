@@ -15,6 +15,7 @@ export default observer((props) => {
   const { dataSet, intl } = useContext(Store);
   const [code, setCode] = useState(null);
   const [inputValue, setInputValue] = useState('');
+  const [isTree, setIsTree] = useState(true);
 
   function showDetail(record) {
     if (record.get('service')) {
@@ -76,26 +77,58 @@ export default observer((props) => {
       });
     });
   }
+
+  function getExpand() {
+    return (
+      <div className="c7n-instance-tree">
+        <Input 
+          className="c7n-instance-search"
+          style={{ marginBottom: '.1rem', width: '1.9rem' }}
+          prefix={<Icon type="search" style={{ color: 'black' }} />}
+          placeholder="请输入搜索条件"
+          onChange={handleSearch}
+          value={inputValue}
+          onPressEnter={handleExpand}
+        />
+        <div
+          role="none"
+          className="hidden-button"
+          onClick={() => setIsTree(false)}
+        >
+          <Icon type="navigate_before" />
+        </div>
+        <Tree
+          renderer={nodeRenderer}
+          dataSet={dataSet}
+        />
+      </div>
+    );
+  }
+  function getUnExpand() {
+    return (
+      <div className="c7n-iam-apitest-bar">
+        <div
+          role="none"
+          className="c7n-iam-apitest-bar-button"
+          onClick={() => setIsTree(true)}
+        >
+          <Icon type="navigate_next" />
+        </div>
+        <p
+          role="none"
+          onClick={() => setIsTree(true)}
+        >
+            实例
+        </p>
+      </div>
+    );
+  }
   
   return (
     <Page>
       <Breadcrumb />
       <Content className="c7n-instance">
-        <div className="c7n-instance-tree">
-          <Input 
-            className="c7n-instance-search"
-            style={{ marginBottom: '.1rem' }}
-            prefix={<Icon type="search" style={{ color: 'black' }} />}
-            placeholder="请输入搜索条件"
-            onChange={handleSearch}
-            value={inputValue}
-            onPressEnter={handleExpand}
-          />
-          <Tree
-            renderer={nodeRenderer}
-            dataSet={dataSet}
-          />
-        </div>
+        {isTree ? getExpand() : getUnExpand()}
         <div className="c7n-instance-content">
           <DetailView id={code} intl={intl} />
         </div>
