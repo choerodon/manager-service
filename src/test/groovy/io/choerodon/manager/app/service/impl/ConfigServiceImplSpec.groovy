@@ -1,6 +1,6 @@
 //package io.choerodon.manager.app.service.impl
 //
-//import io.choerodon.base.domain.PageRequest
+//import org.springframework.data.domain.Pageable
 //import io.choerodon.core.exception.CommonException
 //import io.choerodon.manager.IntegrationTestConfiguration
 //import io.choerodon.manager.api.dto.ConfigCheckDTO
@@ -272,7 +272,7 @@
 //
 //
 //        when: '列出指定服务下配置'
-//        PageRequest pageRequest = new PageRequest(1, 20)
+//        Pageable pageable = PageRequest.of(1, 20)
 //        configService.listByServiceName(serviceName, pageRequest, queryInfo, queryParam)
 //
 //        then: '配置列表不为空'

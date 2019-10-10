@@ -3,7 +3,7 @@ package io.choerodon.manager.app.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.exception.ext.NotExistedException;
 import io.choerodon.core.exception.ext.UpdateException;
@@ -67,10 +67,10 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public PageInfo<ConfigVO> listByServiceName(String serviceName, PageRequest pageRequest, ConfigDTO configDTO, String queryParam) {
+    public PageInfo<ConfigVO> listByServiceName(String serviceName, Pageable pageable, ConfigDTO configDTO, String queryParam) {
         PageInfo<ConfigDTO> pageInfo =
                 PageHelper
-                        .startPage(pageRequest.getPage(), pageRequest.getSize())
+                        .startPage(pageable.getPageNumber(), pageable.getPageSize())
                         .doSelectPageInfo(() -> configMapper.fulltextSearch(configDTO, serviceName, queryParam));
         return ConfigConverter.dto2Vo(pageInfo);
     }

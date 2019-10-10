@@ -1,6 +1,6 @@
 package io.choerodon.manager.app.service.impl
 
-import io.choerodon.base.domain.PageRequest
+import org.springframework.data.domain.PageRequest
 import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.app.service.ServiceService
 import io.choerodon.manager.infra.mapper.ServiceMapper
@@ -52,7 +52,7 @@ class ServiceServiceImplSpec extends Specification {
         def params = "manager"
 
         when: "调用接口"
-        PageRequest pageRequest = new PageRequest(1, 0)
+        PageRequest pageRequest = PageRequest.of(1, 0)
         def list = serviceService.pageManager(serviceName, params, pageRequest)
 
         then: "校验调用次数和返回List不为空"

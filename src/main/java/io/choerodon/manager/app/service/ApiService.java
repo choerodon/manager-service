@@ -1,7 +1,7 @@
 package io.choerodon.manager.app.service;
 
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.manager.api.dto.swagger.ControllerDTO;
 import io.choerodon.manager.infra.enums.InvokeCountBusinessType;
 
@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public interface ApiService {
 
-    PageInfo<ControllerDTO> getControllers(String name, String version, PageRequest pageRequest, Map<String, Object> map);
+    PageInfo<ControllerDTO> getControllers(String name, String version, Pageable pageable, Map<String, Object> map);
 
     ControllerDTO queryPathDetail(String serviceName, String version, String controllerName, String operationId);
 

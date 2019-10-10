@@ -2,7 +2,7 @@ package io.choerodon.manager.app.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.manager.api.dto.ServiceManagerDTO;
 import io.choerodon.manager.app.service.ServiceService;
 import io.choerodon.manager.infra.common.utils.ManualPageHelper;
@@ -42,13 +42,13 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Override
-    public PageInfo<ServiceManagerDTO> pageManager(String serviceName, String params, PageRequest pageRequest) {
-        int page = pageRequest.getPage();
-        int size = pageRequest.getSize();
+    public PageInfo<ServiceManagerDTO> pageManager(String serviceName, String params, Pageable pageable) {
+        int page = pageable.getPageNumber();
+        int size = pageable.getPageSize();
         List<ServiceManagerDTO> serviceManagers = new ArrayList<>();
         discoveryClient.getServices().forEach(t -> serviceManagers
                 .add(new ServiceManagerDTO(t, discoveryClient.getInstances(t).size())));
-        if (pageRequest.isQueriedAll()) {
+        if (pageable.getPageSize()==0) {
             Page<ServiceManagerDTO> dtoPage = new Page<>(page, size);
             dtoPage.addAll(serviceManagers);
             return dtoPage.toPageInfo();
@@ -56,7 +56,7 @@ public class ServiceServiceImpl implements ServiceService {
             Map<String, Object> map = new HashMap<>(5);
             map.put("serviceName", serviceName);
             map.put("params", params);
-            return ManualPageHelper.postPage(serviceManagers, pageRequest, map);
+            return ManualPageHelper.postPage(serviceManagers, pageable, map);
         }
 
     }
