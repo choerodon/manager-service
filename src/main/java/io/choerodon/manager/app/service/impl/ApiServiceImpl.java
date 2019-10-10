@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import io.choerodon.base.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.manager.api.dto.MenuDTO;
 import io.choerodon.manager.app.service.DocumentService;
 import io.choerodon.manager.app.service.SwaggerService;
@@ -82,10 +82,10 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public PageInfo<ControllerDTO> getControllers(String name, String version, PageRequest pageRequest, Map<String, Object> map) {
+    public PageInfo<ControllerDTO> getControllers(String name, String version, Pageable pageable, Map<String, Object> map) {
         String json = getSwaggerJson(name, version);
         return Optional.ofNullable(json)
-                .map(j -> ManualPageHelper.postPage(processJson2ControllerDTO(name, j), pageRequest, map))
+                .map(j -> ManualPageHelper.postPage(processJson2ControllerDTO(name, j), pageable, map))
                 .orElseThrow(() -> new CommonException("error.service.swaggerJson.empty"));
     }
 

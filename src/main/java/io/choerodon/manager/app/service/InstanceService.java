@@ -1,7 +1,7 @@
 package io.choerodon.manager.app.service;
 
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.manager.api.dto.InstanceDTO;
 import io.choerodon.manager.api.dto.InstanceDetailDTO;
 
@@ -17,5 +17,5 @@ public interface InstanceService {
 
     void update(String instanceId, Long configId);
 
-    PageInfo<InstanceDTO> listByOptions(String service, Map<String, Object> map, PageRequest pageRequest);
+    PageInfo<InstanceDTO> listByOptions(String service, Map<String, Object> map, Pageable pageable);
 }

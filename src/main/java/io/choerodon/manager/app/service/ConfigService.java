@@ -1,7 +1,7 @@
 package io.choerodon.manager.app.service;
 
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.manager.api.dto.*;
 import io.choerodon.manager.infra.dto.ConfigDTO;
 
@@ -14,7 +14,7 @@ public interface ConfigService {
 
     ConfigVO queryByServiceNameAndConfigVersion(String serviceName, String configVersion);
 
-    PageInfo<ConfigVO> listByServiceName(String serviceName, PageRequest pageRequest, ConfigDTO configDTO, String queryParam);
+    PageInfo<ConfigVO> listByServiceName(String serviceName, Pageable pageable, ConfigDTO configDTO, String queryParam);
 
     ConfigVO updateConfigDefault(Long configId);
 

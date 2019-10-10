@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
 import com.netflix.appinfo.InstanceInfo;
-import io.choerodon.base.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.manager.infra.common.utils.RelaxedNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -471,7 +471,7 @@ public class InstanceServiceImpl implements InstanceService {
     }
 
     @Override
-    public PageInfo<InstanceDTO> listByOptions(String service, Map<String, Object> map, PageRequest pageRequest) {
+    public PageInfo<InstanceDTO> listByOptions(String service, Map<String, Object> map, Pageable pageable) {
         List<InstanceDTO> serviceInstances = new ArrayList<>();
         if (StringUtils.isEmpty(service)) {
             List<String> services = discoveryClient.getServices();
@@ -482,7 +482,7 @@ public class InstanceServiceImpl implements InstanceService {
             serviceInstances.addAll(toInstanceDTOList(discoveryClient.getInstances(service)));
         }
 
-        return ManualPageHelper.postPage(serviceInstances, pageRequest, map);
+        return ManualPageHelper.postPage(serviceInstances, pageable, map);
     }
 
     private List<InstanceDTO> toInstanceDTOList(final List<ServiceInstance> serviceInstances) {

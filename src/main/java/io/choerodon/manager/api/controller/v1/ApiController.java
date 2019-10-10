@@ -7,11 +7,11 @@ import java.util.Map;
 
 import com.github.pagehelper.PageInfo;
 import io.choerodon.base.annotation.Permission;
-import io.choerodon.base.domain.PageRequest;
-import io.choerodon.base.domain.Sort;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import io.choerodon.base.enums.ResourceType;
 import io.choerodon.manager.infra.enums.InvokeCountBusinessType;
-import io.choerodon.mybatis.annotation.SortDefault;
+import org.springframework.data.web.SortDefault;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -64,7 +64,7 @@ public class ApiController {
     @GetMapping("/{service_prefix}/controllers")
     public ResponseEntity<PageInfo<ControllerDTO>> queryByNameAndVersion(
             @ApiIgnore
-            @SortDefault(value = "name", direction = Sort.Direction.ASC) PageRequest pageRequest,
+            @SortDefault(value = "name", direction = Sort.Direction.ASC) Pageable pageable,
             @PathVariable("service_prefix") String serviceName,
             @RequestParam(value = "version", required = false, defaultValue = VersionUtil.NULL_VERSION) String version,
             @RequestParam(required = false, name = "params") String params,
@@ -74,7 +74,7 @@ public class ApiController {
         map.put("params", params);
         map.put("name", name);
         map.put("description", description);
-        return new ResponseEntity<>(apiService.getControllers(serviceName, version, pageRequest, map), HttpStatus.OK);
+        return new ResponseEntity<>(apiService.getControllers(serviceName, version, pageable, map), HttpStatus.OK);
     }
 
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
