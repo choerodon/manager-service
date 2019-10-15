@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { action, computed, observable, toJS } from 'mobx';
-import { axios, store, stores } from '@choerodon/master';
+import { axios, store, stores, Choerodon } from '@choerodon/boot';
 import moment from 'moment';
 import querystring from 'query-string';
 

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Button, Col, Form, Icon, Input, Modal, Popover, Radio, Row, Select, Spin, Table, Tooltip } from 'choerodon-ui';
-import { axios, Content, Header, Page, Permission } from '@choerodon/master';
+import { axios, Content, Header, Page, Permission, Choerodon } from '@choerodon/boot';
 import { withRouter } from 'react-router-dom';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import querystring from 'query-string';
@@ -12,7 +12,7 @@ import '../../../common/ConfirmModal.scss';
 import { handleFiltersParams } from '../../../common/util';
 
 const { Sidebar } = Modal;
-const Option = Select.Option;
+const { Option } = Select;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 const intlPrefix = 'global.route';
@@ -723,7 +723,7 @@ export default class Route extends Component {
       width: '20%',
       filters: [],
       filteredValue: filters.name || [],
-      render: text => (
+      render: (text) => (
         <MouseOverWrapper text={text} width={0.2}>
           {text}
         </MouseOverWrapper>
@@ -735,7 +735,7 @@ export default class Route extends Component {
       width: '20%',
       filters: [],
       filteredValue: filters.path || [],
-      render: text => (
+      render: (text) => (
         <MouseOverWrapper text={text} width={0.1}>
           {text}
         </MouseOverWrapper>
@@ -763,7 +763,8 @@ export default class Route extends Component {
           mode="icon"
           name={intl.formatMessage({ id: record.builtIn ? 'predefined' : 'custom' })}
           colorCode={record.builtIn ? 'PREDEFINE' : 'CUSTOM'}
-        />),
+        />
+      ),
     }, {
       title: '',
       width: '100px',

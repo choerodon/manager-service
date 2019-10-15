@@ -5,13 +5,14 @@
 import React, { Component } from 'react';
 import { Button, DatePicker } from 'choerodon-ui';
 import classnames from 'classnames';
+import { Choerodon } from '@choerodon/boot';
 import moment from 'moment';
 import './TimePicker.scss';
 import { injectIntl, FormattedMessage } from 'react-intl';
 
 const { RangePicker } = DatePicker;
 const ButtonGroup = Button.Group;
-const disabledDate = current => current && current > moment().endOf('day');
+const disabledDate = (current) => current && current > moment().endOf('day');
 
 @injectIntl
 export default class TimePicker extends Component {

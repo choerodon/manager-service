@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { inject, observer } from 'mobx-react';
-import { axios as defaultAxios, Content, Header, Page, Permission } from '@choerodon/master';
+import { axios as defaultAxios, Content, Header, Page, Permission, Choerodon } from '@choerodon/boot';
 import { Form, Table, Input, Button, Select, Tabs, Spin, Tooltip, Icon, Modal } from 'choerodon-ui';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import querystring from 'query-string';
@@ -12,7 +12,9 @@ import './APITest.scss';
 import jsonFormat from '../../../common/json-format';
 import APITestStore from '../../../stores/global/api-test';
 import AuthorizeModal from './AuthorizeModal';
-import { API_HOST } from '@choerodon/boot/lib/containers/common/constants';
+
+// eslint-disable-next-line no-underscore-dangle
+const { API_HOST } = window._env_;
 
 let statusCode;
 let responseHeader;
@@ -147,7 +149,7 @@ export default class APIDetail extends Component {
     handledDescWithComment = jsonFormat(handledDescWithComment);
     const handledDesc = Hjson.parse(desc);
     const { permission = { roles: [] } } = handledDesc;
-    const roles = permission.roles.length && permission.roles.map(item => ({
+    const roles = permission.roles.length && permission.roles.map((item) => ({
       name: intl.formatMessage({ id: `${intlPrefix}.default.role` }),
       value: item,
     }));
@@ -271,7 +273,7 @@ export default class APIDetail extends Component {
             dataSource={tableValue}
             pagination={false}
             filterBar={false}
-            rowKey={record => `${record.name}-${record.value}`}
+            rowKey={(record) => `${record.name}-${record.value}`}
           />
         </div>
         <div className="c7n-request-params">
@@ -430,7 +432,8 @@ export default class APIDetail extends Component {
                 )}
               </FormItem>
               <Icon type="mode_edit" className="c7n-iam-TextEditToggle-text-icon" />
-            </div>);
+            </div>
+          );
         } else if (record.type === 'boolean') {
           editableNode = (
             <FormItem>
@@ -465,10 +468,12 @@ export default class APIDetail extends Component {
                   <div className="c7n-iam-TextEditToggle-text">
                     <TextArea className={classnames({ errorTextarea: getFieldError(`${record.name}`) })} rows={6} placeholder={getFieldError(`${record.name}`) || '请以换行的形式输入多个值'} onChange={this.changeTextareaValue.bind(this, record.name, record.type)} />
                     <Icon type="mode_edit" className="c7n-iam-TextEditToggle-text-icon" />
-                  </div>)}
+                  </div>,
+                )}
               </FormItem>
 
-            </div>);
+            </div>
+          );
         } else if (record.type === 'file') {
           editableNode = (
             <div className="uploadContainer">
@@ -592,8 +597,7 @@ export default class APIDetail extends Component {
               >
                 {intl.formatMessage({ id: `${intlPrefix}.sending` })}
               </Button>
-            )
-            }
+            )}
           </div>
         </div>
         <div style={{ textAlign: 'center', paddingTop: '100px', display: APITestStore.isShowResult === false ? 'block' : 'none' }}><Spin size="large" /></div>
@@ -795,8 +799,7 @@ export default class APIDetail extends Component {
                 </Tabs>
               </Content>
             </div>
-          )
-        }
+          )}
 
         <Modal
           bodyStyle={{ height: '356px' }}
@@ -806,7 +809,7 @@ export default class APIDetail extends Component {
           width={454}
           maskClosable={!APITestStore.modalSaving}
           onCancel={this.handleCancel}
-          onOk={e => this.AuthorizeModal.handleSubmit(e)}
+          onOk={(e) => this.AuthorizeModal.handleSubmit(e)}
         >
           {this.renderModalContent()}
         </Modal>

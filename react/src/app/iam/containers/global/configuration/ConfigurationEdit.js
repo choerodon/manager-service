@@ -4,7 +4,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { inject, observer } from 'mobx-react';
-import { axios, Content, Header, Page, Permission } from '@choerodon/master';
+import { axios, Content, Header, Page, Permission, Choerodon } from '@choerodon/boot';
 import { Button, Col, Form, Input, Modal, Row, Select, Steps } from 'choerodon-ui';
 import querystring from 'query-string';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -178,7 +178,7 @@ class EditConfig extends Component {
       if (res.failed) {
         Choerodon.prompt(res.message);
       } else {
-        const currentService = ConfigurationStore.service.find(service => service.name === this.state.service);
+        const currentService = ConfigurationStore.service.find((service) => service.name === this.state.service);
         ConfigurationStore.setRelatedService(currentService);
         ConfigurationStore.setStatus('');
         Choerodon.prompt(intl.formatMessage({ id: 'modify.success' }));
@@ -189,7 +189,7 @@ class EditConfig extends Component {
 
   /* 取消 */
   cancelAll = () => {
-    const currentService = ConfigurationStore.service.find(service => service.name === this.state.service);
+    const currentService = ConfigurationStore.service.find((service) => service.name === this.state.service);
     ConfigurationStore.setRelatedService(currentService);
     ConfigurationStore.setStatus('');
     this.props.history.push('/manager/configuration');

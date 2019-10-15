@@ -4,7 +4,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { inject, observer } from 'mobx-react';
-import { axios, Content, Header, Page, Permission } from '@choerodon/master';
+import { axios, Content, Header, Page, Permission, Choerodon } from '@choerodon/boot';
 import { Button, Col, Form, Input, Modal, Row, Select, Steps } from 'choerodon-ui';
 import querystring from 'query-string';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -161,8 +161,7 @@ class CreateConfig extends Component {
           label={<FormattedMessage id={`${intlPrefix}.template`} />}
           getPopupContainer={() => document.getElementsByClassName('page-content')[0]}
           filterOption={
-            (input, option) =>
-              option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+            (input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
           }
           filter
           onChange={this.generateVersion.bind(this)}
@@ -185,8 +184,7 @@ class CreateConfig extends Component {
             label={<FormattedMessage id={`${intlPrefix}.template`} />}
             getPopupContainer={() => document.getElementsByClassName('page-content')[0]}
             filterOption={
-              (input, option) =>
-                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              (input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
             }
             filter
           />
@@ -199,8 +197,7 @@ class CreateConfig extends Component {
             label={<FormattedMessage id={`${intlPrefix}.template`} />}
             getPopupContainer={() => document.getElementsByClassName('page-content')[0]}
             filterOption={
-              (input, option) =>
-                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              (input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
             }
             filter
             onChange={this.generateVersion.bind(this)}
@@ -345,8 +342,7 @@ class CreateConfig extends Component {
                 label={<FormattedMessage id={`${intlPrefix}.service`} />}
                 getPopupContainer={() => document.getElementsByClassName('page-content')[0]}
                 filterOption={
-                  (input, option) =>
-                    option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  (input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                 }
                 filter
                 onChange={this.handleChange.bind(this)}
@@ -528,8 +524,7 @@ class CreateConfig extends Component {
       if (failed) {
         Choerodon.prompt(message);
       } else {
-        const currentService =
-          ConfigurationStore.service.find(item => item.name === data.serviceName);
+        const currentService =          ConfigurationStore.service.find((item) => item.name === data.serviceName);
         ConfigurationStore.setRelatedService(currentService);
         Choerodon.prompt(intl.formatMessage({ id: 'create.success' }));
         this.props.history.push('/manager/configuration');
@@ -561,9 +556,11 @@ class CreateConfig extends Component {
         ]}
       >
         <Header
-          title={<FormattedMessage
+          title={(
+<FormattedMessage
             id={`${intlPrefix}.create`}
-          />}
+          />
+)}
           backPath="/manager/configuration"
         />
         <Content
@@ -573,21 +570,26 @@ class CreateConfig extends Component {
           <div className="createConfigContainer">
             <Steps current={current}>
               <Step
-                title={
+                title={(
                   <span style={{ color: current === 1 ? '#3F51B5' : '', fontSize: 14 }}>
                     <FormattedMessage id={`${intlPrefix}.step1.title`} />
-                  </span>}
+                  </span>
+                )
+}
                 status={this.getStatus(1)}
               />
               <Step
-                title={<span style={{ color: current === 2 ? '#3F51B5' : '', fontSize: 14 }}>
+                title={(
+<span style={{ color: current === 2 ? '#3F51B5' : '', fontSize: 14 }}>
                   <FormattedMessage
                     id={`${intlPrefix}.step2.title`}
-                  /></span>}
+                  /></span>
+)}
                 status={this.getStatus(2)}
               />
               <Step
-                title={<span style={{
+                title={(
+<span style={{
                   color: current === 3 ? '#3F51B5' : '',
                   fontSize: 14,
                 }}
@@ -595,7 +597,8 @@ class CreateConfig extends Component {
                   <FormattedMessage
                     id={`${intlPrefix}.step3.create.title`}
                   />
-                </span>}
+                </span>
+)}
                 status={this.getStatus(3)}
               />
             </Steps>

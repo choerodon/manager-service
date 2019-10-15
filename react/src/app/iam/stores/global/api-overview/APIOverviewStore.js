@@ -1,5 +1,5 @@
 import { action, computed, observable, toJS } from 'mobx';
-import { axios, store } from '@choerodon/master';
+import { axios, store, Choerodon } from '@choerodon/boot';
 import moment from 'moment';
 import querystring from 'query-string';
 import _ from 'lodash';
@@ -7,18 +7,31 @@ import _ from 'lodash';
 @store('APIOverviewStore')
 class APIOverviewStore {
   @observable service = [];
+
   @observable firstChartData = null;
+
   @observable secChartData = null;
+
   @observable thirdChartData = null;
+
   @observable firstLoading = true;
+
   @observable secLoading = true;
+
   @observable thirdLoading = true;
+
   @observable secStartTime = moment().subtract(6, 'days');
+
   @observable secEndTime = moment();
+
   @observable thirdStartTime = moment().subtract(6, 'days');
+
   @observable thirdEndTime = moment();
+
   @observable currentService = {};
+
   @observable thirdStartDate = null;
+
   @observable thirdEndDate = null;
 
   @action setThirdStartDate(data) {
@@ -142,7 +155,7 @@ class APIOverviewStore {
       } else {
         const { details, service } = res;
         if (details.length && service.length) {
-          const handleDetails = details.map(item => ({ ...item, sortIndex: service.indexOf(item.service) }));
+          const handleDetails = details.map((item) => ({ ...item, sortIndex: service.indexOf(item.service) }));
           const finalDetails = _.orderBy(handleDetails, ['sortIndex'], ['asc']);
           res.details = finalDetails;
         }
@@ -168,7 +181,7 @@ class APIOverviewStore {
           Choerodon.prompt(data.message);
         } else {
           if (data.api.length) {
-            const arr = data.api.map(item => `${item.split(':')[1]}: ${item.split(':')[0]}`);
+            const arr = data.api.map((item) => `${item.split(':')[1]}: ${item.split(':')[0]}`);
             data.api = arr;
           }
 
