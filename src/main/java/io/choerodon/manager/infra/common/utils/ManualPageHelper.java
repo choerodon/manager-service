@@ -89,6 +89,7 @@ public class ManualPageHelper {
             return Collections.emptyList();
         }
         int totalCount = source.size();
+        page = page <= 1 ? 1 : page;
         int fromIndex = (page - 1) * pageSize;
         if (fromIndex >= totalCount) {
             return Collections.emptyList();
