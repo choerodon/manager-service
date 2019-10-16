@@ -4,7 +4,7 @@ export default ({ intl, intlPrefix, metadataDataSet }) => ({
   paging: false,
   transport: {
     read: ({ data: { instanceId } }) => ({
-      url: `/manager/v1/instances/${instanceId}`,
+      url: `/manager/v1/instances/${instanceId}?page=1`,
       method: 'get',
       dataKey: null,
     }),

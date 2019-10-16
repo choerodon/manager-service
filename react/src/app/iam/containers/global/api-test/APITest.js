@@ -21,7 +21,7 @@ import AuthorizeModal from './AuthorizeModal';
 
 
 // eslint-disable-next-line no-underscore-dangle
-const API_HOST = window._env_;
+const { API_HOST } = window._env_;
 const intlPrefix = 'global.apitest';
 const FormItem = Form.Item;
 const { TextArea } = Input;
