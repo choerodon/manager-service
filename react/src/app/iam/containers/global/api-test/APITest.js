@@ -389,7 +389,7 @@ export default class APITest extends Component {
               {
                 tableValue.map(({ name, value }, index) => (
                   <Row key={`${name}-${index}`} className="c7n-iam-apitest-content-right-container-info-interfaceinfo-row">
-                    <Col span={7}>{name}:</Col>
+                    <Col span={7}>{name}</Col>
                     <Col span={17}>{value}</Col>
                   </Row>
                 ))
