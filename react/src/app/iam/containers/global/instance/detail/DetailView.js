@@ -1,5 +1,5 @@
 import React, { Component, useState, useEffect, useContext } from 'react';
-import { Content, Header, Page, axios } from '@choerodon/master';
+import { Content, Header, Page, axios } from '@choerodon/boot';
 import { Col, Row, Tabs, Spin } from 'choerodon-ui';
 import { Icon, Table, Form, Output } from 'choerodon-ui/pro';
 import AceEditor from '../../../../components/yamlAce';

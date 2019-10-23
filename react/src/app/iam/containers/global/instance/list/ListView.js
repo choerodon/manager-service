@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Content, Page, Header, Breadcrumb } from '@choerodon/master';
+import { Content, Page, Header, Breadcrumb } from '@choerodon/boot';
 import { Icon, Tree } from 'choerodon-ui/pro';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';

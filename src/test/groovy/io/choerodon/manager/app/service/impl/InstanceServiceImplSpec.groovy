@@ -2,8 +2,8 @@ package io.choerodon.manager.app.service.impl
 
 import com.netflix.appinfo.InstanceInfo
 import com.netflix.appinfo.LeaseInfo
-import io.choerodon.base.domain.PageRequest
-import io.choerodon.base.domain.Sort
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import io.choerodon.core.exception.CommonException
 import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.api.dto.InstanceDTO
@@ -218,7 +218,47 @@ class InstanceServiceImplSpec extends Specification {
         and: "构造pageRequest"
         def order = new Sort.Order("id")
         Sort sort = new Sort(order)
-        PageRequest pageRequest = new PageRequest(1, 20, sort)
+        PageRequest pageRequest = new PageRequest(1, 20, sort) {
+            @Override
+            int getPageNumber() {
+                return 0
+            }
+
+            @Override
+            int getPageSize() {
+                return 0
+            }
+
+            @Override
+            long getOffset() {
+                return 0
+            }
+
+            @Override
+            Sort getSort() {
+                return null
+            }
+
+            @Override
+            PageRequest next() {
+                return null
+            }
+
+            @Override
+            PageRequest previousOrFirst() {
+                return null
+            }
+
+            @Override
+            PageRequest first() {
+                return null
+            }
+
+            @Override
+            boolean hasPrevious() {
+                return false
+            }
+        }
 
         and: 'mock'
         mockDiscoveryClient.getServices() >> { return serviceList }

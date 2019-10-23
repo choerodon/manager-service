@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { inject } from 'mobx-react';
-import { asyncLocaleProvider, asyncRouter, nomatch } from '@choerodon/master';
+import { asyncLocaleProvider, asyncRouter, nomatch } from '@choerodon/boot';
 
 const siteStatistics = asyncRouter(() => import('./global/site-statistics'));
 const microService = asyncRouter(() => import('./global/microservice'));

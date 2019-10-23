@@ -1,7 +1,7 @@
 package io.choerodon.manager.app.service.impl
 
-import io.choerodon.base.domain.PageRequest
-import io.choerodon.base.domain.Sort
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import io.choerodon.manager.IntegrationTestConfiguration
 import io.choerodon.manager.api.dto.swagger.ControllerDTO
 import io.choerodon.manager.app.service.ApiService
@@ -62,7 +62,7 @@ class ApiServiceImplSpec extends Specification {
         when: "方法调用"
         Sort.Order order = new Sort.Order("id")
         Sort sort = new Sort(order)
-        PageRequest pageRequest = new PageRequest(1, 20, sort)
+        PageRequest pageRequest= new PageRequest(1, 20, sort)
         def list = apiService.getControllers(name, version, pageRequest, map)
 
         then: "结果分析"

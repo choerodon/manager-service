@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { asyncRouter, nomatch } from '@choerodon/master';
+import { asyncRouter, nomatch } from '@choerodon/boot';
 
 const list = asyncRouter(() => import('./list'));
 

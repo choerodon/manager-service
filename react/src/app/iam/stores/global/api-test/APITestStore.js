@@ -2,7 +2,7 @@
  * Created by hulingfangzi on 2018/7/9.
  */
 import { action, computed, observable, toJS } from 'mobx';
-import { axios, store } from '@choerodon/master';
+import { axios, store } from '@choerodon/boot';
 
 @store('ApitestStore')
 class ApitestStore {

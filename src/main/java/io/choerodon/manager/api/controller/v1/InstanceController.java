@@ -5,10 +5,10 @@ import java.util.Map;
 
 import com.github.pagehelper.PageInfo;
 import io.choerodon.base.annotation.Permission;
-import io.choerodon.base.domain.PageRequest;
-import io.choerodon.base.domain.Sort;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import io.choerodon.base.enums.ResourceType;
-import io.choerodon.mybatis.annotation.SortDefault;
+import org.springframework.data.web.SortDefault;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +52,7 @@ public class InstanceController {
     @CustomPageRequest
     public ResponseEntity<PageInfo<InstanceDTO>> list(@RequestParam(value = "service", required = false) String service,
                                                       @ApiIgnore
-                                                      @SortDefault(value = "instanceId", direction = Sort.Direction.DESC) PageRequest pageRequest,
+                                                      @SortDefault(value = "instanceId", direction = Sort.Direction.DESC) Pageable pageable,
                                                       @RequestParam(required = false, name = "instanceId") String instanceId,
                                                       @RequestParam(required = false, name = "version") String version,
                                                       @RequestParam(required = false, name = "status") String status,
@@ -63,7 +63,7 @@ public class InstanceController {
         map.put("version", version);
         map.put("status", status);
         map.put("params", params);
-        return new ResponseEntity<>(instanceService.listByOptions(service, map, pageRequest), HttpStatus.OK);
+        return new ResponseEntity<>(instanceService.listByOptions(service, map, pageable), HttpStatus.OK);
     }
 
     /**

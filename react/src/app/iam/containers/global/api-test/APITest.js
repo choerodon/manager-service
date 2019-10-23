@@ -7,12 +7,11 @@ import { inject, observer } from 'mobx-react';
 import { Button, Tooltip, Tree, Input, Icon, Form, Row, Col, Select, Table, Spin, Modal } from 'choerodon-ui';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import { withRouter } from 'react-router-dom';
-import { axios as defaultAxios, Content, Header, Page, Permission, Breadcrumb } from '@choerodon/master';
+import { axios as defaultAxios, Content, Header, Page, Permission, Breadcrumb, Choerodon } from '@choerodon/boot';
 import querystring from 'query-string';
 import _ from 'lodash';
 import classnames from 'classnames';
 import Hjson from 'hjson';
-import { API_HOST } from '@choerodon/boot/lib/containers/common/constants';
 import APITestStore from '../../../stores/global/api-test';
 import './APITest.scss';
 import ApiTree from './apiTree';
@@ -20,6 +19,9 @@ import emptyApi from '../../../assets/images/noright.svg';
 import jsonFormat from '../../../common/json-format';
 import AuthorizeModal from './AuthorizeModal';
 
+
+// eslint-disable-next-line no-underscore-dangle
+const { API_HOST } = window._env_;
 const intlPrefix = 'global.apitest';
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -387,7 +389,7 @@ export default class APITest extends Component {
               {
                 tableValue.map(({ name, value }, index) => (
                   <Row key={`${name}-${index}`} className="c7n-iam-apitest-content-right-container-info-interfaceinfo-row">
-                    <Col span={7}>{name}:</Col>
+                    <Col span={7}>{name}</Col>
                     <Col span={17}>{value}</Col>
                   </Row>
                 ))

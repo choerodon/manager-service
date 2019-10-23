@@ -5,7 +5,7 @@ import { findDOMNode } from 'react-dom';
 import { inject, observer } from 'mobx-react';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import { withRouter } from 'react-router-dom';
-import { axios, Content, Header, Page, Breadcrumb } from '@choerodon/master';
+import { axios, Content, Header, Page, Breadcrumb } from '@choerodon/boot';
 import { Button, Table, Select, Spin } from 'choerodon-ui';
 import moment from 'moment';
 import ReactEcharts from 'echarts-for-react';

@@ -4,14 +4,13 @@ import java.util.List;
 
 import com.github.pagehelper.PageInfo;
 import io.choerodon.base.annotation.Permission;
-import io.choerodon.base.constant.PageConstant;
-import io.choerodon.base.domain.PageRequest;
-import io.choerodon.base.domain.Sort;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import io.choerodon.base.enums.ResourceType;
 import io.choerodon.manager.api.dto.ConfigVO;
 import io.choerodon.manager.infra.dto.ConfigDTO;
 import io.choerodon.manager.infra.dto.ServiceDTO;
-import io.choerodon.mybatis.annotation.SortDefault;
+import org.springframework.data.web.SortDefault;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
@@ -62,8 +61,8 @@ public class ServiceController {
             @RequestParam(required = false, name = "service_name") String serviceName,
             @RequestParam(required = false) String params,
             @ApiIgnore
-            @SortDefault(value = "name", direction = Sort.Direction.DESC) PageRequest pageRequest) {
-        return new ResponseEntity<>(serviceService.pageManager(serviceName, params, pageRequest), HttpStatus.OK);
+            @SortDefault(value = "name", direction = Sort.Direction.DESC) Pageable pageable) {
+        return new ResponseEntity<>(serviceService.pageManager(serviceName, params, pageable), HttpStatus.OK);
     }
 
     /**
@@ -123,7 +122,7 @@ public class ServiceController {
     public ResponseEntity<PageInfo<ConfigVO>> list(
             @PathVariable("service_name") String serviceName,
             @ApiIgnore
-            @SortDefault(value = "name", direction = Sort.Direction.ASC) PageRequest pageRequest,
+            @SortDefault(value = "name", direction = Sort.Direction.ASC) Pageable pageable,
             @RequestParam(required = false, name = "name") String name,
             @RequestParam(required = false, name = "source") String source,
             @RequestParam(required = false, name = "configVersion") String configVersion,
@@ -134,7 +133,7 @@ public class ServiceController {
         dto.setConfigVersion(configVersion);
         dto.setIsDefault(isDefault);
         dto.setSource(source);
-        return new ResponseEntity<>(configService.listByServiceName(serviceName, pageRequest, dto, param), HttpStatus.OK);
+        return new ResponseEntity<>(configService.listByServiceName(serviceName, pageable, dto, param), HttpStatus.OK);
     }
 
 }

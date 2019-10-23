@@ -6,7 +6,7 @@ import { inject, observer } from 'mobx-react';
 import { Button, Form, Modal, Select, Table } from 'choerodon-ui';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import { withRouter } from 'react-router-dom';
-import { Action, axios, Content, Header, Page, Permission } from '@choerodon/master';
+import { Action, axios, Content, Header, Page, Permission, Choerodon } from '@choerodon/boot';
 import querystring from 'query-string';
 import ConfigurationStore from '../../../stores/global/configuration';
 import MouseOverWrapper from '../../../components/mouseOverWrapper';
@@ -15,7 +15,7 @@ import '../../../common/ConfirmModal.scss';
 import { handleFiltersParams } from '../../../common/util';
 
 const FormItem = Form.Item;
-const Option = Select.Option;
+const {Option} = Select;
 const intlPrefix = 'global.configuration';
 
 @Form.create({})
@@ -165,8 +165,7 @@ export default class Configuration extends Component {
           value={ConfigurationStore.currentService.name}
           getPopupContainer={() => document.getElementsByClassName('page-content')[0]}
           label={<FormattedMessage id={`${intlPrefix}.service`} />}
-          filterOption={(input, option) =>
-            option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+          filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
           filter
           onChange={this.handleChange.bind(this)}
         >
@@ -185,7 +184,7 @@ export default class Configuration extends Component {
    * @param serviceName 服务名称
    */
   handleChange(serviceName) {
-    const currentService = ConfigurationStore.service.find(service => service.name === serviceName);
+    const currentService = ConfigurationStore.service.find((service) => service.name === serviceName);
     ConfigurationStore.setCurrentService(currentService);
     this.setState(this.getInitState(), () => {
       this.loadConfig();
@@ -266,7 +265,7 @@ export default class Configuration extends Component {
       width: '25%',
       filters: [],
       filteredValue: filters.name || [],
-      render: text => (
+      render: (text) => (
         <MouseOverWrapper text={text} width={0.2}>
           {text}
         </MouseOverWrapper>
@@ -278,7 +277,7 @@ export default class Configuration extends Component {
       width: '25%',
       filters: [],
       filteredValue: filters.configVersion || [],
-      render: text => (
+      render: (text) => (
         <MouseOverWrapper text={text} width={0.2}>
           {text}
         </MouseOverWrapper>
@@ -305,7 +304,7 @@ export default class Configuration extends Component {
         value: 'false',
       }],
       filteredValue: filters.isDefault || [],
-      render: text => intl.formatMessage({ id: text ? 'yes' : 'no' }),
+      render: (text) => intl.formatMessage({ id: text ? 'yes' : 'no' }),
     }, {
       title: '',
       width: '100px',
