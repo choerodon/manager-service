@@ -1,7 +1,7 @@
 package io.choerodon.manager.api.controller.v1;
 
-import io.choerodon.base.annotation.Permission;
-import io.choerodon.base.enums.ResourceType;
+import io.choerodon.core.annotation.Permission;
+import io.choerodon.core.enums.ResourceType;
 import io.choerodon.manager.api.dto.MenuClickDTO;
 import io.choerodon.manager.app.service.StatisticService;
 import io.swagger.annotations.ApiOperation;

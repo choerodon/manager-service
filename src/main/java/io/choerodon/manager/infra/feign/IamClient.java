@@ -1,6 +1,6 @@
 package io.choerodon.manager.infra.feign;
 
-import io.choerodon.base.annotation.Permission;
+import io.choerodon.core.annotation.Permission;
 import io.choerodon.manager.api.dto.MenuDTO;
 import io.choerodon.manager.infra.dto.RouteDTO;
 import io.choerodon.manager.infra.feign.fallback.ConfigServerClientFallback;

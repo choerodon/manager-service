@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.annotation.Permission;
+import io.choerodon.core.annotation.Permission;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import io.choerodon.base.enums.ResourceType;
+import io.choerodon.core.enums.ResourceType;
 import org.springframework.data.web.SortDefault;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
