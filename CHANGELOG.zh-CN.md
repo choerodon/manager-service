@@ -21,6 +21,7 @@
 - 更新feign调用 `iam-service` 为 `base-service`
 - 更新Dockerfile `javabase:0.8.0` 为 `javabase:0.8.2`
 - 更新跨服务初始化目录名 `/script/front` 为 `/script/meta`
+- 升级`choerodon-framework-parent`依赖版本为`0.13.0.RELEASE`
 
 ### 修复
 

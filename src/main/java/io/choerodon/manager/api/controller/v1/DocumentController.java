@@ -1,7 +1,7 @@
 package io.choerodon.manager.api.controller.v1;
 
 
-import io.choerodon.base.annotation.Permission;
+import io.choerodon.core.annotation.Permission;
 import io.choerodon.manager.app.service.ApiService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;

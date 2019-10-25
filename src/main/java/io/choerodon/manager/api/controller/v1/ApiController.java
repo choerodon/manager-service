@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.annotation.Permission;
+import io.choerodon.core.annotation.Permission;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import io.choerodon.base.enums.ResourceType;
+import io.choerodon.core.enums.ResourceType;
 import io.choerodon.manager.infra.enums.InvokeCountBusinessType;
 import org.springframework.data.web.SortDefault;
 import io.choerodon.swagger.annotation.CustomPageRequest;

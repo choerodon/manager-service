@@ -3,10 +3,10 @@ package io.choerodon.manager.api.controller.v1;
 import java.util.List;
 
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.annotation.Permission;
+import io.choerodon.core.annotation.Permission;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import io.choerodon.base.enums.ResourceType;
+import io.choerodon.core.enums.ResourceType;
 import io.choerodon.manager.api.dto.ConfigVO;
 import io.choerodon.manager.infra.dto.ConfigDTO;
 import io.choerodon.manager.infra.dto.ServiceDTO;
