@@ -70,7 +70,7 @@ public class ConfigConverter {
         Map<String, Object> map = configVO.getValue();
         if (map != null) {
             try {
-                dto.setValue(MAPPER.writeValueAsString(dto.getValue()));
+                dto.setValue(MAPPER.writeValueAsString(map));
             } catch (JsonProcessingException e) {
                 throw new CommonException("error.config.parser");
             }
