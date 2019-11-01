@@ -9,6 +9,7 @@ import io.choerodon.manager.infra.dto.RouteDTO;
 import io.choerodon.manager.infra.feign.IamClient;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
  * @author superlee
  * @since 2019-06-11
  */
+@Component
 public class IamClientFallback implements IamClient {
     @Override
     public ResponseEntity<List<MenuDTO>> list() {

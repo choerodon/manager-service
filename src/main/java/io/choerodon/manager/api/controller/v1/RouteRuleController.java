@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class RouteRuleController {
     @ApiOperation(value = "查询所有路由规则信息")
     @CustomPageRequest
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR})
-    public ResponseEntity<PageInfo<RouteRuleVO>> listRouteRules(@SortDefault(value = "id", direction = Sort.Direction.DESC) Pageable pageable,
+    public ResponseEntity<PageInfo<RouteRuleVO>> listRouteRules(@ApiIgnore @SortDefault(value = "id", direction = Sort.Direction.DESC) Pageable pageable,
                                                                 @RequestParam(value = "code", required = false) String code) {
         return new ResponseEntity<>(routeRuleService.listRouteRules(pageable, code), HttpStatus.OK);
     }

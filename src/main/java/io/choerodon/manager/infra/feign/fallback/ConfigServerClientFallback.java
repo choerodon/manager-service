@@ -8,12 +8,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import io.choerodon.manager.infra.feign.ConfigServerClient;
+import org.springframework.stereotype.Component;
 
 /**
  * 向config-server服务发送feign失败的回调处理
  *
  * @author wuguokai
  */
+@Component
 public class ConfigServerClientFallback implements ConfigServerClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigServerClientFallback.class);
