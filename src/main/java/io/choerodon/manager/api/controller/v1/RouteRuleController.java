@@ -70,9 +70,8 @@ public class RouteRuleController {
     @PostMapping("/update")
     @ApiOperation(value = "更新路由规则信息")
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR})
-    public ResponseEntity<RouteRuleVO>updateRouteRule(@RequestBody @Validated(Update.class) RouteRuleVO routeRuleVO,
-                                                        @RequestParam(value = "object_version_number") Long objectVersionNumber) {
-        return new ResponseEntity<>(routeRuleService.updateRouteRule(routeRuleVO, objectVersionNumber), HttpStatus.OK);
+    public ResponseEntity<RouteRuleVO>updateRouteRule(@RequestBody @Validated(Update.class) RouteRuleVO routeRuleVO) {
+        return new ResponseEntity<>(routeRuleService.updateRouteRule(routeRuleVO), HttpStatus.OK);
     }
 
     @PostMapping("/check")

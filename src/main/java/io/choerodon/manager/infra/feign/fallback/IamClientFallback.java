@@ -52,7 +52,7 @@ public class IamClientFallback implements IamClient {
     }
 
     @Override
-    public ResponseEntity<RouteRuleVO> updateRouteRule(RouteRuleVO routeRuleVO, Long objectVersionNumber) {
+    public ResponseEntity<RouteRuleVO> updateRouteRule(RouteRuleVO routeRuleVO) {
         return null;
     }
 

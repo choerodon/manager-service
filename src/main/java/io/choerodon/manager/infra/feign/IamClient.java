@@ -67,11 +67,10 @@ public interface IamClient {
     /**
      * 更新路由规则
      * @param routeRuleVO
-     * @param objectVersionNumber
      * @return
      */
     @PostMapping("/v1/route_rules/update")
-    ResponseEntity<RouteRuleVO>updateRouteRule(@RequestBody RouteRuleVO routeRuleVO, @RequestParam(value = "object_version_number") Long objectVersionNumber);
+    ResponseEntity<RouteRuleVO>updateRouteRule(@RequestBody RouteRuleVO routeRuleVO);
 
     /**
      * 路由校验(code唯一性)

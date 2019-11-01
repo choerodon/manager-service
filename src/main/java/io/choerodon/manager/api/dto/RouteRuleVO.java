@@ -37,6 +37,7 @@ public class RouteRuleVO {
     @Valid
     private List<RouteMemberRuleDTO> routeMemberRuleDTOS;
 
+    @NotNull(message = "error.route.rule.update.object.version.number.cannot.be.null", groups = {Update.class})
     private Long objectVersionNumber;
     private Date creationDate;
     private Long userNumber;
