@@ -1,14 +1,15 @@
 package io.choerodon.manager.infra.feign;
 
-import io.choerodon.core.annotation.Permission;
+import com.github.pagehelper.PageInfo;
 import io.choerodon.manager.api.dto.MenuDTO;
+import io.choerodon.manager.api.dto.RouteRuleDTO;
+import io.choerodon.manager.api.dto.RouteRuleVO;
 import io.choerodon.manager.infra.dto.RouteDTO;
 import io.choerodon.manager.infra.feign.fallback.ConfigServerClientFallback;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -29,4 +30,55 @@ public interface IamClient {
 
     @GetMapping("/v1/route")
     List<RouteDTO> selectRoute(@RequestParam(name = "name", required = false) String name);
+
+    /**
+     * 查询路由规则信息
+     * @param pageable
+     * @param code
+     * @return
+     */
+    @GetMapping("/v1/route_rules")
+    ResponseEntity<PageInfo<RouteRuleVO>> listRouteRules(@RequestBody Pageable pageable, @RequestParam(value = "code", required = false) String code);
+
+    /**
+     * 查询路由规则详细信息
+     * @param id   路由id
+     * @return
+     */
+    @GetMapping("/v1/route_rules/{id}")
+    ResponseEntity<RouteRuleVO> queryRouteRuleDetailById(@PathVariable("id") Long id);
+
+    /**
+     * 新增路由规则
+     * @param routeRuleVO
+     * @return
+     */
+    @PostMapping("/v1/route_rules/insert")
+    ResponseEntity<RouteRuleVO> insertRouteRule(@RequestBody RouteRuleVO routeRuleVO);
+
+    /**
+     * 删除路由规则
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/v1/route_rules/{id}")
+    ResponseEntity<Boolean> deleteRouteRuleById(@PathVariable("id") Long id);
+
+    /**
+     * 更新路由规则
+     * @param routeRuleVO
+     * @param objectVersionNumber
+     * @return
+     */
+    @PostMapping("/v1/route_rules/update")
+    ResponseEntity<RouteRuleVO>updateRouteRule(@RequestBody RouteRuleVO routeRuleVO, @RequestParam(value = "object_version_number") Long objectVersionNumber);
+
+    /**
+     * 路由校验(code唯一性)
+     * @param routeRuleDTO
+     * @return
+     */
+    @PostMapping("/v1/route_rules/check")
+    ResponseEntity<Boolean> checkCode(@RequestBody RouteRuleDTO routeRuleDTO);
+
 }
