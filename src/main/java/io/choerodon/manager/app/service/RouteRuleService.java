@@ -52,7 +52,7 @@ public interface RouteRuleService {
      * @param routeRuleVO     更新路由信息
      * @return                更新完成路由规则信息
      */
-    RouteRuleVO updateRouteRule(RouteRuleVO routeRuleVO, Long objectVersionNumber);
+    RouteRuleVO updateRouteRule(RouteRuleVO routeRuleVO);
 
     /**
      * 路由code重复校验

@@ -37,9 +37,14 @@ public class RouteRuleVO {
     @Valid
     private List<RouteMemberRuleDTO> routeMemberRuleDTOS;
 
+    @NotNull(message = "error.route.rule.update.object.version.number.cannot.be.null", groups = {Update.class})
     private Long objectVersionNumber;
     private Date creationDate;
     private Long userNumber;
+
+    // 配置的用户、主机信息
+    private Long[] userIds;
+    private Long[] hostIds;
 
     public Long getId() {
         return id;
@@ -101,6 +106,24 @@ public class RouteRuleVO {
 
     public RouteRuleVO setUserNumber(Long userNumber) {
         this.userNumber = userNumber;
+        return this;
+    }
+
+    public Long[] getUserIds() {
+        return userIds;
+    }
+
+    public RouteRuleVO setUserIds(Long[] userIds) {
+        this.userIds = userIds;
+        return this;
+    }
+
+    public Long[] getHostIds() {
+        return hostIds;
+    }
+
+    public RouteRuleVO setHostIds(Long[] hostIds) {
+        this.hostIds = hostIds;
         return this;
     }
 }
