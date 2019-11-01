@@ -823,7 +823,7 @@ ${body}`;
           >
             {
               APITestStore.getUserInfo ? (<span>{APITestStore.getUserInfo}</span>) : (
-                <span>{loginName}{realName}</span>
+                <span>{realName}</span>
               )
             }
           </Button>
