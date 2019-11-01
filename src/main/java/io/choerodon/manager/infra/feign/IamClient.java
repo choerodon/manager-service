@@ -5,7 +5,7 @@ import io.choerodon.manager.api.dto.MenuDTO;
 import io.choerodon.manager.api.dto.RouteRuleDTO;
 import io.choerodon.manager.api.dto.RouteRuleVO;
 import io.choerodon.manager.infra.dto.RouteDTO;
-import io.choerodon.manager.infra.feign.fallback.ConfigServerClientFallback;
+import io.choerodon.manager.infra.feign.fallback.IamClientFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ import java.util.List;
  * @author superlee
  * @since 2019-06-11
  */
-@FeignClient(value = "base-service", fallback = ConfigServerClientFallback.class)
+@FeignClient(value = "base-service", fallback = IamClientFallback.class)
 public interface IamClient {
 
     /**
