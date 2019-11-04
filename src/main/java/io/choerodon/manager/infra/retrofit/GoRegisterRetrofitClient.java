@@ -2,10 +2,7 @@ package io.choerodon.manager.infra.retrofit;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.POST;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
+import retrofit2.http.*;
 
 /**
  * @author zongw.lee@gmail.com
@@ -14,9 +11,12 @@ import retrofit2.http.Query;
 public interface GoRegisterRetrofitClient {
 
     @GET("apps")
-    Call<ResponseBody> getApp(@Path("app_name") String appName);
+    Call<ResponseBody> listApps();
 
     @POST("apps/{app-name}")
-    Call<ResponseBody> createOrUpdateApp(@Path("app_name") String appName, @Query("remote_token") String remoteToken);
+    Call<ResponseBody> createOrUpdateApp(@Path("app-name") String appName);
+
+    @DELETE("apps/{app-name}/{instance-id}")
+    Call<ResponseBody> deleteApp(@Path("app-name") String appName, @Path("instance-id") String instanceId);
 
 }

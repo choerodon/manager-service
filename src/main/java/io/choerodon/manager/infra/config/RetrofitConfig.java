@@ -1,14 +1,14 @@
 package io.choerodon.manager.infra.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.springframework.beans.factory.annotation.Value;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.manager.infra.retrofit.GoRegisterRetrofitClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
-import io.choerodon.manager.infra.retrofit.GoRegisterRetrofitClient;
+import java.text.SimpleDateFormat;
 
 /**
  * @author zongw.lee@gmail.com
@@ -17,8 +17,8 @@ import io.choerodon.manager.infra.retrofit.GoRegisterRetrofitClient;
 @Configuration
 public class RetrofitConfig {
 
-    @Value("${eureka.client.serviceUrl.defaultZone}")
-    String goRegisterBaseUrl;
+//    @Value("${eureka.client.serviceUrl.defaultZone}")
+    String goRegisterBaseUrl = "http://register.staging.saas.hand-china.com/eureka/";
 
     @Bean("goRegisterRetrofitClient")
     public GoRegisterRetrofitClient goRegisterRetrofitClient() {
@@ -27,13 +27,12 @@ public class RetrofitConfig {
     }
 
     private Retrofit getGoRegisterRetrofit() {
-        Gson gson = new GsonBuilder()
-                //配置Gson
-                .setDateFormat("yyyy-MM-dd hh:mm:ss")
-                .create();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.getSerializationConfig().with(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"));
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return new Retrofit.Builder()
                 .baseUrl(goRegisterBaseUrl)
-                .addConverterFactory(GsonConverterFactory.create(gson))
+                .addConverterFactory(JacksonConverterFactory.create(objectMapper))
                 .build();
     }
 }
