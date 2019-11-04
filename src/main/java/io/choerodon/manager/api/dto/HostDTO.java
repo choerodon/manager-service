@@ -12,10 +12,12 @@ public class HostDTO {
 
     private String appName;
 
+    private String instanceId;
+
     private int port;
 
     private String sourceType;
-    private String serviceName;
+    private String routeRuleCode;
 
     public String getHostName() {
         return hostName;
@@ -57,11 +59,19 @@ public class HostDTO {
         this.sourceType = sourceType;
     }
 
-    public String getServiceName() {
-        return serviceName;
+    public String getInstanceId() {
+        return instanceId;
     }
 
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
+    }
+
+    public String getRouteRuleCode() {
+        return routeRuleCode;
+    }
+
+    public void setRouteRuleCode(String routeRuleCode) {
+        this.routeRuleCode = routeRuleCode;
     }
 }

@@ -2,6 +2,9 @@ package io.choerodon.manager.app.service;
 
 import com.github.pagehelper.PageInfo;
 import io.choerodon.manager.api.dto.HostDTO;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 /**
  * @author wanghao
@@ -16,8 +19,12 @@ public interface HostService {
      * @param port
      * @param appName
      * @param params
+     * @param pageable
      * @return
      */
-    PageInfo<HostDTO> pagingHosts(String sourceType, String hostName, String ipAddr, int port, String appName, String[] params);
+    PageInfo<HostDTO> pagingHosts(String sourceType, String hostName, String ipAddr, Integer port, String appName, String[] params, Pageable pageable);
 
+    List<HostDTO> listHosts();
+
+    void deleteHost(String appName, String instanceId);
 }

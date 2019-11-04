@@ -7,7 +7,10 @@ import io.choerodon.manager.api.dto.HostDTO;
 import io.choerodon.manager.api.dto.register.ApplicationInfo;
 import io.choerodon.manager.app.service.HostService;
 import io.choerodon.manager.infra.retrofit.GoRegisterRetrofitClient;
+import io.choerodon.manager.infra.utils.PageUtils;
+import io.choerodon.manager.infra.utils.RetrofitCallExceptionParse;
 import okhttp3.ResponseBody;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import retrofit2.Call;
@@ -35,8 +38,34 @@ public class HostServiceImpl implements HostService {
     }
 
     @Override
-    public PageInfo<HostDTO> pagingHosts(String sourceType, String hostName, String ipAddr, int port, String appName, String[] params) {
-        PageInfo<HostDTO> pageInfo = new PageInfo<>();
+    public PageInfo<HostDTO> pagingHosts(String sourceType, String hostName, String ipAddr, Integer port, String appName, String[] params, Pageable pageable) {
+        List<HostDTO> hostList = listHosts();
+        // 过滤
+        if (!ObjectUtils.isEmpty(sourceType)) {
+            hostList = hostList.stream().filter(v -> v.getSourceType().equals(sourceType)).collect(Collectors.toList());
+        }
+        if (!ObjectUtils.isEmpty(port)) {
+            hostList = hostList.stream().filter(v -> port.equals(v.getPort())).collect(Collectors.toList());
+        }
+
+        if (!ObjectUtils.isEmpty(hostName)) {
+            hostList = hostList.stream().filter(v -> v.getHostName().contains(hostName)).collect(Collectors.toList());
+        }
+        if (!ObjectUtils.isEmpty(ipAddr)) {
+            hostList = hostList.stream().filter(v -> v.getIpAddr().contains(ipAddr)).collect(Collectors.toList());
+        }
+        if (!ObjectUtils.isEmpty(appName)) {
+            hostList = hostList.stream().filter(v -> v.getAppName().contains(appName)).collect(Collectors.toList());
+        }
+        // 全局筛选
+        if (!ObjectUtils.isEmpty(params)) {
+
+        }
+        return PageUtils.createPageFromList(hostList,pageable);
+    }
+
+    @Override
+    public List<HostDTO> listHosts() {
         Call<ResponseBody> call = goRegisterRetrofitClient.listApps();
         List<Application> applicationList = new ArrayList<>();
         try {
@@ -52,31 +81,17 @@ public class HostServiceImpl implements HostService {
             hostDTO.setHostName(v.getHostName());
             hostDTO.setIpAddr(v.getIPAddr());
             hostDTO.setPort(v.getPort());
+            hostDTO.setInstanceId(v.getInstanceId());
+            hostDTO.setAppName(v.getAppName());
             hostDTO.setSourceType(v.getMetadata().get(PROVISIONER));
             return hostDTO;
         }).collect(Collectors.toList());
+        return hostList;
+    }
 
-        if (!ObjectUtils.isEmpty(sourceType)) {
-            hostList = hostList.stream().filter(v -> v.getSourceType().equals(sourceType)).collect(Collectors.toList());
-        }
-        if (!ObjectUtils.isEmpty(port)) {
-            hostList = hostList.stream().filter(v -> v.getPort() == port).collect(Collectors.toList());
-        }
-
-        if (!ObjectUtils.isEmpty(hostName)) {
-            hostList = hostList.stream().filter(v -> v.getHostName().contains(hostName)).collect(Collectors.toList());
-        }
-        if (!ObjectUtils.isEmpty(ipAddr)) {
-            hostList = hostList.stream().filter(v -> v.getIpAddr().contains(ipAddr)).collect(Collectors.toList());
-        }
-        if (!ObjectUtils.isEmpty(appName)) {
-            hostList = hostList.stream().filter(v -> v.getAppName().contains(appName)).collect(Collectors.toList());
-        }
-
-        if (!ObjectUtils.isEmpty(params)) {
-
-        }
-
-        return null;
+    @Override
+    public void deleteHost(String appName, String instanceId) {
+        Call<ResponseBody> call = goRegisterRetrofitClient.deleteApp(appName, instanceId);
+        RetrofitCallExceptionParse.executeCall(call,"delete host failed : " + instanceId, Void.class);
     }
 }

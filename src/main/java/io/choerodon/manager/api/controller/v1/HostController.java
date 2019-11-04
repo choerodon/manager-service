@@ -7,18 +7,19 @@ import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.manager.api.dto.HostDTO;
 import io.choerodon.manager.app.service.HostService;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * @author wanghao
  * @Date 2019/11/1 17:50
  */
 @RestController
-@RequestMapping("/v1/host")
+@RequestMapping("/v1/hosts")
 public class HostController {
 
     private HostService hostService;
@@ -31,13 +32,25 @@ public class HostController {
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("分页查询所有主机")
     public ResponseEntity<PageInfo<HostDTO>> pagingHosts(
-            @RequestParam(name = "sourceType",required = false) String sourceType,
-            @RequestParam(name = "hostName",required = false) String hostName,
-            @RequestParam(name = "ipAddr",required = false) String ipAddr,
-            @RequestParam(name = "port",required = false) int port,
-            @RequestParam(name = "appName",required = false) String appName,
-            @RequestParam(name = "params",required = false) String[] params
+            @RequestParam(name = "source_type",required = false) String sourceType,
+            @RequestParam(name = "host_name",required = false) String hostName,
+            @RequestParam(name = "ip_addr",required = false) String ipAddr,
+            @RequestParam(name = "port",required = false) Integer port,
+            @RequestParam(name = "app_name",required = false) String appName,
+            @RequestParam(name = "params",required = false) String[] params,
+            @ApiIgnore
+            @SortDefault(value = "id", direction = Sort.Direction.DESC) Pageable pageable
+            ) {
+        return ResponseEntity.ok(hostService.pagingHosts(sourceType,hostName,ipAddr,port,appName,params,pageable));
+    }
+    @DeleteMapping("/{app_name}/{instance_id}")
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("删除主机")
+    public ResponseEntity<Void> deleteHost(
+            @PathVariable(name = "app_name") String appName,
+            @PathVariable(name = "instance_id") String instanceId
     ) {
-        return ResponseEntity.ok(hostService.pagingHosts(sourceType,hostName,ipAddr,port,appName,params));
+        hostService.deleteHost(appName, instanceId);
+        return ResponseEntity.noContent().build();
     }
 }
