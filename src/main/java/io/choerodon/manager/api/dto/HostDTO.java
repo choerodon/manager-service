@@ -1,5 +1,8 @@
 package io.choerodon.manager.api.dto;
 
+import java.util.Date;
+import java.util.Map;
+
 /**
  * @author wanghao
  * @Date 2019/11/1 17:25
@@ -14,10 +17,14 @@ public class HostDTO {
 
     private String instanceId;
 
+    private Date createDate;
+
     private int port;
 
     private String sourceType;
+
     private String routeRuleCode;
+    private Map<String,String> metadata;
 
     public String getHostName() {
         return hostName;
@@ -73,5 +80,21 @@ public class HostDTO {
 
     public void setRouteRuleCode(String routeRuleCode) {
         this.routeRuleCode = routeRuleCode;
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
+
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Map<String, String> metadata) {
+        this.metadata = metadata;
     }
 }

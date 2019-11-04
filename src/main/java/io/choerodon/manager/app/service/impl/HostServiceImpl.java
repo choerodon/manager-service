@@ -3,13 +3,16 @@ package io.choerodon.manager.app.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
 import com.netflix.discovery.shared.Application;
+import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.HostDTO;
+import io.choerodon.manager.api.dto.HostVO;
+import io.choerodon.manager.api.dto.HostWarpPortDTO;
 import io.choerodon.manager.api.dto.register.ApplicationInfo;
 import io.choerodon.manager.app.service.HostService;
 import io.choerodon.manager.infra.retrofit.GoRegisterRetrofitClient;
 import io.choerodon.manager.infra.utils.PageUtils;
-import io.choerodon.manager.infra.utils.RetrofitCallExceptionParse;
 import okhttp3.ResponseBody;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -17,8 +20,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -29,8 +31,13 @@ import java.util.stream.Collectors;
 public class HostServiceImpl implements HostService {
 
     private static final String PROVISIONER = "provisioner";
+    private static final String HOST_NAME = "hostName";
+    private static final String PORT_ENABLE = "@enabled";
+    private static final String PORT = "$";
+    private static final String ROUTE_RULE_CODE = "routeRuleCode";
     private GoRegisterRetrofitClient goRegisterRetrofitClient;
     private ObjectMapper objectMapper;
+
 
     public HostServiceImpl(GoRegisterRetrofitClient goRegisterRetrofitClient, ObjectMapper objectMapper) {
         this.goRegisterRetrofitClient = goRegisterRetrofitClient;
@@ -49,7 +56,7 @@ public class HostServiceImpl implements HostService {
         }
 
         if (!ObjectUtils.isEmpty(hostName)) {
-            hostList = hostList.stream().filter(v -> v.getHostName().contains(hostName)).collect(Collectors.toList());
+            hostList = hostList.stream().filter(v -> v.getMetadata().get(HOST_NAME) != null && v.getMetadata().get(HOST_NAME).contains(hostName)).collect(Collectors.toList());
         }
         if (!ObjectUtils.isEmpty(ipAddr)) {
             hostList = hostList.stream().filter(v -> v.getIpAddr().contains(ipAddr)).collect(Collectors.toList());
@@ -57,25 +64,14 @@ public class HostServiceImpl implements HostService {
         if (!ObjectUtils.isEmpty(appName)) {
             hostList = hostList.stream().filter(v -> v.getAppName().contains(appName)).collect(Collectors.toList());
         }
-        // 全局筛选
-        if (!ObjectUtils.isEmpty(params)) {
-
-        }
         return PageUtils.createPageFromList(hostList,pageable);
     }
 
     @Override
     public List<HostDTO> listHosts() {
         Call<ResponseBody> call = goRegisterRetrofitClient.listApps();
-        List<Application> applicationList = new ArrayList<>();
-        try {
-            Response<ResponseBody> execute = call.execute();
-            String string = execute.body().string();
-            ApplicationInfo applicationInfo = objectMapper.readValue(string, ApplicationInfo.class);
-            applicationList = applicationInfo.getApplications().getRegisteredApplications();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ApplicationInfo applicationInfo = executeRetrofitCall(call, ApplicationInfo.class, "list hosts failed");
+        List<Application> applicationList = applicationInfo.getApplications().getRegisteredApplications();
         List<HostDTO> hostList = applicationList.stream().flatMap(application -> application.getInstances().stream()).map(v -> {
             HostDTO hostDTO = new HostDTO();
             hostDTO.setHostName(v.getHostName());
@@ -84,6 +80,9 @@ public class HostServiceImpl implements HostService {
             hostDTO.setInstanceId(v.getInstanceId());
             hostDTO.setAppName(v.getAppName());
             hostDTO.setSourceType(v.getMetadata().get(PROVISIONER));
+            hostDTO.setRouteRuleCode(v.getMetadata().get(ROUTE_RULE_CODE));
+            hostDTO.setCreateDate(new Date(v.getLeaseInfo().getRegistrationTimestamp()));
+            hostDTO.setMetadata(v.getMetadata());
             return hostDTO;
         }).collect(Collectors.toList());
         return hostList;
@@ -92,6 +91,52 @@ public class HostServiceImpl implements HostService {
     @Override
     public void deleteHost(String appName, String instanceId) {
         Call<ResponseBody> call = goRegisterRetrofitClient.deleteApp(appName, instanceId);
-        RetrofitCallExceptionParse.executeCall(call,"delete host failed : " + instanceId, Void.class);
+        executeRetrofitCall(call,"delete host failed : " + instanceId);
+    }
+
+    @Override
+    public void saveHost(String appName, HostVO hostVO) {
+       saveOrUpdateHost(appName,hostVO,"save host failed" + hostVO);
+    }
+
+    @Override
+    public void updateHost(String appName, HostVO hostVO) {
+        saveOrUpdateHost(appName,hostVO,"update host failed" + hostVO);
+    }
+    private void saveOrUpdateHost(String appName, HostVO hostVO,String erroMsg) {
+        HostWarpPortDTO host = new HostWarpPortDTO();
+        Map<String,String> metadata = new HashMap<>();
+        metadata.put(HOST_NAME,hostVO.getHostName());
+        host.setMetadata(metadata);
+        host.setIpAddr(hostVO.getIpAddr());
+        Map<String,Object> map = new HashMap<>();
+        map.put(PORT_ENABLE,true);
+        map.put(PORT,hostVO.getPort());
+        host.setPort(map);
+        host.setStatus("UP");
+        Call<ResponseBody> call = goRegisterRetrofitClient.createOrUpdateApp(appName, host);
+        executeRetrofitCall(call,erroMsg);
+    }
+    private <T> T executeRetrofitCall(Call<ResponseBody> call, Class<T> clazz, String erroMsg) {
+        try {
+            Response<ResponseBody> execute = call.execute();
+            if (!execute.isSuccessful()) {
+                throw new CommonException(erroMsg);
+            }
+            String string = execute.body().string();
+            return objectMapper.readValue(string, clazz);
+        } catch (IOException e) {
+            throw new CommonException(erroMsg);
+        }
+    }
+    private void executeRetrofitCall(Call<ResponseBody> call, String erroMsg) {
+        try {
+            Response<ResponseBody> execute = call.execute();
+            if (!execute.isSuccessful()) {
+                throw new CommonException(erroMsg);
+            }
+        } catch (IOException e) {
+            throw new CommonException(erroMsg);
+        }
     }
 }
