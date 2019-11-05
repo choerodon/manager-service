@@ -3,6 +3,7 @@ package io.choerodon.manager.app.service;
 import com.github.pagehelper.PageInfo;
 import io.choerodon.manager.api.dto.HostDTO;
 import io.choerodon.manager.api.dto.HostVO;
+import io.choerodon.manager.api.dto.ServiceVO;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -19,11 +20,10 @@ public interface HostService {
      * @param ipAddr
      * @param port
      * @param appName
-     * @param params
      * @param pageable
      * @return
      */
-    PageInfo<HostDTO> pagingHosts(String sourceType, String hostName, String ipAddr, Integer port, String appName, String[] params, Pageable pageable);
+    PageInfo<ServiceVO> pagingHosts(String sourceType, String hostName, String ipAddr, Integer port, String appName, Pageable pageable);
 
     /**
      * 查询所有主机

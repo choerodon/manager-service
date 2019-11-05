@@ -8,6 +8,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.HostDTO;
 import io.choerodon.manager.api.dto.HostVO;
 import io.choerodon.manager.api.dto.HostWarpPortDTO;
+import io.choerodon.manager.api.dto.ServiceVO;
 import io.choerodon.manager.api.dto.register.ApplicationInfo;
 import io.choerodon.manager.app.service.HostService;
 import io.choerodon.manager.infra.retrofit.GoRegisterRetrofitClient;
@@ -45,7 +46,7 @@ public class HostServiceImpl implements HostService {
     }
 
     @Override
-    public PageInfo<HostDTO> pagingHosts(String sourceType, String hostName, String ipAddr, Integer port, String appName, String[] params, Pageable pageable) {
+    public PageInfo<ServiceVO> pagingHosts(String sourceType, String hostName, String ipAddr, Integer port, String appName, Pageable pageable) {
         List<HostDTO> hostList = listHosts();
         // 过滤
         if (!ObjectUtils.isEmpty(sourceType)) {
@@ -64,7 +65,15 @@ public class HostServiceImpl implements HostService {
         if (!ObjectUtils.isEmpty(appName)) {
             hostList = hostList.stream().filter(v -> v.getAppName().contains(appName)).collect(Collectors.toList());
         }
-        return PageUtils.createPageFromList(hostList, pageable);
+        Map<String, List<HostDTO>> hostsMap = hostList.stream().collect(Collectors.groupingBy(HostDTO::getAppName));
+        List<ServiceVO> services = new ArrayList<>();
+        hostsMap.forEach((k, v) -> {
+            ServiceVO service = new ServiceVO();
+            service.setAppName(k);
+            service.setHosts(v);
+            services.add(service);
+        });
+        return PageUtils.createPageFromList(services, pageable);
     }
 
     @Override
@@ -81,6 +90,9 @@ public class HostServiceImpl implements HostService {
         }
         List<Application> applicationList = applications.getRegisteredApplications();
         hostList = applicationList.stream().flatMap(application -> application.getInstances().stream()).map(v -> {
+            if (v.getMetadata().get(HOST_NAME) == null) {
+                v.getMetadata().put(HOST_NAME, v.getHostName());
+            }
             HostDTO hostDTO = new HostDTO();
             hostDTO.setHostName(v.getHostName());
             hostDTO.setIpAddr(v.getIPAddr());
