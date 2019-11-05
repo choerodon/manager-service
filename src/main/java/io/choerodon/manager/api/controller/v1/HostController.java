@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -61,19 +62,9 @@ public class HostController {
     @ApiOperation("添加主机")
     public ResponseEntity<Void> saveHost(
             @PathVariable(name = "app_name") String appName,
-            @RequestBody HostVO hostVO
+            @RequestBody @Validated HostVO hostVO
     ) {
         hostService.saveHost(appName, hostVO);
-        return ResponseEntity.noContent().build();
-    }
-    @PutMapping("/{app_name}")
-    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
-    @ApiOperation("修改主机")
-    public ResponseEntity<Void> updateHost(
-            @PathVariable(name = "app_name") String appName,
-            @RequestBody HostVO hostVO
-    ) {
-        hostService.updateHost(appName, hostVO);
         return ResponseEntity.noContent().build();
     }
 }

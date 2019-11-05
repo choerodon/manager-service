@@ -16,9 +16,9 @@ public interface GoRegisterRetrofitClient {
     Call<ResponseBody> listApps();
 
     @POST("apps/{app-name}")
-    Call<ResponseBody> createOrUpdateApp(@Path("app-name") String appName, @Body HostWarpPortDTO host);
+    Call<ResponseBody> createHost(@Path("app-name") String appName, @Body HostWarpPortDTO host);
 
     @DELETE("apps/{app-name}/{instance-id}")
-    Call<ResponseBody> deleteApp(@Path("app-name") String appName, @Path("instance-id") String instanceId);
+    Call<ResponseBody> deleteHost(@Path("app-name") String appName, @Path("instance-id") String instanceId);
 
 }

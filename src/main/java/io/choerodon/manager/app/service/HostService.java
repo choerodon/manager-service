@@ -25,11 +25,23 @@ public interface HostService {
      */
     PageInfo<HostDTO> pagingHosts(String sourceType, String hostName, String ipAddr, Integer port, String appName, String[] params, Pageable pageable);
 
+    /**
+     * 查询所有主机
+     * @return
+     */
     List<HostDTO> listHosts();
 
+    /**
+     * 删除主机
+     * @param appName
+     * @param instanceId
+     */
     void deleteHost(String appName, String instanceId);
 
+    /**
+     * 新增主机
+     * @param appName
+     * @param hostVO
+     */
     void saveHost(String appName, HostVO hostVO);
-
-    void updateHost(String appName, HostVO hostVO);
 }
