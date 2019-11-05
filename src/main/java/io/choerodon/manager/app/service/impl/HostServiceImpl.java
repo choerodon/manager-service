@@ -71,7 +71,7 @@ public class HostServiceImpl implements HostService {
     public List<HostDTO> listHosts() {
         List<HostDTO> hostList = new ArrayList<>();
         Call<ResponseBody> call = goRegisterRetrofitClient.listApps();
-        ApplicationInfo applicationInfo = executeRetrofitCall(call, ApplicationInfo.class, "list hosts failed");
+        ApplicationInfo applicationInfo = getApplicationInfo(call);
         if (applicationInfo == null) {
             return hostList;
         }
@@ -122,19 +122,19 @@ public class HostServiceImpl implements HostService {
         executeRetrofitCall(call, erroMsg);
     }
 
-    private <T> T executeRetrofitCall(Call<ResponseBody> call, Class<T> clazz, String erroMsg) {
+    private ApplicationInfo getApplicationInfo(Call<ResponseBody> call) {
         try {
             Response<ResponseBody> execute = call.execute();
             if (!execute.isSuccessful()) {
-                throw new CommonException(erroMsg);
+                throw new CommonException("list hosts failed");
             }
             if (execute.body() == null) {
                 return null;
             }
             String string = execute.body().string();
-            return objectMapper.readValue(string, clazz);
+            return objectMapper.readValue(string, ApplicationInfo.class);
         } catch (IOException e) {
-            throw new CommonException(erroMsg);
+            throw new CommonException("list hosts failed");
         }
     }
 

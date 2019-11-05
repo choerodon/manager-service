@@ -101,7 +101,7 @@
         </dependency>
         <dependency>
             <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>converter-gson</artifactId>
+            <artifactId>converter-jackson</artifactId>
             <version>2.4.0</version>
         </dependency>
         <!-- config server -->
@@ -172,25 +172,8 @@
             <groupId>io.choerodon</groupId>
             <artifactId>choerodon-starter-webmvc</artifactId>
         </dependency>
-        <!-- retrofit -->
-        <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>retrofit</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>converter-gson</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>converter-jackson</artifactId>
-            <version>2.4.0</version>
-        </dependency>
     </dependencies>
     <build>
-        <finalName>appName</finalName>
+        <finalName>app</finalName>
     </build>
 </project>
