@@ -3,6 +3,7 @@ package io.choerodon.manager.infra.config;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.manager.infra.retrofit.GoRegisterRetrofitClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import retrofit2.Retrofit;
@@ -17,8 +18,8 @@ import java.text.SimpleDateFormat;
 @Configuration
 public class RetrofitConfig {
 
-//    @Value("${eureka.client.serviceUrl.defaultZone}")
-    String goRegisterBaseUrl = "http://register.staging.saas.hand-china.com/eureka/";
+    @Value("${eureka.client.serviceUrl.defaultZone}")
+    String goRegisterBaseUrl;
 
     @Bean("goRegisterRetrofitClient")
     public GoRegisterRetrofitClient goRegisterRetrofitClient() {
