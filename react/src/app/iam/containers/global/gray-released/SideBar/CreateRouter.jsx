@@ -1,0 +1,102 @@
+import React from 'react';
+import { Form, TextField, Select, Tooltip } from 'choerodon-ui/pro';
+import { Collapse } from 'choerodon-ui';
+import { observer } from 'mobx-react-lite';
+import _ from 'lodash';
+import AllUserDataSet from '../Store/AllUserDataSet';
+import AllHostDataSet from '../Store/AllHostDataSet';
+import FormSelectEditor from '../../../../components/formSelectEditor';
+import './CreateRouter.less';
+
+const prefixCls = 'c7n-manager-router-createRouter';
+const { Panel } = Collapse;
+
+const CreateRouter = observer(({ currentRecord }) => {
+  const getUserOption = ({ record, text, value }) => (
+    <Tooltip placement="left" title={`${record.get('email')}`}>
+      <div className={`${prefixCls}-option`}>
+        <div className={`${prefixCls}-option-avatar`}>
+          {record.get('imageUrl') ? <img src={record.get('imageUrl')} alt="userAvatar" style={{ width: '100%' }} />
+            : <span className={`${prefixCls}-option-avatar-noavatar`}>{record.get('realName') && record.get('realName').split('')[0]}</span>}
+        </div>
+        <span>{record.get('realName')}</span>
+      </div>
+    </Tooltip>
+  );
+
+  const getHostOption = ({ record, text, value }) => (
+    <span>{text}</span>
+  );
+
+  const queryFunc = _.debounce((str = '', optionDataSet, queryField) => {
+    optionDataSet.setQueryParameter(queryField, str);
+    if (str !== '') { optionDataSet.query(); }
+  }, 500);
+  function handleFilterChange(e, optionDataSet, queryField) {
+    e.persist();
+    queryFunc(e.target.value, optionDataSet, queryField);
+  }
+
+  return (
+    <div className={prefixCls}>
+      <Form record={currentRecord} style={{ width: '5.12rem' }}>
+        <TextField name="code" />
+        <TextField name="description" />
+      </Form>
+      <hr className={`${prefixCls}-hr`} />
+      <Collapse bordered={false} defaultActiveKey={['1', '2']} className={`${prefixCls}-collapse`}>
+        <Panel header="添加主机" key="1">
+          <FormSelectEditor
+            record={currentRecord}
+            optionDataSetConfig={AllHostDataSet}
+            name="instanceIds"
+            addButton="添加主机"
+            alwaysRequired
+            canDeleteAll={false}
+            maxDisable={false}
+          >
+            {((itemProps) => (
+              <Select
+                {...itemProps}
+                labelLayout="float"
+                searchable
+                searchMatcher={() => true}
+                onInput={(e) => handleFilterChange(e, itemProps.options, 'app_name')}
+                optionRenderer={getHostOption}
+              />
+            ))}
+          </FormSelectEditor>
+        </Panel>
+      </Collapse>
+      <hr className={`${prefixCls}-hr`} />
+      <Collapse bordered={false} defaultActiveKey={['1', '2']} className={`${prefixCls}-collapse`}>
+        <Panel header="添加用户" key="1">
+          <FormSelectEditor
+            record={currentRecord}
+            optionDataSetConfig={AllUserDataSet}
+            name="userIds"
+            filterObject
+            addButton="添加用户"
+            alwaysRequired
+            canDeleteAll={false}
+            maxDisable={false}
+          >
+            {((itemProps) => (
+              <Select
+                {...itemProps}
+                labelLayout="float"
+                searchable
+                searchMatcher={() => true}
+                onInput={(e) => handleFilterChange(e, itemProps.options, 'user_name')}
+                optionRenderer={getUserOption}
+              />
+            ))}
+          </FormSelectEditor>
+        </Panel>
+      </Collapse>
+      <hr className={`${prefixCls}-hr`} />
+    </div>
+  );
+});
+
+export default CreateRouter;
