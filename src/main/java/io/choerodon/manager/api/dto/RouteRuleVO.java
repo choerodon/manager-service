@@ -1,5 +1,6 @@
 package io.choerodon.manager.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.choerodon.manager.api.validator.Check;
 import io.choerodon.manager.api.validator.Insert;
 import io.choerodon.manager.api.validator.Update;
@@ -37,14 +38,18 @@ public class RouteRuleVO {
     @Valid
     private List<RouteMemberRuleDTO> routeMemberRuleDTOS;
 
+    @ApiModelProperty(value = "该路由下配置的主机信息")
+    private List<HostDTO> hostDTOS;
+
     @NotNull(message = "error.route.rule.update.object.version.number.cannot.be.null", groups = {Update.class})
     private Long objectVersionNumber;
     private Date creationDate;
     private Long userNumber;
+    private Long hostNumber;
 
     // 配置的用户、主机信息
     private Long[] userIds;
-    private Long[] hostIds;
+    private String[] instanceIds;
 
     public Long getId() {
         return id;
@@ -79,6 +84,15 @@ public class RouteRuleVO {
 
     public RouteRuleVO setRouteMemberRuleDTOS(List<RouteMemberRuleDTO> routeMemberRuleDTOS) {
         this.routeMemberRuleDTOS = routeMemberRuleDTOS;
+        return this;
+    }
+
+    public List<HostDTO> getHostDTOS() {
+        return hostDTOS;
+    }
+
+    public RouteRuleVO setHostDTOS(List<HostDTO> hostDTOS) {
+        this.hostDTOS = hostDTOS;
         return this;
     }
 
@@ -118,12 +132,21 @@ public class RouteRuleVO {
         return this;
     }
 
-    public Long[] getHostIds() {
-        return hostIds;
+    public String[] getInstanceIds() {
+        return instanceIds;
     }
 
-    public RouteRuleVO setHostIds(Long[] hostIds) {
-        this.hostIds = hostIds;
+    public RouteRuleVO setInstanceIds(String[] instanceIds) {
+        this.instanceIds = instanceIds;
+        return this;
+    }
+
+    public Long getHostNumber() {
+        return hostNumber;
+    }
+
+    public RouteRuleVO setHostNumber(Long hostNumber) {
+        this.hostNumber = hostNumber;
         return this;
     }
 }

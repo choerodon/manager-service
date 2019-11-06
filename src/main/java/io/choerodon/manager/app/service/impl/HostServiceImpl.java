@@ -35,10 +35,10 @@ public class HostServiceImpl implements HostService {
     private static final String HOST_NAME = "hostName";
     private static final String PORT_ENABLE = "@enabled";
     private static final String PORT = "$";
-    private static final String ROUTE_RULE_CODE = "routeRuleCode";
     private GoRegisterRetrofitClient goRegisterRetrofitClient;
     private ObjectMapper objectMapper;
 
+    public static final String ROUTE_RULE_CODE = "routeRuleCode";
 
     public HostServiceImpl(GoRegisterRetrofitClient goRegisterRetrofitClient, ObjectMapper objectMapper) {
         this.goRegisterRetrofitClient = goRegisterRetrofitClient;

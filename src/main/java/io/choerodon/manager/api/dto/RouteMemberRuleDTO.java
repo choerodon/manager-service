@@ -27,7 +27,14 @@ public class RouteMemberRuleDTO extends BaseDTO {
     private String routeRuleCode;
 
     @Transient
-    private String userName;
+    private String loginName;
+
+    @Transient
+    private String realName;
+
+    private String imageUrl;
+
+    private String email;
 
     public Long getId() {
         return id;
@@ -56,12 +63,39 @@ public class RouteMemberRuleDTO extends BaseDTO {
         return this;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getLoginName() {
+        return loginName;
     }
 
-    public RouteMemberRuleDTO setUserName(String userName) {
-        this.userName = userName;
+    public RouteMemberRuleDTO setLoginName(String loginName) {
+        this.loginName = loginName;
+        return this;
+    }
+
+    public String getRealName() {
+        return realName;
+    }
+
+    public RouteMemberRuleDTO setRealName(String realName) {
+        this.realName = realName;
+        return this;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public RouteMemberRuleDTO setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+        return this;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public RouteMemberRuleDTO setEmail(String email) {
+        this.email = email;
         return this;
     }
 }

@@ -22,7 +22,6 @@ public class HostDTO {
     private int port;
 
     private String sourceType;
-
     private String routeRuleCode;
     private Map<String,String> metadata;
 

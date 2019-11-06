@@ -8,6 +8,7 @@ import io.choerodon.manager.api.dto.RouteRuleVO;
 import io.choerodon.manager.infra.dto.RouteDTO;
 import io.choerodon.manager.infra.feign.IamClient;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -48,7 +49,7 @@ public class IamClientFallback implements IamClient {
 
     @Override
     public ResponseEntity<Boolean> deleteRouteRuleById(Long id) {
-        return null;
+        return new ResponseEntity<>(false, HttpStatus.OK);
     }
 
     @Override
@@ -58,6 +59,6 @@ public class IamClientFallback implements IamClient {
 
     @Override
     public ResponseEntity<Boolean> checkCode(RouteRuleDTO routeRuleDTO) {
-        return null;
+        return new ResponseEntity<>(false, HttpStatus.OK);
     }
 }
