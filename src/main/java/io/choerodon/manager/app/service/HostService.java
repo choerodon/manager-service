@@ -44,4 +44,7 @@ public interface HostService {
      * @param hostVO
      */
     void saveHost(String appName, HostVO hostVO);
+
+    List<HostDTO> listHosts(String appName);
+
 }
