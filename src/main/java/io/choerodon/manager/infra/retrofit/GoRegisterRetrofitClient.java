@@ -1,10 +1,11 @@
 package io.choerodon.manager.infra.retrofit;
 
-import io.choerodon.manager.api.dto.HostVO;
 import io.choerodon.manager.api.dto.HostWarpPortDTO;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.*;
+
+import java.util.Map;
 
 /**
  * @author zongw.lee@gmail.com
@@ -20,5 +21,8 @@ public interface GoRegisterRetrofitClient {
 
     @DELETE("apps/{app-name}/{instance-id}")
     Call<ResponseBody> deleteHost(@Path("app-name") String appName, @Path("instance-id") String instanceId);
+
+    @PUT("apps/metadata")
+    Call<ResponseBody> updateApps(@Body Map<String, Map<String, String>> updateData);
 
 }
