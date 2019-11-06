@@ -119,6 +119,17 @@ public class HostServiceImpl implements HostService {
         saveHost(appName, hostVO, "save host failed : " + hostVO);
     }
 
+    @Override
+    public List<HostDTO> listHosts(String appName) {
+        List<HostDTO> hostDTOList = listHosts();
+        if (appName == null) {
+            return hostDTOList;
+        }
+        return hostDTOList.stream()
+                .filter(v -> v.getAppName().contains(appName))
+                .collect(Collectors.toList());
+    }
+
     private void saveHost(String appName, HostVO hostVO, String erroMsg) {
         HostWarpPortDTO host = new HostWarpPortDTO();
         Map<String, String> metadata = new HashMap<>();

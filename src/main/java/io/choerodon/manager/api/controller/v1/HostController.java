@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import io.choerodon.core.annotation.Permission;
 import io.choerodon.core.enums.ResourceType;
 import io.choerodon.core.iam.InitRoleCode;
+import io.choerodon.manager.api.dto.HostDTO;
 import io.choerodon.manager.api.dto.HostVO;
 import io.choerodon.manager.api.dto.ServiceVO;
 import io.choerodon.manager.app.service.HostService;
@@ -15,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.List;
 
 /**
  * @author wanghao
@@ -65,5 +68,13 @@ public class HostController {
     ) {
         hostService.saveHost(appName, hostVO);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/search")
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("根据服务名查询主机")
+    public ResponseEntity<List<HostDTO>> listHosts(
+            @RequestParam(name = "app_name", required = false) String appName
+    ) {
+        return ResponseEntity.ok(hostService.listHosts(appName));
     }
 }
