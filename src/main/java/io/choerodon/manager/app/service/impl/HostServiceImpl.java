@@ -122,6 +122,9 @@ public class HostServiceImpl implements HostService {
     @Override
     public List<HostDTO> listHosts(String appName) {
         List<HostDTO> hostDTOList = listHosts();
+        if (appName == null) {
+            return hostDTOList;
+        }
         return hostDTOList.stream()
                 .filter(v -> v.getAppName().contains(appName))
                 .collect(Collectors.toList());
