@@ -8,9 +8,22 @@ export default function (children) {
       if (res.failed) {
         message.error(res.message);
       }
+      // eslint-disable-next-line no-useless-escape
+      if (/^[-—\.\w\s]*$/.test(value)) {
+        return '服务名称只能由字母大小写、数字、"_"、"."、"-"、空格组成';
+      }
+      if (value.length > 30) {
+        return '路由编码超出规定长度';
+      }
       if (!res) {
         return '路由编码重复';
       }
+    }
+    return true;
+  };
+  const descriptionValidator = (value) => {
+    if (value.length > 200) {
+      return '路由描述超出规定长度';
     }
     return true;
   };
@@ -18,9 +31,6 @@ export default function (children) {
     autoQuery: true,
     selection: false,
     paging: true,
-    children: {
-      hostDTOS: children,
-    },
     fields: [{
       name: 'code',
       type: 'string',
@@ -31,6 +41,7 @@ export default function (children) {
       name: 'description',
       type: 'string',
       label: '路由说明',
+      validator: descriptionValidator,
     }, {
       name: 'hostNumber',
       type: 'string',
@@ -62,7 +73,13 @@ export default function (children) {
       textField: 'hostName',
       valueField: 'instanceId',
       label: '主机',
+    }, {
+      name: 'hostDTOS',
+      type: 'auto',
     }],
+    // children: {
+    //   hostDTOS: children,
+    // },
     transport: {
       read: {
         url: '/manager/v1/route_rules',
@@ -73,7 +90,7 @@ export default function (children) {
             ...data,
             list: data.list.map((item) => ({
               ...item,
-              userIds: item.routeMemberRuleDTOS.map((user) => ({ ...user, id: user.userId })),
+              userIds: item.routeMemberRuleDTOS ? item.routeMemberRuleDTOS.map((user) => ({ ...user, id: user.userId })) : [],
               instanceIds: item.hostDTOS,
             })),
           };
@@ -103,6 +120,11 @@ export default function (children) {
         url: `/manager/v1/route_rules/${data[0].id}`,
         method: 'delete',
       }),
+    },
+    events: {
+      load: () => {
+        debugger;
+      },
     },
   };
 }

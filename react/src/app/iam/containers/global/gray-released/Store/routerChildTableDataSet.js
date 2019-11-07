@@ -1,12 +1,16 @@
-export default function () {
+export default function (data) {
   return {
     autoQuery: false,
     selection: false,
     paging: false,
     fields: [{
-      name: 'hostName',
+      name: 'metadataHostName',
       type: 'string',
       label: '主机名称',
+      bind: 'metadata.hostName',
+    }, {
+      name: 'metadata',
+      type: 'object',
     }, {
       name: 'ipAddr',
       type: 'string',
@@ -24,5 +28,6 @@ export default function () {
       type: 'string',
       label: '来源',
     }],
+    data,
   };
 }

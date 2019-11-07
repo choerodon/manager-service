@@ -11,6 +11,46 @@ export default function (children) {
       { text: '系统预置', value: 'pod' },
     ],
   });
+
+  const hostNameValidator = (value) => {
+    // eslint-disable-next-line no-useless-escape
+    const pattern = /^[-—\.\w\s\u4e00-\u9fa5]*$/;
+    if (!pattern.test(value)) {
+      return '主机名称只能由汉字、字母大小写、数字、"_"、"."、"-"、空格组成';
+    }
+    if (value.length > 30) {
+      return '主机名称最长为30字符';
+    }
+    return true;
+  };
+
+  const ipAddressValidator = (value) => {
+    const pattern = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
+    if (!pattern.test(value)) {
+      return '请输入合法IP';
+    }
+    return true;
+  };
+
+  const appNameValidator = (value) => {
+    // eslint-disable-next-line no-useless-escape
+    const pattern = /^[-—\.\w\s\u4e00-\u9fa5]*$/;
+    if (!pattern.test(value)) {
+      return '服务名称只能由汉字、字母大小写、数字、"_"、"."、"-"、空格组成';
+    }
+    if (value.length > 30) {
+      return '服务名称最长为30字符';
+    }
+    return true;
+  };
+
+  const portValidator = (value) => {
+    if (value < 0 || value > 65536) {
+      return '请输入合法端口号';
+    }
+    return true;
+  };
+
   return {
     autoQuery: true,
     selection: false,
@@ -26,10 +66,10 @@ export default function (children) {
     ],
     fields: [
       { name: 'serviceHostName', type: 'string', label: '主机/服务名称', ignore: 'always' },
-      { name: 'appName', type: 'string', label: '服务名称' },
-      { name: 'hostName', type: 'string', label: '主机名称' },
-      { name: 'ipAddr', type: 'string', label: 'IP' },
-      { name: 'port', type: 'string', label: '端口' },
+      { name: 'appName', type: 'string', label: '服务名称', required: true, validator: appNameValidator },
+      { name: 'hostName', type: 'string', label: '主机名称', validator: hostNameValidator, required: true },
+      { name: 'ipAddr', type: 'string', label: 'IP', required: true, validator: ipAddressValidator },
+      { name: 'port', type: 'string', label: '端口', validator: portValidator, required: true },
       { name: 'sourceType', type: 'string', label: '来源', ignore: 'always' },
       { name: 'createDate', type: 'date', label: '创建时间', ignore: 'always' },
     ],
