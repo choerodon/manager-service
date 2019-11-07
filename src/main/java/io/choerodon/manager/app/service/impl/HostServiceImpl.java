@@ -126,7 +126,8 @@ public class HostServiceImpl implements HostService {
             return hostDTOList;
         }
         return hostDTOList.stream()
-                .filter(v -> v.getAppName().contains(appName))
+                .filter(v -> v.getAppName().contains(appName) &&
+                        v.getMetadata().get(ROUTE_RULE) == null)
                 .collect(Collectors.toList());
     }
 
