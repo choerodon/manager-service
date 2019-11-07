@@ -38,7 +38,7 @@ public class HostServiceImpl implements HostService {
     private GoRegisterRetrofitClient goRegisterRetrofitClient;
     private ObjectMapper objectMapper;
 
-    public static final String ROUTE_RULE_CODE = "routeRuleCode";
+    public static final String ROUTE_RULE = "Route_Rule";
 
     public HostServiceImpl(GoRegisterRetrofitClient goRegisterRetrofitClient, ObjectMapper objectMapper) {
         this.goRegisterRetrofitClient = goRegisterRetrofitClient;
@@ -100,7 +100,7 @@ public class HostServiceImpl implements HostService {
             hostDTO.setInstanceId(v.getInstanceId());
             hostDTO.setAppName(v.getAppName());
             hostDTO.setSourceType(v.getMetadata().get(PROVISIONER));
-            hostDTO.setRouteRuleCode(v.getMetadata().get(ROUTE_RULE_CODE));
+            hostDTO.setRouteRuleCode(v.getMetadata().get(ROUTE_RULE));
             hostDTO.setCreateDate(new Date(v.getLeaseInfo().getRegistrationTimestamp()));
             hostDTO.setMetadata(v.getMetadata());
             return hostDTO;
