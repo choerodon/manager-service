@@ -75,7 +75,7 @@ const RouterTable = () => {
           className={`${cssPrefix}-table`}
           expandedRowRenderer={
             ({ dataSet, record }) => (
-              <div style={{ marginLeft: '-0.12rem' }}><RouterChildTable /></div>
+              <div style={{ marginLeft: '-0.12rem' }}><RouterChildTable record={record} /></div>
             )
           }
           filter={(item) => item.status !== 'add'}
@@ -88,10 +88,10 @@ const RouterTable = () => {
             })}
           />
           <Column renderer={ActionRenderer} width={48} />
-          <Column name="description" width={150} />
-          <Column name="hostNumber" width={150} />
-          <Column name="userNumber" width={150} />
-          <Column name="creationDate" width={150} />
+          <Column name="description" />
+          <Column name="hostNumber" />
+          <Column name="userNumber" />
+          <Column name="creationDate" />
         </Table>
       </Content>
     </React.Fragment>
