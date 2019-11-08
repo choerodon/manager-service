@@ -50,7 +50,14 @@ const RouterTable = () => {
     });
   };
 
-  const deleteRecord = (record) => routerTableDataSet.delete(record);
+  const deleteRecord = (record) => routerTableDataSet.delete(record, {
+    okFirst: false,
+    okProps: { color: 'red' },
+    okText: '删除',
+    cancelProps: { color: 'dark' },
+    title: '删除路由',
+    children: `确认要删除路由 "${record.get('code')}" 吗？`,
+  });
 
   const ActionRenderer = ({ record }) => (
     <Action

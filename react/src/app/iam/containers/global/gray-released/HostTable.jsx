@@ -27,7 +27,14 @@ const HostTable = () => {
     });
   };
 
-  const deleteRecord = (record) => hostTableDataSet.delete(record).then((res) => hostTableDataSet.query());
+  const deleteRecord = (record) => hostTableDataSet.delete(record, {
+    okFirst: false,
+    okProps: { color: 'red' },
+    okText: '删除',
+    cancelProps: { color: 'dark' },
+    title: '删除主机',
+    children: `确认要删除主机 "${record.get('serviceHostName')}" 吗？`,
+  }).then((res) => hostTableDataSet.query());
 
   const ActionRenderer = ({ record }) => record.get('parentServiceName') && record.get('sourceType') !== 'pod' && (
     <Action
