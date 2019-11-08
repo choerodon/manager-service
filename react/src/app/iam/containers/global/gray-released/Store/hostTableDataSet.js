@@ -14,7 +14,7 @@ export default function (children) {
 
   const hostNameValidator = (value) => {
     // eslint-disable-next-line no-useless-escape
-    const pattern = /^[-—\.\w\s\u4e00-\u9fa5]*$/;
+    const pattern = /^[a-zA-Z0-9.·\-_\s\u4e00-\u9fa5]*$/;
     if (!pattern.test(value)) {
       return '主机名称只能由汉字、字母大小写、数字、"_"、"."、"-"、空格组成';
     }
@@ -34,9 +34,9 @@ export default function (children) {
 
   const appNameValidator = (value) => {
     // eslint-disable-next-line no-useless-escape
-    const pattern = /^[-—\.\w\s\u4e00-\u9fa5]*$/;
+    const pattern = /^[a-zA-Z0-9.·\-_\/\s]*$/;
     if (!pattern.test(value)) {
-      return '服务名称只能由汉字、字母大小写、数字、"_"、"."、"-"、空格组成';
+      return '服务名称只能由字母大小写、数字、"_"、"."、"-"、"/"、空格组成';
     }
     if (value.length > 30) {
       return '服务名称最长为30字符';
@@ -45,7 +45,7 @@ export default function (children) {
   };
 
   const portValidator = (value) => {
-    if (value < 0 || value > 65536) {
+    if (value < 0 || value > 65535) {
       return '请输入合法端口号';
     }
     return true;
@@ -62,7 +62,7 @@ export default function (children) {
       { name: 'host_name', type: 'string', label: '主机名称' },
       { name: 'ip_addr', type: 'string', label: 'IP' },
       { name: 'port', type: 'string', label: '端口' },
-      { name: 'source_type', type: 'string', label: '来源', options: sourceTypeDataSet },
+      { name: 'source_type', type: 'string', label: '来源', options: sourceTypeDataSet, textField: 'text', valueField: 'value' },
     ],
     fields: [
       { name: 'serviceHostName', type: 'string', label: '主机/服务名称', ignore: 'always' },
@@ -86,7 +86,7 @@ export default function (children) {
           JSON.parse(JSONData).list.forEach((item) => hostArr.push(...item.hosts.map((hostItem) => ({
             ...hostItem,
             parentServiceName: hostItem.appName,
-            serviceHostName: hostItem.hostName,
+            serviceHostName: hostItem.metadata ? hostItem.metadata.hostName : null,
           }))));
           return {
             ...JSON.parse(JSONData),
