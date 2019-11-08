@@ -49,7 +49,7 @@ public class IamClientFallback implements IamClient {
 
     @Override
     public ResponseEntity<Boolean> deleteRouteRuleById(Long id) {
-        return new ResponseEntity<>(false, HttpStatus.OK);
+        return null;
     }
 
     @Override
@@ -59,6 +59,6 @@ public class IamClientFallback implements IamClient {
 
     @Override
     public ResponseEntity<Boolean> checkCode(RouteRuleDTO routeRuleDTO) {
-        return new ResponseEntity<>(false, HttpStatus.OK);
+        return null;
     }
 }
