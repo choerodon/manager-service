@@ -89,6 +89,7 @@ const RouterTable = () => {
         >
           <Column
             name="code"
+            className={`${cssPrefix}-code`}
             width={150}
             onCell={({ record }) => ({
               onClick: () => editRouter(record),
