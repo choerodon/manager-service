@@ -37,8 +37,3 @@ choerodon:
     executetTime: 100
   profiles:
     active: sit
-feign:
-  httpclient:
-    enabled: false
-  okhttp:
-    enabled: true
