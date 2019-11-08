@@ -8,7 +8,6 @@ import './index.less';
 
 export default observer(({ name, optionDataSetConfig, optionDataSet, record, children, addButton, maxDisable, canDeleteAll = true, idField, alwaysRequired = false, required = false, header }) => {
   const formElement = useRef(null);
-  debugger;
 
   async function handleSubmit({ dataSet, data }) {
     const result = await formElement.current.checkValidity();
@@ -39,6 +38,7 @@ export default observer(({ name, optionDataSetConfig, optionDataSet, record, chi
   }
 
   function handleChange(e, index) {
+    debugger;
     const changedValue = record.get(name);
     if (idField) {
       const newValue = changedValue.get(index);
@@ -103,7 +103,6 @@ export default observer(({ name, optionDataSetConfig, optionDataSet, record, chi
     <React.Fragment>
       <Form ref={formElement} className="form-select-editor" columns={12} header={header}>
         {(record.get(name) || []).map((v, index) => {
-          debugger;
           if (idField) {
             v = v[idField];
           }
