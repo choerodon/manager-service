@@ -19,14 +19,14 @@ export default function (children) {
       return '主机名称只能由汉字、字母大小写、数字、"_"、"."、"-"、空格组成';
     }
     if (value.length > 30) {
-      return '主机名称最长为30字符';
+      return '当前描述限制30字符';
     }
     return true;
   };
 
   const ipAddressValidator = (value) => {
     const pattern = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
-    if (!pattern.test(value)) {
+    if (!pattern.test(value) || value === '0.0.0.0' || value === '255.255.255.255') {
       return '请输入合法IP';
     }
     return true;
@@ -38,8 +38,8 @@ export default function (children) {
     if (!pattern.test(value)) {
       return '服务名称只能由字母大小写、数字、"_"、"."、"-"、"/"、空格组成';
     }
-    if (value.length > 30) {
-      return '服务名称最长为30字符';
+    if (value && value.length > 30) {
+      return '当前描述限制30字符';
     }
     return true;
   };
@@ -56,7 +56,7 @@ export default function (children) {
     selection: false,
     parentField: 'parentServiceName',
     idField: 'serviceName',
-    expandField: 'expand',
+    // expandField: 'expand',
     queryFields: [
       { name: 'app_name', type: 'string', label: '服务名称' },
       { name: 'host_name', type: 'string', label: '主机名称' },
@@ -81,7 +81,7 @@ export default function (children) {
         url: '/manager/v1/hosts',
         method: 'get',
         transformResponse(JSONData) {
-          const serviceArr = JSON.parse(JSONData).list.map((item) => ({ serviceHostName: item.appName, serviceName: item.appName, expand: true }));
+          const serviceArr = JSON.parse(JSONData).list.map((item) => ({ serviceHostName: item.appName, serviceName: item.appName }));
           const hostArr = [];
           JSON.parse(JSONData).list.forEach((item) => hostArr.push(...item.hosts.map((hostItem) => ({
             ...hostItem,

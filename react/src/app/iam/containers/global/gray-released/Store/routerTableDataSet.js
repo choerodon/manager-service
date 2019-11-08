@@ -12,8 +12,8 @@ export default function (children) {
       if (!/^[a-zA-Z0-9.·\-_\s]+$/.test(value)) {
         return '路由编码只能由字母大小写、数字、"_"、"."、"-"、空格组成';
       }
-      if (value.length > 30) {
-        return '路由编码超出规定长度';
+      if (value && value.length > 30) {
+        return '当前输入限制30字符';
       }
       if (!res) {
         return '路由编码重复';
@@ -22,8 +22,8 @@ export default function (children) {
     return true;
   };
   const descriptionValidator = (value) => {
-    if (value.length > 200) {
-      return '路由描述超出规定长度';
+    if (value && value.length > 200) {
+      return '当前输入限制200字符';
     }
     return true;
   };
@@ -73,7 +73,7 @@ export default function (children) {
     }, {
       name: 'instanceIds',
       type: 'auto',
-      textField: 'hostName',
+      textField: 'metadata.hostName',
       valueField: 'instanceId',
       label: '主机',
     }, {
@@ -123,11 +123,6 @@ export default function (children) {
         url: `/manager/v1/route_rules/${data[0].id}`,
         method: 'delete',
       }),
-    },
-    events: {
-      load: () => {
-        debugger;
-      },
     },
   };
 }
