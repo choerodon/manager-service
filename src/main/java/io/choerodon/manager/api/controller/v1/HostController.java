@@ -71,10 +71,10 @@ public class HostController {
     }
     @GetMapping("/search")
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
-    @ApiOperation("根据服务名查询主机")
+    @ApiOperation("根据服务名/主机名/IP查询主机信息")
     public ResponseEntity<List<HostDTO>> listHosts(
-            @RequestParam(name = "app_name", required = false) String appName
+            @RequestParam(name = "app_name", required = false) String param
     ) {
-        return ResponseEntity.ok(hostService.listHosts(appName));
+        return ResponseEntity.ok(hostService.listHosts(param));
     }
 }

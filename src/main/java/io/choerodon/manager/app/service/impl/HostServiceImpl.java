@@ -39,6 +39,7 @@ public class HostServiceImpl implements HostService {
     private ObjectMapper objectMapper;
 
     public static final String ROUTE_RULE = "Route_Rule";
+    private static final String METADATA_HOST_NAME = "hostName";
 
     public HostServiceImpl(GoRegisterRetrofitClient goRegisterRetrofitClient, ObjectMapper objectMapper) {
         this.goRegisterRetrofitClient = goRegisterRetrofitClient;
@@ -120,14 +121,13 @@ public class HostServiceImpl implements HostService {
     }
 
     @Override
-    public List<HostDTO> listHosts(String appName) {
+    public List<HostDTO> listHosts(String param) {
         List<HostDTO> hostDTOList = listHosts();
-        if (appName == null) {
+        if (param == null) {
             return hostDTOList;
         }
         return hostDTOList.stream()
-                .filter(v -> v.getAppName().contains(appName) &&
-                        v.getMetadata().get(ROUTE_RULE) == null)
+                .filter(v -> v.getMetadata().get(ROUTE_RULE) == null && (v.getAppName().contains(param) || v.getMetadata().get(METADATA_HOST_NAME).contains(param)))
                 .collect(Collectors.toList());
     }
 
