@@ -6,11 +6,11 @@ export default function (children) {
     const res = await axios.post('manager/v1/route_rules/check', { code: value });
     if (value !== record.getPristineValue(name)) {
       if (res.failed) {
-        message.error(res.message);
+        return res.message;
       }
       // eslint-disable-next-line no-useless-escape
       if (!/^[a-zA-Z0-9.·\-_\s]+$/.test(value)) {
-        return '服务名称只能由字母大小写、数字、"_"、"."、"-"、空格组成';
+        return '路由编码只能由字母大小写、数字、"_"、"."、"-"、空格组成';
       }
       if (value.length > 30) {
         return '路由编码超出规定长度';
