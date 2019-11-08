@@ -104,6 +104,8 @@ export default function (children) {
         method: 'post',
         data: {
           ...data[0],
+          instanceIds: data[0].instanceIds ? data[0].instanceIds.filter((item) => item !== '') : [],
+          userIds: data[0].userIds ? data[0].userIds.filter((item) => item !== '') : [],
           hostDTOS: undefined,
         },
       }),
@@ -111,8 +113,8 @@ export default function (children) {
         url: '/manager/v1/route_rules/update',
         method: 'post',
         data: {
-          instanceIds: instanceIds.map((item) => (typeof item === 'string' ? item : item.instanceId)),
-          userIds: userIds.map((item) => (typeof item === 'number' ? item : item.userId)),
+          instanceIds: instanceIds.filter((item) => item !== '').map((item) => (typeof item === 'string' ? item : item.instanceId)),
+          userIds: userIds.filter((item) => item !== '').map((item) => (typeof item === 'number' ? item : item.userId)),
           code,
           description,
           objectVersionNumber,

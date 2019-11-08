@@ -60,7 +60,6 @@ const CreateRouter = observer(({ currentRecord }) => {
             optionDataSetConfig={AllHostDataSet}
             name="instanceIds"
             addButton="添加主机"
-            canDeleteAll={false}
             maxDisable={false}
           >
             {((itemProps) => (
@@ -85,7 +84,6 @@ const CreateRouter = observer(({ currentRecord }) => {
             name="userIds"
             filterObject
             addButton="添加用户"
-            canDeleteAll={false}
             maxDisable={false}
           >
             {((itemProps) => (
