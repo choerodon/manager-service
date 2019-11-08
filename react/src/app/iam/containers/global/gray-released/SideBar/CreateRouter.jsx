@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, TextField, Select, Tooltip } from 'choerodon-ui/pro';
+import { Form, TextField, Select, Tooltip, Icon } from 'choerodon-ui/pro';
 import { Collapse } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import _ from 'lodash';
@@ -45,7 +45,16 @@ const CreateRouter = observer(({ currentRecord }) => {
       </Form>
       <hr className={`${prefixCls}-hr`} />
       <Collapse bordered={false} defaultActiveKey={['1', '2']} className={`${prefixCls}-collapse`}>
-        <Panel header="添加主机" key="1">
+        <Panel
+          header={(
+            <div className={`${prefixCls}-help`}>添加主机
+              <Tooltip title="您可通过输入服务名称或主机名称来选择所需要添加的主机">
+                <Icon type="help" />
+              </Tooltip>
+            </div>
+          )}
+          key="1"
+        >
           <FormSelectEditor
             record={currentRecord}
             optionDataSetConfig={AllHostDataSet}

@@ -38,6 +38,19 @@
     width: 0.32rem !important;
     height: 0.32rem !important;
   }
+  &-help {
+    .customLabelHelp();
+  }
+}
+
+.customLabelHelp(@marginBottom: 4px) {
+  i {
+    font-size: 0.14rem;
+    font-weight: 300;
+    color: rgba(0, 0, 0, 0.6);
+    margin-bottom: @marginBottom;
+    margin-left: 4px;
+  }
 }
 
 .overLoadCollapse() {
