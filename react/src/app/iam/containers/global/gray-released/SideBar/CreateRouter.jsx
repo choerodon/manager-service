@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, TextField, Select, Tooltip, Icon } from 'choerodon-ui/pro';
+import { Form, TextField, Select, Tooltip, Icon, TextArea } from 'choerodon-ui/pro';
 import { Collapse } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import _ from 'lodash';
@@ -41,7 +41,7 @@ const CreateRouter = observer(({ currentRecord }) => {
     <div className={prefixCls}>
       <Form record={currentRecord} style={{ width: '5.12rem' }}>
         <TextField name="code" />
-        <TextField name="description" />
+        <TextArea name="description" />
       </Form>
       <hr className={`${prefixCls}-hr`} />
       <Collapse bordered={false} defaultActiveKey={['1', '2']} className={`${prefixCls}-collapse`}>
@@ -60,7 +60,6 @@ const CreateRouter = observer(({ currentRecord }) => {
             optionDataSetConfig={AllHostDataSet}
             name="instanceIds"
             addButton="添加主机"
-            alwaysRequired
             canDeleteAll={false}
             maxDisable={false}
           >
@@ -70,7 +69,7 @@ const CreateRouter = observer(({ currentRecord }) => {
                 labelLayout="float"
                 searchable
                 searchMatcher={() => true}
-                onInput={(e) => handleFilterChange(e, itemProps.options, 'app_name')}
+                onInput={(e) => handleFilterChange(e, itemProps.options, 'param')}
                 optionRenderer={getHostOption}
               />
             ))}
@@ -86,7 +85,6 @@ const CreateRouter = observer(({ currentRecord }) => {
             name="userIds"
             filterObject
             addButton="添加用户"
-            alwaysRequired
             canDeleteAll={false}
             maxDisable={false}
           >

@@ -96,7 +96,7 @@ const RouterTable = () => {
             })}
           />
           <Column renderer={ActionRenderer} width={48} />
-          <Column name="description" />
+          <Column name="description" tooltip="overflow" />
           <Column name="hostNumber" />
           <Column name="userNumber" />
           <Column name="creationDate" />
