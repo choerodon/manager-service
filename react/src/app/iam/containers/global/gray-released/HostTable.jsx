@@ -55,12 +55,12 @@ const HostTable = () => {
       <Breadcrumb />
       <Content>
         <Table dataSet={hostTableDataSet} mode="tree" filter={(item) => item.status !== 'add'}>
-          <Column name="serviceHostName" width={150} />
-          <Column renderer={ActionRenderer} width={48} />
-          <Column name="ipAddr" />
-          <Column name="port" />
-          <Column name="sourceType" renderer={SourceTypeRenderer} />
-          <Column name="createDate" />
+          <Column name="serviceHostName" width={200} tooltip="overflow" />
+          <Column renderer={ActionRenderer} width={48} tooltip="overflow" />
+          <Column name="ipAddr" tooltip="overflow" />
+          <Column name="port" tooltip="overflow" />
+          <Column name="sourceType" renderer={SourceTypeRenderer} tooltip="overflow" />
+          <Column name="createDate" tooltip="overflow" />
         </Table>
       </Content>
     </TabPage>

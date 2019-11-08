@@ -9,7 +9,7 @@ export default function (children) {
         message.error(res.message);
       }
       // eslint-disable-next-line no-useless-escape
-      if (/^[-—\.\w\s]*$/.test(value)) {
+      if (!/^[a-zA-Z0-9.·\-_\s]+$/.test(value)) {
         return '服务名称只能由字母大小写、数字、"_"、"."、"-"、空格组成';
       }
       if (value.length > 30) {
@@ -31,6 +31,9 @@ export default function (children) {
     autoQuery: true,
     selection: false,
     paging: true,
+    queryFields: [
+      { name: 'code', type: 'string', label: '路由编码' },
+    ],
     fields: [{
       name: 'code',
       type: 'string',
