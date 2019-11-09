@@ -34,7 +34,7 @@ public class HostController {
     }
 
     @GetMapping
-    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR})
     @ApiOperation("分页查询所有主机")
     public ResponseEntity<PageInfo<ServiceVO>> pagingHosts(
             @RequestParam(name = "source_type", required = false) String sourceType,
@@ -49,7 +49,7 @@ public class HostController {
     }
 
     @DeleteMapping("/{app_name}/{instance_id}")
-    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR})
     @ApiOperation("删除主机")
     public ResponseEntity<Void> deleteHost(
             @PathVariable(name = "app_name") String appName,
@@ -60,7 +60,7 @@ public class HostController {
     }
 
     @PostMapping("/{app_name}")
-    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR})
     @ApiOperation("添加主机")
     public ResponseEntity<Void> saveHost(
             @PathVariable(name = "app_name") String appName,
@@ -70,7 +70,7 @@ public class HostController {
         return ResponseEntity.noContent().build();
     }
     @GetMapping("/search")
-    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR})
     @ApiOperation("根据服务名/主机名/IP查询主机信息")
     public ResponseEntity<List<HostDTO>> listHosts(
             @RequestParam(name = "param", required = false) String param
