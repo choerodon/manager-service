@@ -53,12 +53,12 @@ public class IamClientFallback implements IamClient {
     }
 
     @Override
-    public ResponseEntity<RouteRuleVO> updateRouteRule(RouteRuleVO routeRuleVO) {
+    public ResponseEntity<RouteRuleVO> updateRouteRule(Long id, RouteRuleVO routeRuleVO) {
         return null;
     }
 
     @Override
-    public ResponseEntity<Boolean> checkCode(RouteRuleDTO routeRuleDTO) {
+    public ResponseEntity<Boolean> checkCode(String code) {
         return null;
     }
 }

@@ -37,6 +37,11 @@ choerodon:
     executetTime: 100
   profiles:
     active: sit
+feign:
+  httpclient:
+    enabled: false
+  okhttp:
+    enabled: true
 ribbon:
   ReadTimeout: 5000
   ConnectTimeout: 5000
