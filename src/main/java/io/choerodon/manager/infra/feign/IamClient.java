@@ -52,7 +52,7 @@ public interface IamClient {
      * @param routeRuleVO
      * @return
      */
-    @PostMapping("/v1/route_rules/")
+    @PostMapping("/v1/route_rules")
     ResponseEntity<RouteRuleVO> insertRouteRule(@RequestBody RouteRuleVO routeRuleVO);
 
     /**
