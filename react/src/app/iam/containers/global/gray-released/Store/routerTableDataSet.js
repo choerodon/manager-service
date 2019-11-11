@@ -3,10 +3,11 @@ import { message } from 'choerodon-ui/pro';
 
 export default function (children) {
   const codeValidator = async (value, name, record) => {
-    const res = await axios.post('manager/v1/route_rules/check', { code: value });
+    const res = await axios.get('manager/v1/route_rules/check_code', { params: { code: value } });
     if (value !== record.getPristineValue(name)) {
       if (res.failed) {
-        return res.message;
+        message.error(res.message);
+        return true;
       }
       // eslint-disable-next-line no-useless-escape
       if (!/^[a-zA-Z0-9.·\-_\s]+$/.test(value)) {
@@ -100,7 +101,7 @@ export default function (children) {
         },
       },
       create: ({ data }) => ({
-        url: '/manager/v1/route_rules/insert',
+        url: '/manager/v1/route_rules',
         method: 'post',
         data: {
           ...data[0],
@@ -110,15 +111,14 @@ export default function (children) {
         },
       }),
       update: ({ data: [{ instanceIds, userIds, code, description, objectVersionNumber, id }] }) => ({
-        url: '/manager/v1/route_rules/update',
-        method: 'post',
+        url: `/manager/v1/route_rules/${id}`,
+        method: 'put',
         data: {
           instanceIds: instanceIds.filter((item) => item !== '').map((item) => (typeof item === 'string' ? item : item.instanceId)),
           userIds: userIds.filter((item) => item !== '').map((item) => (typeof item === 'number' ? item : item.userId)),
           code,
           description,
           objectVersionNumber,
-          id,
         },
       }),
       destroy: ({ data }) => ({
