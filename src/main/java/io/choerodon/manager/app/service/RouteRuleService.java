@@ -36,7 +36,7 @@ public interface RouteRuleService {
      * @param routeRuleVO    路由规则DTO
      * @return                添加成功返回添加成功的routeRuleDTO
      */
-    RouteRuleVO insertRouteRule(RouteRuleVO routeRuleVO);
+    RouteRuleVO createRouteRule(RouteRuleVO routeRuleVO);
 
     /**
      * 根据路由ID删除路由信息
@@ -49,16 +49,17 @@ public interface RouteRuleService {
     /**
      * 路由规则信息更新
      *
+     * @param id              更新路由id
      * @param routeRuleVO     更新路由信息
      * @return                更新完成路由规则信息
      */
-    RouteRuleVO updateRouteRule(RouteRuleVO routeRuleVO);
+    RouteRuleVO updateRouteRule(Long id, RouteRuleVO routeRuleVO);
 
     /**
      * 路由code重复校验
      *
-     * @param routeRuleVO  校验信息
+     * @param code         校验信息
      * @return             校验结果
      */
-    Boolean checkCode(RouteRuleVO routeRuleVO);
+    Boolean checkCode(String code);
 }

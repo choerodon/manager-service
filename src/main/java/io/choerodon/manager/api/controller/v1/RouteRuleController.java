@@ -5,7 +5,6 @@ import io.choerodon.core.annotation.Permission;
 import io.choerodon.core.enums.ResourceType;
 import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.manager.api.dto.RouteRuleVO;
-import io.choerodon.manager.api.validator.Check;
 import io.choerodon.manager.api.validator.Insert;
 import io.choerodon.manager.api.validator.Update;
 import io.choerodon.manager.app.service.RouteRuleService;
@@ -19,8 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
-import java.util.List;
 
 /**
  * RouteRuleController
@@ -53,11 +50,11 @@ public class RouteRuleController {
         return new ResponseEntity<>(routeRuleService.queryRouteRuleDetailById(id), HttpStatus.OK);
     }
 
-    @PostMapping(value = "/insert")
+    @PostMapping(value = "/")
     @ApiOperation(value = "添加路由规则")
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR})
-    public ResponseEntity<RouteRuleVO> insertRouteRule(@RequestBody @Validated({Insert.class}) RouteRuleVO routeRuleVO) {
-        return new ResponseEntity<>(routeRuleService.insertRouteRule(routeRuleVO), HttpStatus.OK);
+    public ResponseEntity<RouteRuleVO> createRouteRule(@RequestBody @Validated({Insert.class}) RouteRuleVO routeRuleVO) {
+        return new ResponseEntity<>(routeRuleService.createRouteRule(routeRuleVO), HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/{id}")
@@ -67,17 +64,17 @@ public class RouteRuleController {
         return new ResponseEntity<>(routeRuleService.deleteRouteRuleById(id), HttpStatus.OK);
     }
 
-    @PostMapping("/update")
+    @PutMapping("/{id}")
     @ApiOperation(value = "更新路由规则信息")
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR})
-    public ResponseEntity<RouteRuleVO>updateRouteRule(@RequestBody @Validated(Update.class) RouteRuleVO routeRuleVO) {
-        return new ResponseEntity<>(routeRuleService.updateRouteRule(routeRuleVO), HttpStatus.OK);
+    public ResponseEntity<RouteRuleVO>updateRouteRule(@PathVariable(value = "id") Long id, @RequestBody @Validated(Update.class) RouteRuleVO routeRuleVO) {
+        return new ResponseEntity<>(routeRuleService.updateRouteRule(id, routeRuleVO), HttpStatus.OK);
     }
 
-    @PostMapping("/check")
+    @GetMapping("/check_code")
     @ApiOperation(value = "路由编码重复性校验")
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR})
-    public ResponseEntity<Boolean> checkCode(@RequestBody @Validated({Check.class}) RouteRuleVO routeRuleVO) {
-        return new ResponseEntity<>(routeRuleService.checkCode(routeRuleVO), HttpStatus.OK);
+    public ResponseEntity<Boolean> checkCode(String code) {
+        return new ResponseEntity<>(routeRuleService.checkCode(code), HttpStatus.OK);
     }
 }

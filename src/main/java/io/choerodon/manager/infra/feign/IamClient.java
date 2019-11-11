@@ -2,7 +2,6 @@ package io.choerodon.manager.infra.feign;
 
 import com.github.pagehelper.PageInfo;
 import io.choerodon.manager.api.dto.MenuDTO;
-import io.choerodon.manager.api.dto.RouteRuleDTO;
 import io.choerodon.manager.api.dto.RouteRuleVO;
 import io.choerodon.manager.infra.dto.RouteDTO;
 import io.choerodon.manager.infra.feign.fallback.IamClientFallback;
@@ -53,7 +52,7 @@ public interface IamClient {
      * @param routeRuleVO
      * @return
      */
-    @PostMapping("/v1/route_rules/insert")
+    @PostMapping("/v1/route_rules/")
     ResponseEntity<RouteRuleVO> insertRouteRule(@RequestBody RouteRuleVO routeRuleVO);
 
     /**
@@ -66,18 +65,19 @@ public interface IamClient {
 
     /**
      * 更新路由规则
+     * @param  id
      * @param routeRuleVO
      * @return
      */
-    @PostMapping("/v1/route_rules/update")
-    ResponseEntity<RouteRuleVO>updateRouteRule(@RequestBody RouteRuleVO routeRuleVO);
+    @PutMapping("/v1/route_rules/{id}")
+    ResponseEntity<RouteRuleVO>updateRouteRule(@PathVariable(value = "id") Long id, @RequestBody RouteRuleVO routeRuleVO);
 
     /**
      * 路由校验(code唯一性)
-     * @param routeRuleDTO
+     * @param code
      * @return
      */
-    @PostMapping("/v1/route_rules/check")
-    ResponseEntity<Boolean> checkCode(@RequestBody RouteRuleDTO routeRuleDTO);
+    @GetMapping("/v1/route_rules/check_code")
+    ResponseEntity<Boolean> checkCode(@RequestParam(value = "code") String code);
 
 }
