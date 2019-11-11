@@ -74,7 +74,7 @@ public class RouteRuleController {
     @GetMapping("/check_code")
     @ApiOperation(value = "路由编码重复性校验")
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR})
-    public ResponseEntity<Boolean> checkCode(String code) {
+    public ResponseEntity<Boolean> checkCode(@RequestParam(value = "code") String code) {
         return new ResponseEntity<>(routeRuleService.checkCode(code), HttpStatus.OK);
     }
 }
