@@ -37,3 +37,6 @@ choerodon:
     executetTime: 100
   profiles:
     active: sit
+ribbon:
+  ReadTimeout: 5000
+  ConnectTimeout: 5000
