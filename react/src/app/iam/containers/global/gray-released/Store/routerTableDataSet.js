@@ -7,7 +7,7 @@ export default function (children) {
     if (value !== record.getPristineValue(name)) {
       if (res.failed) {
         message.error(res.message);
-        return true;
+        return false;
       }
       // eslint-disable-next-line no-useless-escape
       if (!/^[a-zA-Z0-9.·\-_\s]+$/.test(value)) {
