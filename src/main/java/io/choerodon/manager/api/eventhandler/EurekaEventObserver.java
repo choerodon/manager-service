@@ -42,7 +42,6 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
             if (StringUtils.isEmpty(json)) {
                 throw new RemoteAccessException("fetch swagger json data is empty, " + payload);
             }
-            LOGGER.info("@@@begin to fetch swagger json, EurekaEventPayload: {}", payload);
             swaggerRefreshService.updateOrInsertSwagger(payload, json);
         } catch (Exception e) {
             LOGGER.warn("process swagger data exception skip: {}", payload, e);
