@@ -42,6 +42,7 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
             if (StringUtils.isEmpty(json)) {
                 throw new RemoteAccessException("fetch swagger json data is empty, " + payload);
             }
+            LOGGER.info("@@@begin to fetch swagger json, EurekaEventPayload: {}", payload);
             swaggerRefreshService.updateOrInsertSwagger(payload, json);
         } catch (Exception e) {
             LOGGER.warn("process swagger data exception skip: {}", payload, e);
@@ -51,7 +52,7 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
             if (StringUtils.isEmpty(actuatorJson)) {
                 throw new RemoteAccessException("fetch actuator json data is empty, " + payload);
             }
-            if(actuatorRefreshService.updateOrInsertActuator(payload.getAppName(), payload.getVersion(), actuatorJson)){
+            if (actuatorRefreshService.updateOrInsertActuator(payload.getAppName(), payload.getVersion(), actuatorJson)) {
                 LOGGER.info("actuator data saga apply success: {}", payload.getId());
             } else {
                 LOGGER.info("actuator data not change skip: {}", payload.getId());
