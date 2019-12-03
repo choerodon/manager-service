@@ -7,7 +7,7 @@ package io.choerodon.manager.infra.common.utils;
  */
 public class VersionUtil {
     public static final String NULL_VERSION = "null_version";
-    public static final String METADATA_VERSION = "VERSION";
+    public static final String METADATA_VERSION = "version";
 
     private VersionUtil() {
     }
