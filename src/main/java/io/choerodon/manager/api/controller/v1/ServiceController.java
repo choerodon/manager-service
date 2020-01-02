@@ -54,7 +54,7 @@ public class ServiceController {
      * @return page
      */
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER})
-    @ApiOperation("微服务管理列表")
+    @ApiOperation("查询微服务管理列表")
     @CustomPageRequest
     @GetMapping("/manager")
     public ResponseEntity<PageInfo<ServiceManagerDTO>> pageManager(
@@ -71,7 +71,7 @@ public class ServiceController {
      * @return page
      */
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_DEVELOPER}, permissionLogin = true)
-    @ApiOperation("查询服务列表")
+    @ApiOperation("查询所有服务列表")
     @GetMapping
     public ResponseEntity<List<ServiceDTO>> pageAll(@RequestParam(required = false) String param) {
         return new ResponseEntity<>(serviceService.list(param), HttpStatus.OK);
