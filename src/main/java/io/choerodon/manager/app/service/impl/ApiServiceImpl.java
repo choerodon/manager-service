@@ -753,8 +753,9 @@ public class ApiServiceImpl implements ApiService {
         return map;
     }
 
-    private ControllerDTO queryPathDetailByOptions(String serviceName, JsonNode pathNode, List<ControllerDTO> targetControllers, String operationId,
+    private ControllerDTO queryPathDetailByOptions(String name, JsonNode pathNode, List<ControllerDTO> targetControllers, String operationId,
                                                    Map<String, String> dtoMap, String basePath) {
+        String serviceName = getRouteName(name);
         Iterator<String> urlIterator = pathNode.fieldNames();
         while (urlIterator.hasNext()) {
             String url = urlIterator.next();
