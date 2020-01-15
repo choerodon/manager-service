@@ -898,7 +898,7 @@ public class ApiServiceImpl implements ApiService {
                 PermissionData permission = extraData.getPermission();
                 String action = permission.getAction();
                 path.setInnerInterface(permission.isPermissionWithin());
-                path.setCode(String.format("%s-service.%s.%s", serviceName, resourceCode, action));
+                path.setCode(String.format("%s.%s.%s", serviceName, resourceCode, action));
             } catch (IOException e) {
                 logger.info("extraData read failed.", e);
             }
