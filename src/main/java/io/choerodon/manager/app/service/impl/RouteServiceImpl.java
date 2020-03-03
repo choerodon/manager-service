@@ -71,10 +71,13 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public MultiKeyMap getAllRunningInstances() {
         List<RouteDTO> routes = iamClient.selectRoute(null);
+        LOGGER.info("routes is {}", routes.toString());
         List<String> serviceIds = discoveryClient.getServices();
+        LOGGER.info("serviceIds is {}", serviceIds.toString());
         MultiKeyMap multiKeyMap = new MultiKeyMap();
         for (String serviceIdInList : serviceIds) {
             for (ServiceInstance instance : discoveryClient.getInstances(serviceIdInList)) {
+                LOGGER.info("instance is {}", instance);
                 String version = instance.getMetadata().get(VersionUtil.METADATA_VERSION);
                 if (org.springframework.util.StringUtils.isEmpty(version)) {
                     version = VersionUtil.NULL_VERSION;
