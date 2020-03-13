@@ -10,7 +10,6 @@ import io.choerodon.manager.infra.dto.ActuatorDTO;
 import io.choerodon.manager.infra.mapper.ActuatorMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +24,7 @@ public class ActuatorRefreshServiceImpl implements ActuatorRefreshService {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String ACTUATOR_REFRESH_SAGA_CODE = "mgmt-actuator-refresh";
     private static final String METADATA_REFRESH_SAGA_CODE = "mgmt-metadata-refresh";
+    private static final String SERVICE = "service";
     private ActuatorMapper actuatorMapper;
     private TransactionalProducer producer;
 
@@ -68,11 +68,11 @@ public class ActuatorRefreshServiceImpl implements ActuatorRefreshService {
         for (ActuatorDTO actuator : preparedActuators){
             try {
                 Map jsonMap = OBJECT_MAPPER.readValue(actuator.getValue(), Map.class);
-                jsonMap.put("service", actuator.getServiceName());
+                jsonMap.put(SERVICE, actuator.getServiceName());
                 producer.apply(StartSagaBuilder
                         .newBuilder()
                         .withLevel(ResourceLevel.SITE)
-                        .withRefType("service")
+                        .withRefType(SERVICE)
                         .withRefId(actuator.getServiceName())
                         .withSagaCode(ACTUATOR_REFRESH_SAGA_CODE), startSagaBuilder -> startSagaBuilder.withPayloadAndSerialize(jsonMap));
                 actuator.setStatus(ActuatorDTO.STATUS_PROCESSED);
@@ -90,11 +90,11 @@ public class ActuatorRefreshServiceImpl implements ActuatorRefreshService {
     public void sendMetadataEvent(String json, String service){
         try {
             Map jsonMap = OBJECT_MAPPER.readValue(json, Map.class);
-            jsonMap.put("service", service);
+            jsonMap.put(SERVICE, service);
             producer.apply(StartSagaBuilder
                     .newBuilder()
                     .withLevel(ResourceLevel.SITE)
-                    .withRefType("service")
+                    .withRefType(SERVICE)
                     .withRefId(service)
                     .withSagaCode(METADATA_REFRESH_SAGA_CODE), startSagaBuilder -> startSagaBuilder.withPayloadAndSerialize(jsonMap));
         } catch (IOException e) {

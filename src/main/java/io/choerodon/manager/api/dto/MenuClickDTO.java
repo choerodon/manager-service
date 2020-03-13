@@ -11,9 +11,6 @@ public class MenuClickDTO {
 
     private List<Menu> menus;
 
-    public MenuClickDTO() {
-    }
-
     public String getRootCode() {
         return rootCode;
     }
@@ -37,9 +34,6 @@ public class MenuClickDTO {
         private String name;
 
         private Integer count;
-
-        public Menu() {
-        }
 
         public String getCode() {
             return code;

@@ -49,9 +49,10 @@ public class ServiceServiceImpl implements ServiceService {
         discoveryClient.getServices().forEach(t -> serviceManagers
                 .add(new ServiceManagerDTO(t, discoveryClient.getInstances(t).size())));
         if (pageable.getPageSize()==0) {
-            Page<ServiceManagerDTO> dtoPage = new Page<>(page, size);
-            dtoPage.addAll(serviceManagers);
-            return dtoPage.toPageInfo();
+            try (Page<ServiceManagerDTO> dtoPage = new Page<>(page, size)) {
+                dtoPage.addAll(serviceManagers);
+                return dtoPage.toPageInfo();
+            }
         } else {
             Map<String, Object> map = new HashMap<>(5);
             map.put("serviceName", serviceName);

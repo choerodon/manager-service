@@ -46,6 +46,7 @@ public class DocumentServiceImpl implements DocumentService {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String METADATA_CONTEXT = "CONTEXT";
     private static final String DEFAULT = "default";
+    private static final String HTTP_SUBFIX = "http://";
     @Value("${choerodon.swagger.oauth-url:http://localhost:8080/iam/oauth/authorize}")
     private String oauthUrl;
     @Value("${choerodon.swagger.client:client}")
@@ -205,7 +206,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public String fetchSwaggerJsonByIp(final EurekaEventPayload payload) {
-        ResponseEntity<String> response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + "/v2/choerodon/api-docs",
+        ResponseEntity<String> response = restTemplate.getForEntity(HTTP_SUBFIX + payload.getInstanceAddress() + "/v2/choerodon/api-docs",
                 String.class);
         if (response.getStatusCode() == HttpStatus.OK) {
             return response.getBody();
@@ -217,7 +218,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public String fetchActuatorJson(final EurekaEventPayload payload) {
-        ResponseEntity<Map> response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + "/choerodon/actuator/all", Map.class);
+        ResponseEntity<Map> response = restTemplate.getForEntity(HTTP_SUBFIX + payload.getInstanceAddress() + "/choerodon/actuator/all", Map.class);
         if (response.getStatusCode() == HttpStatus.OK) {
             Map<String, Object> result = response.getBody();
             try {
@@ -238,7 +239,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public String fetchMetadataJson(final EurekaEventPayload payload) {
-        ResponseEntity<Map> response = restTemplate.getForEntity("http://" + payload.getInstanceAddress() + "/choerodon/metadata", Map.class);
+        ResponseEntity<Map> response = restTemplate.getForEntity(HTTP_SUBFIX + payload.getInstanceAddress() + "/choerodon/metadata", Map.class);
         if (response.getStatusCode() == HttpStatus.OK) {
             Map<String, Object> result = response.getBody();
             result.put("service", payload.getAppName());
@@ -254,7 +255,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     private PropertyData fetchPropertyData(String address) {
-        ResponseEntity<PropertyData> response = restTemplate.getForEntity("http://"
+        ResponseEntity<PropertyData> response = restTemplate.getForEntity(HTTP_SUBFIX
                 + address + "/choerodon/asgard", PropertyData.class);
         if (response.getStatusCode() == HttpStatus.OK) {
             return response.getBody();

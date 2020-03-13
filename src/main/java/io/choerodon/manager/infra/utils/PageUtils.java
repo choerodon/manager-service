@@ -21,9 +21,9 @@ public class PageUtils {
         return (page - 1) * size;
     }
 
-    public static List<String> getPageableSorts(Pageable Pageable) {
+    public static List<String> getPageableSorts(Pageable pageable) {
         List<String> sorts = new ArrayList<>();
-        Iterator<Sort.Order> sortIterator = Pageable.getSort().iterator();
+        Iterator<Sort.Order> sortIterator = pageable.getSort().iterator();
         while (sortIterator.hasNext()) {
             Sort.Order order = sortIterator.next();
             sorts.add(order.getProperty() + "," + order.getDirection());
@@ -35,23 +35,23 @@ public class PageUtils {
      * 装配Page对象
      *
      * @param all         包含所有内容的列表
-     * @param Pageable 分页参数
+     * @param pageable 分页参数
      * @return PageInfo
      */
-    public static <T> PageInfo<T> createPageFromList(List<T> all, Pageable Pageable) {
+    public static <T> PageInfo<T> createPageFromList(List<T> all, Pageable pageable) {
         PageInfo<T> result = new PageInfo<>();
-        boolean queryAll = Pageable.getPageNumber() == 0 || Pageable.getPageSize() == 0;
-        result.setPageSize(queryAll ? all.size() : Pageable.getPageSize());
-        result.setPageNum(Pageable.getPageNumber());
+        boolean queryAll = pageable.getPageNumber() == 0 || pageable.getPageSize() == 0;
+        result.setPageSize(queryAll ? all.size() : pageable.getPageSize());
+        result.setPageNum(pageable.getPageNumber());
         result.setTotal(all.size());
-        result.setPages(queryAll ? 1 : (int) (Math.ceil(all.size() / (Pageable.getPageSize() * 1.0))));
-        int fromIndex = Pageable.getPageSize() * (Pageable.getPageNumber() - 1);
+        result.setPages(queryAll ? 1 : (int) (Math.ceil(all.size() / (pageable.getPageSize() * 1.0))));
+        int fromIndex = pageable.getPageSize() * (pageable.getPageNumber() - 1);
         int size;
         if (all.size() >= fromIndex) {
-            if (all.size() <= fromIndex + Pageable.getPageSize()) {
+            if (all.size() <= fromIndex + pageable.getPageSize()) {
                 size = all.size() - fromIndex;
             } else {
-                size = Pageable.getPageSize();
+                size = pageable.getPageSize();
             }
             result.setSize(queryAll ? all.size() : size);
             result.setList(queryAll ? all : all.subList(fromIndex, fromIndex + result.getSize()));

@@ -4,7 +4,6 @@ import io.choerodon.eureka.event.AbstractEurekaEventObserver;
 import io.choerodon.eureka.event.EurekaEventPayload;
 import io.choerodon.manager.app.service.ActuatorRefreshService;
 import io.choerodon.manager.app.service.DocumentService;
-import io.choerodon.manager.app.service.RouteService;
 import io.choerodon.manager.app.service.SwaggerRefreshService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,18 +20,14 @@ public class EurekaEventObserver extends AbstractEurekaEventObserver {
     private SwaggerRefreshService swaggerRefreshService;
 
 
-    private RouteService routeService;
-
     private ActuatorRefreshService actuatorRefreshService;
 
     public EurekaEventObserver(DocumentService documentService,
                                SwaggerRefreshService swaggerRefreshService,
-                               ActuatorRefreshService actuatorRefreshService,
-                               RouteService routeService) {
+                               ActuatorRefreshService actuatorRefreshService) {
         this.documentService = documentService;
         this.swaggerRefreshService = swaggerRefreshService;
         this.actuatorRefreshService = actuatorRefreshService;
-        this.routeService = routeService;
     }
 
     @Override

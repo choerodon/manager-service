@@ -3,12 +3,10 @@ package io.choerodon.manager.infra.feign.fallback;
 import com.github.pagehelper.PageInfo;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.manager.api.dto.MenuDTO;
-import io.choerodon.manager.api.dto.RouteRuleDTO;
 import io.choerodon.manager.api.dto.RouteRuleVO;
 import io.choerodon.manager.infra.dto.RouteDTO;
 import io.choerodon.manager.infra.feign.IamClient;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
