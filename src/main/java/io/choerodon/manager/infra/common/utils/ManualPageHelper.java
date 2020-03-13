@@ -33,13 +33,14 @@ public class ManualPageHelper {
 
     public static <T> PageInfo<T> postPage(final List<T> source, int page, int size,
                                            final Map<String, Object> filters, Comparator<T> comparable) {
-        Page<T> result = new Page<>(page, size);
-        final List<T> filterList = source.stream().filter(t -> throughFilter(t, filters))
-                .sorted(comparable).collect(Collectors.toList());
-        List<T> pageList = getPageList(page, size, filterList);
-        result.setTotal(filterList.size());
-        result.addAll(pageList);
-        return result.toPageInfo();
+        try (Page<T> result = new Page<>(page, size)) {
+            final List<T> filterList = source.stream().filter(t -> throughFilter(t, filters))
+                    .sorted(comparable).collect(Collectors.toList());
+            List<T> pageList = getPageList(page, size, filterList);
+            result.setTotal(filterList.size());
+            result.addAll(pageList);
+            return result.toPageInfo();
+        }
     }
 
     private static <T> Comparator<T> defaultCompare(final Sort sort) {
@@ -106,10 +107,7 @@ public class ManualPageHelper {
         boolean allIsNullExcludeParams = true;
         for (Map.Entry<String, Object> entry : filters.entrySet()) {
             String key = entry.getKey();
-            if (PARAMS_KEY.equals(key)) {
-                continue;
-            }
-            if (!StringUtils.isEmpty(entry.getValue())) {
+            if (!PARAMS_KEY.equals(key) && !StringUtils.isEmpty(entry.getValue())) {
                 allIsNullExcludeParams = false;
                 break;
             }

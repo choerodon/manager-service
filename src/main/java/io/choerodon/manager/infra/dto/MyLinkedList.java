@@ -31,7 +31,8 @@ public class MyLinkedList<T> {
      * @return
      */
     public boolean isLoop() {
-        Node fast = head, slow = head;
+        Node fast = head;
+        Node slow = head;
         if (fast == null) {
             return false;
         }
@@ -40,7 +41,7 @@ public class MyLinkedList<T> {
             if (fast != null && fast.data.equals(slow.data)) {
                 return true;
             }
-            if (fast.next == null) {
+            if (fast != null && fast.next == null) {
                 slow = slow.next;
                 fast = slow;
             }
@@ -54,10 +55,10 @@ public class MyLinkedList<T> {
      */
     public MyLinkedList<T> deepCopy() {
         MyLinkedList<T> myLinkedList = new MyLinkedList<>();
-        Node head = this.head;
-        while (head != null) {
+        Node tempHead = this.head;
+        while (tempHead != null) {
             myLinkedList.addNode(head.data);
-            head = head.next;
+            tempHead = head.next;
         }
         return myLinkedList;
     }

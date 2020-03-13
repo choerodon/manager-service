@@ -29,6 +29,10 @@ public class ConfigConverter {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private ConfigConverter() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static ConfigVO dto2Vo(ConfigDTO dto) {
         if (dto == null) {
             throw new IllegalArgumentException("error.config.null");
@@ -56,12 +60,13 @@ public class ConfigConverter {
     }
 
     public static PageInfo<ConfigVO> dto2Vo(PageInfo<ConfigDTO> pageInfo) {
-        Page<ConfigVO> page = new Page<>(pageInfo.getPageNum(), pageInfo.getPageSize());
-        List<ConfigDTO> dtoList = pageInfo.getList();
-        page.setTotal(dtoList.size());
-        List<ConfigVO> result = dto2Vo(dtoList);
-        page.addAll(result);
-        return page.toPageInfo();
+        try (Page<ConfigVO> page = new Page<>(pageInfo.getPageNum(), pageInfo.getPageSize())) {
+            List<ConfigDTO> dtoList = pageInfo.getList();
+            page.setTotal(dtoList.size());
+            List<ConfigVO> result = dto2Vo(dtoList);
+            page.addAll(result);
+            return page.toPageInfo();
+        }
     }
 
     public static ConfigDTO vo2Dto(ConfigVO configVO) {

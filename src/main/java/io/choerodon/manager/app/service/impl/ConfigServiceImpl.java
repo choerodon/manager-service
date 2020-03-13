@@ -3,7 +3,6 @@ package io.choerodon.manager.app.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.springframework.data.domain.Pageable;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.exception.ext.NotExistedException;
 import io.choerodon.core.exception.ext.UpdateException;
@@ -17,11 +16,11 @@ import io.choerodon.manager.infra.dto.ConfigDTO;
 import io.choerodon.manager.infra.dto.ServiceDTO;
 import io.choerodon.manager.infra.mapper.ConfigMapper;
 import io.choerodon.manager.infra.mapper.ServiceMapper;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +40,7 @@ public class ConfigServiceImpl implements ConfigService {
     public static final String CONFIG_TYPE_YAML = "yaml";
 
     private static final String ERROR_SERVICE_NAME_NOT_EXIST = "error.config.serviceName.notExist";
+    private static final String ERROR_CONFIG_UPDATE = "error.config.update";
 
     @Value("${choerodon.gateway.names}")
     private String[] getRouteServices;
@@ -59,7 +59,6 @@ public class ConfigServiceImpl implements ConfigService {
         this.configMapper = configMapper;
         this.serviceMapper = serviceMapper;
         this.configAssertHelper = configAssertHelper;
-        this.serviceMapper = serviceMapper;
     }
 
     public void setGetRouteServices(String[] getRouteServices) {
@@ -88,12 +87,12 @@ public class ConfigServiceImpl implements ConfigService {
             if (defaultDto != null) {
                 defaultDto.setIsDefault(false);
                 if (configMapper.updateByPrimaryKeySelective(defaultDto) != 1) {
-                    throw new UpdateException("error.config.update");
+                    throw new UpdateException(ERROR_CONFIG_UPDATE);
                 }
             }
             dto.setIsDefault(true);
             if (configMapper.updateByPrimaryKeySelective(dto) != 1) {
-                throw new UpdateException("error.config.update");
+                throw new UpdateException(ERROR_CONFIG_UPDATE);
             }
         }
         return ConfigConverter.dto2Vo(dto);
@@ -132,7 +131,7 @@ public class ConfigServiceImpl implements ConfigService {
         configAssertHelper.notExisted(configId);
         ConfigDTO configDTO = ConfigConverter.vo2Dto(configVO);
         if (configMapper.updateByPrimaryKeySelective(configDTO) != 1) {
-            throw new CommonException("error.config.update");
+            throw new CommonException(ERROR_CONFIG_UPDATE);
         }
         return ConfigConverter.dto2Vo(configAssertHelper.notExisted(configId));
     }

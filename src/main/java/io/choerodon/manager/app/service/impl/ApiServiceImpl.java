@@ -59,6 +59,10 @@ public class ApiServiceImpl implements ApiService {
     private static final String COLON = ":";
     private static final String UNDERLINE = "-";
     private static final String SERVICE = "service";
+    private static final String PATHS = "paths";
+    private static final String OPERATION_ID = "operationId";
+    private static final String ARRAY = "array";
+    private static final String OBJECT = "object";
 
     private DocumentService documentService;
 
@@ -351,7 +355,7 @@ public class ApiServiceImpl implements ApiService {
 
     private Map<String, List> processPathMap(String routeName, String service, String version, JsonNode node) {
         Map<String, List> pathMap = new HashMap<>();
-        JsonNode pathNode = node.get("paths");
+        JsonNode pathNode = node.get(PATHS);
         Iterator<String> urlIterator = pathNode.fieldNames();
         while (urlIterator.hasNext()) {
             String url = urlIterator.next();
@@ -366,7 +370,7 @@ public class ApiServiceImpl implements ApiService {
                 Map<String, Object> path = new HashMap<>();
                 path.put(TITLE, url);
                 path.put("method", method);
-                path.put("operationId", Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
+                path.put(OPERATION_ID, Optional.ofNullable(jsonNode.get(OPERATION_ID)).map(JsonNode::asText).orElse(null));
                 path.put(SERVICE, service);
                 path.put("version", version);
                 path.put(DESCRIPTION, Optional.ofNullable(jsonNode.get("summary")).map(JsonNode::asText).orElse(null));
@@ -478,7 +482,7 @@ public class ApiServiceImpl implements ApiService {
         }
         Map<String, Map<String, FieldDTO>> map = processDefinitions(node);
         Map<String, String> dtoMap = convertMap2JsonWithComments(map);
-        JsonNode pathNode = node.get("paths");
+        JsonNode pathNode = node.get(PATHS);
         String basePath = node.get("basePath").asText();
         ControllerDTO controller = queryPathDetailByOptions(name, pathNode, targetControllers, operationId, dtoMap, basePath);
         cache2Redis(key, controller);
@@ -530,7 +534,7 @@ public class ApiServiceImpl implements ApiService {
                         logger.warn("the swagger json of service {} version {} is empty, skip", service, version);
                     } else {
                         JsonNode node = objectMapper.readTree(json);
-                        JsonNode pathNode = node.get("paths");
+                        JsonNode pathNode = node.get(PATHS);
                         Iterator<String> urlIterator = pathNode.fieldNames();
                         while (urlIterator.hasNext()) {
                             String url = urlIterator.next();
@@ -562,7 +566,7 @@ public class ApiServiceImpl implements ApiService {
             Map<String, Map<String, FieldDTO>> map = processDefinitions(node);
             Map<String, String> dtoMap = convertMap2JsonWithComments(map);
             controllers = processControllers(node);
-            JsonNode pathNode = node.get("paths");
+            JsonNode pathNode = node.get(PATHS);
             processPaths(serviceName, pathNode, controllers, dtoMap, basePath);
         } catch (IOException e) {
             throw new CommonException("error.parseJson");
@@ -597,7 +601,7 @@ public class ApiServiceImpl implements ApiService {
                         FieldDTO dto = entry1.getValue();
                         //如果是集合类型，注释拼到字段的上一行
                         String type = dto.getType();
-                        if ("array".equals(type)) {
+                        if (ARRAY.equals(type)) {
                             //处理集合引用的情况，type为array
                             if (dto.getComment() != null) {
                                 sb.append("//");
@@ -656,7 +660,7 @@ public class ApiServiceImpl implements ApiService {
                                 appendComment(sb, dto);
                                 sb.append("\n");
                             }
-                            if ("object".equals(type)) {
+                            if (OBJECT.equals(type)) {
                                 appendField(sb, field);
                                 sb.append("\"{}\"");
                                 //拼注释
@@ -720,7 +724,7 @@ public class ApiServiceImpl implements ApiService {
                 JsonNode propertyNode = jsonNode.get("properties");
                 if (propertyNode == null) {
                     String type = jsonNode.get("type").asText();
-                    if ("object".equals(type)) {
+                    if (OBJECT.equals(type)) {
                         map.put(className, null);
                     }
                     continue;
@@ -764,7 +768,7 @@ public class ApiServiceImpl implements ApiService {
             while (methodIterator.hasNext()) {
                 String method = methodIterator.next();
                 JsonNode pathDetailNode = methodNode.get(method);
-                String pathOperationId = pathDetailNode.get("operationId").asText();
+                String pathOperationId = pathDetailNode.get(OPERATION_ID).asText();
                 if (operationId.equals(pathOperationId)) {
                     processPathDetail(serviceName, targetControllers, dtoMap, url, methodNode, method, basePath);
                 }
@@ -810,7 +814,7 @@ public class ApiServiceImpl implements ApiService {
         }
         path.setRemark(Optional.ofNullable(jsonNode.get("summary")).map(JsonNode::asText).orElse(null));
         path.setDescription(Optional.ofNullable(jsonNode.get(DESCRIPTION)).map(JsonNode::asText).orElse(null));
-        path.setOperationId(Optional.ofNullable(jsonNode.get("operationId")).map(JsonNode::asText).orElse(null));
+        path.setOperationId(Optional.ofNullable(jsonNode.get(OPERATION_ID)).map(JsonNode::asText).orElse(null));
         processConsumes(path, jsonNode);
         processProduces(path, jsonNode);
         processResponses(path, jsonNode, dtoMap);
@@ -857,7 +861,7 @@ public class ApiServiceImpl implements ApiService {
                         //给array前面的注释加上缩进，即满足\n//\\S+\n的注释
                         response.setBody(sb.toString());
                     } else {
-                        if ("object".equals(type)) {
+                        if (OBJECT.equals(type)) {
                             response.setBody("{}");
                         } else {
                             response.setBody(type);
@@ -955,11 +959,11 @@ public class ApiServiceImpl implements ApiService {
                                 StringBuilder sb = arrayTypeAppendBrackets(type, body);
                                 parameter.setBody(sb.toString());
                             } else {
-                                if (!"object".equals(type)) {
+                                if (!OBJECT.equals(type)) {
                                     parameter.setBody(type);
                                 } else {
                                     Map<String, String> map = schema.getAdditionalProperties();
-                                    if (map != null && "array".equals(map.get("type"))) {
+                                    if (map != null && ARRAY.equals(map.get("type"))) {
                                         parameter.setBody("[{}]");
                                     } else {
                                         parameter.setBody("{}");
@@ -979,7 +983,7 @@ public class ApiServiceImpl implements ApiService {
 
     private StringBuilder arrayTypeAppendBrackets(String type, String body) {
         StringBuilder sb = new StringBuilder();
-        if ("array".equals(type)) {
+        if (ARRAY.equals(type)) {
             sb.append("[\n");
             sb.append(body);
             sb.append("\n]");

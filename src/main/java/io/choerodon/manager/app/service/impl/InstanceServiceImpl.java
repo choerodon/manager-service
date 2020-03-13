@@ -47,6 +47,9 @@ public class InstanceServiceImpl implements InstanceService {
     private final ExecutorService asyncExecutor = Executors.newSingleThreadExecutor();
 
     private static final String CONFIG_VERSION_DEFAULT = "default";
+    private static final String VALUE = "value";
+    private static final String PROPERTIES = "properties";
+    private static final String DEFAULT_PROFILE = "default";
 
     /**
      * spring boot 2.0 endpoint
@@ -165,7 +168,7 @@ public class InstanceServiceImpl implements InstanceService {
         while (subIterator.hasNext()) {
             JsonNode node = subIterator.next();
             String key = node.get("name").asText();
-            JsonNode jsonNode = node.get("properties");
+            JsonNode jsonNode = node.get(PROPERTIES);
             if (key.startsWith("applicationConfig: [classpath:/")) {
                 key = key.replace("applicationConfig: [classpath:/", "").replace(".properties]", "")
                         .replace(".yml]", "");
@@ -176,7 +179,7 @@ public class InstanceServiceImpl implements InstanceService {
             Iterator<Map.Entry<String, JsonNode>> vit = jsonNode.fields();
             while (vit.hasNext()) {
                 Map.Entry<String, JsonNode> value = vit.next();
-                String jsonValue = value.getValue().get("value").asText();
+                String jsonValue = value.getValue().get(VALUE).asText();
                 if (!StringUtils.isEmpty(jsonValue) && !value.getKey().startsWith("java")) {
                     map.put(key + "." + value.getKey(), jsonValue);
                 }
@@ -196,7 +199,7 @@ public class InstanceServiceImpl implements InstanceService {
                 break;
             }
         }
-        String activeProfile = "default";
+        String activeProfile = DEFAULT_PROFILE;
         JsonNode profileNode = root.findValue("activeProfiles");
         if (profileNode.get(0) != null && !StringUtils.isEmpty(profileNode.get(0).asText())) {
             activeProfile = profileNode.get(0).asText();
@@ -267,12 +270,12 @@ public class InstanceServiceImpl implements InstanceService {
             if (propertySourceNode == null) {
                 return this;
             }
-            JsonNode properties = propertySourceNode.findValue("properties");
+            JsonNode properties = propertySourceNode.findValue(PROPERTIES);
             Iterator<Map.Entry<String, JsonNode>> propertiesIterator = properties.fields();
             while (propertiesIterator.hasNext()) {
                 Map.Entry<String, JsonNode> entry = propertiesIterator.next();
                 Data data = getDataByRelaxedNames(entry.getKey());
-                String value = entry.getValue().findValue("value").asText();
+                String value = entry.getValue().findValue(VALUE).asText();
                 if (data == null) {
                     map.put(entry.getKey(), new Data(value, property));
                 } else {
@@ -294,38 +297,22 @@ public class InstanceServiceImpl implements InstanceService {
             return null;
         }
 
-        public PropertySourceBuilder coverApplyServerPort() {
-            JsonNode value = root.findValue("server.ports");
-            if (value == null) {
-                return this;
-            }
-            JsonNode serverPort = value.findValue("local.server.port");
-            if (serverPort != null) {
-                map.put("server.port", new Data(serverPort.asText(), "server.ports"));
-            }
-            JsonNode managementServerPort = value.findValue("local.management.port");
-            if (serverPort != null) {
-                map.put("management.port", new Data(managementServerPort.asText(), "management.port"));
-            }
-            return this;
-        }
-
         public PropertySourceBuilder coverApplyServerPortSpringBoot2() {
             JsonNode propertySourceNode = getPropertySourceNode("server.ports");
             if (propertySourceNode == null) {
                 return this;
             }
-            JsonNode properties = propertySourceNode.findValue("properties");
+            JsonNode properties = propertySourceNode.findValue(PROPERTIES);
             Iterator<Map.Entry<String, JsonNode>> propertiesIterator = properties.fields();
             while (propertiesIterator.hasNext()) {
                 Map.Entry<String, JsonNode> entry = propertiesIterator.next();
                 String key = entry.getKey();
                 JsonNode value = entry.getValue();
                 if ("local.server.port".equalsIgnoreCase(key)) {
-                    map.put("server.port", new Data(value.findValue("value").asText(), "server.ports"));
+                    map.put("server.port", new Data(value.findValue(VALUE).asText(), "server.ports"));
                 }
                 if ("local.management.port".equalsIgnoreCase(key)) {
-                    map.put("management.port", new Data(value.findValue("value").asText(), "management.port"));
+                    map.put("management.port", new Data(value.findValue(VALUE).asText(), "management.port"));
                 }
 
             }
@@ -360,14 +347,14 @@ public class InstanceServiceImpl implements InstanceService {
             if (propertySourceNode == null) {
                 return this;
             }
-            JsonNode properties = propertySourceNode.findValue("properties");
+            JsonNode properties = propertySourceNode.findValue(PROPERTIES);
             Iterator<Map.Entry<String, JsonNode>> propertiesIterator = properties.fields();
             while (propertiesIterator.hasNext()) {
                 Map.Entry<String, JsonNode> entry = propertiesIterator.next();
                 String mapExistKey = getKeyByRelaxedNames(entry.getKey());
                 if (mapExistKey != null) {
                     Data data = map.get(mapExistKey);
-                    String value = entry.getValue().findValue("value").asText();
+                    String value = entry.getValue().findValue(VALUE).asText();
                     data.setValue(value);
                 }
             }
@@ -435,17 +422,6 @@ public class InstanceServiceImpl implements InstanceService {
                     ", source='" + source + '\'' +
                     '}';
         }
-    }
-
-    private String getConfigPropertySource(final JsonNode root) {
-        Iterator<Map.Entry<String, JsonNode>> it = root.fields();
-        while (it.hasNext()) {
-            Map.Entry<String, JsonNode> entry = it.next();
-            if (entry.getKey().startsWith("configService:")) {
-                return entry.getKey();
-            }
-        }
-        return null;
     }
 
 
