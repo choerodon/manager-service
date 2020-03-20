@@ -24,5 +24,6 @@ public class ManagerServiceApplication {
         SpringApplication.run(ManagerServiceApplication.class, args);
     }
     
+    
 
 }
