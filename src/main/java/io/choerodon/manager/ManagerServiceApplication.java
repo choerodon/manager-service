@@ -23,5 +23,6 @@ public class ManagerServiceApplication {
         EurekaEventHandler.getInstance().init();
         SpringApplication.run(ManagerServiceApplication.class, args);
     }
+    
 
 }
