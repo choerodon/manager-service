@@ -6,8 +6,9 @@ import { axios, Choerodon } from '@choerodon/boot';
 import _ from 'lodash';
 import querystring from 'query-string';
 import classnames from 'classnames';
-import './ApiTree.scss';
 import APITestStore from '../../../../stores/global/api-test';
+
+import './ApiTree.scss';
 
 const { TreeNode } = Tree;
 
