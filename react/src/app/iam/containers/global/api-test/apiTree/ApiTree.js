@@ -43,11 +43,7 @@ export default class ApiTree extends Component {
         this.setState({
           treeData: res.service,
         });
-        const node = [
-          {
-            props: res.service[0].children[0].children[0].children[0],
-          },
-        ];
+        const node = [res.service[0].children[0].children[0].children[0]];
         getDetail(node);
       }
     });
@@ -74,11 +70,11 @@ export default class ApiTree extends Component {
   }
 
   onSelect = (selectedKey, info) => {
-    if (info.selectedNodes[0].props.children && !info.selectedNodes[0].props.children.length) {
+    if (info.selectedNodes[0].children && !info.selectedNodes[0].children.length) {
       return;
     }
 
-    if (!info.selectedNodes[0].props.children) {
+    if (!info.selectedNodes[0].children) {
       const { getDetail } = this.props;
       APITestStore.setCurrentNode(info.selectedNodes);
       getDetail(info.selectedNodes);

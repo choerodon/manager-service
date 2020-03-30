@@ -133,7 +133,7 @@ export default class APITest extends Component {
       query: '',
       taArr: {},
     });
-    const { version, operationId, refController, servicePrefix } = node[0].props;
+    const { version, operationId, refController, servicePrefix } = node[0];
     const queryObj = {
       version,
       operation_id: operationId,
