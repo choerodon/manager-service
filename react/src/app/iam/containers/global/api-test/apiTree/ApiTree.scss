@@ -87,6 +87,9 @@
     .c7n-tree-switcher {
       margin-top: 3px;
     }
+    .c7n-tree-switcher-icon {
+      font-size: .2rem;
+    }
     .c7n-iam-apitest-api-wrapper-1,
     .c7n-iam-apitest-api-wrapper-2,
     .c7n-iam-apitest-api-wrapper-3,
@@ -101,6 +104,7 @@
     .c7n-tree span.c7n-tree-iconEle {
       margin-right: 6px;
       cursor: pointer;
+      width: auto;
 
       i.icon {
         line-height: 24px;

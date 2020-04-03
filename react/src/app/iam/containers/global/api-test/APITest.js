@@ -2,7 +2,7 @@
  * Created by hulingfangzi on 2018/7/3.
  */
 
-import React, { Component } from 'react';
+import React, { Fragment, Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { Button, Tooltip, Tree, Input, Icon, Form, Row, Col, Select, Table, Spin, Modal } from 'choerodon-ui';
 import { injectIntl, FormattedMessage } from 'react-intl';
@@ -12,6 +12,7 @@ import querystring from 'query-string';
 import _ from 'lodash';
 import classnames from 'classnames';
 import Hjson from 'hjson';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import APITestStore from '../../../stores/global/api-test';
 import './APITest.scss';
 import ApiTree from './apiTree';
@@ -313,6 +314,11 @@ export default class APITest extends Component {
     });
   }
 
+  handleCopy = () => {
+    const { intl: { formatMessage } } = this.props;
+    Choerodon.prompt(formatMessage({ id: 'copy.success' }));
+  };
+
   getApiDetail() {
     const { intl } = this.props;
     const { url, innerInterface, code, method, remark, consumes, produces } = APITestStore.getApiDetail;
@@ -330,7 +336,19 @@ export default class APITest extends Component {
 
     const tableValue = [{
       name: intl.formatMessage({ id: `${intlPrefix}.code` }),
-      value: code,
+      value: (
+        <Fragment>
+          <span>{code}</span>
+          <Tooltip title={intl.formatMessage({ id: 'copy' })}>
+            <CopyToClipboard
+              text={code}
+              onCopy={this.handleCopy}
+            >
+              <Icon type="library_books" style={{ cursor: 'pointer', verticalAlign: 'text-bottom', marginLeft: '4px' }} />
+            </CopyToClipboard>
+          </Tooltip>
+        </Fragment>
+      ),
     }, {
       name: intl.formatMessage({ id: `${intlPrefix}.method` }),
       value: method,
@@ -681,6 +699,18 @@ ${body}`;
                 {intl.formatMessage({ id: `${intlPrefix}.sending` })}
               </Button>
             )}
+            <CopyToClipboard
+              text={this.state.requestUrl}
+              onCopy={this.handleCopy}
+            >
+              <Button
+                funcType="raised"
+                type="primary"
+                style={{ marginLeft: '8px' }}
+              >
+                {intl.formatMessage({ id: 'copy' })}
+              </Button>
+            </CopyToClipboard>
           </div>
         </div>
         <div style={{ textAlign: 'center', paddingTop: '100px', display: APITestStore.isShowResult === false ? 'block' : 'none' }}><Spin size="large" /></div>

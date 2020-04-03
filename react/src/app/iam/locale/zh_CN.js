@@ -659,6 +659,7 @@ const zh_CN = {
   baseon: '基于此创建',
   selectall: '全选',
   selectnone: '取消全选',
+  copy: '复制',
 
   // status
   // success
