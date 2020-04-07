@@ -43,6 +43,7 @@ export default class ApiTree extends Component {
         this.generateList(res.service);
         this.setState({
           treeData: res.service,
+          expandedKeys: ['0', '0-0', '0-0-0'],
         });
         const node = [res.service[0].children[0].children[0].children[0]];
         getDetail(node);
