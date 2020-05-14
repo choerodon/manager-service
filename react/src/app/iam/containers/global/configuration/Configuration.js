@@ -15,7 +15,7 @@ import '../../../common/ConfirmModal.scss';
 import { handleFiltersParams } from '../../../common/util';
 
 const FormItem = Form.Item;
-const {Option} = Select;
+const { Option } = Select;
 const intlPrefix = 'global.configuration';
 
 @Form.create({})
@@ -138,7 +138,7 @@ export default class Configuration extends Component {
       }
       queryObj.sort = sorter.join(',');
     }
-    return axios.get(`/manager/v1/services/${serviceName}/configs?${querystring.stringify(queryObj)}`);
+    return axios.get(`/hadm/v1/services/${serviceName}/configs?${querystring.stringify(queryObj)}`);
   }
 
   handlePageChange = (pagination, filters, sorter, params) => {

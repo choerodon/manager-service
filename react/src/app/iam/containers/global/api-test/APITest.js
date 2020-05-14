@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Created by hulingfangzi on 2018/7/3.
  */
@@ -139,7 +140,7 @@ export default class APITest extends Component {
       version,
       operation_id: operationId,
     };
-    defaultAxios.get(`${urlPrefix}/manager/v1/swaggers/${servicePrefix}/controllers/${refController}/paths?${querystring.stringify(queryObj)}`).then((data) => {
+    defaultAxios.get(`${urlPrefix}/hadm/v1/swaggers/${servicePrefix}/controllers/${refController}/paths?${querystring.stringify(queryObj)}`).then((data) => {
       if (data.failed) {
         Choerodon.prompt(data.message);
         APITestStore.setDetailFlag('empty');
@@ -242,6 +243,7 @@ export default class APITest extends Component {
       const arr = e.target.value.split('\n');
       this.state.taArr[name] = arr;
       this.setState({
+        // eslint-disable-next-line react/no-access-state-in-setstate
         taArr: this.state.taArr,
       });
     }

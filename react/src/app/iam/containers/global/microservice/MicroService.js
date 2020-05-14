@@ -99,7 +99,7 @@ export default class MicroService extends Component {
       }
       queryObj.sort = sorter.join(',');
     }
-    return axios.get(`/manager/v1/services/manager?${querystring.stringify(queryObj)}`);
+    return axios.get(`/hadm/v1/services/manager?${querystring.stringify(queryObj)}`);
   }
 
   handlePageChange = (pagination, filters, sorter, params) => {

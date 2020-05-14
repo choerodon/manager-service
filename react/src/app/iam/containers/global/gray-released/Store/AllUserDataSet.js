@@ -4,7 +4,7 @@ export default {
   paging: false,
   transport: {
     read: ({ data }) => ({
-      url: '/base/v1/users/enable_user/route_rule_unused',
+      url: '/iam/choerodon/v1/users/enable_user/route_rule_unused',
       method: 'get',
       params: {
         ...data,

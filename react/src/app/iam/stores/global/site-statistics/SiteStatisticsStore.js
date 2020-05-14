@@ -134,7 +134,7 @@ class SiteStatisticsStore {
       end_date: endDate,
       code: `choerodon.code.top.${level}`,
     };
-    return axios.get(`/manager/v1/statistic/menu_click?${querystring.stringify(queryObj)}`)
+    return axios.get(`/hadm/v1/statistic/menu_click?${querystring.stringify(queryObj)}`)
       .then((data) => {
         if (data.failed) {
           Choerodon.prompt(data.message);
@@ -169,7 +169,7 @@ class SiteStatisticsStore {
       end_date: this.endTime.format().split('T')[0],
       code: `choerodon.code.top.${level}`,
     };
-    return axios.get(`/manager/v1/statistic/menu_click?${querystring.stringify(queryObj)}`).then((data) => {
+    return axios.get(`/hadm/v1/statistic/menu_click?${querystring.stringify(queryObj)}`).then((data) => {
       if (data.failed) {
         Choerodon.prompt(data.message);
       } else {
@@ -182,7 +182,7 @@ class SiteStatisticsStore {
     });
   };
 
-  getMenuData = (level) => axios.get(`/base/v1/menus/menu_config?code=choerodon.code.top.${level}`).then((data) => {
+  getMenuData = (level) => axios.get(`/iam/choerodon/v1/menus/menu_config?code=choerodon.code.top.${level}`).then((data) => {
     this.dfsAddAllMenu(data.subMenus, level);
   });
 

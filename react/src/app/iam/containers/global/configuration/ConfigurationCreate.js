@@ -136,7 +136,7 @@ class CreateConfig extends Component {
       page: 1,
       size: 20,
     };
-    axios.get(`/manager/v1/services/${serviceName}/configs?${querystring.stringify(queryObj)}`).then((data) => {
+    axios.get(`/hadm/v1/services/${serviceName}/configs?${querystring.stringify(queryObj)}`).then((data) => {
       if (data.failed) {
         Choerodon.prompt(data.message);
       } else {
@@ -281,7 +281,7 @@ class CreateConfig extends Component {
   /* 获取配置yaml */
   getConfigYaml() {
     const configId = this.state.configId || ConfigurationStore.getCurrentConfigId;
-    axios.get(`manager/v1/configs/${configId}/yaml`).then((data) => {
+    axios.get(`hadm/v1/configs/${configId}/yaml`).then((data) => {
       if (data.failed) {
         Choerodon.prompt(data.message);
       } else {
@@ -524,7 +524,7 @@ class CreateConfig extends Component {
       if (failed) {
         Choerodon.prompt(message);
       } else {
-        const currentService =          ConfigurationStore.service.find((item) => item.name === data.serviceName);
+        const currentService = ConfigurationStore.service.find((item) => item.name === data.serviceName);
         ConfigurationStore.setRelatedService(currentService);
         Choerodon.prompt(intl.formatMessage({ id: 'create.success' }));
         this.props.history.push('/manager/configuration');
@@ -557,9 +557,9 @@ class CreateConfig extends Component {
       >
         <Header
           title={(
-<FormattedMessage
-            id={`${intlPrefix}.create`}
-          />
+            <FormattedMessage
+              id={`${intlPrefix}.create`}
+            />
 )}
           backPath="/manager/configuration"
         />
@@ -574,30 +574,30 @@ class CreateConfig extends Component {
                   <span style={{ color: current === 1 ? '#3F51B5' : '', fontSize: 14 }}>
                     <FormattedMessage id={`${intlPrefix}.step1.title`} />
                   </span>
-                )
-}
+                )}
                 status={this.getStatus(1)}
               />
               <Step
                 title={(
-<span style={{ color: current === 2 ? '#3F51B5' : '', fontSize: 14 }}>
-                  <FormattedMessage
-                    id={`${intlPrefix}.step2.title`}
-                  /></span>
+                  <span style={{ color: current === 2 ? '#3F51B5' : '', fontSize: 14 }}>
+                    <FormattedMessage
+                      id={`${intlPrefix}.step2.title`}
+                    />
+                  </span>
 )}
                 status={this.getStatus(2)}
               />
               <Step
                 title={(
-<span style={{
-                  color: current === 3 ? '#3F51B5' : '',
-                  fontSize: 14,
-                }}
-                >
-                  <FormattedMessage
-                    id={`${intlPrefix}.step3.create.title`}
-                  />
-                </span>
+                  <span style={{
+                    color: current === 3 ? '#3F51B5' : '',
+                    fontSize: 14,
+                  }}
+                  >
+                    <FormattedMessage
+                      id={`${intlPrefix}.step3.create.title`}
+                    />
+                  </span>
 )}
                 status={this.getStatus(3)}
               />

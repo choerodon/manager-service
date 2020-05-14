@@ -30,6 +30,7 @@ export default class Route extends Component {
 
   state = this.getInitState();
 
+  // eslint-disable-next-line react/no-deprecated
   componentWillMount() {
     this.loadRouteList();
     this.getService();
@@ -72,7 +73,7 @@ export default class Route extends Component {
 
   /* 获取所有微服务 */
   getService() {
-    axios.get('manager/v1/services/manager?size=0').then((res) => {
+    axios.get('hadm/v1/services/manager?size=0').then((res) => {
       this.setState({
         serviceArr: res.list, // PageInfo对象
       });
@@ -179,7 +180,7 @@ export default class Route extends Component {
       }
       queryObj.sort = sorter.join(',');
     }
-    return axios.get(`/manager/v1/routes?${querystring.stringify(queryObj)}`);
+    return axios.get(`/hadm/v1/routes?${querystring.stringify(queryObj)}`);
   }
 
   handlePageChange = (pagination, filters, sorter, params) => {
@@ -230,7 +231,7 @@ export default class Route extends Component {
       className: 'c7n-iam-confirm-modal',
       title: intl.formatMessage({ id: `${intlPrefix}.delete.title` }),
       content: intl.formatMessage({ id: `${intlPrefix}.delete.content` }, { name: record.name }),
-      onOk: () => axios.delete(`/manager/v1/routes/${record.id}`).then(({ failed, message }) => {
+      onOk: () => axios.delete(`/hadm/v1/routes/${record.id}`).then(({ failed, message }) => {
         if (failed) {
           Choerodon.prompt(message);
         } else {
@@ -309,7 +310,7 @@ export default class Route extends Component {
           this.setState({
             submitting: true,
           });
-          axios.post('/manager/v1/routes', JSON.stringify(body)).then(({ failed, message }) => {
+          axios.post('/hadm/v1/routes', JSON.stringify(body)).then(({ failed, message }) => {
             if (failed) {
               Choerodon.prompt(message);
             } else {
@@ -348,7 +349,7 @@ export default class Route extends Component {
             customSensitiveHeaders: isFiltered,
             sensitiveHeaders: info,
           };
-          axios.post(`/manager/v1/routes/${id}`, JSON.stringify(body)).then(({ failed, message }) => {
+          axios.post(`/hadm/v1/routes/${id}`, JSON.stringify(body)).then(({ failed, message }) => {
             if (failed) {
               Choerodon.prompt(message);
             } else {
@@ -373,7 +374,7 @@ export default class Route extends Component {
    */
   checkName = (rule, value, callback) => {
     const { intl } = this.props;
-    axios.post('/manager/v1/routes/check', JSON.stringify({ name: value }))
+    axios.post('/hadm/v1/routes/check', JSON.stringify({ name: value }))
       .then(({ failed }) => {
         if (failed) {
           callback(intl.formatMessage({ id: `${intlPrefix}.name.exist.msg` }));
@@ -402,7 +403,7 @@ export default class Route extends Component {
    */
   checkPath = (rule, value, callback) => {
     const { intl } = this.props;
-    axios.post('/manager/v1/routes/check', JSON.stringify({ path: value }))
+    axios.post('/hadm/v1/routes/check', JSON.stringify({ path: value }))
       .then(({ failed }) => {
         if (failed) {
           callback(intl.formatMessage({ id: `${intlPrefix}.path.exist.msg` }));

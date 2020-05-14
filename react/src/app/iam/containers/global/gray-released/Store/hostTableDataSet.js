@@ -78,7 +78,7 @@ export default function (children) {
     },
     transport: {
       read: {
-        url: '/manager/v1/hosts',
+        url: '/hadm/v1/hosts',
         method: 'get',
         transformResponse(JSONData) {
           const serviceArr = JSON.parse(JSONData).list.map((item) => ({ serviceHostName: item.appName, serviceName: item.appName }));
@@ -95,7 +95,7 @@ export default function (children) {
         },
       },
       create: ({ data }) => ({
-        url: `manager/v1/hosts/${data[0].appName}`,
+        url: `hadm/v1/hosts/${data[0].appName}`,
         method: 'post',
         data: {
           ...data[0],
@@ -103,7 +103,7 @@ export default function (children) {
         },
       }),
       destroy: ({ data: [{ appName, instanceId }] }) => ({
-        url: `manager/v1/hosts/${appName}/${instanceId}`,
+        url: `hadm/v1/hosts/${appName}/${instanceId}`,
         method: 'delete',
       }),
     },

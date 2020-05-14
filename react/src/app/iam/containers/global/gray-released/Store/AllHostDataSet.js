@@ -4,7 +4,7 @@ export default {
   paging: false,
   transport: {
     read: ({ data }) => ({
-      url: '/manager/v1/hosts/search',
+      url: '/hadm/v1/hosts/search',
       method: 'get',
       params: {
         ...data,
