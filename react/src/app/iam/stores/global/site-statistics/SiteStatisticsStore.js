@@ -134,7 +134,7 @@ class SiteStatisticsStore {
       end_date: endDate,
       code: `choerodon.code.top.${level}`,
     };
-    return axios.get(`/hadm/v1/statistic/menu_click?${querystring.stringify(queryObj)}`)
+    return axios.get(`/hadm/choerodon/v1/statistic/menu_click?${querystring.stringify(queryObj)}`)
       .then((data) => {
         if (data.failed) {
           Choerodon.prompt(data.message);
@@ -169,7 +169,7 @@ class SiteStatisticsStore {
       end_date: this.endTime.format().split('T')[0],
       code: `choerodon.code.top.${level}`,
     };
-    return axios.get(`/hadm/v1/statistic/menu_click?${querystring.stringify(queryObj)}`).then((data) => {
+    return axios.get(`/hadm/choerodon/v1/statistic/menu_click?${querystring.stringify(queryObj)}`).then((data) => {
       if (data.failed) {
         Choerodon.prompt(data.message);
       } else {
