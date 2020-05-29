@@ -335,7 +335,7 @@ export default class SiteStatistics extends Component {
     return (
       <Page
         service={[
-          'manager-service.statistic.queryMenuClick',
+          'choerodon.code.site.operation.manager.menu-statistics.ps.default',
         ]}
       >
         <Header
