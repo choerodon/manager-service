@@ -10,14 +10,23 @@ const { AppState } = stores;
 @store('ConfigurationStore')
 class ConfigurationStore {
   @observable service = [];
+  
   @observable currentService = {};
+
   @observable configData = [];
+  
   @observable loading = true;
+  
   @observable currentServiceConfig = {};
+  
   @observable currentConfigId = null; // 当前配置id
+  
   @observable status = '';
+  
   @observable editConfig = null;
+  
   @observable relatedService = {}; // 联动service
+  
   @observable lastPath = 'configuration'; // 记录上次路径
 
   @action setStatus(data) {
@@ -92,7 +101,7 @@ class ConfigurationStore {
     return this.lastPath;
   }
 
-  loadService = () => axios.get('manager/v1/services');
+  loadService = () => axios.get('hadm/v1/services');
 
   loadCurrentServiceConfig(serviceId) {
     const queryObj = {
@@ -100,22 +109,22 @@ class ConfigurationStore {
       page: 1,
       size: 200,
     };
-    axios.get(`/manager/v1/configs?${querystring.stringify(queryObj)}`).then(data => this.setCurrentServiceConfig((data.list || []).slice()));
+    axios.get(`/hadm/v1/configs?${querystring.stringify(queryObj)}`).then((data) => this.setCurrentServiceConfig((data.list || []).slice()));
   }
 
   modifyConfig(configId, type, data) {
-    return axios.put(`manager/v1/configs/${configId}?type=${type}`, data);
+    return axios.put(`hadm/v1/configs/${configId}?type=${type}`, data);
   }
 
-  deleteConfig = configId => axios.delete(`manager/v1/configs/${configId}`);
+  deleteConfig = (configId) => axios.delete(`hadm/v1/configs/${configId}`);
 
-  setDefaultConfig = configId => axios.put(`manager/v1/configs/${configId}/default`);
+  setDefaultConfig = (configId) => axios.put(`hadm/v1/configs/${configId}/default`);
 
-  createConfig = data => axios.post('manager/v1/configs', JSON.stringify(data));
+  createConfig = (data) => axios.post('hadm/v1/configs', JSON.stringify(data));
 
-  getEditConfigData = id => axios.get(`manager/v1/configs/${id}`);
+  getEditConfigData = (id) => axios.get(`hadm/v1/configs/${id}`);
 
-  versionCheck = data => axios.post('manager/v1/configs/check', JSON.stringify(data));
+  versionCheck = (data) => axios.post('hadm/v1/configs/check', JSON.stringify(data));
 }
 const configurationStore = new ConfigurationStore();
 export default configurationStore;

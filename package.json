@@ -1,15 +1,15 @@
 {
   "name": "@choerodon/manager",
   "routeName": "manager",
-  "version": "0.21.0",
+  "version": "0.22.0-hzero",
   "description": "",
   "main": "./lib/src/app/iam/containers/IAMIndex.js",
   "files": [
     "lib"
   ],
   "peerDependencies": {
-    "@choerodon/boot": "0.21.0",
-    "@choerodon/master": "0.22.0"
+    "@choerodon/boot": "0.21.2",
+    "@choerodon/master": "0.22.0-hzero"
   },
   "dependencies": {
     "echarts": "^4.2.1",
@@ -19,8 +19,9 @@
     "react-copy-to-clipboard": "^5.0.2"
   },
   "devDependencies": {
-    "@choerodon/boot": "0.21.0",
-    "@choerodon/master": "0.22.0"
+    "@choerodon/boot": "0.21.2",
+    "@choerodon/master": "0.22.0-hzero",
+    "choerodon-ui": "^0.8.62"
   },
   "scripts": {
     "start": "choerodon-front-boot start --config ./react/config.js",

@@ -1,4 +1,4 @@
-/* eslint-disable func-names */
+/* eslint-disable */
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { inject, observer } from 'mobx-react';
@@ -112,7 +112,7 @@ export default class APIDetail extends Component {
         version,
         operation_id: operationId,
       };
-      defaultAxios.get(`${urlPrefix}/manager/v1/swaggers/${service}/controllers/${controller}/paths?${querystring.stringify(queryObj)}`).then((data) => {
+      defaultAxios.get(`${urlPrefix}/hadm/v1/swaggers/${service}/controllers/${controller}/paths?${querystring.stringify(queryObj)}`).then((data) => {
         data.paths.some((item) => {
           if (item.operationId === operationId) {
             const { basePath, url } = item;

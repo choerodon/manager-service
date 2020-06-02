@@ -47,7 +47,7 @@ instance.interceptors.response.use((res) => {
   if (res.status === 200) {
     APITestStore.setApiToken(`${res.data.token_type} ${res.data.access_token}`);
     APITestStore.setIsShowResult(null);
-    getInfoinstance.get('base/v1/users/self').then((info) => {
+    getInfoinstance.get('iam/hzero/v1/users/self').then((info) => {
       APITestStore.setUserInfo(`${info.data.realName}`);
       Choerodon.prompt('授权成功');
     });

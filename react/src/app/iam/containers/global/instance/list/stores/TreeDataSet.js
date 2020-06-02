@@ -12,7 +12,7 @@ export default (intl, intlPrefix) => {
     ],
     transport: {
       read: {
-        url: '/manager/v1/instances',
+        url: '/hadm/v1/instances',
         method: 'get',
         transformResponse: (data) => {
           const parsedData = JSON.parse(data);

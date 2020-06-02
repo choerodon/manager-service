@@ -42,6 +42,7 @@ class EditConfig extends Component {
     };
   }
 
+  // eslint-disable-next-line react/no-deprecated
   componentWillMount() {
     ConfigurationStore.setRelatedService({}); // 保存时的微服务信息
     if (!ConfigurationStore.service.length) this.loadInitData();
@@ -74,7 +75,7 @@ class EditConfig extends Component {
       page: 1,
       size: 20,
     };
-    axios.get(`/manager/v1/services/${serviceName}/configs?${querystring.stringify(queryObj)}`).then((data) => {
+    axios.get(`/hadm/v1/services/${serviceName}/configs?${querystring.stringify(queryObj)}`).then((data) => {
       if (data.failed) {
         Choerodon.prompt(data.message);
       } else {
@@ -121,7 +122,7 @@ class EditConfig extends Component {
   /* 获取配置yaml */
   getConfigYaml() {
     const { id } = this.state;
-    axios.get(`manager/v1/configs/${id}/yaml`).then((data) => {
+    axios.get(`hadm/v1/configs/${id}/yaml`).then((data) => {
       if (data.failed) {
         Choerodon.prompt(data.message);
       } else {
@@ -155,6 +156,7 @@ class EditConfig extends Component {
    */
   changeStep = (index) => {
     if (index === 1) {
+      // eslint-disable-next-line react/no-access-state-in-setstate
       this.setState({ yamlData: this.state.oldYamlData });
     }
     this.setState({ current: index });

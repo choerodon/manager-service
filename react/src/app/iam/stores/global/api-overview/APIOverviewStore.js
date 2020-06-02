@@ -135,7 +135,7 @@ class APIOverviewStore {
   }
 
 
-  loadFirstChart = () => axios.get('/manager/v1/swaggers/api/count')
+  loadFirstChart = () => axios.get('/hadm/v1/swaggers/api/count')
     .then((data) => {
       if (data.failed) {
         Choerodon.prompt(data.message);
@@ -148,7 +148,7 @@ class APIOverviewStore {
       Choerodon.handleResponseError(error);
     })
 
-  loadSecChart = (beginDate, endDate) => axios.get(`/manager/v1/swaggers/service_invoke/count?begin_date=${beginDate}&end_date=${endDate}`)
+  loadSecChart = (beginDate, endDate) => axios.get(`/hadm/v1/swaggers/service_invoke/count?begin_date=${beginDate}&end_date=${endDate}`)
     .then((res) => {
       if (res.failed) {
         Choerodon.prompt(res.message);
@@ -167,7 +167,7 @@ class APIOverviewStore {
       Choerodon.handleResponseError(error);
     })
 
-  loadServices = () => axios.get('/manager/v1/swaggers/resources');
+  loadServices = () => axios.get('/hadm/v1/swaggers/resources');
 
   loadThirdChart = (beginDate, endDate, service) => {
     const queryObj = {
@@ -175,7 +175,7 @@ class APIOverviewStore {
       end_date: endDate,
       service,
     };
-    return axios.get(`/manager/v1/swaggers/api_invoke/count?${querystring.stringify(queryObj)}`)
+    return axios.get(`/hadm/v1/swaggers/api_invoke/count?${querystring.stringify(queryObj)}`)
       .then((data) => {
         if (data.failed) {
           Choerodon.prompt(data.message);
