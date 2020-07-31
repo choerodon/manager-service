@@ -34,7 +34,7 @@ export default class SiteStatistics extends Component {
     const startDate = SiteStatisticsStore.startTime.format().split('T')[0];
     const endDate = SiteStatisticsStore.endTime.format().split('T')[0];
     SiteStatisticsStore.loadChart(startDate, endDate, SiteStatisticsStore.getCurrentLevel).then(() => {
-      this.props.MenuStore.loadMenuData({ type: SiteStatisticsStore.getCurrentLevel }).then((data) => {
+      SiteStatisticsStore.getMenuData(SiteStatisticsStore.getCurrentLevel).then((data) => {
         SiteStatisticsStore.appendTableData(data);
       });
     });
@@ -53,7 +53,7 @@ export default class SiteStatistics extends Component {
     const startDate = SiteStatisticsStore.getStartTime.format().split('T')[0];
     const endDate = SiteStatisticsStore.getEndTime.format().split('T')[0];
     SiteStatisticsStore.loadChart(startDate, endDate, currentLevel).then(() => {
-      this.props.MenuStore.loadMenuData({ type: SiteStatisticsStore.getCurrentLevel }).then((data) => {
+      SiteStatisticsStore.getMenuData(SiteStatisticsStore.getCurrentLevel).then((data) => {
         SiteStatisticsStore.appendTableData(data);
       });
     });
@@ -147,9 +147,9 @@ export default class SiteStatistics extends Component {
 
   handleChange(level) {
     SiteStatisticsStore.setCurrentLevel(level);
-    this.props.MenuStore.loadMenuData({ type: level }).then((data) => {
-      SiteStatisticsStore.appendTableData(data);
-    });
+    // SiteStatisticsStore.getMenuData(level).then((data) => {
+    //   SiteStatisticsStore.appendTableData(data);
+    // });
     this.loadChart();
   }
 

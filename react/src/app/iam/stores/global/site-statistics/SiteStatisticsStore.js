@@ -184,6 +184,7 @@ class SiteStatisticsStore {
 
   getMenuData = (level) => axios.get(`/iam/choerodon/v1/menus/menu_config?code=choerodon.code.top.${level}`).then((data) => {
     this.dfsAddAllMenu(data, level);
+    return data;
   });
 
 
